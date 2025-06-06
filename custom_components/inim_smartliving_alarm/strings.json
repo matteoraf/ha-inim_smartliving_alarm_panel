@@ -1,0 +1,71 @@
+{
+    "config": {
+      "step": {
+        "user": {
+          "title": "Inim SmartLiving Alarm Setup",
+          "description": "Please enter the connection details for your Inim SmartLAN module.",
+          "data": {
+            "host": "Host",
+            "port": "Port",
+            "pin": "PIN Code",
+            "panel_name": "Panel Name"
+          }
+        },
+        "initial_options": {
+          "title": "Initial Options",
+          "description": "Set the initial options for your Inim Alarm integration. These can be changed later from the integration's configuration page.",
+          "data": {
+            "polling_interval": "Polling Interval (seconds)",
+            "limit_areas": "Number of Areas to import",
+            "limit_zones": "Number of Zones to import",
+            "limit_scenarios": "Number of Scenarios to import",
+            "event_log_size": "Number of Events to store in log",
+            "reader_names": "Reader Names (comma-separated)",
+            "scenario_arm_home": "Arm Home Scenario",
+            "scenario_arm_away": "Arm Away Scenario",
+            "scenario_arm_night": "Arm Night Scenario",
+            "scenario_arm_vacation": "Arm Vacation Scenario",
+            "scenario_disarm": "Disarm Scenario"
+          }
+        }
+      },
+      "error": {
+        "cannot_connect": "Failed to connect. Please check the Host and Port and ensure the panel is reachable.",
+        "auth_failed": "Authentication failed. Please check your connection.",
+        "invalid_panel_response": "Received an invalid response from the panel. Please check your connection and configuration.",
+        "validation_error_detail": "A validation error occurred while fetching initial data from the panel.",
+        "unknown": "An unknown error occurred. Please check the logs for more details."
+      },
+      "abort": {
+        "already_configured": "This Inim Alarm panel is already configured."
+      }
+    },
+    "options": {
+      "step": {
+        "init": {
+          "title": "Inim SmartLiving Alarm Options",
+          "description": "Adjust the settings for your Inim Alarm integration.",
+          "data": {
+            "pin": "New PIN Code",
+            "polling_interval": "Polling Interval (seconds)",
+            "limit_areas": "Number of Areas to import",
+            "limit_zones": "Number of Zones to import",
+            "limit_scenarios": "Number of Scenarios to import",
+            "event_log_size": "Number of Events to store in log",
+            "reader_names": "Reader Names (comma-separated list for Reader 1, Reader 2, etc.)",
+            "scenario_arm_home": "Arm Home Scenario",
+            "scenario_arm_away": "Arm Away Scenario",
+            "scenario_arm_night": "Arm Night Scenario",
+            "scenario_arm_vacation": "Arm Vacation Scenario",
+            "scenario_disarm": "Disarm Scenario"
+          }
+        }
+      },
+      "error": {
+        "cannot_connect_new_pin": "Failed to connect to the panel. Please check connection.",
+        "auth_failed_new_pin": "Authentication failed with the new PIN. The PIN has not been changed.",
+        "pin_validation_error": "An error occurred while validating the new PIN.",
+        "unknown_pin_error": "An unknown error occurred while validating the new PIN. Please check the logs."
+      }
+    }
+  }

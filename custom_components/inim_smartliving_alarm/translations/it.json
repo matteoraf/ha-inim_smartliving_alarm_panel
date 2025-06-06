@@ -1,0 +1,71 @@
+{
+    "config": {
+      "step": {
+        "user": {
+          "title": "Configurazione Inim SmartLiving",
+          "description": "Inserisci i dettagli di connessione al modulo SmartLAN/SI.",
+          "data": {
+            "host": "Host",
+            "port": "Porta",
+            "pin": "Codice PIN",
+            "panel_name": "Nome Centrale"
+          }
+        },
+        "initial_options": {
+          "title": "Opzioni Iniziali",
+          "description": "Imposta le opzioni iniziali. Potranno essere modificate in seguito dalla pagina di configurazione dell'integrazione.",
+          "data": {
+            "polling_interval": "Intervallo di aggiornamento (secondi)",
+            "limit_areas": "Numero di Aree da importare",
+            "limit_zones": "Numero di Zone da importare",
+            "limit_scenarios": "Numero di Scenari da importare",
+            "event_log_size": "Numero di eventi da memorizzare",
+            "reader_names": "Nomi dei Lettori (separati da virgola)",
+            "scenario_arm_home": "Scenario Inserimento Parziale (Casa)",
+            "scenario_arm_away": "Scenario Inserimento Totale (Fuori)",
+            "scenario_arm_night": "Scenario Inserimento Notte",
+            "scenario_arm_vacation": "Scenario Inserimento Vacanza",
+            "scenario_disarm": "Scenario Disinserimento"
+          }
+        }
+      },
+      "error": {
+        "cannot_connect": "Connessione fallita. Controlla l'Host e la Porta e assicurati che la centrale sia raggiungibile.",
+        "auth_failed": "Autenticazione fallita.",
+        "invalid_panel_response": "Ricevuta una risposta non valida dalla centrale. Controlla la connessione e la configurazione.",
+        "validation_error_detail": "Si è verificato un errore di validazione durante il recupero dei dati iniziali dalla centrale.",
+        "unknown": "Si è verificato un errore sconosciuto. Controlla i log per maggiori dettagli."
+      },
+      "abort": {
+        "already_configured": "Questa centrale di allarme è già configurata."
+      }
+    },
+    "options": {
+      "step": {
+        "init": {
+          "title": "Opzioni Inim SmartLiving",
+          "description": "Modifica le impostazioni per la tua integrazione Inim.",
+          "data": {
+            "pin": "Codice PIN",
+            "polling_interval": "Intervallo di aggiornamento (secondi)",
+            "limit_areas": "Numero di Aree da importare",
+            "limit_zones": "Numero di Zone da importare",
+            "limit_scenarios": "Numero di Scenari da importare",
+            "event_log_size": "Numero di eventi da memorizzare nel log",
+            "reader_names": "Nomi dei Lettori (elenco separato da virgola es: Lettore Esterno, Lettore Garage, ecc.)",
+            "scenario_arm_home": "Scenario Inserimento Parziale (Casa)",
+            "scenario_arm_away": "Scenario Inserimento Totale (Fuori)",
+            "scenario_arm_night": "Scenario Inserimento Notte",
+            "scenario_arm_vacation": "Scenario Inserimento Vacanza",
+            "scenario_disarm": "Scenario Disinserimento"
+          }
+        }
+      },
+      "error": {
+        "cannot_connect_new_pin": "Connessione alla centrale fallita. Verifica la connessione.",
+        "auth_failed_new_pin": "Autenticazione fallita. Il PIN non è stato modificato.",
+        "pin_validation_error": "Si è verificato un errore durante di validazione.",
+        "unknown_pin_error": "Si è verificato un errore sconosciuto. Controlla i log."
+      }
+    }
+  }

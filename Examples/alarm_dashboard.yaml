@@ -1,0 +1,477 @@
+button_card_templates:
+  area:
+    variables:
+      a_triggered_state: |
+        [[[
+          var triggered_entity = `binary_sensor.${entity.entity_id.substring(entity.entity_id.indexOf('.') + 1)}_triggered`
+          return states[triggered_entity].state
+        ]]]
+      calculated_state: |
+        [[[
+          if (variables.a_triggered_state == "on")
+            return "triggered"
+          else
+            return entity.attributes.status_text 
+        ]]]
+    show_label: true
+    name: '[[[ return entity.attributes.area_name ]]]'
+    label: '[[[ return variables.calculated_state ]]]'
+    tooltip: Click once to unlock the button, then click once again to toggle
+    double_tap_action:
+      action: more-info
+    styles:
+      card:
+        - text-transform: capitalize
+        - font-size: 12px
+    lock:
+      enabled: '[[[ return variables.calculated_state === "disarmed"; ]]]'
+      duration: 10
+      unlock: tap
+    state:
+      - operator: template
+        value: '[[[ return variables.calculated_state == "triggered" ]]]'
+        color: red
+        icon: mdi:shield-alert-outline
+        styles:
+          card:
+            - animation: blink 2s ease infinite
+            - border-color: red
+      - operator: template
+        value: '[[[ return variables.calculated_state == "armed" ]]]'
+        color: orange
+        icon: mdi:shield-lock-outline
+        styles:
+          card:
+            - border-color: orange
+      - operator: default
+        color: green
+        icon: mdi:shield-lock-open-outline
+        styles:
+          card:
+            - border-color: green
+  scenario:
+    variables:
+      a_trigger_entity: |
+        [[[
+          return `binary_sensor.${entity.entity_id.substring(entity.entity_id.indexOf('.') + 1)}_active`
+        ]]]
+      calculated_state: |
+        [[[
+          return states[variables.a_trigger_entity].state
+        ]]]
+    triggers_update:
+      - sensor.sl1050_active_scenario
+    show_label: true
+    name: '[[[ return entity.attributes.scenario_name ]]]'
+    label: '[[[ return variables.calculated_state ]]]'
+    tooltip: Click once to unlock the button, then click once again to activate
+    tap_action:
+      action: call-service
+      service: button.press
+      target:
+        entity_id: '[[[ return `${entity.entity_id}` ]]]'
+    double_tap_action:
+      action: more-info
+    styles:
+      card:
+        - text-transform: capitalize
+        - font-size: 12px
+    lock:
+      enabled: '[[[ return variables.calculated_state === "off"; ]]]'
+      duration: 10
+      unlock: tap
+    state:
+      - operator: template
+        value: '[[[ return variables.calculated_state == "on" ]]]'
+        color: orange
+        icon: mdi:shield-check-outline
+        styles:
+          card:
+            - border-color: orange
+      - operator: default
+        color: green
+        icon: mdi:shield-off-outline
+        styles:
+          card:
+            - border-color: green
+  zone:
+    name: '[[[ return entity.attributes.zone_name ]]]'
+    aspect_ratio: 1/1
+    custom_fields:
+      area: '[[[ return `Area: ${entity.attributes.assigned_areas}` ]]]'
+      zone_id: '[[[ return `Zone ID: ${entity.attributes.zone_id}` ]]]'
+      last_chgd: >-
+        [[[ return `Last Changed: <br>
+        ${helpers.formatShortDateTime(entity.last_changed)}` ]]]
+    state:
+      - value: 'on'
+        color: red
+        icon: mdi:lock-open-variant-outline
+        styles:
+          card:
+            - border-color: red
+      - operator: default
+        color: green
+        icon: mdi:lock-outline
+    styles:
+      card:
+        - font-size: 10px
+        - text-transform: capitalize
+      grid:
+        - grid-template-areas: '"i" "n" "area" "zone_id" "last_chgd"'
+      name:
+        - font-weight: bold
+        - font-size: 13px
+        - align-self: middle
+        - padding-bottom: 4px
+      custom_fields:
+        zone_id:
+          - font-size: 8px
+          - padding-bottom: 2px
+          - align-self: middle
+        area:
+          - font-size: 8px
+          - padding-bottom: 2px
+          - align-self: middle
+        last_chgd:
+          - font-size: 8px
+          - padding-bottom: 2px
+          - align-self: middle
+views:
+  - title: Inim Alarm System
+    icon: mdi:shield-home
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: area
+                entity: switch.sl1050_area_1
+              - type: custom:button-card
+                template: area
+                entity: switch.sl1050_area_2
+              - type: custom:button-card
+                template: area
+                entity: switch.sl1050_area_3
+              - type: custom:button-card
+                template: area
+                entity: switch.sl1050_area_4
+              - type: custom:button-card
+                template: area
+                entity: switch.sl1050_area_5
+              - type: custom:button-card
+                template: area
+                entity: switch.sl1050_area_6
+              - type: custom:button-card
+                template: area
+                entity: switch.sl1050_area_7
+            title: Areas
+      - square: false
+        type: grid
+        columns: 9
+        cards:
+          - type: custom:button-card
+            template: scenario
+            entity: button.sl1050_scenario_0
+          - type: custom:button-card
+            template: scenario
+            entity: button.sl1050_scenario_1
+          - type: custom:button-card
+            template: scenario
+            entity: button.sl1050_scenario_2
+          - type: custom:button-card
+            template: scenario
+            entity: button.sl1050_scenario_3
+          - type: custom:button-card
+            template: scenario
+            entity: button.sl1050_scenario_4
+          - type: custom:button-card
+            template: scenario
+            entity: button.sl1050_scenario_5
+          - type: custom:button-card
+            template: scenario
+            entity: button.sl1050_scenario_6
+          - type: custom:button-card
+            template: scenario
+            entity: button.sl1050_scenario_7
+          - type: custom:button-card
+            template: scenario
+            entity: button.sl1050_scenario_8
+        title: Scenarios
+      - states:
+          - arm_home
+          - arm_away
+          - arm_night
+        type: alarm-panel
+        entity: alarm_control_panel.sl1050
+        view_layout:
+          position: sidebar
+      - type: entities
+        title: System Information
+        show_header_toggle: false
+        entities:
+          - entity: sensor.sl1050_active_scenario
+            name: Active Scenario
+          - entity: sensor.sl1050_firmware_version
+            name: Firmware
+          - entity: sensor.sl1050_system_type
+            name: System Type
+        view_layout:
+          position: sidebar
+    type: sidebar
+  - type: sections
+    title: Zones
+    icon: mdi:lock-outline
+    cards:
+      - type: horizontal-stack
+        cards: []
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Porte
+            heading_style: title
+            icon: mdi:door-sliding
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_4
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_6
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_35
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_36
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: Tapparelle
+            icon: mdi:window-shutter
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_11
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_13
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_17
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_21
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_23
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_31
+              - type: custom:button-card
+                color_type: blank-card
+              - type: custom:button-card
+                color_type: blank-card
+      - type: grid
+        cards:
+          - type: heading
+            heading: Volumetrici
+            heading_style: title
+            icon: mdi:motion-sensor
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_5
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_7
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_8
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_9
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_19
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_27
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_28
+              - type: custom:button-card
+                color_type: blank-card
+      - type: grid
+        cards:
+          - type: heading
+            heading_style: title
+            heading: Finestre
+            icon: mdi:window-closed-variant
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_1
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_2
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_3
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_12
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_14
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_18
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_22
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_24
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_25
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_32
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_33
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_34
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_37
+              - type: custom:button-card
+                color_type: blank-card
+              - type: custom:button-card
+                color_type: blank-card
+              - type: custom:button-card
+                color_type: blank-card
+      - type: grid
+        cards:
+          - type: heading
+            heading: Esterni
+            heading_style: title
+            icon: mdi:motion-sensor
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_15
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_16
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_20
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_26
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_29
+              - type: custom:button-card
+                color_type: blank-card
+              - type: custom:button-card
+                color_type: blank-card
+              - type: custom:button-card
+                color_type: blank-card
+          - type: horizontal-stack
+            cards:
+              - type: custom:button-card
+                template: zone
+                entity: binary_sensor.sl1050_zone_10
+              - type: custom:button-card
+                color_type: blank-card
+              - type: custom:button-card
+                color_type: blank-card
+              - type: custom:button-card
+                color_type: blank-card
+    max_columns: 3
+  - type: sections
+    title: Events
+    cards: []
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: New section
+          - type: custom:flex-table-card
+            title: Alarm Event Log (Table)
+            entities:
+              include: sensor.sl1050_event_log
+            css:
+              table+: 'width: 100%;'
+              th: 'text-align: left; padding-bottom: 5px;'
+              td: 'padding: 3px;'
+              tbody tr+: 'user-select: text'
+            columns:
+              - name: Date
+                data: event_log.timestamp
+                sort_unmodified: true
+                modify: >-
+                  x ? new Date(x).toLocaleDateString(typeof hass !== 'undefined'
+                  ? hass.locale.language : 'it-IT', {day: '2-digit', month:
+                  '2-digit', timeZone: '+01:00'}) : 'N/A'
+                width: 15%
+              - name: Time
+                data: event_log.timestamp
+                sort_unmodified: true
+                modify: >-
+                  x ? new Date(x).toLocaleTimeString(typeof hass !== 'undefined'
+                  ? hass.locale.language : 'it-IT', {hour: '2-digit', minute:
+                  '2-digit', second: '2-digit', hour12: false, timeZone:
+                  '+01:00'}) : 'N/A'
+                width: 15%
+              - name: Event
+                data: event_log.description
+                default: No description
+                main: true
+                width: 40%
+              - name: Details
+                data: event_log
+                width: 20%
+                modify: >
+                  let parts = []; if (x.scenario) parts.push(x.scenario + ' ');
+                  if (x.area) parts.push('Area: ' + x.area + ' '); if (x.zone)
+                  parts.push('Zone: ' + x.zone + ' '); if (x.affected_areas)
+                  parts.push(x.affected_areas + ' '); parts.join('; ') || '-';
+              - name: Authorized By
+                data: event_log
+                default: '-'
+                width: 10%
+                modify: >-
+                  if(!x.authorized_by){"-"}else{x.authorized_by + " (" +
+                  x.authorized_id + ")"}
+              - name: Device
+                data: event_log
+                default: '-'
+                width: 10%
+                modify: if(!x.device){"-"}else{x.device  + " (" + x.device_id + ")"}
+        column_span: 1
