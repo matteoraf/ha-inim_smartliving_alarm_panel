@@ -2,7 +2,7 @@
     "domain": "inim_smartliving_alarm",
     "name": "Inim Smartliving Alarm",
     "codeowners": ["@matteoraf"],
-    "documentation": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/readme.md",
+    "documentation": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/blob/main/README.md",
     "issue_tracker": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/issues",
     "requirements": [],
     "iot_class": "local_polling",
