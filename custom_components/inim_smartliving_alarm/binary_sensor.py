@@ -35,8 +35,6 @@ from .const import (
     KEY_INIT_ZONES_CONFIG_DETAILED,
 )
 
-# from .inim_api import InimAlarmAPI # For type hinting if API instance is passed
-
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -53,7 +51,9 @@ async def async_setup_entry(
 
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
-    system_info = initial_panel_config.get("system_info", {})  # For model/version
+
+    # Get Panel model/version
+    system_info = initial_panel_config.get("system_info", {})
 
     # Get user-defined panel name
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
@@ -175,18 +175,16 @@ class BaseInimBinarySensor(CoordinatorEntity, BinarySensorEntity):
         super().__init__(coordinator)
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
-        self._system_info = system_info  # Still useful for model/manufacture
+        self._system_info = system_info
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for the entity."""
         return DeviceInfo(
             identifiers={(DOMAIN, self.config_entry.entry_id)},
-            name=self._panel_display_name,  # Use the user-defined panel name here
+            name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(
-                "type", "SmartLiving"
-            ),  # Model can still come from system_info
+            model=self._system_info.get("type", "SmartLiving"),
             sw_version=self._system_info.get("version", "Unknown"),
         )
 

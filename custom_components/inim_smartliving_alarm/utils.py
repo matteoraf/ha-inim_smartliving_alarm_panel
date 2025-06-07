@@ -7,7 +7,6 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-# Import keys from const.py
 from .const import (
     DOMAIN,
     KEY_INIT_AREA_NAMES,
@@ -119,9 +118,7 @@ async def async_handle_scenario_activation_failure(
                 target_scenario_name,
                 scenario_idx_to_activate,
             )
-            notification_title = (
-                f"Inim Alarm - '{target_scenario_name}' Failed"  # MODIFIED title
-            )
+            notification_title = f"Inim Alarm - '{target_scenario_name}' Failed"
             notification_message = (
                 f"Failed to activate {target_scenario_name} for '{entity_name}'. "
                 "Check panel for details (no specific areas identified or details missing)."
@@ -188,8 +185,10 @@ async def async_handle_scenario_activation_failure(
                             )
 
             if problematic_zones_messages:
-                notification_title = f"Inim Alarm - Scenario '{target_scenario_name}' Blocked"  # MODIFIED title
-                # MODIFIED: Format zones as an ordered list
+                notification_title = (
+                    f"Inim Alarm - Scenario '{target_scenario_name}' Blocked"
+                )
+                # Format zones as an ordered list
                 ordered_zones_list_str = "\n".join(
                     [
                         f"{i + 1}. {msg}"
@@ -198,16 +197,14 @@ async def async_handle_scenario_activation_failure(
                 )
                 notification_message = (
                     f"Cannot activate {target_scenario_name}. "
-                    f"The following zones are preventing activation:\n{ordered_zones_list_str}"  # MODIFIED
+                    f"The following zones are preventing activation:\n{ordered_zones_list_str}"
                 )
                 notification_id_suffix = (
                     f"activation_blocked_{scenario_idx_to_activate}"
                 )
                 _LOGGER.info("%s: %s", entity_name, notification_message)
             else:
-                notification_title = (
-                    f"Inim Alarm - '{target_scenario_name}' Failed"  # MODIFIED title
-                )
+                notification_title = f"Inim Alarm - '{target_scenario_name}' Failed"
                 notification_message = (
                     f"Failed to activate {target_scenario_name} for '{entity_name}'. "
                     "No specific zones found in problematic state. Check panel."
@@ -222,9 +219,7 @@ async def async_handle_scenario_activation_failure(
                 )
 
     elif not is_disarm_scenario:
-        notification_title = (
-            f"Inim Alarm - '{base_scenario_name_for_msg}' Failed"  # MODIFIED title
-        )
+        notification_title = f"Inim Alarm - '{base_scenario_name_for_msg}' Failed"
         notification_message = f"Failed to {action_name} for '{entity_name}'. Reason undetermined (data unavailable)."
         notification_id_suffix = f"activation_failed_no_data_{scenario_idx_to_activate}"
         _LOGGER.warning(

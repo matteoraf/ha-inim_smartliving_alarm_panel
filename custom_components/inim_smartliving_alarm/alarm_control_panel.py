@@ -32,7 +32,7 @@ from .const import (
     KEY_LIVE_AREAS_STATUS,
     KEY_LIVE_TRIGGERED_AREAS_LIST,
 )
-from .inim_api import InimAlarmAPI  # Your API class
+from .inim_api import InimAlarmAPI
 from .utils import async_handle_scenario_activation_failure
 
 _LOGGER = logging.getLogger(__name__)
@@ -335,7 +335,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
                 if self.coordinator:  # Ensure coordinator exists
                     await self.coordinator.async_request_refresh()
             else:
-                # --- MODIFIED SECTION FOR FAILURE NOTIFICATION ---
+                # Handle activation failure and send notification with details
                 _LOGGER.error(
                     "%s: API reported failure for %s (scenario %s)",
                     self.name,
@@ -346,9 +346,9 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
                 await async_handle_scenario_activation_failure(
                     self.hass,
                     self.coordinator,
-                    self._initial_panel_config,  # Pass the stored initial config
+                    self._initial_panel_config,
                     self.unique_id,
-                    self.name,  # Use entity name for user message
+                    self.name,
                     scenario_idx_to_activate,
                     action_name,
                     is_disarm_scenario=is_disarm,

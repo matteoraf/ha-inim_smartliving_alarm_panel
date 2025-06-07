@@ -187,7 +187,7 @@ class InimScenarioActivationButton(ButtonEntity):
                 if self._coordinator:  # Refresh data if coordinator is available
                     await self._coordinator.async_request_refresh()
             else:
-                # --- MODIFIED SECTION FOR FAILURE NOTIFICATION ---
+                # Handle activation failure and send notification with details
                 _LOGGER.error(
                     "API reported failure for %s via button '%s'",
                     action_name,
@@ -209,12 +209,12 @@ class InimScenarioActivationButton(ButtonEntity):
 
                 await async_handle_scenario_activation_failure(
                     self.hass,
-                    self._coordinator,  # Pass the coordinator instance (can be None)
-                    self._initial_panel_config,  # Pass the stored initial config
+                    self._coordinator,
+                    self._initial_panel_config,
                     self.unique_id,
-                    self.name,  # Use button's HA entity name
+                    self.name,
                     self._scenario_index_0_based,
-                    action_name,  # Pass the constructed action name
+                    action_name,
                     is_disarm_scenario=is_disarm,
                 )
                 # The utility function now handles the coordinator refresh on failure if coordinator is passed.

@@ -12,7 +12,7 @@ from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
 
 from .const import (
-    CONF_EVENT_LOG_SIZE,  # MODIFIED: Import new const
+    CONF_EVENT_LOG_SIZE,
     CONF_LIMIT_AREAS,
     CONF_LIMIT_SCENARIOS,
     CONF_LIMIT_ZONES,
@@ -53,7 +53,7 @@ async def _validate_connection_and_fetch_initial_config(
         host,
         port,
     )
-    # This call handles its own connect/disconnect.
+
     initial_config = await hass.async_add_executor_job(
         api.get_initial_panel_configuration
     )
@@ -94,7 +94,7 @@ async def _validate_connection_and_fetch_initial_config(
         error_message = f"Failed to retrieve essential data for: {', '.join(missing_or_failed_parts)}."
         _LOGGER.error("%s From %s:%s", error_message, host, port)
         if any("auth" in error.lower() for error in initial_config.get("errors", [])):
-            raise ValueError("auth_failed")  # Specific error key for PIN failure
+            raise ValueError("auth_failed")
         raise ValueError(error_message)
 
     if not initial_config.get("system_info") or not initial_config["system_info"].get(
@@ -363,12 +363,11 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                     self.config_entry.data[CONF_HOST],
                 )
                 try:
-                    # Validate new PIN by trying to fetch initial config with it
                     await _validate_connection_and_fetch_initial_config(
                         self.hass,
                         self.config_entry.data[CONF_HOST],
                         self.config_entry.data[CONF_PORT],
-                        new_pin,  # Use the new PIN for validation
+                        new_pin,
                     )
                     _LOGGER.info(
                         "New PIN validated successfully for %s",
@@ -380,9 +379,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                         "Connection failed with new PIN for %s",
                         self.config_entry.data[CONF_HOST],
                     )
-                    errors[CONF_PIN] = (
-                        "cannot_connect_new_pin"  # Custom error key for strings.json
-                    )
+                    errors[CONF_PIN] = "cannot_connect_new_pin"
                 except ValueError as vex:
                     _LOGGER.warning(
                         "PIN validation error for %s: %s",

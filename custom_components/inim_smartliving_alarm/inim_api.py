@@ -20,8 +20,9 @@ class InimAlarmConstants:
     PIN_FILLER_HEX = "ff"  # Unset digits will be represented by "ff"
     DEFAULT_SYSTEM_MAX_ZONES = 50
     DEFAULT_SYSTEM_MAX_AREAS = 10
+    DEFAULT_SYSTEM_MAX_SCENARIOS = 30
 
-    # Max events to fetch in a single poll to avoid overload
+    # Max events to fetch in a single poll to avoid overload - change at your own risk
     MAX_EVENTS_PER_FETCH = 50
 
     # For static commands, "cmd_full" is 7-byte cmd + 1-byte its checksum = 8 bytes / 16 hex chars.
@@ -71,7 +72,7 @@ class InimAlarmConstants:
             "resp_len": 2,
         },
         "CHECK_SCENARIO_ACTIVATION_ALLOWED_INFO": {  # Dynamic command base
-            "cmd_prefix": "0000001ff9",  # Scenario byte (from 80) inserted her
+            "cmd_prefix": "0000001ff9",  # Scenario byte (from 80) inserted here
             "cmd_suffix": "0d",  # Fixed part after scenario byte
             "resp_len": 14,
         },
@@ -169,7 +170,7 @@ class InimAlarmConstants:
     AREA_ACTION_DISARM = "4"
     AREA_ACTION_ARM = "1"
     AREA_ACTION_KEEP_STATUS = "0"
-    MAX_AREAS_PAYLOAD = 16  # Payload structure supports up to 8 bytes) [cite: 30, 38
+    MAX_AREAS_PAYLOAD = 16  # Payload structure supports up to 8 bytes)
 
     # Mappings for Zone Configuration Parsing
     ACTIVATION_TYPE_MAP = {
@@ -335,7 +336,7 @@ class InimAlarmAPI:
     def _send_raw_command(self, command_hex_with_payload):
         """
         Sends a fully formed hex command (including base command's checksum and any payload)
-        after converting to binary. [cite: 8]
+        after converting to binary.
         """
         if not self._is_connected or not self.sock:
             logger.error("Not connected. Cannot send command.")
@@ -360,7 +361,7 @@ class InimAlarmAPI:
 
     def _read_raw_response(self, buffer_size=InimAlarmConstants.MAX_RESPONSE_LEN_BYTES):
         """
-        Reads a raw binary response from the socket and converts to hex. [cite: 8]
+        Reads a raw binary response from the socket and converts to hex.
         """
         if not self._is_connected or not self.sock:
             logger.error("Not connected. Cannot read response.")
@@ -468,18 +469,18 @@ class InimAlarmAPI:
 
     # --- Initialize ---
     def get_system_info(self):
-        """Requests system type and firmware version. [cite: 18]"""
+        """Requests system type and firmware version."""
         spec = InimAlarmConstants.COMMAND_SPECS["GET_SYSTEM_INFO"]
         response_data_hex = self._send_command_core(
             spec["cmd_full"], expect_specific_response_len=spec["resp_len"]
         )
         if response_data_hex:
             try:
-                # Response is ASCII encoded HEX [cite: 18]
+                # Response is ASCII encoded HEX
                 ascii_info = binascii.unhexlify(response_data_hex).decode(
                     "ascii", errors="ignore"
                 )
-                # Example: "6.07 01050 !" -> version "6.07", type "1050" [cite: 18]
+                # Example: "6.07 01050 !" -> version "6.07", type "1050"
                 parts = ascii_info.strip().split(" ")
                 version = parts[0] if len(parts) > 0 else "Unknown"
                 system_type = parts[1] if len(parts) > 1 else "Unknown"
@@ -502,11 +503,11 @@ class InimAlarmAPI:
         )
         if response_data_hex:
             try:
-                # Response is an ASCII encoded HEX. [cite: 19]
-                # Each area is 16 bytes, total of 10 Areas for this system. [cite: 20]
+                # Response is an ASCII encoded HEX.
+                # Each area is 16 bytes, total of 10 Areas for this system.
                 area_names_raw = binascii.unhexlify(response_data_hex)
                 names = []
-                bytes_per_name = 16  # Each area name is 16 bytes [cite: 20]
+                bytes_per_name = 16  # Each area name is 16 bytes
                 for i in range(0, len(area_names_raw), bytes_per_name):
                     name_bytes = area_names_raw[i : i + bytes_per_name]
                     names.append(name_bytes.decode("ascii", errors="ignore").strip())
@@ -518,7 +519,7 @@ class InimAlarmAPI:
         return None
 
     def get_zones(self):  # Names
-        """Requests Zone Names. This involves a sequence of 7 commands. [cite: 61]"""
+        """Requests Zone Names. This involves a sequence of 7 commands."""
         zone_name_cmd_keys = [
             "GET_ZONE_NAMES_1",
             "GET_ZONE_NAMES_2",
@@ -542,11 +543,11 @@ class InimAlarmAPI:
         if all_zone_data_hex:
             try:
                 # Response is an ASCII encoded HEX.
-                # Each zone name takes 16 bytes. [cite: 63]
+                # Each zone name takes 16 bytes.
                 # The number of zone names to parse is now self.system_max_zones_to_fetch
-                bytes_per_name = 16  # Each zone name is 16 bytes [cite: 63]
+                bytes_per_name = 16  # Each zone name is 16 bytes
                 # The data for zone names is at the beginning of the concatenated response.
-                # The PDF states "first 800 bytes (excluding checksums) are zones" for 50 zones. [cite: 64]
+                # First 800 bytes (excluding checksums) are zones, for 50 zones.
                 # So, we take data for self.system_max_zones_to_fetch * bytes_per_name
                 zone_names_hex_data = all_zone_data_hex[
                     : self.system_max_zones * bytes_per_name * 2
@@ -558,7 +559,7 @@ class InimAlarmAPI:
                     name_bytes = zone_names_bytes[i : i + bytes_per_name]
                     names.append(name_bytes.decode("ascii", errors="ignore").strip())
 
-                # The remaining part of all_zone_data_hex contains expansions names and free bytes. [cite: 64]
+                # The remaining part of all_zone_data_hex contains expansions names and free bytes.
                 # TODO: Parse expansion names from remaining data if needed.
                 return {"raw_hex_full": all_zone_data_hex, "zone_names": names}
             except Exception as e:
@@ -658,7 +659,7 @@ class InimAlarmAPI:
                     except ValueError:
                         zone_config_parsed["assigned_areas"] = "Parse Error"  # Or []
 
-                    # Byte 3: Activation Type [cite: 74]
+                    # Byte 3: Activation Type
                     try:
                         act_val = int(zone_data_p1_hex[4:6], 16)
                         zone_config_parsed["activation_type_val"] = act_val
@@ -672,7 +673,7 @@ class InimAlarmAPI:
 
                     # Bytes 4-6 are undecoded, so they are skipped as per request.
 
-                    # Byte 7: Duration/Sensibility (ms) [cite: 75]
+                    # Byte 7: Duration/Sensibility (ms)
                     try:
                         zone_config_parsed["duration_ms"] = int(
                             zone_data_p1_hex[12:14], 16
@@ -680,7 +681,7 @@ class InimAlarmAPI:
                     except ValueError:
                         zone_config_parsed["duration_ms"] = "Parse Error"
 
-                    # Byte 8: The time [cite: 76]
+                    # Byte 8: The time
                     time_val_hex = zone_data_p1_hex[14:16]
                     try:
                         time_val_int = int(time_val_hex, 16)
@@ -705,7 +706,7 @@ class InimAlarmAPI:
                     except ValueError:
                         zone_config_parsed["time"] = "Parse Error"
 
-                    # Byte 9: Number of pulses [cite: 76]
+                    # Byte 9: Number of pulses
                     try:
                         zone_config_parsed["pulses"] = int(zone_data_p1_hex[16:18], 16)
                     except ValueError:
@@ -724,9 +725,9 @@ class InimAlarmAPI:
                     ]
                     # zone_config_parsed["_raw_config_part2_hex"] = item_data_p2_hex # Optional raw hex for this zone
 
-                    # Bytes 1-5 are undecoded, skipped. [cite: 77]
+                    # Bytes 1-5 are undecoded, skipped.
 
-                    # Byte 6: Balancing type [cite: 77, 78]
+                    # Byte 6: Balancing type
                     try:
                         bal_val = int(item_data_p2_hex[10:12], 16)
                         zone_config_parsed["balancing_type_val"] = bal_val
@@ -738,7 +739,7 @@ class InimAlarmAPI:
                     except ValueError:
                         zone_config_parsed["balancing_type_desc"] = "Parse Error"
 
-                    # Byte 7: Sensor type (P2) [cite: 79]
+                    # Byte 7: Sensor type (P2)
                     try:
                         s_type_val = int(item_data_p2_hex[12:14], 16)
                         zone_config_parsed["sensor_type_val"] = s_type_val
@@ -765,7 +766,7 @@ class InimAlarmAPI:
         }
 
     def get_scenarios(self):  # Names
-        """Requests Scenario Names. Two commands involved. [cite: 41]"""
+        """Requests Scenario Names. Two commands involved."""
         scenario_name_cmd_keys = ["GET_SCENARIO_NAMES_1", "GET_SCENARIO_NAMES_2"]
         all_scenario_data_hex = ""
         for cmd_key in scenario_name_cmd_keys:
@@ -780,12 +781,12 @@ class InimAlarmAPI:
 
         if all_scenario_data_hex:
             try:
-                # Response is ASCII encoded HEX. [cite: 42]
-                # 30 scenarios, each name 16 bytes. [cite: 41]
+                # Response is ASCII encoded HEX.
+                # 30 scenarios, each name 16 bytes.
                 scenario_names_bytes = binascii.unhexlify(all_scenario_data_hex)
                 names = []
-                bytes_per_name = 16  # [cite: 41]
-                num_scenarios = 30  # [cite: 41]
+                bytes_per_name = 16
+                num_scenarios = 30
                 for i in range(
                     0,
                     min(num_scenarios * bytes_per_name, len(scenario_names_bytes)),
@@ -829,7 +830,6 @@ class InimAlarmAPI:
 
         all_scenario_details = []
         bytes_per_scenario_activation = 8
-        num_scenarios_in_response = 30  # Document states 30 scenarios [cite: 44]
 
         action_map = {
             InimAlarmConstants.AREA_ACTION_ARM: "arm",  # '1'
@@ -837,7 +837,7 @@ class InimAlarmAPI:
             InimAlarmConstants.AREA_ACTION_KEEP_STATUS: "keep",  # '0'
         }
 
-        for i in range(num_scenarios_in_response):
+        for i in range(InimAlarmConstants.DEFAULT_SYSTEM_MAX_SCENARIOS):
             offset = i * bytes_per_scenario_activation * 2  # *2 for hex characters
             scenario_activation_hex = response_data_hex[
                 offset : offset + (bytes_per_scenario_activation * 2)
@@ -845,7 +845,7 @@ class InimAlarmAPI:
 
             if len(scenario_activation_hex) != bytes_per_scenario_activation * 2:
                 logger.warning(
-                    f"Scenario {i}: Not enough data to parse activation. Got: {scenario_activation_hex}"
+                    f"Scenario {i}: Not enough data to parse activation. Got: {scenario_activation_hex}",
                 )
                 all_scenario_details.append(
                     {
@@ -856,9 +856,9 @@ class InimAlarmAPI:
                 )
                 continue
 
-            # First 5 bytes (10 hex chars) define area actions [cite: 46]
+            # First 5 bytes (10 hex chars) define area actions
             area_action_hex_part = scenario_activation_hex[:10]
-            # Last 3 bytes (6 hex chars) are unknown [cite: 47]
+            # Last 3 bytes (6 hex chars) are unknown
             unknown_part_hex = scenario_activation_hex[10:]
 
             parsed_area_actions = {}
@@ -866,7 +866,7 @@ class InimAlarmAPI:
             for byte_idx in range(5):  # Covers up to 10 areas
                 byte_val_hex = area_action_hex_part[byte_idx * 2 : byte_idx * 2 + 2]
 
-                # PDF: "Within each byte, the areas are represented inverted."
+                # Protocol: "Within each byte, the areas are represented inverted."
                 # Byte 1 (idx 0): Area 2 (MSN) - Area 1 (LSN)
                 # ...
                 # Byte 5 (idx 4): Area 10 (MSN) - Area 9 (LSN)
@@ -940,17 +940,18 @@ class InimAlarmAPI:
             )
             return False
 
-        # Validate scenario number (assuming up to 30 scenarios, 0-29)
-        # The get_scenarios method parses up to 30 names.
+        # Validate scenario number
         if not (
-            0 <= scenario_number_0_indexed < 30
-        ):  # Max scenarios based on other parts of PDF
+            0
+            <= scenario_number_0_indexed
+            < InimAlarmConstants.DEFAULT_SYSTEM_MAX_SCENARIOS
+        ):
             logger.error(
-                f"Invalid scenario number: {scenario_number_0_indexed}. Must be 0-29."
+                f"Invalid scenario number: {scenario_number_0_indexed}. Must be 0-{InimAlarmConstants.DEFAULT_SYSTEM_MAX_SCENARIOS - 1}."
             )
             return False
 
-        # Construct the scenario byte for the command: starts from 0x80 for scenario 0. [cite: 52]
+        # Construct the scenario byte for the command: starts from 0x80 for scenario 0.
         scenario_command_byte_val = 0x80 + scenario_number_0_indexed
         scenario_command_byte_hex = format(scenario_command_byte_val, "02x")
 
@@ -966,7 +967,7 @@ class InimAlarmAPI:
         eight_byte_cmd_with_checksum = seven_byte_cmd_hex + cmd_checksum
 
         # Send the command and get the response data (checksum stripped)
-        # Expected response length is 14 bytes (13 data + 1 chk) [cite: 53]
+        # Expected response length is 14 bytes (13 data + 1 chk)
         response_data_hex = self._send_command_core(
             eight_byte_cmd_with_checksum,
             expect_specific_response_len=spec_info["resp_len"],
@@ -978,7 +979,7 @@ class InimAlarmAPI:
             )
             return False  # Error in communication or validation
 
-        # A positive response (all zones clear, scenario can be activated) is all zeros for the data part. [cite: 54]
+        # A positive response (all zones clear, scenario can be activated) is all zeros for the data part.
         # The response_data_hex from _send_command_core is 13 bytes (26 hex chars).
         expected_positive_response_data = "00" * 13  # 13 bytes of zeros
 
@@ -993,32 +994,32 @@ class InimAlarmAPI:
 
     # --- Status ---
     def get_areas_status(self):
-        """Requests Areas Status. [cite: 21]"""
+        """Requests Areas Status."""
         spec = InimAlarmConstants.COMMAND_SPECS["GET_AREAS_STATUS"]
         response_data_hex = self._send_command_core(
             spec["cmd_full"], expect_specific_response_len=spec["resp_len"]
-        )  # Response 17 bytes [cite: 21]
+        )  # Response 17 bytes
         if response_data_hex:
             status_info = {
                 "raw_hex": response_data_hex,
                 "area_statuses": {},
                 "triggered_areas": [],
             }
-            # First 5 bytes represent area status. [cite: 22] Each hex digit is an area, inverted within byte. [cite: 22, 23, 24]
+            # First 5 bytes represent area status. Each hex digit is an area, inverted within byte.
             area_status_hex = response_data_hex[:10]
             statuses = {}
-            for byte_idx in range(5):  # Covers up to 10 areas [cite: 24]
+            for byte_idx in range(5):  # Covers up to 10 areas
                 byte_val_hex = area_status_hex[byte_idx * 2 : byte_idx * 2 + 2]
-                # Byte N: Area (N*2) - Area (N*2-1) [cite: 24]
+                # Byte N: Area (N*2) - Area (N*2-1)
                 area_in_msn = (byte_idx + 1) * 2  # e.g., byte_idx 0 -> Area 2
                 area_in_lsn = (byte_idx + 1) * 2 - 1  # e.g., byte_idx 0 -> Area 1
 
                 status_char_msn = byte_val_hex[
                     0
-                ]  # Left nibble, represents higher area number in pair [cite: 24]
+                ]  # Left nibble, represents higher area number in pair
                 status_char_lsn = byte_val_hex[
                     1
-                ]  # Right nibble, represents lower area number in pair [cite: 24]
+                ]  # Right nibble, represents lower area number in pair
 
                 if area_in_lsn <= self.system_max_areas:
                     statuses[area_in_lsn] = (
@@ -1027,7 +1028,7 @@ class InimAlarmAPI:
                         else "disarmed"
                         if status_char_lsn == InimAlarmConstants.AREA_STATUS_DISARMED
                         else "unknown"
-                    )  # [cite: 23]
+                    )
                 if area_in_msn <= self.system_max_areas:
                     statuses[area_in_msn] = (
                         "armed"
@@ -1035,20 +1036,18 @@ class InimAlarmAPI:
                         else "disarmed"
                         if status_char_msn == InimAlarmConstants.AREA_STATUS_DISARMED
                         else "unknown"
-                    )  # [cite: 23]
+                    )
             status_info["area_statuses"] = statuses
 
-            # 11th byte (index 10 of data, hex chars 20-21) tells if an area has been triggered. [cite: 25]
+            # 11th byte (index 10 of data, hex chars 20-21) tells if an area has been triggered.
             if len(response_data_hex) >= 22:
                 triggered_byte_hex = response_data_hex[
                     20:22
                 ]  # This is the 11th byte of the data part
                 triggered_byte_val = int(triggered_byte_hex, 16)
                 triggered_areas = []
-                if (
-                    triggered_byte_val != 0
-                ):  # 00 means no areas have alarms in memory [cite: 25]
-                    # Value is power of 2 of the area number (counting from zero) [cite: 25, 26]
+                if triggered_byte_val != 0:  # 00 means no areas have alarms in memory
+                    # Value is power of 2 of the area number (counting from zero)
                     for i in range(
                         self.system_max_areas
                     ):  # Check up to system max areas (e.g. 8 or 10)
@@ -1060,13 +1059,13 @@ class InimAlarmAPI:
         return None
 
     def get_active_scenario(self):
-        """Requests the currently active scenario. [cite: 49]"""
+        """Requests the currently active scenario."""
         spec = InimAlarmConstants.COMMAND_SPECS["GET_ACTIVE_SCENARIO"]
         response_data_hex = self._send_command_core(
             spec["cmd_full"], expect_specific_response_len=spec["resp_len"]
-        )  # Response 2 bytes (1 data byte + 1 chk) [cite: 49]
+        )  # Response 2 bytes (1 data byte + 1 chk)
         if response_data_hex:
-            # First byte tells active scenario number (counting from 00). [cite: 49]
+            # First byte tells active scenario number (counting from 00).
             active_scenario_num = int(response_data_hex, 16)
             return {
                 "raw_hex": response_data_hex,
@@ -1110,7 +1109,7 @@ class InimAlarmAPI:
 
         # Parse the 50 hex digits for zone statuses
         # Each digit represents the status of 2 zones.
-        # Order: Digit 1 -> Zones 3&4, Digit 2 -> Zones 1&2, etc. [cite: 81]
+        # Order: Digit 1 -> Zones 3&4, Digit 2 -> Zones 1&2, etc.
         for digit_index in range(50):  # 50 hex digits from D0 to D49
             hex_digit_char = zone_status_block_hex[digit_index]
 
@@ -1121,34 +1120,26 @@ class InimAlarmAPI:
 
             if (
                 digit_index % 2 == 0
-            ):  # Even index: D0, D2, D4... (Corresponds to PDF's "Digit 1", "Digit 3", ...)
-                zone1_num = (
-                    m * 4
-                ) + 3  # "First zone" in the pair for this digit [cite: 81]
-                zone2_num = (
-                    m * 4
-                ) + 4  # "Second zone" in the pair for this digit [cite: 81]
+            ):  # Even index: D0, D2, D4... (Corresponds to "Digit 1", "Digit 3", ...)
+                zone1_num = (m * 4) + 3  # "First zone" in the pair for this digit
+                zone2_num = (m * 4) + 4  # "Second zone" in the pair for this digit
             else:  # Odd index: D1, D3, D5... (Corresponds to PDF's "Digit 2", "Digit 4", ...)
-                zone1_num = (
-                    m * 4
-                ) + 1  # "First zone" in the pair for this digit [cite: 81]
-                zone2_num = (
-                    m * 4
-                ) + 2  # "Second zone" in the pair for this digit [cite: 81]
+                zone1_num = (m * 4) + 1  # "First zone" in the pair for this digit
+                zone2_num = (m * 4) + 2  # "Second zone" in the pair for this digit
 
             status_zone1_str = "unknown"
             status_zone2_str = "unknown"
 
-            if hex_digit_char == "5":  # Both zones clear [cite: 81]
+            if hex_digit_char == "5":  # Both zones clear
                 status_zone1_str = "clear"
                 status_zone2_str = "clear"
-            elif hex_digit_char == "6":  # First zone alarmed, second clear [cite: 81]
+            elif hex_digit_char == "6":  # First zone alarmed, second clear
                 status_zone1_str = "alarmed"
                 status_zone2_str = "clear"
-            elif hex_digit_char == "9":  # First zone clear, second alarmed [cite: 81]
+            elif hex_digit_char == "9":  # First zone clear, second alarmed
                 status_zone1_str = "clear"
                 status_zone2_str = "alarmed"
-            elif hex_digit_char == "a":  # Both zones alarmed [cite: 81]
+            elif hex_digit_char == "a":  # Both zones alarmed
                 status_zone1_str = "alarmed"
                 status_zone2_str = "alarmed"
             else:
@@ -1475,7 +1466,7 @@ class InimAlarmAPI:
     # --- Actions ---
     def _construct_area_action_payload(self, areas_to_arm=None, areas_to_disarm=None):
         """
-        Constructs the 8-byte HEX payload for arming/disarming areas. [cite: 29, 30]
+        Constructs the 8-byte HEX payload for arming/disarming areas.
         Args:
             areas_to_arm (list[int], optional): List of area numbers (1-indexed) to arm.
             areas_to_disarm (list[int], optional): List of area numbers (1-indexed) to disarm.
@@ -1485,9 +1476,9 @@ class InimAlarmAPI:
         areas_to_arm = areas_to_arm or []
         areas_to_disarm = areas_to_disarm or []
 
-        # Payload is 8 bytes, representing up to 16 areas. [cite: 30, 38]
-        # Each hex digit represents an area's requested status. [cite: 31]
-        # Within each byte, areas are represented inverted (e.g. Byte 1 -> Area2-Area1). [cite: 31, 32]
+        # Payload is 8 bytes, representing up to 16 areas.
+        # Each hex digit represents an area's requested status.
+        # Within each byte, areas are represented inverted (e.g. Byte 1 -> Area2-Area1).
         payload_nibbles = [InimAlarmConstants.AREA_ACTION_KEEP_STATUS] * (
             InimAlarmConstants.MAX_AREAS_PAYLOAD
         )
@@ -1495,20 +1486,18 @@ class InimAlarmAPI:
         for area_num_1_indexed in range(1, InimAlarmConstants.MAX_AREAS_PAYLOAD + 1):
             action = (
                 InimAlarmConstants.AREA_ACTION_KEEP_STATUS
-            )  # Default: Keep current status [cite: 31]
+            )  # Default: Keep current status
             if area_num_1_indexed in areas_to_arm:
-                action = InimAlarmConstants.AREA_ACTION_ARM  # 1 -> Arm Area [cite: 31]
+                action = InimAlarmConstants.AREA_ACTION_ARM  # 1 -> Arm Area
             elif area_num_1_indexed in areas_to_disarm:
-                action = (
-                    InimAlarmConstants.AREA_ACTION_DISARM
-                )  # 4 -> Disarm Area [cite: 31]
+                action = InimAlarmConstants.AREA_ACTION_DISARM  # 4 -> Disarm Area
 
             byte_index_for_area = (area_num_1_indexed - 1) // 2
             is_msn_in_byte_representation = (
                 area_num_1_indexed % 2 == 0
-            )  # Area 2,4,6... are MSN in PDF's byte representation [cite: 32]
+            )  # Area 2,4,6... are MSN
 
-            # Determine position in the 16-nibble string based on PDF's inverted representation
+            # Determine position in the 16-nibble string based on inverted representation
             if (
                 is_msn_in_byte_representation
             ):  # Area is the one on the left in "Area2-Area1" -> MSN of output byte
@@ -1519,7 +1508,7 @@ class InimAlarmAPI:
             if nibble_string_index < len(payload_nibbles):
                 payload_nibbles[nibble_string_index] = action
 
-        # The payload for areas should be exactly 8 bytes (16 hex chars) [cite: 29, 30]
+        # The payload for areas should be exactly 8 bytes (16 hex chars)
         # If fewer than MAX_AREAS_PAYLOAD are used, remaining should be '0' (Keep status)
         final_payload_string = "".join(payload_nibbles)
         return final_payload_string[
@@ -1528,27 +1517,27 @@ class InimAlarmAPI:
 
     def arm_disarm_areas(self, areas_to_arm=None, areas_to_disarm=None):
         """
-        Arms or disarms specified areas. [cite: 28]
-        Command is 8 bytes (base command + its checksum) + 14 bytes payload. [cite: 28]
-        Payload is PIN (6 bytes) + areas arm status (8 bytes). [cite: 29]
+        Arms or disarms specified areas.
+        Command is 8 bytes (base command + its checksum) + 14 bytes payload.
+        Payload is PIN (6 bytes) + areas arm status (8 bytes).
         """
         spec_info = InimAlarmConstants.COMMAND_SPECS["ARM_DISARM_AREAS_CMD_INFO"]
-        # spec_info["cmd_full"] is the 8-byte base command part ("0100002006000e35") [cite: 29]
+        # spec_info["cmd_full"] is the 8-byte base command part ("0100002006000e35")
 
         area_action_payload_hex = self._construct_area_action_payload(
             areas_to_arm, areas_to_disarm
-        )  # 8 bytes [cite: 30]
+        )  # 8 bytes]
         full_payload_hex = (
             self.pin_hex + area_action_payload_hex
-        )  # 6 bytes PIN + 8 bytes areas = 14 bytes [cite: 29]
+        )  # 6 bytes PIN + 8 bytes areas = 14 bytes
 
         command_to_send_hex = spec_info["cmd_full"] + full_payload_hex
 
         try:
             self._send_raw_command(command_to_send_hex)
 
-            # System confirms by responding with the checksum of the payload (PIN + areas). [cite: 34]
-            # Response is 1 byte (2 hex chars). [cite: 35]
+            # System confirms by responding with the checksum of the payload (PIN + areas).
+            # Response is 1 byte (2 hex chars).
             response_hex_full = self._read_raw_response(
                 buffer_size=spec_info["resp_len"]
             )  # Expect 1 byte
@@ -1576,24 +1565,24 @@ class InimAlarmAPI:
 
     def activate_scenario(self, scenario_number):  # 0-indexed for payload
         """
-        Activates a scenario. [cite: 55]
-        Command is 8 bytes + 8 bytes payload (actually 7 in example). [cite: 56, 57]
-        Payload: PIN (6 bytes) + scenario number (1 byte). [cite: 57]
+        Activates a scenario.
+        Command is 8 bytes + 8 bytes payload (actually 7 in example).
+        Payload: PIN (6 bytes) + scenario number (1 byte).
         """
         spec_info = InimAlarmConstants.COMMAND_SPECS["ACTIVATE_SCENARIO_CMD_INFO"]
-        # spec_info["cmd_full"] is "010000200a000732" [cite: 57]
+        # spec_info["cmd_full"] is "010000200a000732"
 
-        # Scenario number is 0-indexed for payload [cite: 57]
+        # Scenario number is 0-indexed for payload
         if not (
             0 <= scenario_number < 30
-        ):  # Assuming max 30 scenarios based on name requests [cite: 41]
+        ):  # Assuming max 30 scenarios based on name requests
             logger.error(
                 f"Invalid scenario number: {scenario_number}. Must be 0-29 (example uses 00 for scenario 1)."
             )
             return False
 
         scenario_byte_hex = format(scenario_number, "02x")
-        # Payload: PIN (6 bytes) + scenario number (1 byte) = 7 bytes [cite: 57]
+        # Payload: PIN (6 bytes) + scenario number (1 byte) = 7 bytes
         full_payload_hex = self.pin_hex + scenario_byte_hex
 
         command_to_send_hex = spec_info["cmd_full"] + full_payload_hex
@@ -1651,7 +1640,7 @@ class InimAlarmAPI:
                     (
                         "keyboard_names",
                         self.get_keyboard_names,
-                    ),  # MODIFIED: Add call to new method
+                    ),
                 ]
                 for key, method in methods_to_call:
                     logger.debug("Fetching %s...", key)
@@ -1762,10 +1751,12 @@ class InimAlarmAPI:
 
             # Validate scenario number input first
             if not (
-                0 <= scenario_number_0_indexed < 30
-            ):  # Assuming max 30 scenarios (0-29)
+                0
+                <= scenario_number_0_indexed
+                < InimAlarmConstants.DEFAULT_SYSTEM_MAX_SCENARIOS
+            ):
                 logger.error(
-                    f"execute_activate_scenario: Invalid scenario number {scenario_number_0_indexed}. Must be 0-29."
+                    f"execute_activate_scenario: Invalid scenario number {scenario_number_0_indexed}. Must be 0-{InimAlarmConstants.DEFAULT_SYSTEM_MAX_SCENARIOS - 1}."
                 )
                 return False
 

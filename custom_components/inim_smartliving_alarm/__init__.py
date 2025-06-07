@@ -30,7 +30,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Inim Alarm from a config entry."""
     _LOGGER.info(
-        "Setting up Inim Alarm integration for entry: %a (%s)",
+        "Setting up Inim Alarm integration for entry: %s (%s)",
         entry.title,
         entry.entry_id,
     )

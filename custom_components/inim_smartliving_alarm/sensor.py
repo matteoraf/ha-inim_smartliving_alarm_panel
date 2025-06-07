@@ -197,9 +197,7 @@ class ActiveInimScenarioNameSensor(BaseInimSensorEntity):
         }
 
 
-class PanelFirmwareSensor(
-    SensorEntity
-):  # This one is static, doesn't need coordinator base
+class PanelFirmwareSensor(SensorEntity):
     """Panel Firmware Sensor Class."""
 
     _attr_should_poll = False
@@ -238,7 +236,7 @@ class PanelFirmwareSensor(
         )
 
 
-class PanelSystemTypeSensor(SensorEntity):  # Static, doesn't need coordinator base
+class PanelSystemTypeSensor(SensorEntity):
     """Panel System Type Sensor."""
 
     _attr_should_poll = False
@@ -508,6 +506,6 @@ class InimEventLogSensor(BaseInimSensorEntity):
             "latest_event_description": latest_event_in_log_description,
             "latest_event_timestamp": latest_event_in_log_timestamp,
             "event_log_size_configured": self._event_log_display_size,
-            "event_log_count_current": len(self._event_log),  # Current actual count
+            "event_log_count_current": len(self._event_log),
             "event_log": self._event_log,
         }

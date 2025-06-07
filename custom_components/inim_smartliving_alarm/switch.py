@@ -1,6 +1,6 @@
 """Platform for switch entities for the Inim Alarm integration (Areas)."""
 
-import functools  # Import functools
+import functools
 import logging
 from typing import Any
 
