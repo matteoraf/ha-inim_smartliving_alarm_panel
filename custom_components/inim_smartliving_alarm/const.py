@@ -44,7 +44,8 @@ DEFAULT_LIMIT_SCENARIOS = 30
 
 # Default limiys for imported events
 DEFAULT_EVENT_LOG_SIZE = 50  # Default number of events to store
-SYSTEM_MAX_EVENT_LOG_SIZE = 250  # System limit of events to store
+SYSTEM_MAX_EVENT_LOG_SIZE = 150  # System limit of events to store, increasing this may cause exceeding the maximum size of 16384 bytes for the sensor attribute
+
 
 # Data keys for hass.data[DOMAIN][entry.entry_id]
 DATA_API_CLIENT = "api_client"
