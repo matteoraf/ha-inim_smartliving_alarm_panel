@@ -144,6 +144,7 @@ class InimAlarmConstants:
             "cmd_full": "00000159c8006486",
             "resp_len": 101,
         },
+        "GET_ZONE_INDEX_MAP": {"cmd_full": "00000178fd0082f8", "resp_len": 131},
         "GET_ZONES_STATUS": {
             "cmd_full": "0000002001001a3b",
             "resp_len": 27,
@@ -155,6 +156,10 @@ class InimAlarmConstants:
         "GET_ZONES_TRIGGERED_STATUS": {
             "cmd_full": "0000002003001c3f",
             "resp_len": 29,
+        },
+        "SET_ZONE_EXCLUDED_CMD_INFO": {
+            "cmd_full": "0100002009000933",
+            "resp_len": 1,
         },
         # Events (Compact)
         "GET_NEXT_EVENT_POINTER_CMD_INFO": {
@@ -627,6 +632,12 @@ class InimAlarmAPI:
                 return None
             all_config_data_hex_part2 += response_part
 
+        # Getting zone internal index map
+        zone_map_data = self._get_zone_index_map()
+        zone_index_map = zone_map_data.get("zone_index_map") if zone_map_data else {}
+        if not zone_index_map:
+            logger.error("Could not retrieve zone index map.")
+
         zones_config_detailed = []
 
         for i in range(self.system_max_zones):
@@ -753,6 +764,14 @@ class InimAlarmAPI:
                         zone_config_parsed["sensor_type_desc"] = "Parse Error"
 
                     # Bytes 8-12 are undecoded, skipped.
+            # Adding internal_index
+            try:
+                if zone_idx_0_based in zone_index_map:
+                    zone_config_parsed["internal_index"] = zone_index_map[
+                        zone_idx_0_based
+                    ]
+            except ValueError:
+                zone_config_parsed["internal_index"] = "Parse Error"
                 # else: zone_config_parsed["_raw_config_part2_hex"] = "Data Missing in Packet" # If storing raw hex
 
             zones_config_detailed.append(
@@ -1172,6 +1191,28 @@ class InimAlarmAPI:
             "zone_statuses": ordered_zone_statuses,  # Return the numerically ordered dictionary
             "unknown_byte_after_status_data": unknown_byte_hex,
         }
+
+    def _get_zone_index_map(self):
+        spec = InimAlarmConstants.COMMAND_SPECS.get("GET_ZONE_INDEX_MAP")
+        if not spec:
+            logger.error("Command spec for GET_ZONE_INDEX_MAP not found.")
+            return None
+        response_data_hex = self._send_command_core(
+            spec["cmd_full"], expect_specific_response_len=spec["resp_len"]
+        )
+        if not response_data_hex:
+            return None
+        zone_map = {}
+        for internal_index, i in enumerate(range(0, len(response_data_hex) - 2, 2)):
+            zone_num_hex = response_data_hex[i : i + 2]
+            if zone_num_hex.lower() == "ff":
+                continue
+            try:
+                zone_number_0_based = int(zone_num_hex, 16)
+                zone_map[zone_number_0_based] = internal_index
+            except (ValueError, IndexError):
+                continue
+        return {"zone_index_map": zone_map, "raw_hex_data": response_data_hex}
 
     def _parse_zone_bitmask_status(
         self, response_data_hex, text_for_bit_1, text_for_bit_0
@@ -1729,6 +1770,65 @@ class InimAlarmAPI:
             logger.error("Reset area alarm operation failed: %s", e)
             return False
 
+    def set_zone_excluded_status(self, zone_internal_index, excluded_status):
+        """Enables or disables excluded status for a specific zone.
+
+        Args:
+            zone_internal_index (int): The internal zone index number.
+            excluded_status (bool): True to excluded (disable) the zone, False to enable it.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+
+        """
+        spec_info = InimAlarmConstants.COMMAND_SPECS["SET_ZONE_EXCLUDED_CMD_INFO"]
+
+        # Payload: PIN (6 bytes) + zone number (2 bytes LE) + action (1 byte)
+        zone_hex = format(zone_internal_index, "04x")
+        zone_hex_le = zone_hex[2:] + zone_hex[:2]
+
+        # Action: 01 to disable (exclude), 00 to enable
+        action_byte = "01" if excluded_status else "00"
+
+        full_payload_hex = self.pin_hex + zone_hex_le + action_byte
+
+        command_to_send_hex = spec_info["cmd_full"] + full_payload_hex
+
+        try:
+            self._send_raw_command(command_to_send_hex)
+            response_hex_full = self._read_raw_response(
+                buffer_size=spec_info["resp_len"]
+            )
+
+            if len(response_hex_full) == 2:
+                expected_checksum = self.calculate_checksum(full_payload_hex)
+                if response_hex_full.lower() == expected_checksum.lower():
+                    action_text = "excluded" if excluded_status else "Enabled"
+                    logger.info(
+                        "Zone with internal index %s %s successfully.",
+                        zone_internal_index,
+                        action_text,
+                    )
+                    return True
+                else:
+                    logger.error(
+                        "Set excluded for zone with internal index %s failed: Incorrect response checksum. Expected %s, Got %s",
+                        zone_internal_index,
+                        expected_checksum,
+                        response_hex_full,
+                    )
+                    return False
+            else:
+                logger.error(
+                    "Set excluded for zone with internal index %s failed: Unexpected response length. Got %s",
+                    zone_internal_index,
+                    response_hex_full,
+                )
+                return False
+        except (ConnectionError, TimeoutError, ValueError) as e:
+            logger.error("Set zone excluded operation failed: %s", e)
+            return False
+
     def activate_scenario(self, scenario_number):  # 0-indexed for payload
         """
         Activates a scenario.
@@ -1939,6 +2039,28 @@ class InimAlarmAPI:
                 success = self.reset_area_alarm(area_number_1_indexed)
             except Exception as e:
                 logger.error("Exception during execute_reset_area_alarm: %s", e)
+                success = False
+            finally:
+                self.disconnect()
+            return success
+
+    def execute_set_zone_excluded_status(self, zone_internal_index, excluded_status):
+        """Connects, sets the excluded status for a zone, then disconnects. Returns success status."""
+        with self._api_lock:
+            logger.debug("Lock acquired for execute_set_zone_excluded_status")
+            if not self.connect():
+                logger.error(
+                    "Failed to connect to panel for set zone excluded operation."
+                )
+                return False
+
+            success = False
+            try:
+                success = self.set_zone_excluded_status(
+                    zone_internal_index, excluded_status
+                )
+            except Exception as e:
+                logger.error("Exception during execute_set_zone_excluded_status: %s", e)
                 success = False
             finally:
                 self.disconnect()
