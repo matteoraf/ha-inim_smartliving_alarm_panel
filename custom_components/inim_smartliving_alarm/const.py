@@ -116,6 +116,9 @@ KEY_LIVE_ZONE_STATUSES_MAP = (
 KEY_LIVE_ZONES_EXCLUDED_STATUS = "zones_excluded_status"
 KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP = "zone_excluded_statuses"
 
+KEY_LIVE_ZONES_TRIGGERED_STATUS = "zones_triggered_status"
+KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP = "zone_triggered_statuses"
+
 KEY_PROCESSED_EVENTS = "processed_events"  # List of new events from last poll
 KEY_LATEST_EVENT_INDEX_VAL = (
     "latest_event_index_val"  # Panel's absolute latest event index
