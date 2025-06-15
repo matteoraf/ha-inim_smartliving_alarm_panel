@@ -102,7 +102,7 @@ After installation and restarting Home Assistant:
         
     *   **Port**: The TCP port your SmartLAN module is listening on (default is 5004).
         
-    *   **PIN**: A valid user PIN code for your alarm panel (The PIN won't be checked. If the PIN is not valid, it simply won't work, but you will not get any error message about it.).
+    *   **PIN**: A valid user PIN code for your alarm panel (The PIN won't be checked. If the PIN is not valid, it simply won't work, but you will not get any error message about it during the configuration process.).
         
     *   **Panel Name** (Optional): A friendly name for your alarm panel in Home Assistant (e.g., "Home Alarm").
         
@@ -141,6 +141,8 @@ This integration exposes your Inim alarm system's components as various Home Ass
 *   **Zones**:
     
     *   *binary\_sensor.your\_panel\_name\_zone\_X*: Represents a single zone. It turns on if the zone is alarmed. The device class (motion or opening) is automatically assigned based on the zone's configuration on the panel. Extended attributes provide more details about the zone's configuration.
+
+    *   *switch.your\_panel\_name\_zone\_X*: Lets you enable or disable (exclude) individual zones.
         
 *   **Scenarios**:
     

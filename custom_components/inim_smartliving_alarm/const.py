@@ -44,8 +44,7 @@ DEFAULT_LIMIT_SCENARIOS = 30
 
 # Default limiys for imported events
 DEFAULT_EVENT_LOG_SIZE = 50  # Default number of events to store
-SYSTEM_MAX_EVENT_LOG_SIZE = 150  # System limit of events to store, increasing this may cause exceeding the maximum size of 16384 bytes for the sensor attribute
-
+SYSTEM_MAX_EVENT_LOG_SIZE = 100  # System limit of events to store, increasing this may cause exceeding the maximum size of 16384 bytes for the sensor attribute
 
 # Data keys for hass.data[DOMAIN][entry.entry_id]
 DATA_API_CLIENT = "api_client"
@@ -114,6 +113,8 @@ KEY_LIVE_ZONES_STATUS = "zones_status"  # Dict with current zone statuses
 KEY_LIVE_ZONE_STATUSES_MAP = (
     "zone_statuses"  # Dict within zones_status: {zone_id_1_based_str: "status_str"}
 )
+KEY_LIVE_ZONES_EXCLUDED_STATUS = "zones_excluded_status"
+KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP = "zone_excluded_statuses"
 
 KEY_PROCESSED_EVENTS = "processed_events"  # List of new events from last poll
 KEY_LATEST_EVENT_INDEX_VAL = (
