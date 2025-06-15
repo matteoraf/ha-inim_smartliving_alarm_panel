@@ -1209,6 +1209,14 @@ class InimAlarmAPI:
         )
         return extended_event_pointer_hex_val_str
 
+    def _decode_area_mask(self, d1: str, d2: str) -> dict[str, Any] | None:
+        area_mask_val = d1 | (d2 << 8)
+        return [
+            area_idx + 1
+            for area_idx in range(self.system_max_areas)
+            if (area_mask_val >> area_idx) & 1
+        ]
+
     def _fetch_one_compact_event(
         self, index_byte4_hex: str, index_byte5_hex: str
     ) -> dict[str, Any] | None:
@@ -1274,18 +1282,13 @@ class InimAlarmAPI:
             )
 
             if action_code in [0x8A, 0x8C, 0x8D, 0x0A, 0x0C, 0x95, 0x96]:
-                area_mask_val = d1_val | (d2_val << 8)
-                event_data["affected_areas"] = [
-                    area_idx + 1
-                    for area_idx in range(self.system_max_areas)
-                    if (area_mask_val >> area_idx) & 1
-                ]
+                event_data["affected_areas"] = self._decode_area_mask(d1_val, d2_val)
                 event_data["device_id_hex"] = format(d4_val, "02x")
                 event_data["authorized_id_hex"] = format(d3_val, "02x")
             elif action_code == 0x9E:
                 event_data["scenario_number_0_indexed"] = d3_val
             elif action_code in [0x80, 0x00]:
-                event_data["area_number_1_indexed"] = d1_val
+				event_data["affected_areas"] = self._decode_area_mask(d1_val, d2_val)
                 event_data["zone_number_0_indexed"] = d3_val
                 event_data["zone_number_1_indexed_for_display"] = d3_val + 1
 
