@@ -1288,7 +1288,7 @@ class InimAlarmAPI:
             elif action_code == 0x9E:
                 event_data["scenario_number_0_indexed"] = d3_val
             elif action_code in [0x80, 0x00]:
-				event_data["affected_areas"] = self._decode_area_mask(d1_val, d2_val)
+                event_data["affected_areas"] = self._decode_area_mask(d1_val, d2_val)
                 event_data["zone_number_0_indexed"] = d3_val
                 event_data["zone_number_1_indexed_for_display"] = d3_val + 1
 
