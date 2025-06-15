@@ -148,7 +148,7 @@ class InimAlarmConstants:
             "cmd_full": "0000002001001a3b",
             "resp_len": 27,
         },
-        "GET_ZONES_BYPASS_STATUS": {
+        "GET_ZONES_EXCLUDED_STATUS": {
             "cmd_full": "0000002002001a3c",
             "resp_len": 27,
         },
@@ -1176,7 +1176,7 @@ class InimAlarmAPI:
     def _parse_zone_bitmask_status(
         self, response_data_hex, text_for_bit_1, text_for_bit_0
     ):
-        """Generic helper to parse zone bypass and triggered status responses based on a direct byte-to-zone mapping.
+        """Generic helper to parse zone excluded and triggered status responses based on a direct byte-to-zone mapping.
 
         Args:
             response_data_hex (str): The response data (checksum stripped).
@@ -1231,9 +1231,9 @@ class InimAlarmAPI:
 
         return parsed_statuses
 
-    def get_zones_bypass_status(self):
-        """Requests and parses the bypass status of all zones."""
-        spec = InimAlarmConstants.COMMAND_SPECS["GET_ZONES_BYPASS_STATUS"]
+    def get_zones_excluded_status(self):
+        """Requests and parses the excluded status of all zones."""
+        spec = InimAlarmConstants.COMMAND_SPECS["GET_ZONES_EXCLUDED_STATUS"]
         response_data_hex = self._send_command_core(
             spec["cmd_full"], expect_specific_response_len=spec["resp_len"]
         )
@@ -1241,14 +1241,14 @@ class InimAlarmAPI:
         if not response_data_hex:
             return None
 
-        # For bypass, a '1' bit means ENABLED and a '0' bit means DISABLED (bypassed).
-        bypass_statuses = self._parse_zone_bitmask_status(
+        # For excluded, a '1' bit means ENABLED and a '0' bit means DISABLED (excluded).
+        excluded_statuses = self._parse_zone_bitmask_status(
             response_data_hex, text_for_bit_1="enabled", text_for_bit_0="disabled"
         )
 
         return {
             "raw_hex_data": response_data_hex,
-            "zone_bypass_statuses": bypass_statuses,
+            "zone_excluded_statuses": excluded_statuses,
         }
 
     def get_zones_triggered_status(self):
@@ -1845,7 +1845,7 @@ class InimAlarmAPI:
                     "error": "Connection failure",
                     "areas_status": None,
                     "zones_status": None,
-                    "zones_bypass_status": None,
+                    "zones_excluded_status": None,
                     "zones_triggered_status": None,
                     "active_scenario": None,
                 }
@@ -1853,7 +1853,7 @@ class InimAlarmAPI:
             live_status = {
                 "areas_status": None,
                 "zones_status": None,
-                "zones_bypass_status": None,
+                "zones_excluded_status": None,
                 "zones_triggered_status": None,
                 "active_scenario": None,
                 "errors": [],
@@ -1872,10 +1872,10 @@ class InimAlarmAPI:
                     live_status["errors"].append("Failed to get zones status.")
                 time.sleep(0.1)
 
-                logger.debug("Fetching live zones bypass status...")
-                live_status["zones_bypass_status"] = self.get_zones_bypass_status()
-                if live_status["zones_bypass_status"] is None:
-                    live_status["errors"].append("Failed to get zones bypass status.")
+                logger.debug("Fetching live zones excluded status...")
+                live_status["zones_excluded_status"] = self.get_zones_excluded_status()
+                if live_status["zones_excluded_status"] is None:
+                    live_status["errors"].append("Failed to get zones excluded status.")
                 time.sleep(0.1)
 
                 logger.debug("Fetching live zones triggered status...")
