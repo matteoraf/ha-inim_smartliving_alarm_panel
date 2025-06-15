@@ -146,6 +146,8 @@ This integration exposes your Inim alarm system's components as various Home Ass
     
     *   *binary\_sensor.your\_panel\_name\_zone\_X*: Represents a single zone. It turns on if the zone is alarmed. The device class (motion or opening) is automatically assigned based on the zone's configuration on the panel. Extended attributes provide more details about the zone's configuration.
 
+    *   *binary\_sensor.your\_panel\_name\_zone\_X_triggered_*: Represents a single zone. It turns on if the zone has triggered the system.
+
     *   *switch.your\_panel\_name\_zone\_X*: Lets you enable or disable (exclude) individual zones.
         
 *   **Scenarios**:
