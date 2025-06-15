@@ -95,6 +95,26 @@ button_card_templates:
           card:
             - border-color: green
   zone:
+    variables:
+      a1_excluded_entity: |
+        [[[
+          return `switch.${entity.entity_id.substring(entity.entity_id.indexOf('.') + 1)}`
+        ]]]
+      a2_excluded_state: |
+        [[[
+          return states[variables.a1_excluded_entity].state
+        ]]]
+      a1_triggered_entity: |
+        [[[
+          return `binary_sensor.${entity.entity_id.substring(entity.entity_id.indexOf('.') + 1)}_triggered`
+        ]]]
+      a2_triggered_state: |
+        [[[
+          return states[variables.a1_triggered_entity].state
+        ]]]
+    triggers_update:
+      - '[[[ return variables.a1_excluded_entity ]]]'
+      - '[[[ return variables.a1_triggered_entity ]]]'
     name: '[[[ return entity.attributes.zone_name ]]]'
     aspect_ratio: 1/1
     custom_fields:
@@ -104,12 +124,26 @@ button_card_templates:
         [[[ return `Last Changed: <br>
         ${helpers.formatShortDateTime(entity.last_changed)}` ]]]
     state:
-      - value: 'on'
+      - operator: template
+        value: '[[[ return variables.a2_triggered_state == "on" ]]]'
         color: red
-        icon: mdi:lock-open-variant-outline
+        icon: mdi:shield-alert-outline
         styles:
           card:
             - border-color: red
+      - operator: template
+        value: '[[[ return variables.a2_excluded_state == "off" ]]]'
+        color: gray
+        icon: mdi:lock-off-outline
+        styles:
+          card:
+            - opacity: 0.8
+      - value: 'on'
+        color: orange
+        icon: mdi:lock-open-variant-outline
+        styles:
+          card:
+            - border-color: orange
       - operator: default
         color: green
         icon: mdi:lock-outline

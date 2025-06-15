@@ -20,9 +20,11 @@ Features
         
 *   **Detailed Zone Monitoring**: Zones are exposed as:
     
-    *   **Binary Sensor entities**: With device classes automatically assigned based on zone type. "Double Balancing" and "Shutter" types are assigned the motion device class, while "Normally Closed" or "Normally Open" are assigned the opening class.
+    *   **Binary Sensor Status entities**: With device classes automatically assigned based on zone type. "Double Balancing" and "Shutter" types are assigned the motion device class, while "Normally Closed" or "Normally Open" are assigned the opening class.
         
     *   Extended attributes provide additional configuration parameters for each zone.
+    
+    *   **Binary Sensor Triggered entities**: Telling if a zone has triggered the system.
     
     *   **Switch entities**: To allow individual zone exclusion.
         

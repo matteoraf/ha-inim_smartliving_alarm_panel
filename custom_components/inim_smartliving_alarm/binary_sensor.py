@@ -33,6 +33,8 @@ from .const import (
     KEY_INIT_ZONES,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
+    KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP,
+    KEY_LIVE_ZONES_TRIGGERED_STATUS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -117,6 +119,17 @@ async def async_setup_entry(
                 zone_config_detail,
             )
         )
+        # Add the new sensor for "triggered" status
+        binary_sensors_to_add.append(
+            InimZoneTriggeredBinarySensor(
+                coordinator,
+                entry,
+                panel_display_name,
+                system_info,
+                i,
+                zone_name,
+            )
+        )
 
     num_areas_to_create = min(len(all_area_names), limit_areas)
     _LOGGER.debug(
@@ -135,7 +148,7 @@ async def async_setup_entry(
 
     num_scenarios_to_create = min(len(all_scenario_names), limit_scenarios)
     _LOGGER.debug(
-        "Setting up %s Scenario Active Binary Sensors (Limit: %a, Available: %s)",
+        "Setting up %s Scenario Active Binary Sensors (Limit: %s, Available: %s)",
         num_scenarios_to_create,
         limit_scenarios,
         len(all_scenario_names),
@@ -202,7 +215,7 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         zone_name: str,
         zone_config_detail: dict[str, Any] | None,
     ) -> None:
-        """Initialize the Inim zone binary sensor."""
+        """Initialize the Inim zone status binary sensor."""
         super().__init__(coordinator, config_entry, panel_display_name, system_info)
         self._zone_index_0_based = zone_index_0_based
         self._zone_id_1_based = zone_index_0_based + 1
@@ -277,6 +290,61 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         return self._attr_extra_state_attributes
+
+
+class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
+    """Binary sensor for the persistent triggered status of an Inim Zone."""
+
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+
+    def __init__(
+        self,
+        coordinator: Any,
+        config_entry: ConfigEntry,
+        panel_display_name: str,
+        system_info: dict[str, Any],
+        zone_index_0_based: int,
+        zone_name: str,
+    ) -> None:
+        """Initialize the Inim zone triggered binary sensor."""
+        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        self._zone_id_1_based = zone_index_0_based + 1
+        self._zone_name = zone_name
+        self._attr_name = f"Zone {self._zone_id_1_based} Triggered ({self._zone_name})"
+        self._attr_unique_id = (
+            f"{config_entry.entry_id}_zone_triggered_{self._zone_id_1_based}"
+        )
+        self._update_state_from_coordinator()
+
+    @property
+    def suggested_object_id(self) -> str | None:
+        """Return a suggested object ID for the entity."""
+        return f"{self._panel_display_name}_zone_{self._zone_id_1_based}_triggered"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._update_state_from_coordinator()
+        self.async_write_ha_state()
+
+    def _update_state_from_coordinator(self) -> None:
+        is_on_state = False
+        if self.coordinator.data and self.coordinator.data.get(
+            KEY_LIVE_ZONES_TRIGGERED_STATUS
+        ):
+            triggered_data = self.coordinator.data[KEY_LIVE_ZONES_TRIGGERED_STATUS]
+            if triggered_data.get(KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP):
+                triggered_statuses = triggered_data[
+                    KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP
+                ]
+                status_text = triggered_statuses.get(self._zone_id_1_based, "clear")
+                if status_text.lower() == "triggered":
+                    is_on_state = True
+        self._attr_is_on = is_on_state
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the state attributes."""
+        return {"zone_id": self._zone_id_1_based, "zone_name": self._zone_name}
 
 
 class InimAreaTriggeredBinarySensor(BaseInimBinarySensor):
