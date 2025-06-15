@@ -171,6 +171,11 @@ class InimAlarmConstants:
             "cmd_base_suffix": "0009",
             "resp_len": 10,
         },
+        # Others
+        "CHECK_LAST_COMMAND_EXECUTION_STATUS": {
+            "cmd_full": "0000002004000125",
+            "resp_len": 3,  # 2 data bytes + 1 checksum byte
+        },
     }
 
     # Area status/action constants
@@ -477,6 +482,39 @@ class InimAlarmAPI:
                 f"Failed to send/receive for base cmd {eight_byte_cmd_with_checksum[:14]}: {e}"
             )
             return None
+
+    def _check_last_command_execution_status(self):
+        """Checks the status of the last executed command.
+
+        Returns:
+            dict: A dictionary containing the status and a descriptive message.
+
+        """
+        spec = InimAlarmConstants.COMMAND_SPECS["CHECK_LAST_COMMAND_EXECUTION_STATUS"]
+        # This command needs to be sent without a payload
+        response_data_hex = self._send_command_core(
+            spec["cmd_full"], expect_specific_response_len=spec["resp_len"]
+        )
+        logger.debug("Response %s", response_data_hex)
+
+        if response_data_hex is None:
+            return {
+                "status": "communication_error",
+                "message": "No response from panel when checking command status.",
+            }
+
+        if response_data_hex == "00":
+            return {"status": "success", "message": "Command executed successfully."}
+        elif response_data_hex == "01":
+            return {
+                "status": "pin_error",
+                "message": "Invalid PIN or not authorized for the operation.",
+            }
+        else:
+            return {
+                "status": "operation_error",
+                "message": f"Operation not valid or failed. Error code: {response_data_hex}",
+            }
 
     # --- Initialize ---
     def get_system_info(self):
@@ -1679,28 +1717,31 @@ class InimAlarmAPI:
         try:
             self._send_raw_command(command_to_send_hex)
 
-            # System confirms by responding with the checksum of the payload (PIN + areas).
+            # System aknowlegdes by responding with the checksum of the payload (PIN + areas).
             # Response is 1 byte (2 hex chars).
             response_hex_full = self._read_raw_response(
                 buffer_size=spec_info["resp_len"]
-            )  # Expect 1 byte
-
-            if len(response_hex_full) == 2:  # 1 byte = 2 hex chars
+            )
+            if len(response_hex_full) == 2:
                 expected_payload_checksum = self.calculate_checksum(full_payload_hex)
                 if response_hex_full.lower() == expected_payload_checksum.lower():
-                    logger.info(
-                        f"Arm/Disarm successful. Armed: {areas_to_arm}, Disarmed: {areas_to_disarm}"
-                    )
-                    return True
+                    logger.info("Command aknowledge by the panel")
                 else:
                     logger.error(
-                        f"Arm/Disarm failed: Incorrect response checksum. Expected {expected_payload_checksum}, Got {response_hex_full} for payload {full_payload_hex}"
+                        f"Incorrect response checksum. Expected {expected_payload_checksum}, Got {response_hex_full} for payload {full_payload_hex}"
                     )
-                    return False
             else:
-                logger.error(
-                    f"Arm/Disarm failed: Unexpected response length. Got {response_hex_full}"
+                logger.error(f"Unexpected response length. Got {response_hex_full}")
+
+            # Let's check if the command was succesful
+            status_result = self._check_last_command_execution_status()
+            if status_result["status"] == "success":
+                logger.info(
+                    f"Arm/Disarm successful. Armed: {areas_to_arm}, Disarmed: {areas_to_disarm}"
                 )
+                return True
+            else:
+                logger.error(f"Arm/Disarm failed: {status_result['message']}")
                 return False
         except (ConnectionError, TimeoutError, ValueError) as e:
             logger.error(f"Arm/Disarm areas operation failed: {e}")
@@ -1747,23 +1788,29 @@ class InimAlarmAPI:
             if len(response_hex_full) == 2:
                 expected_checksum = self.calculate_checksum(full_payload_hex)
                 if response_hex_full.lower() == expected_checksum.lower():
-                    logger.info(
-                        "Area %s alarm reset successful.", area_number_1_indexed
-                    )
-                    return True
+                    logger.info("Command aknowledge by the panel")
                 else:
                     logger.error(
-                        "Area %s reset failed: Incorrect response checksum. Expected %s, Got %s",
-                        area_number_1_indexed,
+                        "Incorrect response checksum. Expected %s, Got %s",
                         expected_checksum,
                         response_hex_full,
                     )
-                    return False
             else:
                 logger.error(
-                    "Area %s reset failed: Unexpected response length. Got %s",
-                    area_number_1_indexed,
+                    "Unexpected response length. Got %s",
                     response_hex_full,
+                )
+
+            # Let's check if the command was succesful
+            status_result = self._check_last_command_execution_status()
+            if status_result["status"] == "success":
+                logger.info("Area %s alarm reset successful.", area_number_1_indexed)
+                return True
+            else:
+                logger.error(
+                    "Area %s reset failed: %s",
+                    area_number_1_indexed,
+                    status_result["message"],
                 )
                 return False
         except (ConnectionError, TimeoutError, ValueError) as e:
@@ -1803,26 +1850,34 @@ class InimAlarmAPI:
             if len(response_hex_full) == 2:
                 expected_checksum = self.calculate_checksum(full_payload_hex)
                 if response_hex_full.lower() == expected_checksum.lower():
-                    action_text = "excluded" if excluded_status else "Enabled"
-                    logger.info(
-                        "Zone with internal index %s %s successfully.",
-                        zone_internal_index,
-                        action_text,
-                    )
-                    return True
+                    logger.info("Command aknowledge by the panel")
                 else:
                     logger.error(
-                        "Set excluded for zone with internal index %s failed: Incorrect response checksum. Expected %s, Got %s",
-                        zone_internal_index,
+                        "Incorrect response checksum. Expected %s, Got %s",
                         expected_checksum,
                         response_hex_full,
                     )
-                    return False
             else:
                 logger.error(
-                    "Set excluded for zone with internal index %s failed: Unexpected response length. Got %s",
-                    zone_internal_index,
+                    "Unexpected response length. Got %s",
                     response_hex_full,
+                )
+
+            # Let's check if the command was succesful
+            status_result = self._check_last_command_execution_status()
+            if status_result["status"] == "success":
+                action_text = "excluded" if excluded_status else "enabled"
+                logger.info(
+                    "Zone with internal index %s status set to %s successfully.",
+                    zone_internal_index,
+                    action_text,
+                )
+                return True
+            else:
+                logger.error(
+                    "Set excluded for zone index %s failed: %s",
+                    zone_internal_index,
+                    status_result["message"],
                 )
                 return False
         except (ConnectionError, TimeoutError, ValueError) as e:
@@ -1865,18 +1920,29 @@ class InimAlarmAPI:
             if len(response_hex_full) == 2:  # Assuming 1 byte response
                 expected_payload_checksum = self.calculate_checksum(full_payload_hex)
                 if response_hex_full.lower() == expected_payload_checksum.lower():
-                    logger.info(
-                        f"Activate scenario {scenario_number} likely successful."
-                    )
-                    return True
+                    logger.info("Command aknowledge by the panel")
                 else:
-                    logger.warning(
-                        f"Activate scenario {scenario_number}: Response {response_hex_full} did not match expected payload checksum {expected_payload_checksum}. Operation status uncertain."
+                    logger.error(
+                        "Incorrect response checksum. Expected %s, Got %s",
+                        expected_payload_checksum,
+                        response_hex_full,
                     )
-                    return False  # More conservative: if not matching expected, treat as fail or uncertain.
             else:
-                logger.warning(
-                    f"Activate scenario {scenario_number}: Unexpected response length {len(response_hex_full)}. Status uncertain."
+                logger.error(
+                    "Unexpected response length. Got %s",
+                    response_hex_full,
+                )
+
+            # Let's check if the command was succesful
+            status_result = self._check_last_command_execution_status()
+            if status_result["status"] == "success":
+                logger.info("Activate scenario %s successful.", scenario_number)
+                return True
+            else:
+                logger.error(
+                    "Activate scenario %s failed: %s",
+                    scenario_number,
+                    status_result["message"],
                 )
                 return False
         except (ConnectionError, TimeoutError, ValueError) as e:
