@@ -144,11 +144,11 @@ class InimAlarmConstants:
             "cmd_full": "0000002001001a3b",
             "resp_len": 27,
         },
-        "GET_ZONES_STATUS_RELATED_1": {
+        "GET_ZONES_BYPASS_STATUS": {
             "cmd_full": "0000002002001a3c",
             "resp_len": 27,
         },
-        "GET_ZONES_STATUS_RELATED_2": {
+        "GET_ZONES_TRIGGERED_STATUS": {
             "cmd_full": "0000002003001c3f",
             "resp_len": 29,
         },
@@ -1172,6 +1172,104 @@ class InimAlarmAPI:
             "unknown_byte_after_status_data": unknown_byte_hex,
         }
 
+    def _parse_zone_bitmask_status(
+        self, response_data_hex, text_for_bit_1, text_for_bit_0
+    ):
+        """Generic helper to parse zone bypass and triggered status responses based on a direct byte-to-zone mapping.
+
+        Args:
+            response_data_hex (str): The response data (checksum stripped).
+            text_for_bit_1 (str): The text status to return if a zone's bit is 1.
+            text_for_bit_0 (str): The text status to return if a zone's bit is 0.
+
+        Returns:
+            dict: A dictionary of {zone_id: status_text}
+        """
+        parsed_statuses = {}
+
+        # Convert the hex string to a list of integer byte values.
+        try:
+            byte_values = [
+                int(response_data_hex[i : i + 2], 16)
+                for i in range(0, len(response_data_hex), 2)
+            ]
+        except (ValueError, IndexError):
+            logger.error(
+                "Could not parse response hex into bytes: %s", response_data_hex
+            )
+            return {}
+
+        # Each byte represents 8 zones.
+        # Byte 0 -> zones 1-8
+        # Byte 1 -> zones 9-16
+        # etc.
+        for byte_index, byte_val in enumerate(byte_values):
+            # The zones covered by this byte.
+            start_zone_in_group = byte_index * 8
+
+            # Each bit in the byte represents a zone.
+            # Bits are mapped right-to-left: bit 0 is zone 1 of the group, bit 1 is zone 2, etc.
+            for bit_index in range(8):
+                # Calculate the 1-based zone ID
+                zone_id = start_zone_in_group + bit_index + 1
+
+                # We should not parse beyond the max configured zones for the system.
+                if zone_id > self.system_max_zones:
+                    break  # Stop processing bits for this byte if we exceed max zones.
+
+                # Check if the bit at bit_index is set
+                bit_is_set = (byte_val >> bit_index) & 1
+
+                # Determine the status based on the text arguments.
+                status = text_for_bit_1 if bit_is_set else text_for_bit_0
+                parsed_statuses[zone_id] = status
+
+            # Stop processing bytes if we have covered all zones.
+            if start_zone_in_group + 8 >= self.system_max_zones:
+                break
+
+        return parsed_statuses
+
+    def get_zones_bypass_status(self):
+        """Requests and parses the bypass status of all zones."""
+        spec = InimAlarmConstants.COMMAND_SPECS["GET_ZONES_BYPASS_STATUS"]
+        response_data_hex = self._send_command_core(
+            spec["cmd_full"], expect_specific_response_len=spec["resp_len"]
+        )
+
+        if not response_data_hex:
+            return None
+
+        # For bypass, a '1' bit means ENABLED and a '0' bit means DISABLED (bypassed).
+        bypass_statuses = self._parse_zone_bitmask_status(
+            response_data_hex, text_for_bit_1="enabled", text_for_bit_0="disabled"
+        )
+
+        return {
+            "raw_hex_data": response_data_hex,
+            "zone_bypass_statuses": bypass_statuses,
+        }
+
+    def get_zones_triggered_status(self):
+        """Requests and parses the triggered status of all zones."""
+        spec = InimAlarmConstants.COMMAND_SPECS["GET_ZONES_TRIGGERED_STATUS"]
+        response_data_hex = self._send_command_core(
+            spec["cmd_full"], expect_specific_response_len=spec["resp_len"]
+        )
+
+        if not response_data_hex:
+            return None
+
+        # For triggered, a '1' bit means TRIGGERED and a '0' bit means CLEAR.
+        triggered_statuses = self._parse_zone_bitmask_status(
+            response_data_hex, text_for_bit_1="triggered", text_for_bit_0="clear"
+        )
+
+        return {
+            "raw_hex_data": response_data_hex,
+            "zone_triggered_statuses": triggered_statuses,
+        }
+
     # --- Events ---
     def _get_raw_next_event_pointer(self) -> str | None:
         """
@@ -1682,12 +1780,16 @@ class InimAlarmAPI:
                     "error": "Connection failure",
                     "areas_status": None,
                     "zones_status": None,
+                    "zones_bypass_status": None,
+                    "zones_triggered_status": None,
                     "active_scenario": None,
                 }
 
             live_status = {
                 "areas_status": None,
                 "zones_status": None,
+                "zones_bypass_status": None,
+                "zones_triggered_status": None,
                 "active_scenario": None,
                 "errors": [],
             }
@@ -1703,6 +1805,22 @@ class InimAlarmAPI:
                 live_status["zones_status"] = self.get_zones_status()
                 if live_status["zones_status"] is None:
                     live_status["errors"].append("Failed to get zones status.")
+                time.sleep(0.1)
+
+                logger.debug("Fetching live zones bypass status...")
+                live_status["zones_bypass_status"] = self.get_zones_bypass_status()
+                if live_status["zones_bypass_status"] is None:
+                    live_status["errors"].append("Failed to get zones bypass status.")
+                time.sleep(0.1)
+
+                logger.debug("Fetching live zones triggered status...")
+                live_status["zones_triggered_status"] = (
+                    self.get_zones_triggered_status()
+                )
+                if live_status["zones_triggered_status"] is None:
+                    live_status["errors"].append(
+                        "Failed to get zones triggered status."
+                    )
                 time.sleep(0.1)
 
                 logger.debug("Fetching live active scenario...")
