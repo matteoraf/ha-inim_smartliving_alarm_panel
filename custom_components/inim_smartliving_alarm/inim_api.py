@@ -649,12 +649,7 @@ class InimAlarmAPI:
                     try:
                         b1_val = int(zone_data_p1_hex[0:2], 16)
                         b2_val = int(zone_data_p1_hex[2:4], 16)
-                        area_mask = b1_val | (b2_val << 8)
-                        assigned_areas = [
-                            area_idx + 1
-                            for area_idx in range(min(16, self.system_max_areas))
-                            if (area_mask >> area_idx) & 1
-                        ]
+                        assigned_areas = self._decode_area_mask(b1_val, b2_val)
                         zone_config_parsed["assigned_areas"] = assigned_areas
                     except ValueError:
                         zone_config_parsed["assigned_areas"] = "Parse Error"  # Or []
