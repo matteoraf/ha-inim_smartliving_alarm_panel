@@ -54,6 +54,10 @@ class InimAlarmConstants:
             "cmd_full": "0100002006000e35",
             "resp_len": 1,
         },
+        "RESET_AREA_ALARM_CMD_INFO": {
+            "cmd_full": "0100002008000831",
+            "resp_len": 1,
+        },
         # Scenarios
         "GET_SCENARIO_NAMES_1": {
             "cmd_full": "000101145000fa60",
@@ -197,6 +201,8 @@ class InimAlarmConstants:
         0x8A: "Area(s) Armed",
         0x8C: "Area(s) Disarmed",
         0x8D: "Area(s) Reset",
+        0x85: "Zone Excluded",
+        0x05: "End of Zone Excluded",
         0x0A: "End of Area(s) Armed",
         0x0C: "End of Area(s) Disarmed",
         0xBA: "Installer Code Inserted",
@@ -1380,7 +1386,7 @@ class InimAlarmAPI:
                 event_data["authorized_id_hex"] = format(d3_val, "02x")
             elif action_code == 0x9E:
                 event_data["scenario_number_0_indexed"] = d3_val
-            elif action_code in [0x80, 0x00]:
+            elif action_code in [0x80, 0x00, 0x85, 0x05]:
                 event_data["affected_areas"] = self._decode_area_mask(d1_val, d2_val)
                 event_data["zone_number_0_indexed"] = d3_val
                 event_data["zone_number_1_indexed_for_display"] = d3_val + 1
@@ -1659,6 +1665,70 @@ class InimAlarmAPI:
             logger.error(f"Arm/Disarm areas operation failed: {e}")
             return False
 
+    def reset_area_alarm(self, area_number_1_indexed):
+        """Resets the alarm status for a specific area.
+
+        Args:
+            area_number_1_indexed (int): The 1-indexed area number to reset.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+
+        """
+        spec_info = InimAlarmConstants.COMMAND_SPECS["RESET_AREA_ALARM_CMD_INFO"]
+
+        if not (1 <= area_number_1_indexed <= self.system_max_areas):
+            logger.error(
+                "Invalid area number: %s. Must be 1-%s",
+                area_number_1_indexed,
+                self.system_max_areas,
+            )
+            return False
+
+        # Payload is PIN (6 bytes) + areas to reset (2 bytes).
+        # The area is represented as a bitmask.
+        area_mask = 1 << (area_number_1_indexed - 1)
+        # Format as a 2-byte little-endian hex string.
+        area_hex_le = format(area_mask, "04x")[2:] + format(area_mask, "04x")[:2]
+
+        full_payload_hex = self.pin_hex + area_hex_le
+
+        command_to_send_hex = spec_info["cmd_full"] + full_payload_hex
+
+        try:
+            self._send_raw_command(command_to_send_hex)
+
+            # Similar to arm/disarm, the panel should respond with the payload's checksum.
+            response_hex_full = self._read_raw_response(
+                buffer_size=spec_info["resp_len"]
+            )
+
+            if len(response_hex_full) == 2:
+                expected_checksum = self.calculate_checksum(full_payload_hex)
+                if response_hex_full.lower() == expected_checksum.lower():
+                    logger.info(
+                        "Area %s alarm reset successful.", area_number_1_indexed
+                    )
+                    return True
+                else:
+                    logger.error(
+                        "Area %s reset failed: Incorrect response checksum. Expected %s, Got %s",
+                        area_number_1_indexed,
+                        expected_checksum,
+                        response_hex_full,
+                    )
+                    return False
+            else:
+                logger.error(
+                    "Area %s reset failed: Unexpected response length. Got %s",
+                    area_number_1_indexed,
+                    response_hex_full,
+                )
+                return False
+        except (ConnectionError, TimeoutError, ValueError) as e:
+            logger.error("Reset area alarm operation failed: %s", e)
+            return False
+
     def activate_scenario(self, scenario_number):  # 0-indexed for payload
         """
         Activates a scenario.
@@ -1847,19 +1917,41 @@ class InimAlarmAPI:
                     areas_to_arm=areas_to_arm, areas_to_disarm=areas_to_disarm
                 )
             except Exception as e:
-                logger.error(f"Exception during execute_arm_disarm_areas: {e}")
+                logger.error("Exception during execute_arm_disarm_areas: %s", e)
                 success = False  # Ensure success is false on exception
             finally:
                 self.disconnect()
             return success
 
+    def execute_reset_area_alarm(self, area_number_1_indexed):
+        """Connects, performs an area alarm reset operation, then disconnects. Returns success status."""
+        with self._api_lock:
+            logger.debug("Lock acquired for execute_reset_area_alarm")
+
+            if not self.connect():
+                logger.error(
+                    "Failed to connect to panel for reset area alarm operation."
+                )
+                return False
+
+            success = False
+            try:
+                success = self.reset_area_alarm(area_number_1_indexed)
+            except Exception as e:
+                logger.error("Exception during execute_reset_area_alarm: %s", e)
+                success = False
+            finally:
+                self.disconnect()
+            return success
+
     def execute_activate_scenario(self, scenario_number_0_indexed):
-        """
-        Connects, checks if scenario activation is allowed, activates the scenario
+        """Connects, checks if scenario activation is allowed, activates the scenario
         if allowed, then disconnects.
+
         Returns:
             bool: True if the scenario was successfully checked as allowed AND activated.
                   False if connection failed, check failed, activation was not allowed, or activation failed.
+
         """
 
         with self._api_lock:  # Acquire the lock for the duration of this operation
