@@ -191,11 +191,9 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         )  # Explicitly allow None if state is truly unknown
 
         # Default to DISARMED if no other conditions are met and a disarm scenario is defined.
-        # If no disarm scenario, it's harder to default, might be UNKNOWN.
+        # If no disarm scenario, it's harder to default.
         if self._scenario_mappings.get(CONF_SCENARIO_DISARM) is not None:
             new_state_enum = AlarmControlPanelState.DISARMED
-        else:
-            new_state_enum = AlarmControlPanelState.UNKNOWN
 
         # Check for TRIGGERED state first (highest priority)
         if areas_status_data and areas_status_data.get(KEY_LIVE_TRIGGERED_AREAS_LIST):
@@ -272,7 +270,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
                         current_active_scenario_idx,
                     )
 
-                    new_state_enum = AlarmControlPanelState.ARMED_AWAY  # Fallback
+                    new_state_enum = AlarmControlPanelState.ARMED_CUSTOM_BYPASS  # Fallback
 
             elif (
                 current_active_scenario_idx == -1
