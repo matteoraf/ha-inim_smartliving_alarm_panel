@@ -148,3 +148,6 @@ PROBLEM_ZONE_STATES_FOR_ARMING = ["alarmed"]
 
 # --- Sensor Entity Suffixes/Keys ---
 SENSOR_LAST_EVENT_LOG_SUFFIX = "event_log"  # For the new event log sensor
+
+# Define the new service name as a constant
+SERVICE_ALARM_RESET = "alarm_reset"

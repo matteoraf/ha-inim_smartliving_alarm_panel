@@ -9,7 +9,8 @@ from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelState,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant, ServiceCall, callback
+from homeassistant.helpers import service
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -31,6 +32,7 @@ from .const import (
     KEY_LIVE_ACTIVE_SCENARIO_NUMBER,
     KEY_LIVE_AREAS_STATUS,
     KEY_LIVE_TRIGGERED_AREAS_LIST,
+    SERVICE_ALARM_RESET,
 )
 from .inim_api import InimAlarmAPI
 from .utils import async_handle_scenario_activation_failure
@@ -69,6 +71,57 @@ async def async_setup_entry(
     )
     async_add_entities([alarm_panel])
     _LOGGER.info("Inim Alarm Control Panel %s added", alarm_panel.name)
+
+    # Register the alarm_reset service
+    async def async_alarm_reset_service(call: ServiceCall) -> None:
+        """Handle the service call to reset an area alarm.
+        This function automatically finds all triggered areas and resets them.
+        """
+        # Get the platform object that manages all alarm_control_panel entities.
+        platform = hass.data.get("alarm_control_panel")
+        if not platform:
+            _LOGGER.error("Alarm control panel component not loaded.")
+            return
+
+        # Get the string IDs of all entities targeted by the service call.
+        target_entity_ids = await service.async_extract_entity_ids(hass, call)
+
+        # Loop through the entity IDs to get the correct entity objects.
+        for entity_id in target_entity_ids:
+            entity = platform.get_entity(entity_id)
+
+            if not isinstance(entity, InimAlarmControlPanel):
+                continue
+
+            coordinator_data = entity.coordinator.data
+            if not coordinator_data:
+                _LOGGER.warning(
+                    "No coordinator data available for %s to find triggered areas",
+                    entity.name,
+                )
+                continue
+
+            areas_status = coordinator_data.get(KEY_LIVE_AREAS_STATUS, {})
+            triggered_areas = areas_status.get(KEY_LIVE_TRIGGERED_AREAS_LIST, [])
+
+            if not triggered_areas:
+                _LOGGER.info(
+                    "Alarm Reset called for %s, but no areas are currently triggered",
+                    entity.name,
+                )
+                continue
+
+            _LOGGER.info(
+                "Found triggered areas to reset on %s: %s", entity.name, triggered_areas
+            )
+            for area_id in triggered_areas:
+                await entity.async_alarm_reset(area_id=area_id)
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_ALARM_RESET,
+        async_alarm_reset_service,
+    )
 
 
 class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
@@ -270,7 +323,9 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
                         current_active_scenario_idx,
                     )
 
-                    new_state_enum = AlarmControlPanelState.ARMED_CUSTOM_BYPASS  # Fallback
+                    new_state_enum = (
+                        AlarmControlPanelState.ARMED_CUSTOM_BYPASS
+                    )  # Fallback
 
             elif (
                 current_active_scenario_idx == -1
@@ -396,3 +451,47 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         await self._async_activate_scenario_by_mapping(
             CONF_SCENARIO_ARM_VACATION, "arm vacation"
         )
+
+    async def async_alarm_reset(self, area_id: int) -> None:
+        """Send the alarm reset command for a specific area to the panel."""
+        _LOGGER.info("%s: Attempting to reset alarm for area %d", self.name, area_id)
+        try:
+            success = await self.hass.async_add_executor_job(
+                self.api_client.execute_reset_area_alarm, area_id
+            )
+            if success:
+                _LOGGER.info(
+                    "%s: Alarm reset command for area %d acknowledged by panel",
+                    self.name,
+                    area_id,
+                )
+                # Request a refresh to get the updated state from the panel
+                if self.coordinator:
+                    await self.coordinator.async_request_refresh()
+            else:
+                _LOGGER.error(
+                    "%s: API reported failure for alarm reset for area %d",
+                    self.name,
+                    area_id,
+                )
+                self.hass.components.persistent_notification.async_create(
+                    f"The alarm panel failed to reset the alarm for area {area_id} on '{self.name}'. Check the logs for details.",
+                    title="Inim Alarm Reset Failed",
+                    notification_id=f"{self.unique_id}_reset_error_{area_id}",
+                )
+
+        except Exception as e:
+            _LOGGER.error(
+                "%s: API error during alarm reset for area %d: %s",
+                self.name,
+                area_id,
+                e,
+            )
+            self.hass.components.persistent_notification.async_create(
+                f"An API error occurred while trying to reset area {area_id} for '{self.name}': {e}",
+                title="Inim Alarm API Error",
+                notification_id=f"{self.unique_id}_reset_api_error_{area_id}",
+            )
+            # Optionally, refresh coordinator even on exception to try and get a stable state
+            if self.coordinator:
+                await self.coordinator.async_request_refresh()

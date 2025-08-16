@@ -253,6 +253,21 @@ views:
             name: System Type
         view_layout:
           position: sidebar
+      - show_name: true
+        show_icon: true
+        type: button
+        tap_action:
+          action: perform-action
+          perform_action: script.alarm_reset
+          target: {}
+        icon: mdi:shield-off
+        visibility:
+          - condition: state
+            entity: alarm_control_panel.sl1050
+            state: triggered
+        name: Reset Alarm
+        view_layout:
+          position: sidebar
     type: sidebar
   - type: sections
     title: Zones
