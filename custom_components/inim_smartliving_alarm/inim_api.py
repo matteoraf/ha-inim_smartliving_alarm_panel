@@ -15,7 +15,7 @@ class InimAlarmConstants:
     """Stores constants related to the Inim alarm protocol."""
 
     MAX_RESPONSE_LEN_BYTES = 251  # Default length of a response in bytes
-    DEFAULT_TIMEOUT = 5  # Default socket timeout in seconds
+    DEFAULT_TIMEOUT = 10  # Default socket timeout in seconds
     PIN_LENGTH_BYTES = 6  # Each PIN is represented with 6 bytes
     PIN_FILLER_HEX = "ff"  # Unset digits will be represented by "ff"
     DEFAULT_SYSTEM_MAX_ZONES = 50
@@ -43,7 +43,7 @@ class InimAlarmConstants:
         },
         # Areas
         "GET_AREA_NAMES": {
-            "cmd_full": "000101000000a0a2",
+            "cmd_full": "0000017d000042c0",
             "resp_len": 161,
         },
         "GET_AREAS_STATUS": {
@@ -60,11 +60,11 @@ class InimAlarmConstants:
         },
         # Scenarios
         "GET_SCENARIO_NAMES_1": {
-            "cmd_full": "000101145000fa60",
+            "cmd_full": "0000019150004224",
             "resp_len": 251,
         },
         "GET_SCENARIO_NAMES_2": {
-            "cmd_full": "000101154a00e647",
+            "cmd_full": "0000019192004266",
             "resp_len": 231,
         },
         "GET_SCENARIO_ACTIVATIONS": {
@@ -88,31 +88,31 @@ class InimAlarmConstants:
         "GET_KEYBOARD_NAMES": {"cmd_full": "0001010b4000a0ed", "resp_len": 161},
         # Zones Names (Individual commands)
         "GET_ZONE_NAMES_1": {
-            "cmd_full": "00010100a000fa9c",
+            "cmd_full": "0000017da0004260",
             "resp_len": 251,
         },
         "GET_ZONE_NAMES_2": {
-            "cmd_full": "000101019a00fa97",
+            "cmd_full": "0000017de20042a2",
             "resp_len": 251,
         },
         "GET_ZONE_NAMES_3": {
-            "cmd_full": "000101029400fa92",
+            "cmd_full": "0000017e240042e5",
             "resp_len": 251,
         },
         "GET_ZONE_NAMES_4": {
-            "cmd_full": "000101038e00fa8d",
+            "cmd_full": "0000017e66004227",
             "resp_len": 251,
         },
         "GET_ZONE_NAMES_5": {
-            "cmd_full": "000101048800fa88",
+            "cmd_full": "0000017ea8004269",
             "resp_len": 251,
         },
         "GET_ZONE_NAMES_6": {
-            "cmd_full": "000101058200fa83",
+            "cmd_full": "0000017eea0042ab",
             "resp_len": 251,
         },
         "GET_ZONE_NAMES_7": {
-            "cmd_full": "000101067c0064e8",
+            "cmd_full": "0000017f2c0042ee",
             "resp_len": 101,
         },
         # Zones Config (Individual commands)
@@ -383,6 +383,7 @@ class InimAlarmAPI:
             logger.error("Not connected. Cannot read response.")
             raise ConnectionError("Not connected to alarm panel.")
         try:
+            time.sleep(0.8)
             raw_response = self.sock.recv(buffer_size)
             if not raw_response:
                 logger.warning("Received empty response from panel.")
