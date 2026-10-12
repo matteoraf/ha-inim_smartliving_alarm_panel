@@ -84,7 +84,7 @@ async def async_setup_entry(
             return
 
         # Get the string IDs of all entities targeted by the service call.
-        target_entity_ids = await service.async_extract_entity_ids(hass, call)
+        target_entity_ids = await service.async_extract_entity_ids(call)
 
         # Loop through the entity IDs to get the correct entity objects.
         for entity_id in target_entity_ids:
