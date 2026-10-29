@@ -25,6 +25,22 @@ class InimAlarmConstants:
     # Max events to fetch in a single poll to avoid overload - change at your own risk
     MAX_EVENTS_PER_FETCH = 50
 
+    # Memory read command: 00 <region:2> <address:2, big endian> 00 <length> + checksum
+    MEMORY_REGION_RAM = "0000"
+    MEMORY_REGION_EEPROM = "0101"
+    MAX_READ_BYTES = 250
+    NAME_LENGTH_BYTES = 16
+
+    # The EEPROM address of each table of names depends on the panel model and firmware.
+    # The panel publishes it in RAM, as a 16-bit little endian pointer, at these addresses
+    # (same addresses used by the official Inim software).
+    NAME_TABLE_POINTERS = {
+        "areas": 0x4014,
+        "zones": 0x4016,
+        "codes": 0x4018,
+        "scenarios": 0x4024,
+    }
+
     # For static commands, "cmd_full" is 7-byte cmd + 1-byte its checksum = 8 bytes / 16 hex chars.
     # For dynamic base commands, "cmd_prefix"/"cmd_suffix" are parts of the 7-byte command,
     # and their checksum will be calculated on the fly.
@@ -544,8 +560,108 @@ class InimAlarmAPI:
                 return {"raw_hex": response_data_hex, "error": str(e)}
         return None
 
+    # --- Memory access ---
+    @staticmethod
+    def build_read_command(region_hex, address, length):
+        """Builds a memory read command as a hex string, checksum included."""
+        body = f"00{region_hex}{address:04x}00{length:02x}"
+        return body + InimAlarmAPI.calculate_checksum(body)
+
+    def _read_memory(self, region_hex, address, length):
+        """Reads `length` bytes (at most MAX_READ_BYTES) from the panel memory.
+
+        Returns:
+            bytes | None: the data, or None on any communication error.
+
+        """
+        response_hex = self._send_command_core(
+            self.build_read_command(region_hex, address, length),
+            expect_specific_response_len=length + 1,
+        )
+        if response_hex is None or len(response_hex) != length * 2:
+            return None
+        return binascii.unhexlify(response_hex)
+
+    def _read_table_pointer(self, kind):
+        """Returns the EEPROM address of the table of names `kind`, as published by the panel."""
+        data = self._read_memory(
+            InimAlarmConstants.MEMORY_REGION_RAM,
+            InimAlarmConstants.NAME_TABLE_POINTERS[kind],
+            2,
+        )
+        return int.from_bytes(data, "little") if data else None
+
+    @staticmethod
+    def _decode_name(raw):
+        return raw.decode("ascii", errors="ignore").replace("\x00", " ").strip()
+
+    def _read_names_from_pointer(self, kind, count, next_kind=None):
+        """Reads the names of `kind` from the address the panel itself publishes.
+
+        The address of each table of names depends on the panel model and firmware, so it
+        is not hardcoded: the panel keeps a pointer to it in RAM.
+
+        Args:
+            kind (str): key of InimAlarmConstants.NAME_TABLE_POINTERS.
+            count (int): maximum number of names to read.
+            next_kind (str, optional): the table stored right after this one. When given, the
+                number of names is limited to the room available before it, so that the
+                entries of the following table are not mistaken for names of this one.
+
+        Returns:
+            tuple[list[str], bytes] | None: (names, raw data), or None when the pointer
+            cannot be read or the data it points to does not look like text.
+
+        """
+        c = InimAlarmConstants
+        table_addr = self._read_table_pointer(kind)
+        if not table_addr:
+            return None
+        if next_kind:
+            next_addr = self._read_table_pointer(next_kind)
+            if next_addr and next_addr > table_addr:
+                count = min(count, (next_addr - table_addr) // c.NAME_LENGTH_BYTES)
+        if count < 1:
+            return None
+
+        total = count * c.NAME_LENGTH_BYTES
+        data = b""
+        while len(data) < total:
+            part = self._read_memory(
+                c.MEMORY_REGION_EEPROM,
+                table_addr + len(data),
+                min(c.MAX_READ_BYTES, total - len(data)),
+            )
+            if part is None:
+                return None
+            data += part
+
+        entries = [
+            data[i : i + c.NAME_LENGTH_BYTES]
+            for i in range(0, total, c.NAME_LENGTH_BYTES)
+        ]
+        # Reading the wrong place gives binary garbage: accept the table only if it is text.
+        non_empty = [e for e in entries if e.strip(b"\x00 ")]
+        printable = [e for e in non_empty if all(b == 0 or 0x20 <= b < 0x7F for b in e)]
+        if not non_empty or len(printable) < 0.8 * len(non_empty):
+            logger.warning(
+                "Table of %s names at EEPROM 0x%04X does not look like text, ignoring it",
+                kind,
+                table_addr,
+            )
+            return None
+        return [self._decode_name(e) for e in entries], data
+
     def get_areas(self):  # Names
         """Requests Area Names."""
+        pointed = self._read_names_from_pointer(
+            "areas", InimAlarmConstants.DEFAULT_SYSTEM_MAX_AREAS, next_kind="zones"
+        )
+        if pointed is not None:
+            names, raw = pointed
+            return {"raw_hex": raw.hex(), "names": names}
+
+        # Fallback: fixed address (SmartLiving 1050, firmware 6.07)
         spec = InimAlarmConstants.COMMAND_SPECS["GET_AREA_NAMES"]
         response_data_hex = self._send_command_core(
             spec["cmd_full"], expect_specific_response_len=spec["resp_len"]
@@ -568,7 +684,15 @@ class InimAlarmAPI:
         return None
 
     def get_zones(self):  # Names
-        """Requests Zone Names. This involves a sequence of 7 commands."""
+        """Requests Zone Names."""
+        pointed = self._read_names_from_pointer(
+            "zones", self.system_max_zones, next_kind="codes"
+        )
+        if pointed is not None:
+            names, raw = pointed
+            return {"raw_hex_full": raw.hex(), "zone_names": names}
+
+        # Fallback: fixed addresses (SmartLiving 1050, firmware 6.07): 7 commands
         zone_name_cmd_keys = [
             "GET_ZONE_NAMES_1",
             "GET_ZONE_NAMES_2",
@@ -824,7 +948,15 @@ class InimAlarmAPI:
         }
 
     def get_scenarios(self):  # Names
-        """Requests Scenario Names. Two commands involved."""
+        """Requests Scenario Names."""
+        pointed = self._read_names_from_pointer(
+            "scenarios", InimAlarmConstants.DEFAULT_SYSTEM_MAX_SCENARIOS
+        )
+        if pointed is not None:
+            names, raw = pointed
+            return {"raw_hex": raw.hex(), "names": names}
+
+        # Fallback: fixed addresses (SmartLiving 1050, firmware 6.07): two commands
         scenario_name_cmd_keys = ["GET_SCENARIO_NAMES_1", "GET_SCENARIO_NAMES_2"]
         all_scenario_data_hex = ""
         for cmd_key in scenario_name_cmd_keys:
@@ -1038,10 +1170,9 @@ class InimAlarmAPI:
             return False  # Error in communication or validation
 
         # A positive response (all zones clear, scenario can be activated) is all zeros for the data part.
-        # The response_data_hex from _send_command_core is 13 bytes (26 hex chars).
-        expected_positive_response_data = "00" * 13  # 13 bytes of zeros
-
-        if response_data_hex == expected_positive_response_data:
+        # Its length depends on the panel model (13 bytes on the SmartLiving 1050, 6 on the 515),
+        # so any non-empty response made only of zeros means "allowed".
+        if response_data_hex and set(response_data_hex) == {"0"}:
             logger.info(f"Scenario {scenario_number_0_indexed} activation is allowed.")
             return True
         else:
