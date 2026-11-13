@@ -1,0 +1,1556 @@
+[
+  {
+    "platform": "alarm_control_panel",
+    "unique_id": "_alarm_control_panel",
+    "original_name": "Test Panel",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_10_triggered_bs",
+    "original_name": "Area 10 Triggered (Area 10)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_1_triggered_bs",
+    "original_name": "Area 1 Triggered (Area 1)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_2_triggered_bs",
+    "original_name": "Area 2 Triggered (Area 2)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_3_triggered_bs",
+    "original_name": "Area 3 Triggered (Area 3)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_4_triggered_bs",
+    "original_name": "Area 4 Triggered (Area 4)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_5_triggered_bs",
+    "original_name": "Area 5 Triggered (Area 5)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_6_triggered_bs",
+    "original_name": "Area 6 Triggered (Area 6)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_7_triggered_bs",
+    "original_name": "Area 7 Triggered (Area 7)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_8_triggered_bs",
+    "original_name": "Area 8 Triggered (Area 8)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_9_triggered_bs",
+    "original_name": "Area 9 Triggered (Area 9)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_0_active_bs",
+    "original_name": "Scenario 'Scenario 1' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_10_active_bs",
+    "original_name": "Scenario 'Scenario 11' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_11_active_bs",
+    "original_name": "Scenario 'Scenario 12' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_12_active_bs",
+    "original_name": "Scenario 'Scenario 13' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_13_active_bs",
+    "original_name": "Scenario 'Scenario 14' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_14_active_bs",
+    "original_name": "Scenario 'Scenario 15' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_15_active_bs",
+    "original_name": "Scenario 'Scenario 16' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_16_active_bs",
+    "original_name": "Scenario 'Scenario 17' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_17_active_bs",
+    "original_name": "Scenario 'Scenario 18' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_18_active_bs",
+    "original_name": "Scenario 'Scenario 19' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_19_active_bs",
+    "original_name": "Scenario 'Scenario 20' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_1_active_bs",
+    "original_name": "Scenario 'Scenario 2' Active",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_20_active_bs",
+    "original_name": "Scenario 'Scenario 21' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_21_active_bs",
+    "original_name": "Scenario 'Scenario 22' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_22_active_bs",
+    "original_name": "Scenario 'Scenario 23' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_23_active_bs",
+    "original_name": "Scenario 'Scenario 24' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_24_active_bs",
+    "original_name": "Scenario 'Scenario 25' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_25_active_bs",
+    "original_name": "Scenario 'Scenario 26' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_26_active_bs",
+    "original_name": "Scenario 'Scenario 27' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_27_active_bs",
+    "original_name": "Scenario 'Scenario 28' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_28_active_bs",
+    "original_name": "Scenario 'Scenario 29' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_29_active_bs",
+    "original_name": "Scenario 'Scenario 30' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_2_active_bs",
+    "original_name": "Scenario 'Scenario 3' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_3_active_bs",
+    "original_name": "Scenario 'Scenario 4' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_4_active_bs",
+    "original_name": "Scenario 'Scenario 5' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_5_active_bs",
+    "original_name": "Scenario 'Scenario 6' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_6_active_bs",
+    "original_name": "Scenario 'Scenario 7' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_7_active_bs",
+    "original_name": "Scenario 'Scenario 8' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_8_active_bs",
+    "original_name": "Scenario 'Scenario 9' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_scenario_9_active_bs",
+    "original_name": "Scenario 'Scenario 10' Active",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_1",
+    "original_name": "Zone 1 (Zone 1)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_10",
+    "original_name": "Zone 10 (Zone 10)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_11",
+    "original_name": "Zone 11 (Zone 11)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_12",
+    "original_name": "Zone 12 (Zone 12)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_13",
+    "original_name": "Zone 13 (Zone 13)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_14",
+    "original_name": "Zone 14 (Zone 14)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_15",
+    "original_name": "Zone 15 (Zone 15)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_16",
+    "original_name": "Zone 16 (Zone 16)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_17",
+    "original_name": "Zone 17 (Zone 17)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_18",
+    "original_name": "Zone 18 (Zone 18)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_19",
+    "original_name": "Zone 19 (Zone 19)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_2",
+    "original_name": "Zone 2 (Zone 2)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_20",
+    "original_name": "Zone 20 (Zone 20)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_21",
+    "original_name": "Zone 21 (Zone 21)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_22",
+    "original_name": "Zone 22 (Zone 22)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_23",
+    "original_name": "Zone 23 (Zone 23)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_24",
+    "original_name": "Zone 24 (Zone 24)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_25",
+    "original_name": "Zone 25 (Zone 25)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_26",
+    "original_name": "Zone 26 (Zone 26)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_27",
+    "original_name": "Zone 27 (Zone 27)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_28",
+    "original_name": "Zone 28 (Zone 28)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_29",
+    "original_name": "Zone 29 (Zone 29)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_3",
+    "original_name": "Zone 3 (Zone 3)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_30",
+    "original_name": "Zone 30 (Zone 30)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_31",
+    "original_name": "Zone 31 (Zone 31)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_32",
+    "original_name": "Zone 32 (Zone 32)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_33",
+    "original_name": "Zone 33 (Zone 33)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_34",
+    "original_name": "Zone 34 (Zone 34)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_35",
+    "original_name": "Zone 35 (Zone 35)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_36",
+    "original_name": "Zone 36 (Zone 36)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_37",
+    "original_name": "Zone 37 (Zone 37)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_38",
+    "original_name": "Zone 38 (Zone 38)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_39",
+    "original_name": "Zone 39 (Zone 39)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_4",
+    "original_name": "Zone 4 (Zone 4)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_40",
+    "original_name": "Zone 40 (Zone 40)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_41",
+    "original_name": "Zone 41 (Zone 41)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_42",
+    "original_name": "Zone 42 (Zone 42)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_43",
+    "original_name": "Zone 43 (Zone 43)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_44",
+    "original_name": "Zone 44 (Zone 44)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_45",
+    "original_name": "Zone 45 (Zone 45)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_46",
+    "original_name": "Zone 46 (Zone 46)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_47",
+    "original_name": "Zone 47 (Zone 47)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_48",
+    "original_name": "Zone 48 (Zone 48)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_49",
+    "original_name": "Zone 49 (Zone 49)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_5",
+    "original_name": "Zone 5 (Zone 5)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_50",
+    "original_name": "Zone 50 (Zone 50)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_6",
+    "original_name": "Zone 6 (Zone 6)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_7",
+    "original_name": "Zone 7 (Zone 7)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_8",
+    "original_name": "Zone 8 (Zone 8)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_9",
+    "original_name": "Zone 9 (Zone 9)",
+    "device_class": "opening",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_1",
+    "original_name": "Zone 1 Triggered (Zone 1)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_10",
+    "original_name": "Zone 10 Triggered (Zone 10)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_11",
+    "original_name": "Zone 11 Triggered (Zone 11)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_12",
+    "original_name": "Zone 12 Triggered (Zone 12)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_13",
+    "original_name": "Zone 13 Triggered (Zone 13)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_14",
+    "original_name": "Zone 14 Triggered (Zone 14)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_15",
+    "original_name": "Zone 15 Triggered (Zone 15)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_16",
+    "original_name": "Zone 16 Triggered (Zone 16)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_17",
+    "original_name": "Zone 17 Triggered (Zone 17)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_18",
+    "original_name": "Zone 18 Triggered (Zone 18)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_19",
+    "original_name": "Zone 19 Triggered (Zone 19)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_2",
+    "original_name": "Zone 2 Triggered (Zone 2)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_20",
+    "original_name": "Zone 20 Triggered (Zone 20)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_21",
+    "original_name": "Zone 21 Triggered (Zone 21)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_22",
+    "original_name": "Zone 22 Triggered (Zone 22)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_23",
+    "original_name": "Zone 23 Triggered (Zone 23)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_24",
+    "original_name": "Zone 24 Triggered (Zone 24)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_25",
+    "original_name": "Zone 25 Triggered (Zone 25)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_26",
+    "original_name": "Zone 26 Triggered (Zone 26)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_27",
+    "original_name": "Zone 27 Triggered (Zone 27)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_28",
+    "original_name": "Zone 28 Triggered (Zone 28)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_29",
+    "original_name": "Zone 29 Triggered (Zone 29)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_3",
+    "original_name": "Zone 3 Triggered (Zone 3)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_30",
+    "original_name": "Zone 30 Triggered (Zone 30)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_31",
+    "original_name": "Zone 31 Triggered (Zone 31)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_32",
+    "original_name": "Zone 32 Triggered (Zone 32)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_33",
+    "original_name": "Zone 33 Triggered (Zone 33)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_34",
+    "original_name": "Zone 34 Triggered (Zone 34)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_35",
+    "original_name": "Zone 35 Triggered (Zone 35)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_36",
+    "original_name": "Zone 36 Triggered (Zone 36)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_37",
+    "original_name": "Zone 37 Triggered (Zone 37)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_38",
+    "original_name": "Zone 38 Triggered (Zone 38)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_39",
+    "original_name": "Zone 39 Triggered (Zone 39)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_4",
+    "original_name": "Zone 4 Triggered (Zone 4)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_40",
+    "original_name": "Zone 40 Triggered (Zone 40)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_41",
+    "original_name": "Zone 41 Triggered (Zone 41)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_42",
+    "original_name": "Zone 42 Triggered (Zone 42)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_43",
+    "original_name": "Zone 43 Triggered (Zone 43)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_44",
+    "original_name": "Zone 44 Triggered (Zone 44)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_45",
+    "original_name": "Zone 45 Triggered (Zone 45)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_46",
+    "original_name": "Zone 46 Triggered (Zone 46)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_47",
+    "original_name": "Zone 47 Triggered (Zone 47)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_48",
+    "original_name": "Zone 48 Triggered (Zone 48)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_49",
+    "original_name": "Zone 49 Triggered (Zone 49)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_5",
+    "original_name": "Zone 5 Triggered (Zone 5)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_50",
+    "original_name": "Zone 50 Triggered (Zone 50)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_6",
+    "original_name": "Zone 6 Triggered (Zone 6)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_7",
+    "original_name": "Zone 7 Triggered (Zone 7)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_8",
+    "original_name": "Zone 8 Triggered (Zone 8)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_zone_triggered_9",
+    "original_name": "Zone 9 Triggered (Zone 9)",
+    "device_class": "problem",
+    "state": "off"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_0",
+    "original_name": "Activate 'Scenario 1'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_1",
+    "original_name": "Activate 'Scenario 2'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_10",
+    "original_name": "Activate 'Scenario 11'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_11",
+    "original_name": "Activate 'Scenario 12'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_12",
+    "original_name": "Activate 'Scenario 13'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_13",
+    "original_name": "Activate 'Scenario 14'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_14",
+    "original_name": "Activate 'Scenario 15'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_15",
+    "original_name": "Activate 'Scenario 16'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_16",
+    "original_name": "Activate 'Scenario 17'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_17",
+    "original_name": "Activate 'Scenario 18'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_18",
+    "original_name": "Activate 'Scenario 19'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_19",
+    "original_name": "Activate 'Scenario 20'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_2",
+    "original_name": "Activate 'Scenario 3'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_20",
+    "original_name": "Activate 'Scenario 21'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_21",
+    "original_name": "Activate 'Scenario 22'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_22",
+    "original_name": "Activate 'Scenario 23'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_23",
+    "original_name": "Activate 'Scenario 24'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_24",
+    "original_name": "Activate 'Scenario 25'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_25",
+    "original_name": "Activate 'Scenario 26'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_26",
+    "original_name": "Activate 'Scenario 27'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_27",
+    "original_name": "Activate 'Scenario 28'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_28",
+    "original_name": "Activate 'Scenario 29'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_29",
+    "original_name": "Activate 'Scenario 30'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_3",
+    "original_name": "Activate 'Scenario 4'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_4",
+    "original_name": "Activate 'Scenario 5'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_5",
+    "original_name": "Activate 'Scenario 6'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_6",
+    "original_name": "Activate 'Scenario 7'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_7",
+    "original_name": "Activate 'Scenario 8'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_8",
+    "original_name": "Activate 'Scenario 9'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
+    "unique_id": "_scenario_button_9",
+    "original_name": "Activate 'Scenario 10'",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "sensor",
+    "unique_id": "_active_scenario_name",
+    "original_name": "Active Scenario Name",
+    "device_class": null,
+    "state": "Scenario 2 (Index 1)"
+  },
+  {
+    "platform": "sensor",
+    "unique_id": "_event_log",
+    "original_name": "Test Panel Event Log",
+    "device_class": null,
+    "state": "41583"
+  },
+  {
+    "platform": "sensor",
+    "unique_id": "_firmware_version",
+    "original_name": "Firmware Version",
+    "device_class": null,
+    "state": "6.07"
+  },
+  {
+    "platform": "sensor",
+    "unique_id": "_system_type",
+    "original_name": "System Type",
+    "device_class": null,
+    "state": "01050"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_1",
+    "original_name": "Test Panel Area 1 (Area 1)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_10",
+    "original_name": "Test Panel Area 10 (Area 10)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_2",
+    "original_name": "Test Panel Area 2 (Area 2)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_3",
+    "original_name": "Test Panel Area 3 (Area 3)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_4",
+    "original_name": "Test Panel Area 4 (Area 4)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_5",
+    "original_name": "Test Panel Area 5 (Area 5)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_6",
+    "original_name": "Test Panel Area 6 (Area 6)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_7",
+    "original_name": "Test Panel Area 7 (Area 7)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_8",
+    "original_name": "Test Panel Area 8 (Area 8)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_area_switch_9",
+    "original_name": "Test Panel Area 9 (Area 9)",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_1",
+    "original_name": "Test Panel Zone 1 Enabled (Zone 1)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_10",
+    "original_name": "Test Panel Zone 10 Enabled (Zone 10)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_11",
+    "original_name": "Test Panel Zone 11 Enabled (Zone 11)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_12",
+    "original_name": "Test Panel Zone 12 Enabled (Zone 12)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_13",
+    "original_name": "Test Panel Zone 13 Enabled (Zone 13)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_14",
+    "original_name": "Test Panel Zone 14 Enabled (Zone 14)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_15",
+    "original_name": "Test Panel Zone 15 Enabled (Zone 15)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_16",
+    "original_name": "Test Panel Zone 16 Enabled (Zone 16)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_17",
+    "original_name": "Test Panel Zone 17 Enabled (Zone 17)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_18",
+    "original_name": "Test Panel Zone 18 Enabled (Zone 18)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_19",
+    "original_name": "Test Panel Zone 19 Enabled (Zone 19)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_2",
+    "original_name": "Test Panel Zone 2 Enabled (Zone 2)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_20",
+    "original_name": "Test Panel Zone 20 Enabled (Zone 20)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_21",
+    "original_name": "Test Panel Zone 21 Enabled (Zone 21)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_22",
+    "original_name": "Test Panel Zone 22 Enabled (Zone 22)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_23",
+    "original_name": "Test Panel Zone 23 Enabled (Zone 23)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_24",
+    "original_name": "Test Panel Zone 24 Enabled (Zone 24)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_25",
+    "original_name": "Test Panel Zone 25 Enabled (Zone 25)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_26",
+    "original_name": "Test Panel Zone 26 Enabled (Zone 26)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_27",
+    "original_name": "Test Panel Zone 27 Enabled (Zone 27)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_28",
+    "original_name": "Test Panel Zone 28 Enabled (Zone 28)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_29",
+    "original_name": "Test Panel Zone 29 Enabled (Zone 29)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_3",
+    "original_name": "Test Panel Zone 3 Enabled (Zone 3)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_30",
+    "original_name": "Test Panel Zone 30 Enabled (Zone 30)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_31",
+    "original_name": "Test Panel Zone 31 Enabled (Zone 31)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_32",
+    "original_name": "Test Panel Zone 32 Enabled (Zone 32)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_33",
+    "original_name": "Test Panel Zone 33 Enabled (Zone 33)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_34",
+    "original_name": "Test Panel Zone 34 Enabled (Zone 34)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_35",
+    "original_name": "Test Panel Zone 35 Enabled (Zone 35)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_36",
+    "original_name": "Test Panel Zone 36 Enabled (Zone 36)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_37",
+    "original_name": "Test Panel Zone 37 Enabled (Zone 37)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_4",
+    "original_name": "Test Panel Zone 4 Enabled (Zone 4)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_5",
+    "original_name": "Test Panel Zone 5 Enabled (Zone 5)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_6",
+    "original_name": "Test Panel Zone 6 Enabled (Zone 6)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_7",
+    "original_name": "Test Panel Zone 7 Enabled (Zone 7)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_8",
+    "original_name": "Test Panel Zone 8 Enabled (Zone 8)",
+    "device_class": null,
+    "state": "on"
+  },
+  {
+    "platform": "switch",
+    "unique_id": "_zone_enabled_switch_9",
+    "original_name": "Test Panel Zone 9 Enabled (Zone 9)",
+    "device_class": null,
+    "state": "on"
+  }
+]
