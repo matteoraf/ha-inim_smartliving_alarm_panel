@@ -1,0 +1,31 @@
+# Tooling configuration only. The integration is shipped as custom_components/
+# and is not built as a Python package.
+
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "F",     # pyflakes
+    "W",     # pycodestyle warnings
+    "I",     # import sorting
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "ASYNC", # flake8-async
+]
+ignore = [
+    "E501", # line length is handled by the formatter; long log messages are allowed
+]
+
+[tool.ruff.lint.isort]
+# Same import layout as Home Assistant core
+force-sort-within-sections = true
+combine-as-imports = true
+known-first-party = ["custom_components.inim_smartliving_alarm"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
