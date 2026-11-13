@@ -1,0 +1,51 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, next]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Install ruff
+        run: pip install "$(grep '^ruff==' requirements_test.txt)"
+      - name: Ruff check
+        run: ruff check tests
+      - name: Ruff format
+        run: ruff format --check tests
+
+  pytest:
+    name: Pytest (Home Assistant ${{ matrix.home-assistant }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - home-assistant: minimum
+            python-version: "3.13"
+            requirements: requirements_test_min.txt
+          - home-assistant: latest
+            python-version: "3.14"
+            requirements: requirements_test.txt
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: ${{ matrix.requirements }}
+      - name: Install dependencies
+        run: pip install -r ${{ matrix.requirements }}
+      - name: Run tests
+        run: pytest -q

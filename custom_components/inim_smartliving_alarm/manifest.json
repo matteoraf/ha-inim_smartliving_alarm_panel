@@ -2,13 +2,13 @@
     "domain": "inim_smartliving_alarm",
     "name": "Inim Smartliving Alarm",
     "codeowners": ["@matteoraf"],
-    "documentation": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/blob/main/README.md",
-    "issue_tracker": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/issues",
-    "requirements": [],
-    "iot_class": "local_polling",
-    "integration_type": "device",
-    "version": "0.3.1",
     "config_flow": true,
     "dependencies": [],
-    "loggers": ["custom_components.inim_smartliving_alarm"]
-  }
+    "documentation": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/blob/main/README.md",
+    "integration_type": "device",
+    "iot_class": "local_polling",
+    "issue_tracker": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/issues",
+    "loggers": ["custom_components.inim_smartliving_alarm"],
+    "requirements": [],
+    "version": "0.3.1"
+}
