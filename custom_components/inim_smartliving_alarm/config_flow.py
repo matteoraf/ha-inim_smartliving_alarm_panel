@@ -36,6 +36,7 @@ from .const import (
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
 from .inim_api import InimAlarmAPI
+from .panel_config import async_fetch_panel_configuration
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -44,71 +45,8 @@ async def _validate_connection_and_fetch_initial_config(
     hass: HomeAssistant, host: str, port: int, pin: str
 ) -> dict[str, Any]:
     """Validate connection details by fetching initial panel configuration."""
-
-    # For validation, API uses its internal defaults for max areas/zones if not specified.
     api = InimAlarmAPI(host=host, port=port, pin_code_str=pin)
-
-    _LOGGER.debug(
-        "Attempting to fetch initial panel configuration from %s:%s for validation",
-        host,
-        port,
-    )
-
-    initial_config = await hass.async_add_executor_job(
-        api.get_initial_panel_configuration
-    )
-
-    if initial_config is None:
-        _LOGGER.error(
-            "Connection/API error for %s:%s (API returned None)",
-            host,
-            port,
-        )
-        raise ConnectionError(
-            "Failed to connect to the Inim panel or API error during fetch."
-        )
-
-    # Check for explicit errors reported by the API method
-    if initial_config.get("errors"):
-        _LOGGER.error(
-            "Errors reported by API for %s:%s: %s",
-            host,
-            port,
-            initial_config["errors"],
-        )
-        # If critical data is missing due to these errors, we'll catch it below.
-
-    essential_keys = [
-        "system_info",
-        "areas",
-        "zones",
-        "zones_config",
-        "scenarios",
-        "scenario_activations",
-    ]
-    missing_or_failed_parts = [
-        key for key in essential_keys if initial_config.get(key) is None
-    ]
-
-    if missing_or_failed_parts:
-        error_message = f"Failed to retrieve essential data for: {', '.join(missing_or_failed_parts)}."
-        _LOGGER.error("%s From %s:%s", error_message, host, port)
-        if any("auth" in error.lower() for error in initial_config.get("errors", [])):
-            raise ValueError("auth_failed")
-        raise ValueError(error_message)
-
-    if not initial_config.get("system_info") or not initial_config["system_info"].get(
-        "ascii"
-    ):
-        _LOGGER.error("System information is missing from initial configuration")
-        raise ValueError("invalid_panel_response")
-
-    _LOGGER.info(
-        "Initial panel configuration successfully validated/fetched for %s:%s",
-        host,
-        port,
-    )
-    return initial_config
+    return await async_fetch_panel_configuration(hass, api)
 
 
 class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -318,6 +256,80 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={
                 "panel_name": step1_data.get(CONF_PANEL_NAME, "Inim Panel")
             },
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Change host, port and PIN of an existing entry.
+
+        The panel is contacted with the new details and its configuration is
+        stored again. Options, entities and their unique IDs are kept.
+        """
+        entry = self._get_reconfigure_entry()
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            host = user_input[CONF_HOST]
+            port = user_input[CONF_PORT]
+            unique_id = f"{host}:{port}"
+
+            if any(
+                other.unique_id == unique_id and other.entry_id != entry.entry_id
+                for other in self._async_current_entries(include_ignore=True)
+            ):
+                return self.async_abort(reason="already_configured")
+
+            try:
+                initial_panel_config = (
+                    await _validate_connection_and_fetch_initial_config(
+                        self.hass, host, port, user_input[CONF_PIN]
+                    )
+                )
+            except ConnectionError:
+                _LOGGER.warning("Connection failed for %s:%s", host, port)
+                errors["base"] = "cannot_connect"
+            except ValueError as vex:
+                _LOGGER.warning("Validation error for %s:%s: %s", host, port, vex)
+                errors["base"] = (
+                    str(vex)
+                    if str(vex) in ("auth_failed", "invalid_panel_response")
+                    else "validation_error_detail"
+                )
+            except Exception:
+                _LOGGER.exception("Unexpected error reconfiguring %s:%s", host, port)
+                errors["base"] = "unknown"
+            else:
+                # A changed entry is reloaded by its update listener; reload an
+                # unchanged one here so that the flow always ends with one reload.
+                if not self.hass.config_entries.async_update_entry(
+                    entry,
+                    unique_id=unique_id,
+                    data={
+                        **entry.data,
+                        CONF_HOST: host,
+                        CONF_PORT: port,
+                        CONF_PIN: user_input[CONF_PIN],
+                        DATA_INITIAL_PANEL_CONFIG: initial_panel_config,
+                    },
+                ):
+                    self.hass.config_entries.async_schedule_reload(entry.entry_id)
+                return self.async_abort(reason="reconfigure_successful")
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_HOST): str,
+                vol.Required(CONF_PORT): cv.port,
+                vol.Required(CONF_PIN): str,
+            }
+        )
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=self.add_suggested_values_to_schema(
+                schema, user_input or entry.data
+            ),
+            errors=errors,
+            description_placeholders={"panel_name": entry.title},
         )
 
     @staticmethod

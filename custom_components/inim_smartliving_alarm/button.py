@@ -5,6 +5,7 @@ from typing import Any
 
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -29,6 +30,7 @@ from .const import (
     KEY_INIT_SYSTEM_INFO_VERSION,
 )
 from .inim_api import InimAlarmAPI
+from .panel_config import async_reread_panel_configuration
 from .utils import async_handle_scenario_activation_failure
 
 _LOGGER = logging.getLogger(__name__)
@@ -64,6 +66,10 @@ async def async_setup_entry(
     limit_scenarios = entry.options.get(
         CONF_LIMIT_SCENARIOS,
         entry.data.get(CONF_LIMIT_SCENARIOS, DEFAULT_LIMIT_SCENARIOS),
+    )
+
+    async_add_entities(
+        [InimRereadConfigurationButton(entry, panel_display_name, system_info)]
     )
 
     buttons_to_add = []
@@ -254,3 +260,43 @@ class InimScenarioActivationButton(ButtonEntity):
                 KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS
             )
         return attrs
+
+
+class InimRereadConfigurationButton(ButtonEntity):
+    """Button that reads the panel configuration again and reloads the entry."""
+
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_icon = "mdi:database-refresh"
+
+    def __init__(
+        self,
+        config_entry: ConfigEntry,
+        panel_display_name: str,
+        system_info: dict[str, Any],
+    ) -> None:
+        """Initialize the button."""
+        self.config_entry = config_entry
+        self._panel_display_name = panel_display_name
+        self._system_info = system_info
+        self._attr_name = "Re-read panel configuration"
+        self._attr_unique_id = f"{config_entry.entry_id}_reread_panel_configuration"
+
+    @property
+    def suggested_object_id(self) -> str | None:
+        """Return a suggested object ID for the entity."""
+        return f"{self._panel_display_name}_reread_panel_configuration"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information for the entity."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.config_entry.entry_id)},
+            name=self._panel_display_name,
+            manufacturer="Inim Electronics",
+            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
+            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+        )
+
+    async def async_press(self) -> None:
+        """Read the panel configuration again and reload the entry."""
+        await async_reread_panel_configuration(self.hass, self.config_entry)

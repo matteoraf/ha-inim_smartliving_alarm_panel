@@ -27,6 +27,15 @@
             "scenario_arm_vacation": "Scenario Inserimento Vacanza",
             "scenario_disarm": "Scenario Disinserimento"
           }
+        },
+        "reconfigure": {
+          "title": "Riconfigura Inim SmartLiving",
+          "description": "Aggiorna i dati di connessione di {panel_name}. La centrale viene contattata con i nuovi dati e la sua configurazione (nomi, zone, scenari) viene riletta. Entità e opzioni vengono mantenute.",
+          "data": {
+            "host": "Host",
+            "port": "Porta",
+            "pin": "Codice PIN"
+          }
         }
       },
       "error": {
@@ -37,7 +46,8 @@
         "unknown": "Si è verificato un errore sconosciuto. Controlla i log per maggiori dettagli."
       },
       "abort": {
-        "already_configured": "Questa centrale di allarme è già configurata."
+        "already_configured": "Questa centrale di allarme è già configurata.",
+        "reconfigure_successful": "I dati di connessione sono stati aggiornati e l'integrazione è stata ricaricata."
       }
     },
     "options": {
@@ -66,6 +76,20 @@
         "auth_failed_new_pin": "Autenticazione fallita. Il PIN non è stato modificato.",
         "pin_validation_error": "Si è verificato un errore durante di validazione.",
         "unknown_pin_error": "Si è verificato un errore sconosciuto. Controlla i log."
+      }
+    },
+    "exceptions": {
+      "cannot_connect": {
+        "message": "Connessione alla centrale {host}:{port} fallita. La configurazione della centrale non è stata modificata."
+      },
+      "invalid_panel_configuration": {
+        "message": "La centrale ha restituito una configurazione incompleta o non valida ({error}). La configurazione della centrale non è stata modificata."
+      },
+      "entry_not_found": {
+        "message": "Nessuna voce Inim SmartLiving con ID {entry_id}."
+      },
+      "entry_not_loaded": {
+        "message": "{title} non è caricata, quindi la configurazione della centrale non può essere riletta."
       }
     }
   }

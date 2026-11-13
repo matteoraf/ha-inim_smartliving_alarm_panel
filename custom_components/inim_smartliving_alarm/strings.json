@@ -27,6 +27,15 @@
             "scenario_arm_vacation": "Arm Vacation Scenario",
             "scenario_disarm": "Disarm Scenario"
           }
+        },
+        "reconfigure": {
+          "title": "Reconfigure Inim SmartLiving Alarm",
+          "description": "Update the connection details of {panel_name}. The panel is contacted with the new details and its configuration (names, zones, scenarios) is read again. Entities and options are kept.",
+          "data": {
+            "host": "Host",
+            "port": "Port",
+            "pin": "PIN Code"
+          }
         }
       },
       "error": {
@@ -37,7 +46,8 @@
         "unknown": "An unknown error occurred. Please check the logs for more details."
       },
       "abort": {
-        "already_configured": "This Inim Alarm panel is already configured."
+        "already_configured": "This Inim Alarm panel is already configured.",
+        "reconfigure_successful": "The connection details were updated and the integration was reloaded."
       }
     },
     "options": {
@@ -66,6 +76,20 @@
         "auth_failed_new_pin": "Authentication failed with the new PIN. The PIN has not been changed.",
         "pin_validation_error": "An error occurred while validating the new PIN.",
         "unknown_pin_error": "An unknown error occurred while validating the new PIN. Please check the logs."
+      }
+    },
+    "exceptions": {
+      "cannot_connect": {
+        "message": "Failed to connect to the panel at {host}:{port}. The panel configuration was not changed."
+      },
+      "invalid_panel_configuration": {
+        "message": "The panel returned an incomplete or invalid configuration ({error}). The panel configuration was not changed."
+      },
+      "entry_not_found": {
+        "message": "No Inim SmartLiving Alarm entry with ID {entry_id} was found."
+      },
+      "entry_not_loaded": {
+        "message": "{title} is not loaded, so its panel configuration cannot be read again."
       }
     }
   }
