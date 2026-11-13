@@ -86,12 +86,15 @@ class FakePanel:
 
         # Fault injection, changeable while the panel runs
         self.fragment_replies = False
+        # Pause between fragments, so that reads see partial replies
+        self.fragment_delay = 0.02
         self.reply_delay = 0.0
         self.drop_after_requests: int | None = None
         self.corrupt_replies = 0
 
         self._server: asyncio.Server | None = None
         self._client: asyncio.StreamWriter | None = None
+        self._handlers: set[asyncio.Task] = set()
 
     # --------------------------------------------------------------- lifecycle
 
@@ -100,9 +103,10 @@ class FakePanel:
         self._server = await asyncio.start_server(self._handle_client, host, port)
 
     async def stop(self) -> None:
-        """Close the client connection and stop listening."""
-        if self._client is not None:
-            self._client.close()
+        """Close every connection, wait for their handlers and stop listening."""
+        for task in self._handlers:
+            task.cancel()
+        await asyncio.gather(*self._handlers, return_exceptions=True)
         if self._server is not None:
             self._server.close()
             await self._server.wait_closed()
@@ -130,6 +134,9 @@ class FakePanel:
             return
         self._client = writer
         self.connections += 1
+        handler = asyncio.current_task()
+        assert handler is not None
+        self._handlers.add(handler)
         handled = 0
         try:
             while True:
@@ -147,6 +154,7 @@ class FakePanel:
         except (asyncio.IncompleteReadError, ConnectionError, TimeoutError):
             pass
         finally:
+            self._handlers.discard(handler)
             if self._client is writer:
                 self._client = None
             writer.close()
@@ -240,7 +248,7 @@ class FakePanel:
             for byte in reply:
                 writer.write(bytes((byte,)))
                 await writer.drain()
-                await asyncio.sleep(0)
+                await asyncio.sleep(self.fragment_delay)
         else:
             writer.write(reply)
             await writer.drain()
