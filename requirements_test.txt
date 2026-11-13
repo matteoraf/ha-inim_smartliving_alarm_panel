@@ -1,0 +1,7 @@
+# Development and test dependencies (not needed by Home Assistant at runtime).
+# pytest-homeassistant-custom-component pins a matching Home Assistant release:
+# 0.13.375 -> Home Assistant 2026.10.4 (needs Python 3.14). Bump it when a newer
+# release is published. The integration supports Home Assistant 2026.1 and later,
+# so code must stay compatible with Python 3.13 (ruff target-version = py313).
+pytest-homeassistant-custom-component==0.13.375
+ruff==0.17.5
