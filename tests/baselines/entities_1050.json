@@ -988,6 +988,13 @@
   },
   {
     "platform": "button",
+    "unique_id": "_reread_panel_configuration",
+    "original_name": "Re-read panel configuration",
+    "device_class": null,
+    "state": "unknown"
+  },
+  {
+    "platform": "button",
     "unique_id": "_scenario_button_0",
     "original_name": "Activate 'Scenario 1'",
     "device_class": null,

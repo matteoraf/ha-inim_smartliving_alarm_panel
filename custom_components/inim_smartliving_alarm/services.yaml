@@ -5,3 +5,15 @@ alarm_reset:
     entity:
       - integration: inim_smartliving_alarm
         domain: alarm_control_panel
+
+reread_panel_configuration:
+  name: Re-read panel configuration
+  description: "Reads the configuration of the Inim panel again (names, zone setup, scenarios) and reloads the integration. Options are kept."
+  fields:
+    config_entry_id:
+      name: Panel
+      description: "The Inim SmartLiving panel whose configuration is read again."
+      required: true
+      selector:
+        config_entry:
+          integration: inim_smartliving_alarm

@@ -2,9 +2,13 @@
 
 import logging
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.config_entries import ConfigEntry, ConfigEntryState
+from homeassistant.const import ATTR_CONFIG_ENTRY_ID
+from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
+import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.typing import ConfigType
+import voluptuous as vol
 
 from .const import (
     CONF_HOST,
@@ -16,6 +20,7 @@ from .const import (
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
     PLATFORMS,
+    SERVICE_REREAD_PANEL_CONFIGURATION,
 )
 
 # Import the custom coordinator
@@ -23,8 +28,45 @@ from .coordinator import InimDataUpdateCoordinator
 
 # Import API
 from .inim_api import InimAlarmAPI
+from .panel_config import async_reread_panel_configuration
 
 _LOGGER = logging.getLogger(__name__)
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+REREAD_PANEL_CONFIGURATION_SCHEMA = vol.Schema(
+    {vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string}
+)
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Register the integration services."""
+
+    async def async_reread_service(call: ServiceCall) -> None:
+        """Read the panel configuration of one entry again and reload it."""
+        entry_id = call.data[ATTR_CONFIG_ENTRY_ID]
+        entry = hass.config_entries.async_get_entry(entry_id)
+        if entry is None or entry.domain != DOMAIN:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="entry_not_found",
+                translation_placeholders={"entry_id": entry_id},
+            )
+        if entry.state is not ConfigEntryState.LOADED:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="entry_not_loaded",
+                translation_placeholders={"title": entry.title},
+            )
+        await async_reread_panel_configuration(hass, entry)
+
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_REREAD_PANEL_CONFIGURATION,
+        async_reread_service,
+        schema=REREAD_PANEL_CONFIGURATION_SCHEMA,
+    )
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

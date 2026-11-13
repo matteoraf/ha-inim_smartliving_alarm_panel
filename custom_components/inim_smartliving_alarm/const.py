@@ -151,3 +151,4 @@ SENSOR_LAST_EVENT_LOG_SUFFIX = "event_log"  # For the new event log sensor
 
 # Define the new service name as a constant
 SERVICE_ALARM_RESET = "alarm_reset"
+SERVICE_REREAD_PANEL_CONFIGURATION = "reread_panel_configuration"
