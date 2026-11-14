@@ -107,6 +107,71 @@ def command_frame(address: int, payload: bytes) -> bytes:
 PIN_1234 = bytes.fromhex("01020304ffff")
 
 
+# ------------------------------------------------------------ plain RAM
+
+
+async def test_ram_reads_may_start_inside_a_block(fake_panel: FakePanel) -> None:
+    """Plain RAM is flat: a read can start anywhere in the model string."""
+    async with Client(fake_panel) as client:
+        assert await client.read(read_frame(c.RAM_FIRMWARE + 5, 5), 5) == b"01050"
+        assert await client.read(read_frame(c.RAM_FIRMWARE, 2), 2) == b"6."
+        whole = await client.read(read_frame(c.RAM_FIRMWARE, c.FIRMWARE_LENGTH), 12)
+        assert whole == b"6.07 01050  "
+
+
+async def test_ram_read_across_label_pointers(fake_panel: FakePanel) -> None:
+    """A read may span neighbouring registers and start at an odd address."""
+    async with Client(fake_panel) as client:
+        both = await client.read(read_frame(c.RAM_LABELS_AREAS, 4), 4)
+        middle = await client.read(read_frame(c.RAM_LABELS_AREAS + 1, 2), 2)
+    areas, zones = both[:2], both[2:]
+    assert int.from_bytes(areas, "little") == 0x0000
+    assert int.from_bytes(zones, "little") == 0x00A0
+    assert middle == areas[1:] + zones[:1]
+
+
+async def test_serial_number_area(fake_panel: FakePanel) -> None:
+    """The serial-number area also covers the signature and brand words."""
+    async with Client(fake_panel) as client:
+        area = await client.read(read_frame(c.RAM_SERIAL_NUMBER, 52), 52)
+    assert area[: c.SERIAL_NUMBER_LENGTH] == b"0000000000000001"
+    signature = c.RAM_HW_SIGNATURE - c.RAM_SERIAL_NUMBER
+    assert area[signature : signature + 2] == b"\xb2\x55"
+    brand = c.RAM_BRAND - c.RAM_SERIAL_NUMBER
+    assert area[brand : brand + 2] == b"\x00\x00"
+
+
+@pytest.mark.parametrize(
+    ("armed", "programming", "voice_board", "expected"),
+    [
+        (False, False, True, "0a1c"),  # as read on a real 1050 while idle
+        (True, False, True, "0a14"),  # as read on a real 1050 with an area armed
+        (False, True, True, "0a5c"),
+        (False, False, False, "0a9c"),
+    ],
+)
+async def test_panel_state_flags(
+    fake_panel: FakePanel,
+    armed: bool,
+    programming: bool,
+    voice_board: bool,
+    expected: str,
+) -> None:
+    """Panel state: no area armed, in programming and voice board absent."""
+    state = fake_panel.state
+    if armed:
+        state.area_modes[3] = c.MODE_STAY
+    state.in_programming = programming
+    state.voice_board = voice_board
+    async with Client(fake_panel) as client:
+        assert (await client.read(read_frame(c.RAM_PANEL_STATE, 2), 2)).hex() == (
+            expected
+        )
+        # byte 1 alone, read at an offset
+        flags = await client.read(read_frame(c.RAM_PANEL_STATE + 1, 1), 1)
+    assert flags.hex() == expected[2:]
+
+
 # ------------------------------------------------------------ captured replies
 
 

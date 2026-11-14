@@ -99,6 +99,7 @@ class PanelState:
     firmware: str = "6.07 01050  "
     brand: int = 0
     hardware_signature: bytes = b"\xb2\x55"
+    serial_number: str = "0000000000000001"  # made up; real ones are 16 digits
 
     # Configuration
     pins: list[str | None] = field(default_factory=lambda: [None] * c.NUM_CODES)
@@ -135,6 +136,8 @@ class PanelState:
     faults: bytes = bytes((0, 0)) + (910).to_bytes(2, "little") + bytes(3)  # 13.8 V
     keypad_temperatures: dict[int, float] = field(default_factory=dict)
     command_result: int = c.RESULT_OK
+    in_programming: bool = False  # panel state flag only; commands are not refused
+    voice_board: bool = True
     sirens_stopped: int = 0
     calls_cleared: int = 0
 
@@ -154,7 +157,12 @@ class PanelState:
     # ------------------------------------------------------------------ memory
 
     def ram_read(self, address: int, length: int) -> bytes:
-        """Read plain RAM (registers with special framing are handled by the server)."""
+        """Read RAM (registers with special framing are handled by the server).
+
+        The status registers are built on request and answer at their own
+        address only. All other RAM is flat, as on the real panel: a read may
+        start anywhere, e.g. inside the model string, and unknown bytes are 0.
+        """
         dynamic = {
             c.RAM_AREA_STATUS: self.encode_area_status,
             c.RAM_ZONE_STATE: self.encode_zone_state,
@@ -164,20 +172,36 @@ class PanelState:
             c.RAM_FAULTS: lambda: self.faults,
         }
         if address in dynamic:
-            data = dynamic[address]()
-        else:
-            data = self._static_ram().get(address, b"")
-        return data[:length].ljust(length, b"\x00")
+            return dynamic[address]()[:length].ljust(length, b"\x00")
+        memory: dict[int, int] = {}
+        for start, data in self._static_ram().items():
+            for offset, byte in enumerate(data):
+                memory[start + offset] = byte
+        return bytes(memory.get(a, 0) for a in range(address, address + length))
 
     def _static_ram(self) -> dict[int, bytes]:
+        """Blocks of plain RAM by start address."""
         ram = {
             c.RAM_FIRMWARE: self.firmware.encode("ascii"),
-            c.RAM_BRAND: self.brand.to_bytes(2, "little"),
+            c.RAM_SERIAL_NUMBER: self.serial_number.encode("ascii"),
             c.RAM_HW_SIGNATURE: self.hardware_signature,
+            c.RAM_BRAND: self.brand.to_bytes(2, "little"),
+            c.RAM_PANEL_STATE: self.encode_panel_state(),
         }
         for register, (offset, _count) in LABEL_LAYOUT.items():
             ram[register] = offset.to_bytes(2, "little")
         return ram
+
+    def encode_panel_state(self) -> bytes:
+        """Panel state flags (stato_centrale)."""
+        flags = c.PANEL_STATE_UNKNOWN_BITS
+        if not self.armed_areas():
+            flags |= c.PANEL_STATE_NO_AREA_ARMED
+        if self.in_programming:
+            flags |= c.PANEL_STATE_PROGRAMMING
+        if not self.voice_board:
+            flags |= c.PANEL_STATE_NO_VOICE_BOARD
+        return bytes((c.PANEL_STATE_UNKNOWN_BYTE_0, flags))
 
     def eeprom_image(self) -> bytearray:
         """Build the EEPROM contents from the configuration and the event log."""
