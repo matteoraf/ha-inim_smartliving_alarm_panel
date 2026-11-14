@@ -17,10 +17,12 @@ obfuscation are not supported (nor are they by the integration).
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from dataclasses import dataclass, field
 import json
 from pathlib import Path
 import time
+from typing import ClassVar
 
 OP_READ = 0x00
 OP_WRITE = 0x01
@@ -43,10 +45,13 @@ ACTION_DISARM = 4
 
 PIN_LENGTH = 6
 
-# Attempts to reach the panel for a new client; the panel accepts one local
-# client and may still be closing the previous connection.
-CONNECT_ATTEMPTS = 5
-CONNECT_RETRY_DELAY = 0.3
+# The SmartLAN/SI board ignores a connection attempt that arrives right after
+# the previous connection closed (the client's TCP stack only retries after
+# 1 s); a short pause avoids that. Attempts that still get no answer in time
+# are retried until the deadline.
+RECONNECT_PAUSE = 0.15
+CONNECT_TIMEOUT = 5.0
+CONNECT_DEADLINE = 20.0
 
 
 def reads_pin_table(header: bytes) -> bool:
@@ -145,16 +150,35 @@ class Exchange:
 class PanelProxy:
     """Listens on 127.0.0.1 and forwards each client to the panel."""
 
+    # When any proxy last closed a connection to the panel: tests use several
+    # proxies one after the other, and the pause applies across all of them.
+    _last_upstream_close: ClassVar[float] = float("-inf")
+    # Connections to the panel that are open or still closing, across proxies
+    _open_upstreams: ClassVar[int] = 0
+
     def __init__(
-        self, panel_host: str, panel_port: int, guard: WriteGuard | None = None
+        self,
+        panel_host: str,
+        panel_port: int,
+        guard: WriteGuard | None = None,
+        *,
+        reconnect_pause: float = RECONNECT_PAUSE,
+        connect_timeout: float = CONNECT_TIMEOUT,
+        connect_deadline: float = CONNECT_DEADLINE,
     ) -> None:
         """Create the proxy; call start() to begin listening."""
         self.panel_host = panel_host
         self.panel_port = panel_port
         self.guard = guard
+        self.reconnect_pause = reconnect_pause
+        self.connect_timeout = connect_timeout
+        self.connect_deadline = connect_deadline
         self.exchanges: list[Exchange] = []
         self.blocked: list[str] = []
         self.errors: list[str] = []
+        # monotonic times of each connection to the panel opening and closing
+        self.connected_at: list[float] = []
+        self.closed_at: list[float] = []
         self._server: asyncio.Server | None = None
         self._handlers: set[asyncio.Task] = set()
         # One client at a time, like the panel itself
@@ -213,15 +237,33 @@ class PanelProxy:
     async def _connect_panel(
         self,
     ) -> tuple[asyncio.StreamReader, asyncio.StreamWriter]:
-        for attempt in range(CONNECT_ATTEMPTS):
+        deadline = time.monotonic() + self.connect_deadline
+        # Another proxy may still be closing its connection. The count is shared
+        # across proxies and test event loops, so poll instead of an Event.
+        while PanelProxy._open_upstreams and time.monotonic() < deadline:  # noqa: ASYNC110
+            await asyncio.sleep(0.01)
+        wait = PanelProxy._last_upstream_close + self.reconnect_pause - time.monotonic()
+        if wait > 0:
+            await asyncio.sleep(wait)
+        while True:
+            timeout = min(self.connect_timeout, deadline - time.monotonic())
             try:
-                return await asyncio.open_connection(self.panel_host, self.panel_port)
-            except OSError as err:
-                if attempt == CONNECT_ATTEMPTS - 1:
-                    self.errors.append(f"cannot connect to the panel: {err}")
+                connection = await asyncio.wait_for(
+                    asyncio.open_connection(self.panel_host, self.panel_port),
+                    max(timeout, 0.01),
+                )
+            except OSError as err:  # refused, unreachable or timed out
+                if time.monotonic() + self.reconnect_pause >= deadline:
+                    self.errors.append(
+                        f"cannot connect to the panel within "
+                        f"{self.connect_deadline:g} s: {err!r}"
+                    )
                     raise
-                await asyncio.sleep(CONNECT_RETRY_DELAY)
-        raise AssertionError("unreachable")
+                await asyncio.sleep(self.reconnect_pause)
+                continue
+            PanelProxy._open_upstreams += 1
+            self.connected_at.append(time.monotonic())
+            return connection
 
     async def _relay(
         self, client_reader: asyncio.StreamReader, client_writer: asyncio.StreamWriter
@@ -280,10 +322,16 @@ class PanelProxy:
                 panel_writer.write(header + payload)
                 await panel_writer.drain()
         finally:
-            replies.cancel()
-            await asyncio.gather(replies, return_exceptions=True)
+            # Close first and book-keep in a finally: stop() may cancel this
+            # task while it waits below
             panel_writer.close()
+            replies.cancel()
             try:
-                await panel_writer.wait_closed()
-            except OSError:
-                pass
+                await asyncio.gather(replies, return_exceptions=True)
+                with contextlib.suppress(OSError):
+                    await panel_writer.wait_closed()
+            finally:
+                closed = time.monotonic()
+                self.closed_at.append(closed)
+                PanelProxy._last_upstream_close = closed
+                PanelProxy._open_upstreams -= 1
