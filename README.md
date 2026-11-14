@@ -50,6 +50,12 @@ Features
     
     *   Sensors for the panel's firmware version and system type.
         
+*   **Maintenance without re-adding the integration**:
+    
+    *   **Reconfigure** the host, port and PIN of an existing panel, for example after its IP address changed.
+        
+    *   **Re-read the panel configuration** (names, zone setup, scenarios) after changing it on the panel, with a button or an action.
+        
 
 Prerequisites
 -------------
@@ -129,6 +135,36 @@ After installation and restarting Home Assistant:
 
 You can change these options later by navigating to the integration on the Devices & Services page and clicking "CONFIGURE".
 
+### Changing the connection details (Reconfigure)
+
+If the IP address, port or PIN of your panel changes, you don't need to remove and re-add the integration:
+
+1.  Go to **Settings** -> **Devices & Services** and open **Inim SmartLiving Alarm**.
+    
+2.  Open the menu (⋮) of your panel's entry and choose **Reconfigure**.
+    
+3.  Enter the new **Host**, **Port** and/or **PIN** and click **Submit**.
+    
+
+The integration contacts the panel with the new details, reads its configuration again and reloads. Your options (polling interval, limits, scenario mappings), entities and entity IDs are kept. If the panel cannot be reached, an error is shown and nothing is changed. An address already used by another configured panel is refused. As during setup, the PIN itself is not checked: a wrong PIN only shows up when a command is refused.
+
+### Re-reading the panel configuration
+
+The names of areas, zones and scenarios, the zone setup and the scenario definitions are read from the panel when the integration is set up. If you change them on the panel later (from a keypad or the installer software), read them again with either:
+
+*   the **Re-read panel configuration** button, in the *Configuration* section of your panel's device page, or
+    
+*   the **Re-read panel configuration** action (`inim_smartliving_alarm.reread_panel_configuration`), for example from an automation or from **Developer tools** -> **Actions**, where you pick the panel from a list:
+    
+
+```yaml
+action: inim_smartliving_alarm.reread_panel_configuration
+data:
+  config_entry_id: <the panel's config entry ID>
+```
+
+The integration then reloads with the new configuration. Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel. If the panel cannot be reached, an error is shown and the stored configuration is kept.
+
 Entities Provided
 -----------------
 
@@ -164,6 +200,10 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
     *   *sensor.your\_panel\_name\_firmware\_version* & *sensor.your\_panel\_name\_system\_type*: Provide static information about your alarm panel.
         
+*   **Maintenance**:
+    
+    *   *button.your\_panel\_name\_reread\_panel\_configuration*: Reads the panel configuration again and reloads the integration (see [Re-reading the panel configuration](#re-reading-the-panel-configuration)). Shown in the *Configuration* section of the device page.
+        
 
 _(Replace your\_panel\_name, with actual value based on your setup)._
 
@@ -198,9 +238,15 @@ Troubleshooting
         
     *   Make sure the SmartLAN module is powered and connected to the network.
         
+    *   If the module's IP address or port has changed, update it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)) instead of removing the integration.
+        
+*   **Names, zones or scenarios out of date** after changing them on the panel:
+    
+    *   Use the **Re-read panel configuration** button or action (see [Re-reading the panel configuration](#re-reading-the-panel-configuration)).
+        
 *   **Scenarios not activating or Areas not arming/disarming**:
     
-    *   Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions.
+    *   Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions. You can change it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)).
         
 *   **Entities Not Appearing or Not Updating**:
     
