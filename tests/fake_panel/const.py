@@ -37,6 +37,15 @@ RAM_FIRMWARE = 0x4000
 FIRMWARE_LENGTH = 12
 RAM_BRAND = 0xFED2
 RAM_HW_SIGNATURE = 0xFECC
+RAM_SERIAL_NUMBER = 0xFEA0  # production serial area; 52 bytes reach the brand word
+SERIAL_NUMBER_LENGTH = 16  # ASCII digits at the start of the area
+RAM_PANEL_STATE = 0x0D28  # panel state flags (stato_centrale), 2 bytes
+PANEL_STATE_NO_AREA_ARMED = 0x08  # byte 1, bit 3
+PANEL_STATE_PROGRAMMING = 0x40  # byte 1, bit 6
+PANEL_STATE_NO_VOICE_BOARD = 0x80  # byte 1, bit 7
+# Bits of unknown meaning, as read on a 1050 with firmware 6.07 while idle
+PANEL_STATE_UNKNOWN_BYTE_0 = 0x0A
+PANEL_STATE_UNKNOWN_BITS = 0x14
 RAM_AREA_STATUS = 0x2000
 RAM_ZONE_STATE = 0x2001
 RAM_ZONE_INCLUSION = 0x2002
