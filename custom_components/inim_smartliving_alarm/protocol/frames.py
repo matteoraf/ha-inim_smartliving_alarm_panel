@@ -124,6 +124,33 @@ def parse_read_reply(reply: bytes, length: int) -> bytes:
     return data
 
 
+PIN_LENGTH = 6
+_COMMAND_REGISTERS = range(reg.ARM_AREAS, reg.STOP_SIRENS_OR_CALLS + 1)
+
+
+def carries_pin(frame: bytes) -> bool:
+    """Whether a request is a command write, whose payload starts with the PIN."""
+    address = frame[3] << 8 | frame[4]
+    return (
+        len(frame) > HEADER_LENGTH
+        and frame[0] == OP_WRITE
+        and frame[2] == DEVICE_RAM
+        and address in _COMMAND_REGISTERS
+    )
+
+
+def describe(frame: bytes) -> str:
+    """A request in hex for logs; the PIN of a command is masked."""
+    text = frame[:HEADER_LENGTH].hex(" ")
+    payload = frame[HEADER_LENGTH:]
+    if carries_pin(frame):
+        text += " | " + " ".join(["**"] * PIN_LENGTH)
+        payload = payload[PIN_LENGTH:]
+    if payload:
+        text += " | " + payload.hex(" ")
+    return text
+
+
 def check_write_ack(ack: bytes, payload: bytes) -> None:
     """Check the 1-byte acknowledgement of a write."""
     if len(ack) != 1 or ack[0] != checksum(payload):
