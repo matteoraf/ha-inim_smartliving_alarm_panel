@@ -6,6 +6,7 @@ the SecureSI obfuscation are not supported.
 
 import asyncio
 
+from ..protocol.frames import SMARTLAN_SI
 from .base import PanelTransport
 
 DEFAULT_PORT = 5004
@@ -13,6 +14,8 @@ DEFAULT_PORT = 5004
 
 class SmartLanSiTransport(PanelTransport):
     """Plain frames over TCP."""
+
+    dialect = SMARTLAN_SI
 
     def _encode(self, data: bytes) -> bytes:
         return data

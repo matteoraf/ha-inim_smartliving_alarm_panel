@@ -27,6 +27,8 @@ from custom_components.inim_smartliving_alarm.protocol.errors import (
     UnsupportedPanelError,
 )
 from custom_components.inim_smartliving_alarm.protocol.frames import (
+    SMARTLAN_G,
+    SMARTLAN_SI,
     active_scenario_request,
     carries_pin,
     check_write_ack,
@@ -110,6 +112,10 @@ def test_long_reads_are_split() -> None:
         lambda: read_ram(reg.AREA_STATUS, 0),
         lambda: read_ram(reg.AREA_STATUS, 251),
         lambda: read_eeprom(0x1000000, 1),
+        lambda: read_eeprom(SL1050.pin_table, 251),
+        lambda: read_eeprom(SL1050.pin_table, 2001, SMARTLAN_G),
+        lambda: read_ram(reg.MODEL_STRING, 2001, SMARTLAN_G),
+        lambda: write_ram(reg.ARM_AREAS, bytes(251)),
         lambda: write_ram(reg.ARM_AREAS, b""),
         lambda: active_scenario_request(0x10000),
         lambda: not_ready_request(30, SL1050),
@@ -119,6 +125,24 @@ def test_invalid_requests_are_refused(build) -> None:
     """Out-of-range addresses, lengths and parameters raise ValueError."""
     with pytest.raises(ValueError):
         build()
+
+
+def test_smartlan_g_dialect() -> None:
+    """SmartLAN/G: EEPROM device code 0xFF, reads up to 2000 bytes; RAM as SI."""
+    assert read_eeprom(SL1050.pin_table, 250, SMARTLAN_SI) == cap.PIN_TABLE_REQUEST
+    frame = read_eeprom(SL1050.pin_table, 250, SMARTLAN_G)
+    assert frame[:7] == bytes.fromhex("0000ff61f400fa")
+    assert frame[7] == sum(frame[:7]) & 0xFF
+    assert read_eeprom(SL1050.event_log, 2000, SMARTLAN_G)[:3] == b"\x00\x01\xff"
+    assert read_ram(reg.MODEL_STRING, 12, SMARTLAN_G) == read_ram(reg.MODEL_STRING, 12)
+    assert split(SL1050.zone_records, 4500, SMARTLAN_G) == [
+        (0x05450, 2000),
+        (0x05C20, 2000),
+        (0x063F0, 500),
+    ]
+    assert split(SL1050.zone_records, 900, SMARTLAN_SI) == split(
+        SL1050.zone_records, 900
+    )
 
 
 def test_reply_checks() -> None:

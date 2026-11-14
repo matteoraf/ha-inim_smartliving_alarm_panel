@@ -1,10 +1,16 @@
-"""Request frames and reply checks (SmartLAN/SI encoding).
+"""Request frames and reply checks.
 
 A request is an 8-byte header: op, num_dev, device, address (2 bytes BE),
 length (2 bytes BE), checksum. A read reply is the data followed by its
 checksum; a write is the header followed by the payload, acknowledged with
 one byte, the checksum of the payload.
+
+The two SmartLAN boards use different device codes for EEPROM and allow
+different request sizes (a Dialect); RAM requests are the same on both.
+Builders default to the SmartLAN/SI dialect.
 """
+
+from dataclasses import dataclass
 
 from . import registers as reg
 from .errors import ChecksumError, ProtocolError
@@ -16,12 +22,28 @@ OP_PERIPHERAL_READ = 0x10
 OP_PERIPHERAL_WRITE = 0x11
 
 DEVICE_RAM = 0x00
-DEVICE_EEPROM = 0x01
-DEVICE_FLASH = 0x02
+DEVICE_EEPROM = 0x01  # SmartLAN/SI
+DEVICE_FLASH = 0x02  # SmartLAN/SI
+DEVICE_EEPROM_G = 0xFF  # SmartLAN/G
 
 HEADER_LENGTH = 8
-# Longest read and write payload in one request on SmartLAN/SI
-MAX_TRANSFER = 250
+
+
+@dataclass(frozen=True, slots=True)
+class Dialect:
+    """How one board type encodes requests."""
+
+    name: str
+    eeprom_device: int  # device byte of EEPROM requests
+    max_transfer: int  # longest read in one request
+
+
+SMARTLAN_SI = Dialect("SmartLAN/SI", DEVICE_EEPROM, 250)
+SMARTLAN_G = Dialect("SmartLAN/G", DEVICE_EEPROM_G, 2000)
+
+# Longest read on SmartLAN/SI, and longest write payload on both boards
+# (commands are at most 14 bytes)
+MAX_TRANSFER = SMARTLAN_SI.max_transfer
 
 
 def checksum(data: bytes) -> int:
@@ -46,31 +68,35 @@ def header(op: int, num_dev: int, device: int, address: int, length: int) -> byt
     return data + bytes((checksum(data),))
 
 
-def read_ram(address: int, length: int) -> bytes:
+def read_ram(address: int, length: int, dialect: Dialect = SMARTLAN_SI) -> bytes:
     """Request to read RAM (plain RAM may be read at any address)."""
-    _check_length(length)
+    _check_length(length, dialect.max_transfer)
     return header(OP_READ, 0, DEVICE_RAM, address, length)
 
 
-def read_eeprom(address: int, length: int) -> bytes:
+def read_eeprom(address: int, length: int, dialect: Dialect = SMARTLAN_SI) -> bytes:
     """Request to read EEPROM at a 24-bit address."""
-    _check_length(length)
+    _check_length(length, dialect.max_transfer)
     if not 0 <= address <= 0xFFFFFF:
         raise ValueError(f"address out of range: {address:#x}")
-    return header(OP_READ, address >> 16, DEVICE_EEPROM, address & 0xFFFF, length)
+    return header(
+        OP_READ, address >> 16, dialect.eeprom_device, address & 0xFFFF, length
+    )
 
 
 def write_ram(address: int, payload: bytes) -> bytes:
     """Write to a RAM register: header followed by the payload."""
-    _check_length(len(payload))
+    _check_length(len(payload), MAX_TRANSFER)
     return header(OP_WRITE, 0, DEVICE_RAM, address, len(payload)) + payload
 
 
-def split(address: int, length: int) -> list[tuple[int, int]]:
-    """Split a long read into (address, length) parts of at most 250 bytes."""
+def split(
+    address: int, length: int, dialect: Dialect = SMARTLAN_SI
+) -> list[tuple[int, int]]:
+    """Split a long read into (address, length) parts one request allows."""
     parts = []
     while length > 0:
-        part = min(length, MAX_TRANSFER)
+        part = min(length, dialect.max_transfer)
         parts.append((address, part))
         address += part
         length -= part
@@ -157,6 +183,6 @@ def check_write_ack(ack: bytes, payload: bytes) -> None:
         raise ProtocolError(f"unexpected write acknowledgement {ack.hex()}")
 
 
-def _check_length(length: int) -> None:
-    if not 1 <= length <= MAX_TRANSFER:
-        raise ValueError(f"length must be 1-{MAX_TRANSFER}, not {length}")
+def _check_length(length: int, limit: int) -> None:
+    if not 1 <= length <= limit:
+        raise ValueError(f"length must be 1-{limit}, not {length}")
