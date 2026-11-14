@@ -29,3 +29,6 @@ known-first-party = ["custom_components.inim_smartliving_alarm"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "real_panel: opt-in tests against a real panel (need INIM_PANEL_HOST)",
+]

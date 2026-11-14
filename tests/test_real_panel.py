@@ -1,0 +1,461 @@
+"""Opt-in tests against a real SmartLiving 1050 (firmware 6.x) on SmartLAN/SI.
+
+Skipped unless INIM_PANEL_HOST is set; never run in CI. Disable any other
+local client first (Home Assistant integration, Inim app on the local
+network): the panel accepts one local connection at a time.
+
+    INIM_PANEL_HOST=192.168.1.93 pytest tests/test_real_panel.py
+
+Environment variables:
+
+- INIM_PANEL_HOST: IP address of the SmartLAN/SI (host names are not
+  resolved in tests).
+- INIM_PANEL_PORT: TCP port, 5004 by default.
+- INIM_PANEL_RECORD=1: save every request and reply of each test to
+  tests/real_panel/recordings/ (git-ignored). Recordings hold the panel's
+  names and event log: keep them local; commit only fixtures with the names
+  replaced.
+- INIM_PANEL_WRITE=1 and INIM_TEST_PIN: also run the write tests, which arm
+  and disarm area 4 and bypass and include zone 18 only. Type the PIN
+  without storing it, and unset it afterwards:
+
+      read -rs INIM_TEST_PIN && export INIM_TEST_PIN
+      INIM_PANEL_HOST=... INIM_PANEL_WRITE=1 pytest tests/test_real_panel.py
+      unset INIM_TEST_PIN
+
+All traffic goes through a local proxy (tests/real_panel/proxy.py) that
+refuses every write in read-only mode and, in write mode, every write other
+than arm/disarm of area 4 and bypass/include of zone 18. Every test first
+reads the model string and is skipped unless the panel is a 1050 with
+firmware 6.x, whose memory layout the proxy and the tests assume. The write
+tests are also skipped while the panel is in programming mode.
+"""
+
+import asyncio
+from collections.abc import AsyncGenerator, Awaitable, Callable, Iterator
+from datetime import UTC, datetime, timedelta
+import ipaddress
+import logging
+import os
+from pathlib import Path
+from typing import Any
+
+from homeassistant.core import HomeAssistant
+import pytest
+import pytest_socket
+
+from custom_components.inim_smartliving_alarm.inim_api import InimAlarmAPI
+
+from .fake_panel import FakePanel, checksum
+from .real_panel.proxy import PanelProxy, WriteGuard
+
+HOST = os.environ.get("INIM_PANEL_HOST", "")
+PORT = int(os.environ.get("INIM_PANEL_PORT", "5004"))
+RECORD = bool(os.environ.get("INIM_PANEL_RECORD"))
+WRITE = bool(os.environ.get("INIM_PANEL_WRITE"))
+RECORDINGS = Path(__file__).parent / "real_panel" / "recordings"
+
+# The only area and zone the write tests may change (owner's choice)
+WRITE_AREA = 4
+WRITE_ZONE = 18
+
+# No command is sent in read-only mode, so any PIN will do
+READ_ONLY_PIN = "000000"
+
+# RAM read directly; plain RAM reads may start anywhere inside a block
+RAM_MODEL = 0x4000  # 12 ASCII bytes, e.g. "6.07 01050  "
+MODEL_LENGTH = 12
+RAM_MODEL_FIELD = 0x4005  # the 5-character model number inside that string
+RAM_PANEL_STATE = 0x0D28  # panel state flags (stato_centrale), 2 bytes
+PANEL_STATE_NO_AREA_ARMED = 0x08  # byte 1, bit 3
+PANEL_STATE_PROGRAMMING = 0x40  # byte 1, bit 6
+RAM_AREA_STATUS = 0x2000  # area modes, one nibble per area, then masks
+AREA_STATUS_LENGTH = 16  # on the 1050
+ARMED_MODES = (1, 2, 3)  # away, stay, instant (4 = disarmed)
+RAM_SERIAL_AREA = 0xFEA0  # production serial-number area
+SERIAL_AREA_LENGTH = 52
+RAM_HW_SIGNATURE = 0xFECC
+RAM_BRAND = 0xFED2
+
+pytestmark = [
+    pytest.mark.real_panel,
+    pytest.mark.skipif(not HOST, reason="set INIM_PANEL_HOST to test a real panel"),
+]
+
+ProxyFactory = Callable[[WriteGuard | None], Awaitable[PanelProxy]]
+
+
+@pytest.fixture
+def allow_panel_host(socket_enabled: None) -> None:
+    """Let the tests connect to the panel as well as to 127.0.0.1."""
+    try:
+        ipaddress.ip_address(HOST)
+    except ValueError:
+        pytest.fail(f"INIM_PANEL_HOST must be an IP address, not {HOST!r}")
+    pytest_socket.socket_allow_hosts(["127.0.0.1", HOST])
+
+
+@pytest.fixture
+async def make_proxy(
+    request: pytest.FixtureRequest, allow_panel_host: None
+) -> AsyncGenerator[ProxyFactory]:
+    """Start proxies to the panel; check and optionally save them afterwards."""
+    proxies: list[PanelProxy] = []
+
+    async def make(guard: WriteGuard | None = None) -> PanelProxy:
+        proxy = PanelProxy(HOST, PORT, guard)
+        await proxy.start()
+        proxies.append(proxy)
+        return proxy
+
+    async def stop_all() -> None:
+        for proxy in proxies:
+            await proxy.stop()
+
+    # The proxy's address checks and these tests assume a 1050 on FW 6.x
+    try:
+        model = await raw_read(await make(None), RAM_MODEL, MODEL_LENGTH)
+    except BaseException:
+        await stop_all()
+        raise
+    if model[5:10] != b"01050" or not model.startswith(b"6."):
+        await stop_all()
+        pytest.skip(
+            "written for a SmartLiving 1050 with firmware 6.x, not "
+            f"{model.decode('ascii', 'replace').strip()!r}"
+        )
+
+    yield make
+
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    for index, proxy in enumerate(proxies):
+        await proxy.stop()
+        if RECORD:
+            proxy.save(RECORDINGS / f"{request.node.name}-{stamp}-{index}.json")
+    for proxy in proxies:
+        assert proxy.blocked == [], "the proxy refused requests"
+        assert proxy.errors == []
+
+
+@pytest.fixture
+async def proxy(make_proxy: ProxyFactory) -> PanelProxy:
+    """A read-only proxy to the panel."""
+    return await make_proxy(None)
+
+
+@pytest.fixture
+def api(proxy: PanelProxy) -> InimAlarmAPI:
+    """API client reading the real panel through the read-only proxy."""
+    return InimAlarmAPI(host=proxy.host, port=proxy.port, pin_code_str=READ_ONLY_PIN)
+
+
+async def run(
+    hass: HomeAssistant, func: Callable[..., Any], *args: Any, **kwargs: Any
+) -> Any:
+    """Run a blocking API call in the Home Assistant executor."""
+    return await hass.async_add_executor_job(lambda: func(*args, **kwargs))
+
+
+def read_system_info(api: InimAlarmAPI) -> dict[str, Any] | None:
+    """Connect, read the model and firmware string and disconnect."""
+    if not api.connect():
+        return None
+    try:
+        return api.get_system_info()
+    finally:
+        api.disconnect()
+
+
+def require(result: Any, what: str) -> Any:
+    """Fail with a hint if the panel did not answer."""
+    assert result is not None, (
+        f"no {what} from the panel at {HOST}:{PORT}; is another client "
+        "(Home Assistant, the Inim app) connected?"
+    )
+    return result
+
+
+async def raw_read(proxy: PanelProxy, address: int, length: int) -> bytes:
+    """Read plain RAM through the proxy and return the data, checksum checked."""
+    header = bytes(
+        (0x00, 0x00, 0x00, address >> 8, address & 0xFF, length >> 8, length & 0xFF)
+    )
+    header += bytes((checksum(header),))
+    reader, writer = await asyncio.open_connection(proxy.host, proxy.port)
+    try:
+        writer.write(header)
+        await writer.drain()
+        try:
+            reply = await asyncio.wait_for(reader.readexactly(length + 1), 5)
+        except (TimeoutError, asyncio.IncompleteReadError):
+            pytest.fail(
+                f"no reply to a read of RAM 0x{address:04X} from {HOST}:{PORT}; "
+                "is another client (Home Assistant, the Inim app) connected?"
+            )
+    finally:
+        writer.close()
+        await writer.wait_closed()
+    assert checksum(reply[:-1]) == reply[-1], f"bad checksum at 0x{address:04X}"
+    return reply[:-1]
+
+
+def armed_areas(area_status: bytes) -> list[int]:
+    """Areas (1-10) in any armed mode, from the area status register."""
+    armed = []
+    for area in range(1, 11):
+        byte = area_status[(area - 1) // 2]
+        mode = byte >> 4 if area % 2 == 0 else byte & 0x0F
+        if mode in ARMED_MODES:
+            armed.append(area)
+    return armed
+
+
+async def fake_reply(fake: FakePanel, header: bytes) -> bytes:
+    """Reply of the fake panel to a raw read request."""
+    reader, writer = await asyncio.open_connection(fake.host, fake.port)
+    try:
+        writer.write(header)
+        await writer.drain()
+        reply = b""
+        while True:
+            try:
+                chunk = await asyncio.wait_for(reader.read(4096), 0.3)
+            except TimeoutError:
+                break
+            if not chunk:
+                break
+            reply += chunk
+        return reply
+    finally:
+        writer.close()
+        await writer.wait_closed()
+
+
+# --------------------------------------------------------------- read-only
+
+
+async def test_model_and_firmware(hass: HomeAssistant, api: InimAlarmAPI) -> None:
+    """The panel is a 1050 with firmware 6.x."""
+    info = require(await run(hass, read_system_info, api), "system information")
+
+    assert info["type"] == "01050"
+    assert info["version"].startswith("6.")
+
+
+async def test_configuration_decodes_like_the_fake(
+    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+) -> None:
+    """The configuration has the same structure as the fake panel's."""
+    fake_api = InimAlarmAPI(host=panel.host, port=panel.port, pin_code_str="1234")
+    real = require(
+        await run(hass, api.get_initial_panel_configuration), "configuration"
+    )
+    fake = await run(hass, fake_api.get_initial_panel_configuration)
+
+    assert real["errors"] == []
+    assert real.keys() == fake.keys()
+    for section, key in (
+        ("areas", "names"),
+        ("zones", "zone_names"),
+        ("scenarios", "names"),
+        ("keyboard_names", "names"),
+    ):
+        assert len(real[section][key]) == len(fake[section][key]), section
+        assert all(isinstance(name, str) for name in real[section][key]), section
+
+    activations = real["scenario_activations"]
+    assert len(activations) == len(fake["scenario_activations"])
+    for activation in activations:
+        assert set(activation["area_actions"]) == set(range(1, 11))
+
+    zones = real["zones_config"]["zones_config_detailed"]
+    assert len(zones) == len(fake["zones_config"]["zones_config_detailed"])
+    for zone in zones:
+        assert set(zone["assigned_areas"]) <= set(range(1, 11))
+        assert 0 <= zone.get("internal_index", 0) < 130
+
+
+async def test_live_status(hass: HomeAssistant, api: InimAlarmAPI) -> None:
+    """Every area and zone has a decoded status."""
+    status = require(await run(hass, api.get_live_status_snapshot), "status")
+
+    assert status["errors"] == []
+    assert set(status["areas_status"]["area_statuses"]) == set(range(1, 11))
+    assert set(status["areas_status"]["triggered_areas"]) <= set(range(1, 11))
+    for key, statuses in (
+        ("zones_status", "zone_statuses"),
+        ("zones_excluded_status", "zone_excluded_statuses"),
+        ("zones_triggered_status", "zone_triggered_statuses"),
+    ):
+        assert set(status[key][statuses]) == set(range(1, 51)), key
+    assert status["active_scenario"] is not None
+
+
+async def test_recent_events(hass: HomeAssistant, api: InimAlarmAPI) -> None:
+    """The newest events are read and get plausible timestamps."""
+    result = require(
+        await run(hass, api.execute_get_compact_events, count=5), "event log"
+    )
+
+    events = result["events"]
+    assert events, "the event log is empty"
+    # The panel clock may run a little ahead of this machine's
+    latest = datetime.now(UTC) + timedelta(days=1)
+    for event in events:
+        when = datetime.fromisoformat(event["timestamp_iso"])
+        assert datetime(2015, 1, 1, tzinfo=UTC) < when < latest
+        assert event["action_description"]
+
+
+async def test_replies_have_the_fake_layout(
+    hass: HomeAssistant, api: InimAlarmAPI, proxy: PanelProxy, panel: FakePanel
+) -> None:
+    """Every read gets a valid reply as long as the fake panel's."""
+    require(await run(hass, api.get_initial_panel_configuration), "configuration")
+    require(await run(hass, api.get_live_status_snapshot), "status")
+    require(await run(hass, api.execute_get_compact_events, count=3), "event log")
+
+    reads = [exchange for exchange in proxy.exchanges if not exchange.write]
+    assert reads
+    for exchange in reads:
+        reply = bytes(exchange.reply)
+        assert len(reply) >= 1, exchange.header.hex()
+        assert checksum(reply[:-1]) == reply[-1], exchange.header.hex()
+        expected = await fake_reply(panel, exchange.header)
+        assert len(reply) == len(expected), exchange.header.hex()
+
+
+async def test_ram_read_at_an_offset(proxy: PanelProxy) -> None:
+    """A RAM read may start inside a block: 0x4005 returns the model number."""
+    model = await raw_read(proxy, RAM_MODEL, MODEL_LENGTH)
+    field = await raw_read(proxy, RAM_MODEL_FIELD, 5)
+
+    assert field == model[5:10] == b"01050"
+
+
+async def test_panel_state_flags(proxy: PanelProxy) -> None:
+    """Panel state byte 1 bit 3 is set exactly when no area is armed."""
+    state = await raw_read(proxy, RAM_PANEL_STATE, 2)
+    areas = await raw_read(proxy, RAM_AREA_STATUS, AREA_STATUS_LENGTH)
+
+    no_area_armed = bool(state[1] & PANEL_STATE_NO_AREA_ARMED)
+    assert no_area_armed == (armed_areas(areas) == []), (
+        f"state {state.hex()}, armed areas {armed_areas(areas)}"
+    )
+
+
+async def test_serial_number_area(proxy: PanelProxy) -> None:
+    """The serial-number area reads whole and ends with signature and brand."""
+    area = await raw_read(proxy, RAM_SERIAL_AREA, SERIAL_AREA_LENGTH)
+    signature = await raw_read(proxy, RAM_HW_SIGNATURE, 2)
+    brand = await raw_read(proxy, RAM_BRAND, 2)
+
+    offset = RAM_HW_SIGNATURE - RAM_SERIAL_AREA
+    assert area[offset : offset + 2] == signature
+    offset = RAM_BRAND - RAM_SERIAL_AREA
+    assert area[offset : offset + 2] == brand
+
+
+# ------------------------------------------------------------------ writes
+
+
+@pytest.fixture
+def write_pin() -> str:
+    """The PIN for the write tests, from the environment only."""
+    if not WRITE:
+        pytest.skip("set INIM_PANEL_WRITE=1 to run the write tests")
+    pin = os.environ.get("INIM_TEST_PIN", "")
+    if not pin.isdigit():
+        pytest.skip("set INIM_TEST_PIN (digits only) to run the write tests")
+    return pin
+
+
+@pytest.fixture
+def quiet_api_log() -> Iterator[None]:
+    """Keep the API from logging frames, which contain the PIN, at debug level."""
+    logger = logging.getLogger("custom_components.inim_smartliving_alarm.inim_api")
+    level = logger.level
+    logger.setLevel(logging.INFO)
+    yield
+    logger.setLevel(level)
+
+
+@pytest.fixture
+async def zone_slot(hass: HomeAssistant, api: InimAlarmAPI) -> int:
+    """Physical terminal slot of the write-test zone, read from the panel."""
+    config = require(
+        await run(hass, api.get_initial_panel_configuration), "configuration"
+    )
+    zone = config["zones_config"]["zones_config_detailed"][WRITE_ZONE - 1]
+    assert "internal_index" in zone, f"zone {WRITE_ZONE} has no physical slot"
+    return zone["internal_index"]
+
+
+@pytest.fixture
+async def write_api(
+    write_pin: str,
+    quiet_api_log: None,
+    proxy: PanelProxy,
+    make_proxy: ProxyFactory,
+    zone_slot: int,
+) -> InimAlarmAPI:
+    """API client that may change area 4 and zone 18 only."""
+    state = await raw_read(proxy, RAM_PANEL_STATE, 2)
+    if state[1] & PANEL_STATE_PROGRAMMING:
+        pytest.skip("the panel is in programming mode, which refuses commands")
+    guarded = await make_proxy(WriteGuard(area=WRITE_AREA, zone_slot=zone_slot))
+    return InimAlarmAPI(host=guarded.host, port=guarded.port, pin_code_str=write_pin)
+
+
+async def test_arm_and_disarm_area(
+    hass: HomeAssistant, write_api: InimAlarmAPI
+) -> None:
+    """Area 4 can be armed and disarmed; no other area changes."""
+    before = require(await run(hass, write_api.get_live_status_snapshot), "status")
+    areas = before["areas_status"]
+    if (
+        areas["area_statuses"][WRITE_AREA] != "disarmed"
+        or WRITE_AREA in areas["triggered_areas"]
+    ):
+        pytest.skip(f"area {WRITE_AREA} is not disarmed and quiet")
+
+    try:
+        assert await run(
+            hass, write_api.execute_arm_disarm_areas, areas_to_arm=[WRITE_AREA]
+        )
+        armed = await run(hass, write_api.get_live_status_snapshot)
+        statuses = armed["areas_status"]["area_statuses"]
+        assert statuses[WRITE_AREA] == "armed"
+        assert {k: v for k, v in statuses.items() if k != WRITE_AREA} == {
+            k: v for k, v in areas["area_statuses"].items() if k != WRITE_AREA
+        }
+    finally:
+        assert await run(
+            hass, write_api.execute_arm_disarm_areas, areas_to_disarm=[WRITE_AREA]
+        )
+
+    after = await run(hass, write_api.get_live_status_snapshot)
+    assert after["areas_status"]["area_statuses"][WRITE_AREA] == "disarmed"
+
+
+async def test_bypass_and_include_zone(
+    hass: HomeAssistant, write_api: InimAlarmAPI, zone_slot: int
+) -> None:
+    """Zone 18 can be bypassed and included again."""
+    slot = zone_slot
+    before = require(await run(hass, write_api.get_live_status_snapshot), "status")
+    excluded = before["zones_excluded_status"]["zone_excluded_statuses"]
+    if excluded[WRITE_ZONE] != "enabled":
+        pytest.skip(f"zone {WRITE_ZONE} is not included")
+
+    try:
+        assert await run(hass, write_api.execute_set_zone_excluded_status, slot, True)
+        bypassed = await run(hass, write_api.get_live_status_snapshot)
+        statuses = bypassed["zones_excluded_status"]["zone_excluded_statuses"]
+        assert statuses[WRITE_ZONE] == "disabled"
+    finally:
+        assert await run(hass, write_api.execute_set_zone_excluded_status, slot, False)
+
+    after = await run(hass, write_api.get_live_status_snapshot)
+    statuses = after["zones_excluded_status"]["zone_excluded_statuses"]
+    assert statuses[WRITE_ZONE] == "enabled"
