@@ -1,0 +1,347 @@
+"""Connection handling shared by the SmartLAN transports.
+
+Measured on a SmartLAN/SI board: it closes a connection after about 6.7 s
+without requests, and it ignores a new connection that arrives right after
+the previous one closed (the client's TCP stack only retries after 1 s);
+it may also accept a connection and close it at once. So the transport
+keeps one connection, replaces it before it can go idle, pauses briefly
+before reconnecting, and repeats a read once if its connection was lost.
+
+At debug level every frame is logged, with the PIN of commands masked;
+replies that may hold PINs are not logged.
+"""
+
+import asyncio
+from collections.abc import AsyncIterator
+import contextlib
+from enum import IntEnum
+import heapq
+import itertools
+import logging
+import time
+
+from ..protocol import registers as reg
+from ..protocol.commands import Command, CommandResult, decode_result
+from ..protocol.errors import ProtocolError
+from ..protocol.frames import (
+    carries_pin,
+    check_write_ack,
+    describe,
+    parse_read_reply,
+    read_eeprom,
+    read_ram as read_ram_frame,
+    split,
+)
+
+_LOGGER = logging.getLogger(__name__)
+
+CONNECT_TIMEOUT = 5.0
+CONNECT_ATTEMPTS = 3
+REPLY_TIMEOUT = 5.0
+RECONNECT_PAUSE = 0.15  # after a close, before the next connection attempt
+IDLE_RECONNECT = (
+    5.0  # replace a connection idle for longer (the board drops it at ~6.7 s)
+)
+
+
+class TransportError(Exception):
+    """The panel could not be reached or did not answer."""
+
+
+class ConnectError(TransportError):
+    """No connection could be opened."""
+
+
+class ConnectionLost(TransportError):
+    """The connection closed while waiting for a reply."""
+
+
+class ReplyTimeout(TransportError):
+    """No complete reply arrived in time."""
+
+
+class Priority(IntEnum):
+    """Who goes first when several requests wait (lower first)."""
+
+    COMMAND = 0
+    POLL = 1
+
+
+class PriorityLock:
+    """A lock whose waiters are served by priority, then in arrival order."""
+
+    def __init__(self) -> None:
+        """Create an unlocked lock."""
+        self._locked = False
+        self._waiters: list[tuple[int, int, asyncio.Future[None]]] = []
+        self._order = itertools.count()
+
+    @property
+    def locked(self) -> bool:
+        """Whether someone holds the lock."""
+        return self._locked
+
+    async def acquire(self, priority: Priority) -> None:
+        """Wait for the lock."""
+        if not self._locked and not self._waiters:
+            self._locked = True
+            return
+        future: asyncio.Future[None] = asyncio.get_running_loop().create_future()
+        entry = (int(priority), next(self._order), future)
+        heapq.heappush(self._waiters, entry)
+        try:
+            await future
+        except asyncio.CancelledError:
+            if future.done() and not future.cancelled():
+                self.release()  # the lock was handed over just before the cancel
+            elif entry in self._waiters:
+                self._waiters.remove(entry)
+                heapq.heapify(self._waiters)
+            raise
+
+    def release(self) -> None:
+        """Hand the lock to the next waiter, or unlock."""
+        while self._waiters:
+            _, _, future = heapq.heappop(self._waiters)
+            if not future.done():
+                future.set_result(None)
+                return
+        self._locked = False
+
+
+class Session:
+    """Exclusive use of the connection for one or more requests."""
+
+    def __init__(self, transport: "PanelTransport") -> None:
+        """Wrap a transport whose lock is held."""
+        self._transport = transport
+
+    async def read(
+        self, frame: bytes, length: int, *, sensitive: bool = False
+    ) -> bytes:
+        """Send a read request and return the checked data.
+
+        A read is repeated once on a new connection if the connection was
+        lost; it is not repeated after a timeout. The reply of a sensitive
+        read (such as the PIN table) is never logged.
+        """
+        for attempt in (1, 2):
+            try:
+                reply = await self._transport.exchange(
+                    frame, length + 1, log_reply=not sensitive
+                )
+            except ConnectionLost:
+                if attempt == 2:
+                    raise
+                _LOGGER.debug("Connection lost during a read; repeating it")
+                continue
+            try:
+                return parse_read_reply(reply, length)
+            except ProtocolError:
+                await self._transport.disconnect()  # do not reuse an out-of-step link
+                raise
+        raise AssertionError("unreachable")
+
+    async def read_ram(
+        self, address: int, length: int, *, sensitive: bool = False
+    ) -> bytes:
+        """Read RAM, in parts if longer than one request allows."""
+        return await self._read_parts(address, length, read_ram_frame, sensitive)
+
+    async def read_eeprom(
+        self, address: int, length: int, *, sensitive: bool = False
+    ) -> bytes:
+        """Read EEPROM, in parts if longer than one request allows."""
+        return await self._read_parts(address, length, read_eeprom, sensitive)
+
+    async def write(self, frame: bytes, payload: bytes) -> None:
+        """Send a write and check its acknowledgement; never repeated.
+
+        The acknowledgement of a command is a checksum over the PIN too, so
+        it is only logged as right or wrong.
+        """
+        pin = carries_pin(frame)
+        reply = await self._transport.exchange(frame, 1, log_reply=not pin)
+        try:
+            check_write_ack(reply, payload)
+        except ProtocolError:
+            if pin:
+                _LOGGER.debug("<- wrong acknowledgement")
+            await self._transport.disconnect()
+            raise
+        if pin:
+            _LOGGER.debug("<- acknowledged")
+
+    async def command(self, command: Command) -> CommandResult:
+        """Send a command, then read the panel's result for it."""
+        await self.write(command.frame, command.payload)
+        data = await self.read(read_ram_frame(reg.COMMAND_RESULT, 1), 1)
+        return decode_result(command.kind, data)
+
+    async def _read_parts(
+        self, address: int, length: int, build, sensitive: bool
+    ) -> bytes:
+        data = b""
+        for part_address, part_length in split(address, length):
+            data += await self.read(
+                build(part_address, part_length), part_length, sensitive=sensitive
+            )
+        return data
+
+
+class PanelTransport:
+    """One TCP connection to a SmartLAN board, used one request at a time."""
+
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        *,
+        connect_timeout: float = CONNECT_TIMEOUT,
+        connect_attempts: int = CONNECT_ATTEMPTS,
+        reply_timeout: float = REPLY_TIMEOUT,
+        reconnect_pause: float = RECONNECT_PAUSE,
+        idle_reconnect: float = IDLE_RECONNECT,
+    ) -> None:
+        """Set up the transport; nothing connects until the first request."""
+        self.host = host
+        self.port = port
+        self.connect_timeout = connect_timeout
+        self.connect_attempts = connect_attempts
+        self.reply_timeout = reply_timeout
+        self.reconnect_pause = reconnect_pause
+        self.idle_reconnect = idle_reconnect
+        self.connections_opened = 0
+        self._reader: asyncio.StreamReader | None = None
+        self._writer: asyncio.StreamWriter | None = None
+        self._lock = PriorityLock()
+        self._last_close = float("-inf")
+        self._last_activity = float("-inf")
+
+    @property
+    def connected(self) -> bool:
+        """Whether a connection is open."""
+        return self._writer is not None and not self._writer.is_closing()
+
+    @contextlib.asynccontextmanager
+    async def session(
+        self, priority: Priority = Priority.POLL
+    ) -> AsyncIterator[Session]:
+        """Hold the connection for several requests."""
+        await self._lock.acquire(priority)
+        try:
+            yield Session(self)
+        finally:
+            self._lock.release()
+
+    async def read(
+        self, frame: bytes, length: int, priority: Priority = Priority.POLL
+    ) -> bytes:
+        """Send one read request and return the checked data."""
+        async with self.session(priority) as session:
+            return await session.read(frame, length)
+
+    async def command(self, command: Command) -> CommandResult:
+        """Send one command ahead of any waiting poll and return its result."""
+        async with self.session(Priority.COMMAND) as session:
+            return await session.command(command)
+
+    async def close(self) -> None:
+        """Close the connection once the current request is done."""
+        async with self.session(Priority.COMMAND):
+            await self.disconnect()
+
+    # ------------------------------------------------- with the lock held
+
+    async def exchange(
+        self, data: bytes, reply_length: int, *, log_reply: bool = True
+    ) -> bytes:
+        """Send bytes and read a reply of known length (lock must be held).
+
+        At debug level the request is logged with the PIN masked, and the
+        reply unless log_reply is False.
+        """
+        await self._ensure_connected()
+        assert self._reader is not None and self._writer is not None
+        debug = _LOGGER.isEnabledFor(logging.DEBUG)
+        if debug:
+            _LOGGER.debug("-> %s", describe(data))
+        try:
+            self._writer.write(self._encode(data))
+            await self._writer.drain()
+            reply = await asyncio.wait_for(
+                self._read_reply(self._reader, reply_length), self.reply_timeout
+            )
+        except TimeoutError as err:
+            await self.disconnect()
+            raise ReplyTimeout(f"no reply from {self.host}:{self.port}") from err
+        except (OSError, asyncio.IncompleteReadError) as err:
+            await self.disconnect()
+            raise ConnectionLost(f"connection to {self.host}:{self.port} lost") from err
+        self._last_activity = time.monotonic()
+        if debug:
+            if log_reply:
+                _LOGGER.debug("<- %s", reply.hex(" "))
+            else:
+                _LOGGER.debug("<- %d bytes, not logged", len(reply))
+        return reply
+
+    async def disconnect(self) -> None:
+        """Close the connection (lock must be held)."""
+        writer, self._reader, self._writer = self._writer, None, None
+        if writer is None:
+            return
+        writer.close()
+        with contextlib.suppress(OSError):
+            await writer.wait_closed()
+        self._last_close = time.monotonic()
+        _LOGGER.debug("Disconnected from %s:%s", self.host, self.port)
+
+    async def _ensure_connected(self) -> None:
+        if self._writer is not None:
+            assert self._reader is not None
+            idle = time.monotonic() - self._last_activity
+            if self._writer.is_closing() or self._reader.at_eof():
+                await self.disconnect()
+            elif idle > self.idle_reconnect:
+                _LOGGER.debug("Connection idle for %.1f s; replacing it", idle)
+                await self.disconnect()
+        if self._writer is None:
+            await self._connect()
+
+    async def _connect(self) -> None:
+        error: Exception | None = None
+        for attempt in range(1, self.connect_attempts + 1):
+            wait = self._last_close + self.reconnect_pause - time.monotonic()
+            if wait > 0:
+                await asyncio.sleep(wait)
+            try:
+                self._reader, self._writer = await asyncio.wait_for(
+                    asyncio.open_connection(self.host, self.port), self.connect_timeout
+                )
+            except OSError as err:  # refused, unreachable or timed out
+                error = err
+                self._last_close = time.monotonic()
+                _LOGGER.debug(
+                    "Connection attempt %s to %s:%s failed: %r",
+                    attempt,
+                    self.host,
+                    self.port,
+                    err,
+                )
+                continue
+            self.connections_opened += 1
+            self._last_activity = time.monotonic()
+            _LOGGER.debug("Connected to %s:%s", self.host, self.port)
+            return
+        raise ConnectError(f"cannot connect to {self.host}:{self.port}: {error!r}")
+
+    # ---------------------------------------------- framing (per board type)
+
+    def _encode(self, data: bytes) -> bytes:
+        """Bytes to send for a request."""
+        raise NotImplementedError
+
+    async def _read_reply(self, reader: asyncio.StreamReader, length: int) -> bytes:
+        """Read a reply of length bytes (data and checksum)."""
+        raise NotImplementedError

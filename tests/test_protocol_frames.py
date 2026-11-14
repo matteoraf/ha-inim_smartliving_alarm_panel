@@ -28,7 +28,9 @@ from custom_components.inim_smartliving_alarm.protocol.errors import (
 )
 from custom_components.inim_smartliving_alarm.protocol.frames import (
     active_scenario_request,
+    carries_pin,
     check_write_ack,
+    describe,
     not_ready_request,
     parse_read_reply,
     read_eeprom,
@@ -280,3 +282,17 @@ def test_command_results(kind: CommandKind, code: int, reason: str | None) -> No
     result = decode_result(kind, bytes((code,)))
     assert result.reason == reason
     assert result.ok is (code == 0)
+
+
+def test_describe_masks_the_pin() -> None:
+    """Frames are logged in hex with the PIN of commands masked."""
+    assert carries_pin(cap.ARM_AREA_3)
+    assert describe(cap.ARM_AREA_3) == (
+        "01 00 00 20 06 00 0e 35 | ** ** ** ** ** ** | 00 01 00 00 00 00 00 00"
+    )
+    assert describe(cap.BYPASS_SLOT_23).endswith("| ** ** ** ** ** ** | 17 00 01")
+    assert not carries_pin(cap.FIRMWARE_REQUEST)
+    assert describe(cap.FIRMWARE_REQUEST) == "00 00 00 40 00 00 0c 4c"
+    other = write_ram(0x1234, b"\x01\x02")
+    assert not carries_pin(other)
+    assert describe(other).endswith("| 01 02")
