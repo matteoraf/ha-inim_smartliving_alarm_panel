@@ -9,6 +9,7 @@ import asyncio
 from collections.abc import AsyncGenerator, Awaitable, Callable
 import json
 from pathlib import Path
+import socket
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -17,7 +18,13 @@ import pytest
 from custom_components.inim_smartliving_alarm.inim_api import InimAlarmAPI
 
 from .fake_panel import FakePanel, checksum
-from .real_panel.proxy import PanelProxy, WriteGuard, area_actions, reads_pin_table
+from .real_panel.proxy import (
+    RECONNECT_PAUSE,
+    PanelProxy,
+    WriteGuard,
+    area_actions,
+    reads_pin_table,
+)
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
@@ -89,6 +96,13 @@ async def raw_exchange(proxy: PanelProxy, request: bytes) -> bytes:
     finally:
         writer.close()
         await writer.wait_closed()
+
+
+def closed_port() -> int:
+    """A local TCP port nothing listens on."""
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
 
 
 def writes(panel: FakePanel) -> list[int]:
@@ -256,3 +270,73 @@ async def test_recordings_do_not_contain_the_pin(
         assert item["payload"].startswith("ff" * 6)
         assert item["reply"] == ""
         assert item["reply_length"] == 1
+
+
+# ------------------------------------------------------- panel connections
+
+# asyncio.sleep() may wake up a little early
+TOLERANCE = 0.01
+
+
+async def test_reconnects_are_spaced(
+    hass: HomeAssistant, make_proxy: ProxyFactory
+) -> None:
+    """A new connection to the panel waits a moment after the last one closed."""
+    first = await make_proxy(None)
+    second = await make_proxy(None)
+
+    await run(hass, read_system_info, api_for(first))
+    await run(hass, read_system_info, api_for(first))
+    await run(hass, read_system_info, api_for(second))
+
+    assert len(first.connected_at) == len(first.closed_at) == 2
+    assert first.connected_at[1] - first.closed_at[0] >= RECONNECT_PAUSE - TOLERANCE
+    # The pause also applies to another proxy
+    assert second.connected_at[0] - first.closed_at[1] >= RECONNECT_PAUSE - TOLERANCE
+
+
+async def test_connect_attempts_that_hang_are_retried(
+    hass: HomeAssistant, panel: FakePanel, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A connection attempt the panel never answers is given up and retried."""
+    open_connection = asyncio.open_connection
+    attempts: list[int] = []
+
+    async def first_attempt_hangs(host: str, port: int, *args: Any, **kwargs: Any):
+        if port == panel.port:
+            attempts.append(port)
+            if len(attempts) == 1:
+                await asyncio.sleep(3600)  # like a connection request the board drops
+        return await open_connection(host, port, *args, **kwargs)
+
+    monkeypatch.setattr(asyncio, "open_connection", first_attempt_hangs)
+    proxy = PanelProxy(panel.host, panel.port, connect_timeout=0.2)
+    await proxy.start()
+    try:
+        info = await run(hass, read_system_info, api_for(proxy))
+    finally:
+        await proxy.stop()
+
+    assert info["version"] == "6.07"
+    assert len(attempts) == 2
+    assert proxy.errors == []
+
+
+async def test_unreachable_panel_gives_up_after_the_deadline() -> None:
+    """Without an answer before the deadline the client connection is closed."""
+    proxy = PanelProxy(
+        "127.0.0.1", closed_port(), connect_deadline=0.5, reconnect_pause=0.1
+    )
+    await proxy.start()
+    try:
+        started = asyncio.get_running_loop().time()
+        assert await raw_exchange(proxy, SYSTEM_INFO) == b""
+        elapsed = asyncio.get_running_loop().time() - started
+    finally:
+        await proxy.stop()
+
+    # Gives up once a further attempt could not start before the deadline
+    assert 0.5 - 0.1 <= elapsed < 3
+    assert len(proxy.errors) == 1
+    assert proxy.errors[0].startswith("cannot connect to the panel within 0.5 s")
+    assert proxy.exchanges == []

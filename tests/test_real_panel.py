@@ -44,10 +44,13 @@ from homeassistant.core import HomeAssistant
 import pytest
 import pytest_socket
 
-from custom_components.inim_smartliving_alarm.inim_api import InimAlarmAPI
+from custom_components.inim_smartliving_alarm.inim_api import (
+    InimAlarmAPI,
+    InimAlarmConstants,
+)
 
 from .fake_panel import FakePanel, checksum
-from .real_panel.proxy import PanelProxy, WriteGuard
+from .real_panel.proxy import CONNECT_DEADLINE, PanelProxy, WriteGuard
 
 HOST = os.environ.get("INIM_PANEL_HOST", "")
 PORT = int(os.environ.get("INIM_PANEL_PORT", "5004"))
@@ -61,6 +64,10 @@ WRITE_ZONE = 18
 
 # No command is sent in read-only mode, so any PIN will do
 READ_ONLY_PIN = "000000"
+
+# Seconds to wait for a reply: the proxy may retry its connection to the
+# panel for up to CONNECT_DEADLINE seconds first
+REPLY_TIMEOUT = CONNECT_DEADLINE + 10
 
 # RAM read directly; plain RAM reads may start anywhere inside a block
 RAM_MODEL = 0x4000  # 12 ASCII bytes, e.g. "6.07 01050  "
@@ -83,6 +90,12 @@ pytestmark = [
 ]
 
 ProxyFactory = Callable[[WriteGuard | None], Awaitable[PanelProxy]]
+
+
+@pytest.fixture(autouse=True)
+def patient_api(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Let the API wait as long as the proxy may take to reach the panel."""
+    monkeypatch.setattr(InimAlarmConstants, "DEFAULT_TIMEOUT", REPLY_TIMEOUT)
 
 
 @pytest.fixture
@@ -186,11 +199,14 @@ async def raw_read(proxy: PanelProxy, address: int, length: int) -> bytes:
         writer.write(header)
         await writer.drain()
         try:
-            reply = await asyncio.wait_for(reader.readexactly(length + 1), 5)
+            reply = await asyncio.wait_for(
+                reader.readexactly(length + 1), REPLY_TIMEOUT
+            )
         except (TimeoutError, asyncio.IncompleteReadError):
             pytest.fail(
                 f"no reply to a read of RAM 0x{address:04X} from {HOST}:{PORT}; "
-                "is another client (Home Assistant, the Inim app) connected?"
+                "is another client (Home Assistant, the Inim app) connected, "
+                "or did the board stop accepting connections?"
             )
     finally:
         writer.close()
