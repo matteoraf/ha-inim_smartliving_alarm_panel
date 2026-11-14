@@ -192,13 +192,17 @@ class FakePanel:
             return None
         request = self._decode(header, payload)
         self.requests.append(request)
+        limit = (
+            c.MAX_READ_LENGTH if self.transport == TRANSPORT_SI else c.MAX_READ_LENGTH_G
+        )
         if (
-            self.transport == TRANSPORT_SI
-            and not request.write
+            not request.write
             and request.space in (SPACE_EEPROM, SPACE_FLASH)
-            and request.length > c.MAX_READ_LENGTH
+            and request.length > limit
         ):
-            self.protocol_errors.append(f"read longer than 250 bytes: {header.hex()}")
+            self.protocol_errors.append(
+                f"read longer than {limit} bytes: {header.hex()}"
+            )
         return request
 
     def _decode(self, header: bytes, payload: bytes) -> Request:

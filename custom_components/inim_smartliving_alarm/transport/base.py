@@ -19,16 +19,18 @@ import heapq
 import itertools
 import logging
 import time
+from typing import ClassVar
 
 from ..protocol import registers as reg
 from ..protocol.commands import Command, CommandResult, decode_result
 from ..protocol.errors import ProtocolError
 from ..protocol.frames import (
+    Dialect,
     carries_pin,
     check_write_ack,
     describe,
     parse_read_reply,
-    read_eeprom,
+    read_eeprom as read_eeprom_frame,
     read_ram as read_ram_frame,
     split,
 )
@@ -152,7 +154,7 @@ class Session:
         self, address: int, length: int, *, sensitive: bool = False
     ) -> bytes:
         """Read EEPROM, in parts if longer than one request allows."""
-        return await self._read_parts(address, length, read_eeprom, sensitive)
+        return await self._read_parts(address, length, read_eeprom_frame, sensitive)
 
     async def write(self, frame: bytes, payload: bytes) -> None:
         """Send a write and check its acknowledgement; never repeated.
@@ -175,22 +177,32 @@ class Session:
     async def command(self, command: Command) -> CommandResult:
         """Send a command, then read the panel's result for it."""
         await self.write(command.frame, command.payload)
-        data = await self.read(read_ram_frame(reg.COMMAND_RESULT, 1), 1)
+        result = read_ram_frame(reg.COMMAND_RESULT, 1, self._transport.dialect)
+        data = await self.read(result, 1)
         return decode_result(command.kind, data)
 
     async def _read_parts(
         self, address: int, length: int, build, sensitive: bool
     ) -> bytes:
+        dialect = self._transport.dialect
         data = b""
-        for part_address, part_length in split(address, length):
+        for part_address, part_length in split(address, length, dialect):
             data += await self.read(
-                build(part_address, part_length), part_length, sensitive=sensitive
+                build(part_address, part_length, dialect),
+                part_length,
+                sensitive=sensitive,
             )
         return data
 
 
 class PanelTransport:
-    """One TCP connection to a SmartLAN board, used one request at a time."""
+    """One TCP connection to a SmartLAN board, used one request at a time.
+
+    Subclasses set the board's request dialect and implement the framing
+    (_encode and _read_reply).
+    """
+
+    dialect: ClassVar[Dialect]
 
     def __init__(
         self,
@@ -278,6 +290,9 @@ class PanelTransport:
         except (OSError, asyncio.IncompleteReadError) as err:
             await self.disconnect()
             raise ConnectionLost(f"connection to {self.host}:{self.port} lost") from err
+        except ProtocolError:  # the framing could not decode the reply
+            await self.disconnect()
+            raise
         self._last_activity = time.monotonic()
         if debug:
             if log_reply:
@@ -343,5 +358,8 @@ class PanelTransport:
         raise NotImplementedError
 
     async def _read_reply(self, reader: asyncio.StreamReader, length: int) -> bytes:
-        """Read a reply of length bytes (data and checksum)."""
+        """Read a reply of length bytes (data and checksum).
+
+        Raise ProtocolError for a reply that cannot be decoded.
+        """
         raise NotImplementedError

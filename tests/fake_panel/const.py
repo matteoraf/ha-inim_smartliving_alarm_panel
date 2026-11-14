@@ -15,6 +15,7 @@ NUM_KEYPADS = 10
 EVENT_RING_SIZE = 500
 LABEL_LENGTH = 16
 MAX_READ_LENGTH = 250  # longest single read on SmartLAN/SI
+MAX_READ_LENGTH_G = 2000  # longest single read on SmartLAN/G
 
 # Wire values of the DEVICE byte (SmartLAN/SI encoding)
 DEVICE_RAM = 0x00
