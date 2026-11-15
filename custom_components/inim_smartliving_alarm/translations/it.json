@@ -64,7 +64,7 @@
           "data": {
             "polling_interval": "Intervallo di aggiornamento (secondi)",
             "limit_areas": "Numero di Aree da importare",
-            "limit_zones": "Numero di Zone da importare",
+            "limit_zones": "Zone da importare (fino a questo numero di zona)",
             "limit_scenarios": "Numero di Scenari da importare",
             "event_log_size": "Numero di eventi da memorizzare",
             "reader_names": "Nomi dei Lettori (separati da virgola)",
@@ -112,7 +112,7 @@
             "pin": "Codice PIN",
             "polling_interval": "Intervallo di aggiornamento (secondi)",
             "limit_areas": "Numero di Aree da importare",
-            "limit_zones": "Numero di Zone da importare",
+            "limit_zones": "Zone da importare (fino a questo numero di zona)",
             "limit_scenarios": "Numero di Scenari da importare",
             "event_log_size": "Numero di eventi da memorizzare nel log",
             "reader_names": "Nomi dei Lettori (elenco separato da virgola es: Lettore Esterno, Lettore Garage, ecc.)",

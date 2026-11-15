@@ -18,13 +18,15 @@ Features
         
     *   **Binary Sensor entities**: Per area, whether it is in alarm now, in tamper now, and whether it has an alarm memory (kept after the alarm until it is reset).
         
-*   **Detailed Zone Monitoring**: Zones are exposed as:
+*   **Detailed Zone Monitoring**: Every zone of the panel (zones of input, input/output and double terminals, including the second zone of double terminals) is exposed as:
     
     *   **Binary Sensor Status entities**: With device classes automatically assigned based on zone type. "Double Balancing" and "Shutter" types are assigned the motion device class, while "Normally Closed" or "Normally Open" are assigned the opening class.
         
     *   Extended attributes provide additional configuration parameters for each zone.
     
-    *   **Binary Sensor Triggered entities**: Telling if a zone has triggered the system.
+    *   **Binary Sensor Alarm memory entities**: Telling if a zone has triggered the system (until the alarm memory is reset).
+    
+    *   **Binary Sensor Tamper entities**: Telling if a zone is in tamper or short circuit.
     
     *   **Switch entities**: To allow individual zone exclusion.
         
@@ -128,6 +130,12 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **The alarm panel shows Triggered only while an area is in alarm.** Before, it stayed Triggered until the alarm memory was reset; now it returns to its armed or disarmed state when the alarm ends, and the *Alarm memory* sensors keep the memory. Automations that relied on Triggered lasting until the reset should use the *Alarm memory* sensors instead.
     
+*   **Zones follow the panel's terminal types.** Output terminals (for example a siren) and unused terminals no longer get zone entities, and the second zones of double terminals (51 to 100 on the 1050) are added. Raise the zone limit in the options to 100 to see second zones: existing installations keep their limit (50 by default before). Entities that earlier versions created for terminals that are not zones are **not deleted automatically**: they stay as unavailable entities, and the log lists them at every start (*"these entities belong to terminals that are not zones on the panel"*). Delete them in **Settings** -> **Devices & services** -> **Entities**.
+    
+*   **"Zone X Triggered" is now called "Zone X Alarm memory"** (same entity ID). Zones in short circuit or tamper are no longer shown as unknown: a new *Zone X Tamper* sensor turns on, and the zone's `status_text` says `short` or `tamper`. Such zones are also listed when they prevent a scenario from being activated.
+    
+*   Your configuration entry is updated once more (version 1.3): the zone list is completed from the panel data already stored, without contacting the panel. If that data is incomplete, a warning asks you to use **Re-read panel configuration**.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -162,7 +170,7 @@ After installation and restarting Home Assistant:
     
     *   **Polling Interval**: How often Home Assistant should query the panel for status updates (in seconds).
         
-    *   **Limit Areas/Zones/Scenarios**: The maximum number of each entity type to create. This is useful for managing the number of entities in Home Assistant.
+    *   **Limit Areas/Zones/Scenarios**: The maximum number of each entity type to create. This is useful for managing the number of entities in Home Assistant. The zone limit counts zone numbers: zones above it get no entities, so keep it at 100 (the default) on a SmartLiving 1050 if you use double terminals, whose second zones are numbered 51 to 100.
         
     *   **Event Log Size**: The number of recent events to store and display in the event log sensor's attributes.
         
@@ -224,11 +232,15 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
 *   **Zones**:
     
-    *   *binary\_sensor.your\_panel\_name\_zone\_X*: Represents a single zone. It turns on if the zone is alarmed. The device class (motion or opening) is automatically assigned based on the zone's configuration on the panel. Extended attributes provide more details about the zone's configuration.
+    Only zones that exist on the panel get entities: zones of input, input/output and double terminals. Output terminals (for example a siren) and unused terminals have none. Zones 1 to N are the zones of the panel's N terminals (50 on the SmartLiving 1050); a double terminal *n* also has a second zone, numbered N + *n* (51 to 100 on the 1050).
 
-    *   *binary\_sensor.your\_panel\_name\_zone\_X_triggered_*: Represents a single zone. It turns on if the zone has triggered the system.
+    *   *binary\_sensor.your\_panel\_name\_zone\_X*: Represents a single zone. It turns on if the zone is alarmed (open). The device class (motion or opening) is automatically assigned based on the zone's configuration on the panel. Extended attributes provide more details about the zone's configuration, including `terminal_type`, `status_text` (`clear`, `alarmed`, `short` or `tamper`) and `test` (zone in test mode).
 
-    *   *switch.your\_panel\_name\_zone\_X*: Lets you enable or disable (exclude) individual zones.
+    *   *binary\_sensor.your\_panel\_name\_zone\_X\_triggered* (named *Zone X Alarm memory*): Turns on if the zone has triggered the system, until the alarm memory is reset. The `tamper_memory` attribute tells whether the zone's terminal has a tamper memory (both zones of a double terminal share it).
+
+    *   *binary\_sensor.your\_panel\_name\_zone\_X\_tamper*: Turns on while the zone is in tamper or short circuit (`status_text` tells which).
+
+    *   *switch.your\_panel\_name\_zone\_X*: Lets you enable or disable (exclude) individual zones, including the second zone of double terminals.
         
 *   **Scenarios**:
     
@@ -288,10 +300,6 @@ Known limitations
 
 These are known and will be fixed in the coming versions:
 
-*   **Zones in short circuit or tamper** show as unknown, together with the other zone of the same pair.
-    
-*   **The second zone of double terminals** (zones above the number of terminals) is not shown, and output terminals may appear as zones.
-    
 *   **Event times** are shown in UTC+1, whatever Home Assistant's time zone; after the panel's event log has wrapped around, new events may stop appearing.
     
 *   On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example `switch.home_home_area_3`); existing installations keep their IDs.

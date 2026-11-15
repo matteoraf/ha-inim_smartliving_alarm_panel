@@ -26,6 +26,7 @@ from .const import (
     KEY_LIVE_ZONES_STATUS,
     PROBLEM_ZONE_STATES_FOR_ARMING,
 )
+from .legacy import zone_exists
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -167,7 +168,7 @@ async def async_handle_scenario_activation_failure(
                         ),
                         None,
                     )
-                    if zone_config:
+                    if zone_config and zone_exists(zone_config):
                         assigned_areas = zone_config.get(
                             KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS, []
                         )

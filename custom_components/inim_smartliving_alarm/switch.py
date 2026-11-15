@@ -36,7 +36,7 @@ from .const import (
     KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP,
     KEY_LIVE_ZONES_EXCLUDED_STATUS,
 )
-from .legacy import LegacyPanelClient
+from .legacy import LegacyPanelClient, zones_to_create
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -115,47 +115,38 @@ async def async_setup_entry(
         CONF_LIMIT_ZONES, entry.data.get(CONF_LIMIT_ZONES, DEFAULT_LIMIT_ZONES)
     )
 
-    num_zones_to_create = min(len(all_zone_names), limit_zones)
-
-    if all_zone_names and zones_config_detailed:
-        # Apply the limit before iterating
-        zones_to_process = zones_config_detailed[:num_zones_to_create]
-        _LOGGER.debug(
-            "Setting up %s Zone Enabled Switches (Limit: %s, Available: {len(zones_config_detailed)})",
-            len(zones_to_process),
-            {limit_zones},
+    # a switch needs the zone's physical slot from the zone details
+    zones = (
+        zones_to_create(all_zone_names, zones_config_detailed, limit_zones)
+        if zones_config_detailed
+        else []
+    )
+    _LOGGER.debug(
+        "Setting up zone bypass switches for up to %s zones (Limit: %s)",
+        len(zones),
+        limit_zones,
+    )
+    for zone_index_0_based, display_zone_name, zone_detail in zones:
+        internal_index = zone_detail.get("internal_index") if zone_detail else None
+        if internal_index is None:
+            _LOGGER.warning(
+                "Skipping the bypass switch of zone %s: no physical terminal slot",
+                zone_index_0_based + 1,
+            )
+            continue
+        switches_to_add.append(
+            InimZoneEnabledSwitch(
+                coordinator,
+                api_client,
+                entry,
+                panel_display_name,
+                system_info,
+                zone_index_0_based + 1,
+                display_zone_name,
+                internal_index,
+                second_zone=bool(zone_detail.get("second_zone")),
+            )
         )
-
-        for zone_detail in zones_to_process:
-            zone_index_0_based = zone_detail.get("zone_index")
-            internal_index = zone_detail.get("internal_index")
-
-            if zone_index_0_based is not None and internal_index is not None:
-                zone_id_1_based = zone_index_0_based + 1
-
-                display_zone_name = (
-                    all_zone_names[zone_index_0_based]
-                    if zone_index_0_based < len(all_zone_names)
-                    else f"Zone {zone_id_1_based}"
-                )
-
-                switches_to_add.append(
-                    InimZoneEnabledSwitch(
-                        coordinator,
-                        api_client,
-                        entry,
-                        panel_display_name,
-                        system_info,
-                        zone_id_1_based,
-                        display_zone_name,
-                        internal_index,
-                    )
-                )
-            else:
-                _LOGGER.warning(
-                    "Skipping zone switch due to missing 'zone_index' or 'internal_index' in config details: %s",
-                    zone_detail,
-                )
 
     if switches_to_add:
         async_add_entities(switches_to_add)
@@ -300,6 +291,8 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
         zone_id_1_based: int,
         zone_name: str,
         zone_internal_index: int,
+        *,
+        second_zone: bool = False,
     ) -> None:
         super().__init__(coordinator)
         self.api_client = api_client
@@ -309,6 +302,7 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
         self._zone_id_1_based = zone_id_1_based
         self._zone_name = zone_name
         self._zone_internal_index = zone_internal_index
+        self._second_zone = second_zone  # the second zone of a double terminal
         self._attr_name = f"{self._panel_display_name} Zone {self._zone_id_1_based} Enabled ({self._zone_name})"
         self._attr_unique_id = (
             f"{config_entry.entry_id}_zone_enabled_switch_{self._zone_id_1_based}"
@@ -368,6 +362,7 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
         )
         if await self.api_client.execute_set_zone_excluded_status(
             zone_internal_index=self._zone_internal_index,
+            second_zone=self._second_zone,
             excluded_status=False,  # False means enable
         ):
             await self.coordinator.async_request_refresh()
@@ -381,6 +376,7 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
         )
         if await self.api_client.execute_set_zone_excluded_status(
             zone_internal_index=self._zone_internal_index,
+            second_zone=self._second_zone,
             excluded_status=True,  # True means exclude
         ):
             await self.coordinator.async_request_refresh()

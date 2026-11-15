@@ -50,7 +50,7 @@ DEFAULT_PANEL_NAME = "Inim Smartliving"  # Default if user doesn't provide one
 # - 50 Zones
 # - 30 Scenarios
 DEFAULT_LIMIT_AREAS = 10
-DEFAULT_LIMIT_ZONES = 50
+DEFAULT_LIMIT_ZONES = 100  # zone numbers 1-2L (second zones from L+1)
 DEFAULT_LIMIT_SCENARIOS = 30
 
 # Default limiys for imported events
@@ -138,6 +138,8 @@ KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP = "zone_excluded_statuses"
 
 KEY_LIVE_ZONES_TRIGGERED_STATUS = "zones_triggered_status"
 KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP = "zone_triggered_statuses"
+KEY_LIVE_ZONE_TAMPER_MEMORY_STATUSES_MAP = "zone_tamper_memory_statuses"  # {zone: bool}
+KEY_LIVE_ZONE_TEST_STATUSES_MAP = "zone_test_statuses"  # in zones_excluded_status
 
 KEY_PROCESSED_EVENTS = "processed_events"  # List of new events from last poll
 KEY_LATEST_EVENT_INDEX_VAL = (
@@ -161,9 +163,15 @@ KEY_ZONE_ASSIGNED_AREAS = "assigned_areas"  # Re-using from init if structure ma
 KEY_AREA_ID = "id"  # Typically area_id_1_based
 KEY_AREA_NAME = "name"
 
-# List of zone states that are considered problematic for arming, based on get_zones_status() output
-# The API's get_zones_status() returns "alarmed" or "clear".
-PROBLEM_ZONE_STATES_FOR_ARMING = ["alarmed"]
+# Zone states as reported in KEY_LIVE_ZONE_STATUSES_MAP
+ZONE_STATE_CLEAR = "clear"  # at rest
+ZONE_STATE_ALARMED = "alarmed"  # open
+ZONE_STATE_SHORT = "short"  # short circuit
+ZONE_STATE_TAMPER = "tamper"
+ZONE_TAMPER_STATES = (ZONE_STATE_SHORT, ZONE_STATE_TAMPER)
+
+# Zone states that prevent a scenario from being activated
+PROBLEM_ZONE_STATES_FOR_ARMING = [ZONE_STATE_ALARMED, *ZONE_TAMPER_STATES]
 # --- End Data Structure Keys ---
 
 # --- Sensor Entity Suffixes/Keys ---

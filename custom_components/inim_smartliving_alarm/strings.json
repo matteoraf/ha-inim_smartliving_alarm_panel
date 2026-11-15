@@ -64,7 +64,7 @@
           "data": {
             "polling_interval": "Polling Interval (seconds)",
             "limit_areas": "Number of Areas to import",
-            "limit_zones": "Number of Zones to import",
+            "limit_zones": "Zones to import (up to this zone number)",
             "limit_scenarios": "Number of Scenarios to import",
             "event_log_size": "Number of Events to store in log",
             "reader_names": "Reader Names (comma-separated)",
@@ -112,7 +112,7 @@
             "pin": "New PIN Code",
             "polling_interval": "Polling Interval (seconds)",
             "limit_areas": "Number of Areas to import",
-            "limit_zones": "Number of Zones to import",
+            "limit_zones": "Zones to import (up to this zone number)",
             "limit_scenarios": "Number of Scenarios to import",
             "event_log_size": "Number of Events to store in log",
             "reader_names": "Reader Names (comma-separated list for Reader 1, Reader 2, etc.)",

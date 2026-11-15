@@ -53,9 +53,10 @@ async def panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
     await fake.stop()
 
 
-@pytest.fixture
-async def entry(hass: HomeAssistant, panel: FakePanel) -> AsyncGenerator[ConfigEntry]:
-    """The integration added through the config flow, unloaded afterwards."""
+async def add_entry(
+    hass: HomeAssistant, panel: FakePanel, *, limit_zones: int = 50
+) -> ConfigEntry:
+    """Add the integration through the config flow and wait until it is loaded."""
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": "user"}
     )
@@ -84,7 +85,7 @@ async def entry(hass: HomeAssistant, panel: FakePanel) -> AsyncGenerator[ConfigE
         {
             "polling_interval": 30,
             "limit_areas": 10,
-            "limit_zones": 50,
+            "limit_zones": limit_zones,
             "limit_scenarios": 30,
             "event_log_size": 5,
             "reader_names": "",
@@ -100,6 +101,13 @@ async def entry(hass: HomeAssistant, panel: FakePanel) -> AsyncGenerator[ConfigE
 
     config_entry = hass.config_entries.async_entries(DOMAIN)[0]
     assert config_entry.state is ConfigEntryState.LOADED
+    return config_entry
+
+
+@pytest.fixture
+async def entry(hass: HomeAssistant, panel: FakePanel) -> AsyncGenerator[ConfigEntry]:
+    """The integration added through the config flow, unloaded afterwards."""
+    config_entry = await add_entry(hass, panel)
     yield config_entry
 
     assert await hass.config_entries.async_unload(config_entry.entry_id)

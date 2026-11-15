@@ -38,9 +38,16 @@ from .const import (
     KEY_LIVE_TAMPER_AREAS_LIST,
     KEY_LIVE_TAMPER_MEMORY_AREAS_LIST,
     KEY_LIVE_TRIGGERED_AREAS_LIST,
+    KEY_LIVE_ZONE_STATUSES_MAP,
+    KEY_LIVE_ZONE_TAMPER_MEMORY_STATUSES_MAP,
+    KEY_LIVE_ZONE_TEST_STATUSES_MAP,
     KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP,
+    KEY_LIVE_ZONES_EXCLUDED_STATUS,
+    KEY_LIVE_ZONES_STATUS,
     KEY_LIVE_ZONES_TRIGGERED_STATUS,
+    ZONE_TAMPER_STATES,
 )
+from .legacy import zones_to_create
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -97,42 +104,37 @@ async def async_setup_entry(
 
     binary_sensors_to_add = []
 
-    num_zones_to_create = min(len(all_zone_names), limit_zones)
+    zones = zones_to_create(all_zone_names, detailed_zone_configs, limit_zones)
     _LOGGER.debug(
-        "Setting up %s Zone Binary Sensors (Limit: %s, Available: %s)",
-        num_zones_to_create,
+        "Setting up binary sensors for %s zones (Limit: %s, Available: %s)",
+        len(zones),
         limit_zones,
         len(all_zone_names),
     )
-    for i in range(num_zones_to_create):
-        zone_name = (
-            all_zone_names[i]
-            if i < len(all_zone_names) and all_zone_names[i]
-            else f"Zone {i + 1}"
-        )
-        zone_config_detail = next(
-            (zc for zc in detailed_zone_configs if zc.get("zone_index") == i), None
-        )
+    for zone_index, zone_name, zone_config_detail in zones:
         binary_sensors_to_add.append(
             InimZoneBinarySensor(
                 coordinator,
                 entry,
                 panel_display_name,
                 system_info,
-                i,
+                zone_index,
                 zone_name,
                 zone_config_detail,
             )
         )
-        # Add the new sensor for "triggered" status
-        binary_sensors_to_add.append(
-            InimZoneTriggeredBinarySensor(
+        binary_sensors_to_add.extend(
+            sensor_class(
                 coordinator,
                 entry,
                 panel_display_name,
                 system_info,
-                i,
+                zone_index,
                 zone_name,
+            )
+            for sensor_class in (
+                InimZoneTriggeredBinarySensor,
+                InimZoneTamperBinarySensor,
             )
         )
 
@@ -212,6 +214,15 @@ class BaseInimBinarySensor(CoordinatorEntity, BinarySensorEntity):
             sw_version=self._system_info.get("version", "Unknown"),
         )
 
+    def _zone_value(self, group: str, key: str, default: Any = None) -> Any:
+        """This zone's value in a map of the live status (zone sensors only)."""
+        data = self.coordinator.data or {}
+        values = (data.get(group) or {}).get(key) or {}
+        return values.get(self._zone_id_1_based, default)
+
+    def _zone_flag(self, group: str, key: str) -> bool:
+        return bool(self._zone_value(group, key, False))
+
 
 class InimZoneBinarySensor(BaseInimBinarySensor):
     """Binary sensor for the status of an individual Inim Zone."""
@@ -280,6 +291,9 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
             "zone_id": self._zone_id_1_based,
             "zone_name": self._zone_name,
             "status_text": current_status_text,
+            "test": self._zone_flag(
+                KEY_LIVE_ZONES_EXCLUDED_STATUS, KEY_LIVE_ZONE_TEST_STATUSES_MAP
+            ),
         }
         if self._zone_config_detail:
             for key, value in self._zone_config_detail.items():
@@ -304,7 +318,10 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
 
 
 class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
-    """Binary sensor for the persistent triggered status of an Inim Zone."""
+    """Alarm memory of a zone: on after an alarm until the memory is reset.
+
+    Was the "triggered" sensor; its unique and object IDs are kept.
+    """
 
     _attr_device_class = BinarySensorDeviceClass.PROBLEM
 
@@ -321,7 +338,9 @@ class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
         super().__init__(coordinator, config_entry, panel_display_name, system_info)
         self._zone_id_1_based = zone_index_0_based + 1
         self._zone_name = zone_name
-        self._attr_name = f"Zone {self._zone_id_1_based} Triggered ({self._zone_name})"
+        self._attr_name = (
+            f"Zone {self._zone_id_1_based} Alarm memory ({self._zone_name})"
+        )
         self._attr_unique_id = (
             f"{config_entry.entry_id}_zone_triggered_{self._zone_id_1_based}"
         )
@@ -354,8 +373,67 @@ class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the state attributes, with the terminal's tamper memory."""
+        return {
+            "zone_id": self._zone_id_1_based,
+            "zone_name": self._zone_name,
+            "tamper_memory": self._zone_flag(
+                KEY_LIVE_ZONES_TRIGGERED_STATUS,
+                KEY_LIVE_ZONE_TAMPER_MEMORY_STATUSES_MAP,
+            ),
+        }
+
+
+class InimZoneTamperBinarySensor(BaseInimBinarySensor):
+    """A zone in tamper or short circuit now."""
+
+    _attr_device_class = BinarySensorDeviceClass.TAMPER
+
+    def __init__(
+        self,
+        coordinator: Any,
+        config_entry: ConfigEntry,
+        panel_display_name: str,
+        system_info: dict[str, Any],
+        zone_index_0_based: int,
+        zone_name: str,
+    ) -> None:
+        """Initialize the zone tamper binary sensor."""
+        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        self._zone_id_1_based = zone_index_0_based + 1
+        self._zone_name = zone_name
+        self._attr_name = f"Zone {self._zone_id_1_based} Tamper ({self._zone_name})"
+        self._attr_unique_id = (
+            f"{config_entry.entry_id}_zone_tamper_{self._zone_id_1_based}"
+        )
+        self._update_state_from_coordinator()
+
+    @property
+    def suggested_object_id(self) -> str | None:
+        """Return a suggested object ID for the entity."""
+        return f"{self._panel_display_name}_zone_{self._zone_id_1_based}_tamper"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        self._update_state_from_coordinator()
+        self.async_write_ha_state()
+
+    def _status(self) -> str:
+        return self._zone_value(
+            KEY_LIVE_ZONES_STATUS, KEY_LIVE_ZONE_STATUSES_MAP, "Unknown"
+        )
+
+    def _update_state_from_coordinator(self) -> None:
+        self._attr_is_on = self._status() in ZONE_TAMPER_STATES
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
-        return {"zone_id": self._zone_id_1_based, "zone_name": self._zone_name}
+        return {
+            "zone_id": self._zone_id_1_based,
+            "zone_name": self._zone_name,
+            "status_text": self._status(),
+        }
 
 
 class InimAreaBinarySensor(BaseInimBinarySensor):

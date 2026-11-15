@@ -102,7 +102,7 @@ async def test_setup_smartlan_si(hass: HomeAssistant, panel: FakePanel) -> None:
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     entry: ConfigEntry = result["result"]
-    assert (entry.version, entry.minor_version) == (1, 2)
+    assert (entry.version, entry.minor_version) == (1, 3)
     assert entry.data["board"] == "smartlan_si"
     assert "username" not in entry.data
     assert entry.state is ConfigEntryState.LOADED
@@ -277,7 +277,7 @@ async def test_reconfigure_smartlan_g(hass: HomeAssistant, g_panel: FakePanel) -
 
 
 async def test_migration_adds_the_board(hass: HomeAssistant) -> None:
-    """Entries from before 1.2 are SmartLAN/SI entries."""
+    """Entries from before 1.2 are SmartLAN/SI entries (and then go to 1.3)."""
     entry = MockConfigEntry(
         domain=DOMAIN,
         version=1,
@@ -287,7 +287,7 @@ async def test_migration_adds_the_board(hass: HomeAssistant) -> None:
     entry.add_to_hass(hass)
 
     assert await async_migrate_entry(hass, entry)
-    assert entry.minor_version == 2
+    assert entry.minor_version == 3
     assert entry.data == {
         "host": "192.0.2.10",
         "port": 5004,
