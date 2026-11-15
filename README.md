@@ -32,7 +32,7 @@ Features
         
 *   **Advanced Scenario Control**: Scenarios are exposed as:
     
-    *   **Button entities**: To activate any scenario directly. If activation is prevented by an alarmed zone, a persistent notification with details of the problematic zones is shown in Home Assistant.
+    *   **Button entities**: To activate any scenario directly. If a zone that is not ready prevents the activation, or the panel refuses it, Home Assistant shows an error and a persistent notification with the reason (see [When the panel refuses a command](#when-the-panel-refuses-a-command)).
         
     *   **Binary Sensor entities**: To indicate if a specific scenario is currently active.
         
@@ -148,6 +148,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **SmartLAN/G:** the board's replies are now read the way the board sends them (the data alone, without the panel's checksum). Before, every read failed and setup reported a wrong user name or password even with the right credentials. A wrong user name or password is now reported only when the board's reply cannot be decrypted; any other unexpected reply has its own message (see [Troubleshooting](#troubleshooting)).
     
+*   **Commands that are not carried out now show an error.** Before, a refused arm, disarm, bypass or reset was only written to the log, and the alarm panel's error notifications did not appear at all. Now the action fails with a message that tells why (for example a PIN the panel no longer accepts, or a PIN not enabled for that area), in the dashboard and in automation traces; see [When the panel refuses a command](#when-the-panel-refuses-a-command). An automation step that fails stops that automation unless the step has `continue_on_error: true`. The `inim_smartliving_alarm_scenario_activation_failed` event has a new `panel_result` field (the panel's answer, or `null` when the panel did not refuse the command), and its `reason` can now also be `command_failed` or `invalid_code`.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -256,7 +258,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
 *   **Scenarios**:
     
-    *   *button.your\_panel\_name\_scenario\_X*: Allows direct activation of a specific scenario. If activation fails due to an open zone, a persistent notification will appear in Home Assistant.
+    *   *button.your\_panel\_name\_scenario\_X*: Allows direct activation of a specific scenario. If the activation fails (a zone not ready, or the panel refuses it), an error and a persistent notification with the reason appear in Home Assistant.
         
     *   *binary\_sensor.your\_panel\_name\_scenario\_X\_active*: A binary sensor that is 'on' if that specific scenario is currently the active one on the panel.
         
@@ -315,6 +317,29 @@ These are known and will be fixed in the coming versions:
 *   On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example `switch.home_home_area_3`); existing installations keep their IDs.
     
 
+### When the panel refuses a command
+
+Arming, disarming, bypassing a zone, activating a scenario and resetting the alarm memory fail with a message when they are not carried out. The message says which of three things happened:
+
+*   **The integration did not send the command**: before a scenario, the integration checks the zones it arms. If some are not at rest, the message lists them (for example *"Night was not activated because these zones are not ready: Kitchen window (12)"*) and nothing is sent to the panel.
+    
+*   **The panel refused it**: the message gives the panel's reason:
+    
+    | Message | What to do |
+    |---|---|
+    | The panel did not accept the PIN | The user code was changed or deleted on the panel: enter the current PIN with **Reconfigure**. |
+    | The PIN is not enabled for it | The user code does not control that area: enable it on the panel or use another code. |
+    | A zone programmed to block arming while not ready is not at rest | Close or bypass that zone, then arm again. |
+    | The zone cannot be bypassed / belongs to no area | The zone's programming on the panel does not allow it. |
+    | Already in the requested state | Nothing to do: the zone or area was already as requested. |
+    | Its terminal is out of range / not connected / not in use | The zone's terminal has changed on the panel: use **Re-read panel configuration**. |
+    | The panel refused the command (result code N) | The panel gave no reason, or one this integration does not know yet. |
+    
+*   **The command could not be completed**: the panel could not be reached, or its answer could not be read. See *Cannot Connect* below; try again once the connection is back.
+    
+
+Scenario activations that fail also show a persistent notification and fire the `inim_smartliving_alarm_scenario_activation_failed` event, as before.
+
 Troubleshooting
 ---------------
 
@@ -354,10 +379,13 @@ Troubleshooting
     
     *   Use the **Re-read panel configuration** button or action (see [Re-reading the panel configuration](#re-reading-the-panel-configuration)).
         
-*   **Scenarios not activating or Areas not arming/disarming**:
+*   **Scenarios not activating or Areas not arming/disarming**: the error message tells why (see [When the panel refuses a command](#when-the-panel-refuses-a-command)).
+    
     
     *   Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions. Setup and **Reconfigure** refuse a PIN that matches no user code; for a panel set up with an older version of the integration, the log shows a warning ("The PIN does not match any user code of the panel") each time the integration connects. You can change it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)).
         
+*   **The panel armed an area with a zone open**: the area switches do not check the zones before arming. The panel itself refuses only when the open zone is programmed to block arming while not ready; otherwise it arms, and the open zone can set off an alarm right away. A check of the zones before arming is planned for a later version.
+    
 *   **Entities Not Appearing or Not Updating**:
     
     *   Check the Home Assistant logs (Settings -> System -> Logs) for errors related to the inim\_smartliving\_alarm integration.

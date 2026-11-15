@@ -123,6 +123,10 @@ class PanelState:
     faults: bytes = bytes((0, 0)) + (910).to_bytes(2, "little") + bytes(3)  # 13.8 V
     keypad_temperatures: dict[int, float] = field(default_factory=dict)
     command_result: int = c.RESULT_OK
+    # Arming an area (directly or by scenario) with a zone not at rest is
+    # accepted, as a real 1050 does; True refuses it with the "open zones"
+    # result, as for zones programmed to block arming while not ready
+    block_arming_when_not_ready: bool = False
     in_programming: bool = False  # panel state flag only; commands are not refused
     voice_board: bool = True
     sirens_stopped: int = 0
@@ -390,6 +394,9 @@ class PanelState:
             self._zone_open_in_area(zone, area) for zone in range(self.layout.zones)
         )
 
+    def _blocks_arming(self, area: int) -> bool:
+        return self.block_arming_when_not_ready and self._area_has_open_zones(area)
+
     def _scenario_actions(self, record: bytes) -> dict[int, int]:
         actions = {}
         for area in range(1, self.layout.areas + 1):
@@ -420,7 +427,7 @@ class PanelState:
         if any(not allowed >> (area - 1) & 1 for area in requested):
             return c.RESULT_CODE_NOT_ENABLED
         if any(
-            action != c.MODE_DISARMED and self._area_has_open_zones(area)
+            action != c.MODE_DISARMED and self._blocks_arming(area)
             for area, action in requested.items()
         ):
             return c.RESULT_OPEN_ZONES
@@ -523,7 +530,7 @@ class PanelState:
         if any(not allowed >> (area - 1) & 1 for area in actions):
             return c.RESULT_CODE_NOT_ENABLED
         if any(
-            action != c.MODE_DISARMED and self._area_has_open_zones(area)
+            action != c.MODE_DISARMED and self._blocks_arming(area)
             for area, action in actions.items()
         ):
             return c.RESULT_OPEN_ZONES

@@ -10,6 +10,7 @@ from homeassistant.components.alarm_control_panel import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall, callback
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import service
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -27,6 +28,8 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_PANEL_NAME,
     DOMAIN,
+    KEY_INIT_AREA_NAMES,
+    KEY_INIT_AREAS,
     KEY_INIT_SYSTEM_INFO,
     KEY_LIVE_ACTIVE_SCENARIO,
     KEY_LIVE_ACTIVE_SCENARIO_NUMBER,
@@ -36,8 +39,9 @@ from .const import (
     KEY_LIVE_TRIGGERED_AREAS_LIST,
     SERVICE_ALARM_RESET,
 )
+from .errors import InimCommandError, async_send_command
 from .legacy import LegacyPanelClient
-from .utils import async_handle_scenario_activation_failure
+from .utils import async_activate_scenario
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -83,6 +87,8 @@ async def async_setup_entry(
             _LOGGER.error("Alarm control panel component not loaded.")
             return
 
+        failures: list[InimCommandError] = []
+
         # Get the string IDs of all entities targeted by the service call.
         target_entity_ids = await service.async_extract_entity_ids(call)
 
@@ -121,7 +127,14 @@ async def async_setup_entry(
                 triggered_areas,
             )
             for area_id in triggered_areas:
-                await entity.async_alarm_reset(area_id=area_id)
+                # reset every area; report the first that was not reset
+                try:
+                    await entity.async_alarm_reset(area_id=area_id)
+                except InimCommandError as err:
+                    failures.append(err)
+
+        if failures:
+            raise failures[0]
 
     hass.services.async_register(
         DOMAIN,
@@ -361,17 +374,15 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
     async def _async_activate_scenario_by_mapping(
         self, scenario_mapping_key: str, action_name: str
     ) -> None:
-        """Helper to activate a scenario based on its mapping key."""
+        """Activate the scenario mapped to an action; raise an error if not done."""
         scenario_idx_to_activate = self._scenario_mappings.get(scenario_mapping_key)
 
         if scenario_idx_to_activate is None:
-            _LOGGER.error("%s: No scenario mapped for %s", self.name, action_name)
-            self.hass.components.persistent_notification.async_create(
-                f"Configuration error for '{self.name}': No scenario is mapped for the action '{action_name}'. Please check the integration options.",
-                title="Inim Alarm Configuration Error",
-                notification_id=f"{self.unique_id}_config_error_{action_name.replace(' ', '_')}",
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="scenario_not_mapped",
+                translation_placeholders={"action": action_name, "panel": self.name},
             )
-            return
 
         _LOGGER.info(
             "%s: Attempting to %s (scenario index %s)",
@@ -379,57 +390,19 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
             action_name,
             scenario_idx_to_activate,
         )
-        try:
-            # execute_activate_scenario checks that no zone prevents it first
-            success = await self.api_client.execute_activate_scenario(
-                scenario_idx_to_activate
-            )
-            if success:
-                _LOGGER.info(
-                    "%s: %s (scenario %s) command acknowledged by panel",
-                    self.name,
-                    action_name,
-                    scenario_idx_to_activate,
-                )
-                # Request a refresh to get the latest state from the panel
-                if self.coordinator:  # Ensure coordinator exists
-                    await self.coordinator.async_request_refresh()
-            else:
-                # Handle activation failure and send notification with details
-                _LOGGER.error(
-                    "%s: API reported failure for %s (scenario %s)",
-                    self.name,
-                    action_name,
-                    scenario_idx_to_activate,
-                )
-                is_disarm = scenario_mapping_key == CONF_SCENARIO_DISARM
-                await async_handle_scenario_activation_failure(
-                    self.hass,
-                    self.coordinator,
-                    self._initial_panel_config,
-                    self.unique_id,
-                    self.name,
-                    scenario_idx_to_activate,
-                    action_name,
-                    is_disarm_scenario=is_disarm,
-                )
-                # The utility function now handles the coordinator refresh on failure if coordinator is passed.
-        except Exception as e:
-            _LOGGER.error(
-                "%s: API error during %s (scenario %s): %s",
-                self.name,
-                action_name,
-                scenario_idx_to_activate,
-                e,
-            )
-            self.hass.components.persistent_notification.async_create(
-                f"An API error occurred while trying to {action_name} for '{self.name}': {e}",
-                title="Inim Alarm API Error",
-                notification_id=f"{self.unique_id}_api_error_{action_name.replace(' ', '_')}",
-            )
-            # Optionally, refresh coordinator even on exception to try and get a stable state
-            if self.coordinator:
-                await self.coordinator.async_request_refresh()
+        # Checks that no zone prevents it first; raises an error if not
+        # carried out, after a notification and the activation-failed event
+        await async_activate_scenario(
+            self.hass,
+            self.coordinator,
+            self.api_client,
+            self._initial_panel_config,
+            self.unique_id,
+            self.name,
+            scenario_idx_to_activate,
+            action_name,
+            is_disarm_scenario=scenario_mapping_key == CONF_SCENARIO_DISARM,
+        )
 
     async def async_alarm_disarm(self, code: str | None = None) -> None:
         """Send disarm command."""
@@ -460,43 +433,23 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         )
 
     async def async_alarm_reset(self, area_id: int) -> None:
-        """Send the alarm reset command for a specific area to the panel."""
+        """Reset the alarm memory of one area; raise an error if not done."""
         _LOGGER.info("%s: Attempting to reset alarm for area %d", self.name, area_id)
+        names = self._initial_panel_config.get(KEY_INIT_AREAS, {}).get(
+            KEY_INIT_AREA_NAMES, []
+        )
+        area_name = (
+            names[area_id - 1] if 0 < area_id <= len(names) else ""
+        ) or f"Area {area_id}"
         try:
-            success = await self.api_client.execute_reset_area_alarm(area_id)
-            if success:
-                _LOGGER.info(
-                    "%s: Alarm reset command for area %d acknowledged by panel",
-                    self.name,
-                    area_id,
-                )
-                # Request a refresh to get the updated state from the panel
-                if self.coordinator:
-                    await self.coordinator.async_request_refresh()
-            else:
-                _LOGGER.error(
-                    "%s: API reported failure for alarm reset for area %d",
-                    self.name,
-                    area_id,
-                )
-                self.hass.components.persistent_notification.async_create(
-                    f"The alarm panel failed to reset the alarm for area {area_id} on '{self.name}'. Check the logs for details.",
-                    title="Inim Alarm Reset Failed",
-                    notification_id=f"{self.unique_id}_reset_error_{area_id}",
-                )
-
-        except Exception as e:
-            _LOGGER.error(
-                "%s: API error during alarm reset for area %d: %s",
-                self.name,
-                area_id,
-                e,
+            await async_send_command(
+                self.api_client.panel.reset_alarm_memory(frozenset({area_id})),
+                area_name,
             )
-            self.hass.components.persistent_notification.async_create(
-                f"An API error occurred while trying to reset area {area_id} for '{self.name}': {e}",
-                title="Inim Alarm API Error",
-                notification_id=f"{self.unique_id}_reset_api_error_{area_id}",
-            )
-            # Optionally, refresh coordinator even on exception to try and get a stable state
-            if self.coordinator:
-                await self.coordinator.async_request_refresh()
+        finally:
+            await self.coordinator.async_request_refresh()
+        _LOGGER.info(
+            "%s: Alarm reset command for area %d carried out by the panel",
+            self.name,
+            area_id,
+        )

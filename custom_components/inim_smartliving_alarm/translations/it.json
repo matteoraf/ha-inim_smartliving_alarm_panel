@@ -144,6 +144,57 @@
       },
       "entry_not_loaded": {
         "message": "{title} non è caricata, quindi la configurazione della centrale non può essere riletta."
+      },
+      "command_failed": {
+        "message": "Il comando per {target} non è stato completato: {error}"
+      },
+      "zones_not_ready": {
+        "message": "{target} non è stato attivato perché queste zone non sono pronte: {zones}."
+      },
+      "refused_invalid_code": {
+        "message": "La centrale non ha accettato il PIN per {target}. Il PIN potrebbe essere stato cambiato o cancellato sulla centrale: inserisci quello attuale con Riconfigura."
+      },
+      "refused_open_zones": {
+        "message": "La centrale ha rifiutato l'inserimento di {target}: una zona programmata per bloccare l'inserimento quando non è pronta non è a riposo."
+      },
+      "refused_code_not_enabled": {
+        "message": "La centrale ha rifiutato il comando per {target}: il PIN non è abilitato."
+      },
+      "refused_already_in_state": {
+        "message": "La centrale non ha modificato {target}: è già nello stato richiesto."
+      },
+      "refused_slot_out_of_range": {
+        "message": "La centrale ha rifiutato il comando per {target}: il terminale è fuori intervallo."
+      },
+      "refused_slot_not_connected": {
+        "message": "La centrale ha rifiutato il comando per {target}: il terminale non è collegato."
+      },
+      "refused_null_terminal": {
+        "message": "La centrale ha rifiutato il comando per {target}: il terminale non è utilizzato."
+      },
+      "refused_cannot_be_bypassed": {
+        "message": "La centrale ha rifiutato il comando per {target}: la zona non può essere esclusa."
+      },
+      "refused_no_areas": {
+        "message": "La centrale ha rifiutato il comando per {target}: la zona non appartiene a nessuna area."
+      },
+      "refused_double_zone_error": {
+        "message": "La centrale ha rifiutato il comando per {target}: errore di zona doppia."
+      },
+      "refused_output_not_enabled": {
+        "message": "La centrale ha rifiutato il comando per {target}: l'uscita non è abilitata."
+      },
+      "refused_areas_armed": {
+        "message": "La centrale ha rifiutato il comando per {target}: l'uscita è bloccata mentre le sue aree sono inserite."
+      },
+      "refused_refused": {
+        "message": "La centrale ha rifiutato il comando per {target}."
+      },
+      "refused_unknown": {
+        "message": "La centrale ha rifiutato il comando per {target} (codice di risultato {code})."
+      },
+      "scenario_not_mapped": {
+        "message": "Nessuno scenario è associato a {action} per {panel}: sceglilo nelle opzioni dell'integrazione."
       }
     }
   }

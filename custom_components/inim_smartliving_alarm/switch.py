@@ -36,7 +36,9 @@ from .const import (
     KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP,
     KEY_LIVE_ZONES_EXCLUDED_STATUS,
 )
+from .errors import async_send_command
 from .legacy import LegacyPanelClient, zones_to_create
+from .protocol.commands import ArmMode
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -232,35 +234,27 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         """Turn the switch on (arm the area)."""
         _LOGGER.info("Arming Area %s (%s)", self._area_id_1_based, self._area_name)
 
-        success = await self.api_client.execute_arm_disarm_areas(
-            areas_to_arm=[self._area_id_1_based]
+        await async_send_command(
+            self.api_client.panel.arm_areas({self._area_id_1_based: ArmMode.AWAY}),
+            self._area_name,
         )
-
-        if success:
-            self._attr_is_on = True  # Optimistic update
-            self.async_write_ha_state()
-            await self.coordinator.async_request_refresh()
-            _LOGGER.info("ARM command for Area %s acknowledged", self._area_id_1_based)
-        else:
-            _LOGGER.error("Failed to arm Area %s", self._area_id_1_based)
+        self._attr_is_on = True  # Optimistic update
+        self.async_write_ha_state()
+        await self.coordinator.async_request_refresh()
+        _LOGGER.info("ARM command for Area %s acknowledged", self._area_id_1_based)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the switch off (disarm the area)."""
         _LOGGER.info("Disarming Area %s (%s)", self._area_id_1_based, self._area_name)
 
-        success = await self.api_client.execute_arm_disarm_areas(
-            areas_to_disarm=[self._area_id_1_based]
+        await async_send_command(
+            self.api_client.panel.arm_areas({self._area_id_1_based: ArmMode.DISARM}),
+            self._area_name,
         )
-
-        if success:
-            self._attr_is_on = False  # Optimistic update
-            self.async_write_ha_state()
-            await self.coordinator.async_request_refresh()
-            _LOGGER.info(
-                "DISARM command for Area %s acknowledged", self._area_id_1_based
-            )
-        else:
-            _LOGGER.error("Failed to disarm Area %s", self._area_id_1_based)
+        self._attr_is_on = False  # Optimistic update
+        self.async_write_ha_state()
+        await self.coordinator.async_request_refresh()
+        _LOGGER.info("DISARM command for Area %s acknowledged", self._area_id_1_based)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -360,26 +354,32 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
             self._zone_id_1_based,
             self._zone_internal_index,
         )
-        if await self.api_client.execute_set_zone_excluded_status(
-            zone_internal_index=self._zone_internal_index,
-            second_zone=self._second_zone,
-            excluded_status=False,  # False means enable
-        ):
-            await self.coordinator.async_request_refresh()
+        await async_send_command(
+            self.api_client.panel.bypass_zone(
+                self._zone_internal_index,
+                bypass=False,
+                second_zone=self._second_zone,
+            ),
+            self._zone_name,
+        )
+        await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the switch off (exclude/bypass the zone)."""
         _LOGGER.info(
-            "Excluding Zone %s (Internal Index: %s})",
+            "Excluding Zone %s (Internal Index: %s)",
             self._zone_id_1_based,
             self._zone_internal_index,
         )
-        if await self.api_client.execute_set_zone_excluded_status(
-            zone_internal_index=self._zone_internal_index,
-            second_zone=self._second_zone,
-            excluded_status=True,  # True means exclude
-        ):
-            await self.coordinator.async_request_refresh()
+        await async_send_command(
+            self.api_client.panel.bypass_zone(
+                self._zone_internal_index,
+                bypass=True,
+                second_zone=self._second_zone,
+            ),
+            self._zone_name,
+        )
+        await self.coordinator.async_request_refresh()
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
