@@ -3,8 +3,25 @@
       "step": {
         "user": {
           "title": "Configurazione Inim SmartLiving",
-          "description": "Come è collegata la centrale alla rete?",
+          "description": "Cerca le schede SmartLAN nella rete, oppure scegli come è collegata la centrale per inserirne i dati. La ricerca trova solo le schede nella stessa sottorete di Home Assistant.",
           "menu_options": {
+            "discover": "Cerca nella rete",
+            "smartlan_si": "Scheda SmartLAN/SI",
+            "smartlan_g": "Scheda SmartLAN/G (sperimentale)"
+          }
+        },
+        "discover": {
+          "title": "Schede trovate",
+          "description": "Schede trovate nella sottorete di Home Assistant e non ancora configurate: {count}. Scegline una; il suo indirizzo viene inserito nella pagina successiva.",
+          "data": {
+            "found_board": "Scheda"
+          }
+        },
+        "discover_none": {
+          "title": "Nessuna nuova scheda trovata",
+          "description": "Nessuna scheda SmartLAN non ancora configurata ha risposto. La ricerca raggiunge solo le schede nella stessa sottorete di Home Assistant: inserisci a mano una scheda in un'altra sottorete o VLAN. La ricerca richiede anche che le porte UDP 5001 e 7001 siano libere sull'host di Home Assistant.",
+          "menu_options": {
+            "discover": "Cerca di nuovo",
             "smartlan_si": "Scheda SmartLAN/SI",
             "smartlan_g": "Scheda SmartLAN/G (sperimentale)"
           }

@@ -3,8 +3,25 @@
       "step": {
         "user": {
           "title": "Inim SmartLiving Alarm Setup",
-          "description": "How is the panel connected to your network?",
+          "description": "Search the network for SmartLAN boards, or choose how the panel is connected to enter its details. The search only finds boards on the same subnet as Home Assistant.",
           "menu_options": {
+            "discover": "Search the network",
+            "smartlan_si": "SmartLAN/SI board",
+            "smartlan_g": "SmartLAN/G board (experimental)"
+          }
+        },
+        "discover": {
+          "title": "Boards found",
+          "description": "Boards found on Home Assistant's subnet that are not set up yet: {count}. Choose one; its address is filled in on the next page.",
+          "data": {
+            "found_board": "Board"
+          }
+        },
+        "discover_none": {
+          "title": "No new boards found",
+          "description": "No SmartLAN board that is not set up yet answered. The search only reaches boards on the same subnet as Home Assistant: enter a board on another subnet or VLAN by hand. The search also needs the UDP ports 5001 and 7001 free on the Home Assistant host.",
+          "menu_options": {
+            "discover": "Search again",
             "smartlan_si": "SmartLAN/SI board",
             "smartlan_g": "SmartLAN/G board (experimental)"
           }

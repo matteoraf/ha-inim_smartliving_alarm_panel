@@ -14,16 +14,19 @@ from homeassistant.data_entry_flow import FlowResultType
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.inim_smartliving_alarm import async_migrate_entry
+from custom_components.inim_smartliving_alarm import async_migrate_entry, discovery
 from custom_components.inim_smartliving_alarm.api import SmartLivingPanel
 from custom_components.inim_smartliving_alarm.config_flow import (
     InimAlarmConfigFlow,
 )
 from custom_components.inim_smartliving_alarm.const import DOMAIN
+from custom_components.inim_smartliving_alarm.discovery import DiscoveryError
 from custom_components.inim_smartliving_alarm.protocol.errors import ProtocolError
 
 from .fake_panel import FakePanel
+from .fake_panel.discovery import DiscoveryResponder
 from .fake_panel.server import TRANSPORT_G
+from .test_discovery import free_udp_port
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
@@ -59,7 +62,7 @@ async def board_form(hass: HomeAssistant, board: str) -> str:
         DOMAIN, context={"source": "user"}
     )
     assert result["type"] is FlowResultType.MENU
-    assert result["menu_options"] == ["smartlan_si", "smartlan_g"]
+    assert result["menu_options"] == ["discover", "smartlan_si", "smartlan_g"]
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {"next_step_id": board}
     )
@@ -299,3 +302,143 @@ async def test_newer_major_version_is_not_loaded(hass: HomeAssistant) -> None:
     entry.add_to_hass(hass)
     assert not await async_migrate_entry(hass, entry)
     assert entry.version == 2
+
+
+# ------------------------------------------------------------ network search
+
+
+async def search(
+    hass: HomeAssistant, responders: list[DiscoveryResponder]
+) -> dict[str, Any]:
+    """Choose "search" in the menu; the fake responders answer on 127.0.0.1."""
+    si = next((r for r in responders if r.panel.transport != TRANSPORT_G), None)
+    g = next((r for r in responders if r.panel.transport == TRANSPORT_G), None)
+    si_ports = (si.port, si.reply_port) if si else (free_udp_port(), free_udp_port())
+    g_ports = (g.port, g.reply_port) if g else (free_udp_port(), free_udp_port())
+
+    async def fake_discover() -> list:
+        return await discovery.discover(
+            0.3, target="127.0.0.1", si_ports=si_ports, g_ports=g_ports
+        )
+
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "user"}
+    )
+    with patch(
+        "custom_components.inim_smartliving_alarm.config_flow.discover",
+        fake_discover,
+    ):
+        return await hass.config_entries.flow.async_configure(
+            result["flow_id"], {"next_step_id": "discover"}
+        )
+
+
+async def responder_for(panel: FakePanel, **kwargs) -> DiscoveryResponder:
+    """A started discovery responder for a fake panel."""
+    responder = DiscoveryResponder(panel, free_udp_port(), **kwargs)
+    await responder.start()
+    return responder
+
+
+async def test_search_finds_and_prefills_smartlan_si(
+    hass: HomeAssistant, panel: FakePanel
+) -> None:
+    """A found SmartLAN/SI board opens its form with host and port filled in."""
+    responder = await responder_for(panel)
+    try:
+        result = await search(hass, [responder])
+    finally:
+        await responder.stop()
+
+    assert result["step_id"] == "discover"
+    assert result["description_placeholders"] == {"count": "1"}
+    choices = result["data_schema"].schema["found_board"].container
+    key, label = next(iter(choices.items()))
+    assert label == f"127.0.0.1:{panel.port} - SmartLAN/SI, MAC 00:08:dc:12:34:56"
+
+    result = await submit(hass, result["flow_id"], {"found_board": key})
+    assert result["step_id"] == "smartlan_si"
+    suggested = {
+        str(field): field.description["suggested_value"]
+        for field in result["data_schema"].schema
+        if field.description and "suggested_value" in field.description
+    }
+    assert suggested["host"] == "127.0.0.1"
+    assert suggested["port"] == panel.port
+
+    result = await submit(
+        hass, result["flow_id"], {**si_input(panel), "panel_name": "Found"}
+    )
+    assert result["step_id"] == "initial_options"
+    entry = (await submit(hass, result["flow_id"], OPTIONS))["result"]
+    assert entry.data["board"] == "smartlan_si"
+    await unload_all(hass)
+
+
+async def test_search_prefills_smartlan_g(
+    hass: HomeAssistant, g_panel: FakePanel
+) -> None:
+    """A SmartLAN/G board also gives its panel's model, firmware and name."""
+    responder = await responder_for(g_panel, panel_name="Casa al mare")
+    try:
+        result = await search(hass, [responder])
+    finally:
+        await responder.stop()
+
+    choices = result["data_schema"].schema["found_board"].container
+    key, label = next(iter(choices.items()))
+    assert label == (
+        f"127.0.0.1:{g_panel.port} - SmartLAN/G, SmartLiving 1050, "
+        'firmware 6.07, "Casa al mare"'
+    )
+    result = await submit(hass, result["flow_id"], {"found_board": key})
+    assert result["step_id"] == "smartlan_g"
+    suggested = {
+        str(field): field.description["suggested_value"]
+        for field in result["data_schema"].schema
+        if field.description and "suggested_value" in field.description
+    }
+    assert suggested["panel_name"] == "Casa al mare"
+    assert suggested["port"] == g_panel.port
+
+
+async def test_search_skips_configured_boards(
+    hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
+) -> None:
+    """A board that is already set up is not offered again."""
+    responder = await responder_for(panel)
+    try:
+        result = await search(hass, [responder])
+    finally:
+        await responder.stop()
+    assert result["type"] is FlowResultType.MENU
+    assert result["step_id"] == "discover_none"
+
+
+async def test_search_finds_nothing(hass: HomeAssistant, panel: FakePanel) -> None:
+    """Without answers the user can search again or enter the board by hand."""
+    result = await search(hass, [])
+    assert result["type"] is FlowResultType.MENU
+    assert result["step_id"] == "discover_none"
+    assert result["menu_options"] == ["discover", "smartlan_si", "smartlan_g"]
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"next_step_id": "smartlan_si"}
+    )
+    result = await submit(hass, result["flow_id"], si_input(panel))
+    assert result["step_id"] == "initial_options"
+
+
+async def test_search_cannot_listen(hass: HomeAssistant) -> None:
+    """Busy reply ports end like a search without answers."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": "user"}
+    )
+    with patch(
+        "custom_components.inim_smartliving_alarm.config_flow.discover",
+        side_effect=DiscoveryError("busy"),
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"], {"next_step_id": "discover"}
+        )
+    assert result["step_id"] == "discover_none"
