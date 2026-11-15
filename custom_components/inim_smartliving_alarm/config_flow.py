@@ -111,6 +111,20 @@ async def _validate_connection_and_fetch_initial_config(
     return initial_config
 
 
+def _mapping_default(
+    settings: dict[str, Any], key: str, choices: dict[str, str]
+) -> str:
+    """The form value of a stored scenario mapping.
+
+    An unmapped scenario is stored as None and shown as "none"; so is a
+    stored scenario that is not among the choices, so that the form never
+    offers a value it would refuse.
+    """
+    value = settings.get(key)
+    choice = "none" if value is None else str(value)
+    return choice if choice in choices else "none"
+
+
 class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Inim Alarm."""
 
@@ -494,34 +508,42 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Optional(
                         CONF_SCENARIO_ARM_HOME,
-                        default=str(
-                            self.current_settings.get(CONF_SCENARIO_ARM_HOME, "none")
+                        default=_mapping_default(
+                            self.current_settings,
+                            CONF_SCENARIO_ARM_HOME,
+                            scenario_choices,
                         ),
                     ): vol.In(scenario_choices),
                     vol.Optional(
                         CONF_SCENARIO_ARM_AWAY,
-                        default=str(
-                            self.current_settings.get(CONF_SCENARIO_ARM_AWAY, "none")
+                        default=_mapping_default(
+                            self.current_settings,
+                            CONF_SCENARIO_ARM_AWAY,
+                            scenario_choices,
                         ),
                     ): vol.In(scenario_choices),
                     vol.Optional(
                         CONF_SCENARIO_ARM_NIGHT,
-                        default=str(
-                            self.current_settings.get(CONF_SCENARIO_ARM_NIGHT, "none")
+                        default=_mapping_default(
+                            self.current_settings,
+                            CONF_SCENARIO_ARM_NIGHT,
+                            scenario_choices,
                         ),
                     ): vol.In(scenario_choices),
                     vol.Optional(
                         CONF_SCENARIO_ARM_VACATION,
-                        default=str(
-                            self.current_settings.get(
-                                CONF_SCENARIO_ARM_VACATION, "none"
-                            )
+                        default=_mapping_default(
+                            self.current_settings,
+                            CONF_SCENARIO_ARM_VACATION,
+                            scenario_choices,
                         ),
                     ): vol.In(scenario_choices),
                     vol.Optional(
                         CONF_SCENARIO_DISARM,
-                        default=str(
-                            self.current_settings.get(CONF_SCENARIO_DISARM, "none")
+                        default=_mapping_default(
+                            self.current_settings,
+                            CONF_SCENARIO_DISARM,
+                            scenario_choices,
                         ),
                     ): vol.In(scenario_choices),
                 }
