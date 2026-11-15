@@ -8,6 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .const import (
     CONF_EVENT_LOG_SIZE,
@@ -102,7 +103,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             # else, for subsequent polls, api_call_count_param remains None, and api_call_last_index_param is used.
 
             _LOGGER.debug(
-                "Fetching compact events for %s. Last known index: 0x%04x, Explicit count for API: %s",
+                "Fetching compact events for %s. Last known index: %s, Explicit count for API: %s",
                 self.name,
                 self._last_known_event_index_val
                 if self._last_known_event_index_val is not None
@@ -113,6 +114,8 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             event_result = await self.api_client.execute_get_compact_events(
                 count=api_call_count_param,
                 last_processed_compact_event_index_val=api_call_last_index_param,
+                # the panel stores local time: read it in Home Assistant's zone
+                time_zone=dt_util.get_default_time_zone(),
             )
 
             newly_fetched_events_raw: list[dict[str, Any]] = []
@@ -132,7 +135,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     api_call_count_param is None
                 ):  # Only log "no new" if it was an incremental fetch
                     _LOGGER.debug(
-                        "No new compact events found for %s since last poll (index 0x%04x)",
+                        "No new compact events found for %s since last poll (index %s)",
                         self.name,
                         self._last_known_event_index_val
                         if self._last_known_event_index_val is not None
@@ -142,7 +145,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 if panel_latest_index is not None:
                     if self._last_known_event_index_val != panel_latest_index:
                         _LOGGER.debug(
-                            "Updating last known event index for %s from 0x%04x to 0x%04x",
+                            "Updating last known event index for %s from %s to %s",
                             self.name,
                             self._last_known_event_index_val
                             if self._last_known_event_index_val is not None

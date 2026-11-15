@@ -23,6 +23,7 @@ from custom_components.inim_smartliving_alarm.const import (
     SERVICE_ALARM_RESET,
 )
 
+from .conftest import add_entry
 from .fake_panel import FakePanel, const as c
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
@@ -263,3 +264,28 @@ async def test_zone_alarm_reaches_binary_sensor(
     panel.state.zone_states[19] = c.ZONE_ALARM
     await refresh(hass, entry)
     assert state_of(hass, entry, ZONE_20_SENSOR) == "on"
+
+
+async def test_event_log_in_home_assistant_time_zone(
+    hass: HomeAssistant, panel: FakePanel
+) -> None:
+    """Event times follow Home Assistant's time zone; the state is the ring index."""
+    await hass.config.async_set_time_zone("Europe/Rome")
+    entry = await add_entry(hass, panel)
+    sensor = ("sensor", "_event_log")
+
+    state = hass.states.get(entity_id_for(hass, entry, sensor))
+    assert state.state == "467"
+    log = state.attributes["event_log"]
+    assert [event["timestamp"] for event in log[:3]] == [
+        "2025-06-15T12:09:32+02:00",
+        "2025-06-15T12:09:12+02:00",
+        "2025-03-28T07:35:37+01:00",
+    ]
+
+    await call(hass, entry, "switch", "turn_on", AREA_3_SWITCH)
+    await refresh(hass, entry)
+    state = hass.states.get(entity_id_for(hass, entry, sensor))
+    assert state.state == "468"
+    assert state.attributes["event_log"][0]["timestamp"] == "2026-11-12T08:30:15+01:00"
+    assert await hass.config_entries.async_unload(entry.entry_id)

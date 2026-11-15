@@ -8,6 +8,7 @@ reports it until the marker is removed.
 
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from homeassistant.core import HomeAssistant
 import pytest
@@ -21,6 +22,8 @@ from custom_components.inim_smartliving_alarm.legacy import (
 from .fake_panel import FakePanel, captures, const as c
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
+
+ROME = ZoneInfo("Europe/Rome")
 
 
 @pytest.fixture
@@ -259,11 +262,12 @@ async def test_activate_scenario_blocked_by_open_zone(
 
 async def test_recent_events(hass: HomeAssistant, api: LegacyPanelClient) -> None:
     """The newest events are read from the end of the log and decoded."""
-    result = await run(hass, api.execute_get_compact_events, count=3)
+    result = await run(hass, api.execute_get_compact_events, count=3, time_zone=ROME)
 
-    assert result["latest_event_index_val"] == 0xA26F
+    # positions in the event ring: the head (next free entry) is 468
+    assert result["latest_event_index_val"] == 467
     events = result["events"]
-    assert [event["query_index_val"] for event in events] == [0xA26F, 0xA266, 0xA25D]
+    assert [event["query_index_val"] for event in events] == [467, 466, 465]
     assert [event["action_code"] for event in events] == [0x05, 0x85, 0x00]
     assert [event["action_description"] for event in events] == [
         "End of Zone Excluded",
@@ -272,11 +276,20 @@ async def test_recent_events(hass: HomeAssistant, api: LegacyPanelClient) -> Non
     ]
     assert all(event["affected_areas"] == [7] for event in events)
     assert all(event["zone_number_0_indexed"] == 35 for event in events)
+    # panel local time in the given zone: summer time in June, not in March
     assert [event["timestamp_iso"] for event in events] == [
-        "2025-06-15T12:09:32+01:00",
-        "2025-06-15T12:09:12+01:00",
+        "2025-06-15T12:09:32+02:00",
+        "2025-06-15T12:09:12+02:00",
         "2025-03-28T07:35:37+01:00",
     ]
+
+
+async def test_event_times_without_a_time_zone(
+    hass: HomeAssistant, api: LegacyPanelClient
+) -> None:
+    """Without a time zone the panel's local time carries no offset."""
+    result = await run(hass, api.execute_get_compact_events, count=1)
+    assert result["events"][0]["timestamp_iso"] == "2025-06-15T12:09:32"
 
 
 async def test_new_event_after_command(
@@ -287,10 +300,11 @@ async def test_new_event_after_command(
     result = await run(
         hass,
         api.execute_get_compact_events,
-        last_processed_compact_event_index_val=0xA26F,
+        last_processed_compact_event_index_val=467,
+        time_zone=ROME,
     )
 
-    assert result["latest_event_index_val"] == 0xA278
+    assert result["latest_event_index_val"] == 468
     assert len(result["events"]) == 1
     event = result["events"][0]
     assert event["action_code"] == 0x8A
@@ -416,9 +430,40 @@ async def test_double_terminal_zones_are_reported(
     assert status["zones_status"]["zone_statuses"].get(51) == "alarmed"
 
 
-@pytest.mark.xfail(
-    strict=True, reason="event indexes do not wrap around the 500-entry log"
-)
+async def test_no_new_events(hass: HomeAssistant, api: LegacyPanelClient) -> None:
+    """Nothing is read again when the newest event was already processed."""
+    result = await run(
+        hass, api.execute_get_compact_events, last_processed_compact_event_index_val=467
+    )
+    assert result == {"events": [], "latest_event_index_val": 467}
+
+
+async def test_new_events_across_the_end_of_the_log(
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
+) -> None:
+    """Events written past the last ring entry are found after the wrap."""
+    state = panel.state
+    samples = [event for event in state.events if event is not None][-4:]
+    state.events = [None] * c.EVENT_RING_SIZE
+    for index, event in zip(
+        (c.EVENT_RING_SIZE - 2, c.EVENT_RING_SIZE - 1, 0, 1), samples, strict=True
+    ):
+        state.events[index] = event
+    state.event_head = 2  # entries 0 and 1 written after the wrap
+
+    result = await run(
+        hass,
+        api.execute_get_compact_events,
+        last_processed_compact_event_index_val=c.EVENT_RING_SIZE - 1,
+    )
+    assert result["latest_event_index_val"] == 1
+    assert [event["query_index_val"] for event in result["events"]] == [1, 0]
+    assert [event["action_code"] for event in result["events"]] == [
+        samples[3].code,
+        samples[2].code,
+    ]
+
+
 async def test_events_across_the_end_of_the_log(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
