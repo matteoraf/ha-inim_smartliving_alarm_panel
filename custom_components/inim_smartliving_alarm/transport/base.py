@@ -5,7 +5,7 @@ without requests, and it ignores a new connection that arrives right after
 the previous one closed (the client's TCP stack only retries after 1 s);
 it may also accept a connection and close it at once. So the transport
 keeps one connection, replaces it before it can go idle, pauses briefly
-before reconnecting, and repeats a read once if its connection was lost.
+before reconnecting (also when another transport for the same board closed), and repeats a read once if its connection was lost.
 
 At debug level every frame is logged, with the PIN of commands masked;
 replies that may hold PINs are not logged.
@@ -44,6 +44,11 @@ RECONNECT_PAUSE = 0.15  # after a close, before the next connection attempt
 IDLE_RECONNECT = (
     5.0  # replace a connection idle for longer (the board drops it at ~6.7 s)
 )
+
+# When a connection to each address last closed, for every transport: a new
+# transport for the same board (after a reload, or a second client) must
+# also pause before connecting
+_last_close: dict[tuple[str, int], float] = {}
 
 
 class TransportError(Exception):
@@ -227,7 +232,6 @@ class PanelTransport:
         self._reader: asyncio.StreamReader | None = None
         self._writer: asyncio.StreamWriter | None = None
         self._lock = PriorityLock()
-        self._last_close = float("-inf")
         self._last_activity = float("-inf")
 
     @property
@@ -309,7 +313,7 @@ class PanelTransport:
         writer.close()
         with contextlib.suppress(OSError):
             await writer.wait_closed()
-        self._last_close = time.monotonic()
+        _last_close[(self.host, self.port)] = time.monotonic()
         _LOGGER.debug("Disconnected from %s:%s", self.host, self.port)
 
     async def _ensure_connected(self) -> None:
@@ -327,7 +331,8 @@ class PanelTransport:
     async def _connect(self) -> None:
         error: Exception | None = None
         for attempt in range(1, self.connect_attempts + 1):
-            wait = self._last_close + self.reconnect_pause - time.monotonic()
+            closed = _last_close.get((self.host, self.port), float("-inf"))
+            wait = closed + self.reconnect_pause - time.monotonic()
             if wait > 0:
                 await asyncio.sleep(wait)
             try:
@@ -336,7 +341,7 @@ class PanelTransport:
                 )
             except OSError as err:  # refused, unreachable or timed out
                 error = err
-                self._last_close = time.monotonic()
+                _last_close[(self.host, self.port)] = time.monotonic()
                 _LOGGER.debug(
                     "Connection attempt %s to %s:%s failed: %r",
                     attempt,

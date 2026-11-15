@@ -112,7 +112,7 @@ After installation and restarting Home Assistant:
         
     *   **Port**: The TCP port your SmartLAN module is listening on (default is 5004).
         
-    *   **PIN**: A valid user PIN code for your alarm panel (The PIN won't be checked. If the PIN is not valid, it simply won't work, but you will not get any error message about it during the configuration process.).
+    *   **PIN**: A valid user PIN code for your alarm panel (1 to 6 digits). A PIN that matches no user code is not refused during configuration: Home Assistant logs a warning when it connects, and the panel refuses its commands.
         
     *   **Panel Name** (Optional): A friendly name for your alarm panel in Home Assistant (e.g., "Home Alarm").
         
@@ -240,13 +240,17 @@ Troubleshooting
         
     *   If the module's IP address or port has changed, update it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)) instead of removing the integration.
         
+*   **The Inim app cannot connect locally while Home Assistant is running**:
+    
+    *   The SmartLAN/SI module accepts only one local connection at a time. Home Assistant keeps its connection open while it reads the panel and for a few seconds after each update, so the app may have to retry. Remote access through Inim Cloud is not affected.
+        
 *   **Names, zones or scenarios out of date** after changing them on the panel:
     
     *   Use the **Re-read panel configuration** button or action (see [Re-reading the panel configuration](#re-reading-the-panel-configuration)).
         
 *   **Scenarios not activating or Areas not arming/disarming**:
     
-    *   Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions. You can change it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)).
+    *   Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions. If it matches no user code, the log shows a warning ("The PIN does not match any user code of the panel") each time the integration connects. You can change it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)).
         
 *   **Entities Not Appearing or Not Updating**:
     

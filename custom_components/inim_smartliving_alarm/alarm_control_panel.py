@@ -34,7 +34,7 @@ from .const import (
     KEY_LIVE_TRIGGERED_AREAS_LIST,
     SERVICE_ALARM_RESET,
 )
-from .inim_api import InimAlarmAPI
+from .legacy import LegacyPanelClient
 from .utils import async_handle_scenario_activation_failure
 
 _LOGGER = logging.getLogger(__name__)
@@ -130,7 +130,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
     def __init__(
         self,
         coordinator: Any,
-        api_client: InimAlarmAPI,
+        api_client: LegacyPanelClient,
         config_entry: ConfigEntry,
         initial_panel_config: dict[str, Any],
         panel_display_name: str,
@@ -373,9 +373,9 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
             scenario_idx_to_activate,
         )
         try:
-            # The API's execute_activate_scenario already handles connect/disconnect and check_scenario_activation_allowed
-            success = await self.hass.async_add_executor_job(
-                self.api_client.execute_activate_scenario, scenario_idx_to_activate
+            # execute_activate_scenario checks that no zone prevents it first
+            success = await self.api_client.execute_activate_scenario(
+                scenario_idx_to_activate
             )
             if success:
                 _LOGGER.info(
@@ -456,9 +456,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         """Send the alarm reset command for a specific area to the panel."""
         _LOGGER.info("%s: Attempting to reset alarm for area %d", self.name, area_id)
         try:
-            success = await self.hass.async_add_executor_job(
-                self.api_client.execute_reset_area_alarm, area_id
-            )
+            success = await self.api_client.execute_reset_area_alarm(area_id)
             if success:
                 _LOGGER.info(
                     "%s: Alarm reset command for area %d acknowledged by panel",

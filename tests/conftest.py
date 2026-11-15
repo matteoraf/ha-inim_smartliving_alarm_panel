@@ -7,6 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 import pytest
 
+from custom_components.inim_smartliving_alarm import api
 from custom_components.inim_smartliving_alarm.const import DOMAIN
 
 from .fake_panel import FakePanel
@@ -27,10 +28,26 @@ async def fake_panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
     await panel.stop()
 
 
+@pytest.fixture(autouse=True)
+def no_command_settle(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The fake panel applies commands at once: no settle time after them.
+
+    Real-panel tests keep it, as the real panel needs it.
+    """
+    if request.node.get_closest_marker("real_panel") is None:
+        monkeypatch.setattr(api, "COMMAND_SETTLE", 0)
+
+
 @pytest.fixture
 async def panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
-    """Fake panel accepting a new connection while the previous one closes."""
-    fake = FakePanel(single_client=False)
+    """Fake panel accepting one client at a time, like the SmartLAN/SI board.
+
+    The integration holds one connection per entry and closes it on unload;
+    the config flow closes its own before the entry connects.
+    """
+    fake = FakePanel()
     await fake.start()
     yield fake
     await fake.stop()
