@@ -29,6 +29,7 @@ from ..protocol.frames import (
     carries_pin,
     check_write_ack,
     describe,
+    parse_plain_read_reply,
     parse_read_reply,
     read_eeprom as read_eeprom_frame,
     read_ram as read_ram_frame,
@@ -132,10 +133,13 @@ class Session:
         lost; it is not repeated after a timeout. The reply of a sensitive
         read (such as the PIN table) is never logged.
         """
+        with_checksum = self._transport.reply_checksum
         for attempt in (1, 2):
             try:
                 reply = await self._transport.exchange(
-                    frame, length + 1, log_reply=not sensitive
+                    frame,
+                    length + 1 if with_checksum else length,
+                    log_reply=not sensitive,
                 )
             except ConnectionLost:
                 if attempt == 2:
@@ -143,7 +147,9 @@ class Session:
                 _LOGGER.debug("Connection lost during a read; repeating it")
                 continue
             try:
-                return parse_read_reply(reply, length)
+                if with_checksum:
+                    return parse_read_reply(reply, length)
+                return parse_plain_read_reply(reply, length)
             except ProtocolError:
                 await self._transport.disconnect()  # do not reuse an out-of-step link
                 raise
@@ -208,6 +214,9 @@ class PanelTransport:
     """
 
     dialect: ClassVar[Dialect]
+    # Whether a read reply ends with the panel's checksum (SmartLAN/SI) or
+    # carries the data alone (SmartLAN/G, which checks it on the board)
+    reply_checksum: ClassVar[bool] = True
 
     def __init__(
         self,
@@ -363,7 +372,7 @@ class PanelTransport:
         raise NotImplementedError
 
     async def _read_reply(self, reader: asyncio.StreamReader, length: int) -> bytes:
-        """Read a reply of length bytes (data and checksum).
+        """Read a reply of length bytes (after any decoding).
 
         Raise ProtocolError for a reply that cannot be decoded.
         """

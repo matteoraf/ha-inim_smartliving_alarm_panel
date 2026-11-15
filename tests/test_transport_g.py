@@ -18,7 +18,7 @@ from custom_components.inim_smartliving_alarm.protocol.commands import (
 )
 from custom_components.inim_smartliving_alarm.protocol.config import find_code_index
 from custom_components.inim_smartliving_alarm.protocol.errors import (
-    ChecksumError,
+    DecryptionError,
     ProtocolError,
 )
 from custom_components.inim_smartliving_alarm.protocol.frames import (
@@ -50,9 +50,17 @@ MODEL = read_ram(reg.MODEL_STRING, 12)
 AREAS = read_ram(reg.AREA_STATUS, SL1050.area_status_length)
 
 # Made with openssl (AES-128-CBC, PKCS#7) from the key above and
-# iv = key XOR 00..0F, independently of the code under test
+# iv = key XOR 00..0F, independently of the code under test. A read reply
+# is the data alone: the board checks the panel's checksum itself.
 MODEL_REQUEST_ENCRYPTED = bytes.fromhex("c0bf36fc8fc5a6d50e22c05754a5fbff")
-MODEL_REPLY_ENCRYPTED = bytes.fromhex("722e432d528c3fe366f1cc1429bdbdd3")
+MODEL_REPLY_ENCRYPTED = bytes.fromhex("ce133590d6dacad811323055b1e92226")
+# bytes(range(15)) and bytes(range(16))
+REPLY_15_ENCRYPTED = bytes.fromhex("c259075a6b1cbd7ddcc46c0eee7199bf")
+REPLY_16_ENCRYPTED = bytes.fromhex(
+    "0f9a3d0bbb08aee19149ceaae4a9096e77b4e621826aee6c893493f8c8b8884a"
+)
+# The model string followed by the panel's checksum, as no known board sends
+MODEL_WITH_CHECKSUM_ENCRYPTED = bytes.fromhex("722e432d528c3fe366f1cc1429bdbdd3")
 
 
 @pytest.fixture
@@ -123,14 +131,22 @@ async def _scripted_read(reply: bytes) -> tuple[ScriptedServer, SmartLanGTranspo
 # ------------------------------------------------------------- framing
 
 
-def test_encrypted_lengths() -> None:
-    """PKCS#7 always pads, so a whole block is added at a block boundary."""
-    assert encrypted_length(1) == 16  # write acknowledgement
-    assert encrypted_length(8) == 16  # read request
-    assert encrypted_length(13) == 16  # model string + checksum
-    assert encrypted_length(15) == 16
-    assert encrypted_length(16) == 32
-    assert encrypted_length(2001) == 2016  # longest read + checksum
+@pytest.mark.parametrize(
+    ("length", "wire"),
+    [
+        (1, 16),  # write acknowledgement
+        (8, 16),  # read request
+        (12, 16),  # model string
+        (15, 16),
+        (16, 32),
+        (31, 32),
+        (32, 48),
+        (2000, 2016),  # longest read
+    ],
+)
+def test_encrypted_lengths(length: int, wire: int) -> None:
+    """(n // 16 + 1) blocks: PKCS#7 adds a whole block at a block boundary."""
+    assert encrypted_length(length) == wire
 
 
 async def test_wire_format_matches_reference_vectors(socket_enabled: None) -> None:
@@ -144,13 +160,43 @@ async def test_wire_format_matches_reference_vectors(socket_enabled: None) -> No
     assert server.received == [MODEL_REQUEST_ENCRYPTED]
 
 
+@pytest.mark.parametrize(
+    ("length", "reply"), [(15, REPLY_15_ENCRYPTED), (16, REPLY_16_ENCRYPTED)]
+)
+async def test_replies_at_the_block_boundary(
+    socket_enabled: None, length: int, reply: bytes
+) -> None:
+    """15 data bytes fit one block and 16 need two; nothing more is awaited."""
+    server, link = await _scripted_read(reply)
+    link.reply_timeout = 1
+    try:
+        assert await link.read(read_ram(reg.MODEL_STRING, length), length) == bytes(
+            range(length)
+        )
+    finally:
+        await link.close()
+        await server.stop()
+
+
+async def test_reply_with_a_checksum_is_refused(socket_enabled: None) -> None:
+    """A reply of N + 1 bytes is a protocol error, not data, and drops the link."""
+    server, link = await _scripted_read(MODEL_WITH_CHECKSUM_ENCRYPTED)
+    try:
+        with pytest.raises(ProtocolError, match="expected 12 bytes, got 13"):
+            await link.read(MODEL, 12)
+        assert not link.connected
+    finally:
+        await link.close()
+        await server.stop()
+
+
 async def test_undecryptable_reply_closes_the_connection(
     socket_enabled: None,
 ) -> None:
     """A reply that does not decrypt is an error and the link is dropped."""
     server, link = await _scripted_read(bytes(range(16)))
     try:
-        with pytest.raises(ProtocolError, match="cannot be decrypted"):
+        with pytest.raises(DecryptionError, match="cannot be decrypted"):
             await link.read(MODEL, 12)
         assert not link.connected
     finally:
@@ -222,14 +268,28 @@ async def test_command_and_result(
     assert transport.connections_opened == 1
 
 
-async def test_bad_checksum_inside_the_encryption(
+@pytest.mark.parametrize("length", [12, 15, 16, 31, 32])
+async def test_reads_return_exactly_the_data(
+    transport: SmartLanGTransport, g_panel: FakePanel, length: int
+) -> None:
+    """Every length, including n % 16 == 15, gives n bytes without waiting longer."""
+    transport.reply_timeout = 1
+    address = SL1050.zone_records
+    async with transport.session() as session:
+        data = await session.read_eeprom(address, length)
+    assert data == g_panel.state.eeprom_read(address, length)
+    assert g_panel.protocol_errors == []
+
+
+async def test_board_sending_a_checksum_is_an_error(
     transport: SmartLanGTransport, g_panel: FakePanel
 ) -> None:
-    """A reply that decrypts but fails its checksum drops the connection."""
-    g_panel.corrupt_replies = 1
-    with pytest.raises(ChecksumError):
+    """A board adding the panel's checksum gives a clear error and a new link."""
+    g_panel.g_reply_checksum = True
+    with pytest.raises(ProtocolError, match="expected 12 bytes, got 13"):
         await transport.read(MODEL, 12)
     assert not transport.connected
+    g_panel.g_reply_checksum = False
     assert await transport.read(MODEL, 12) == b"6.07 01050  "
 
 

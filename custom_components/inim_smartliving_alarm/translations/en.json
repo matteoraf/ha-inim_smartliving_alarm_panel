@@ -94,6 +94,7 @@
         "validation_error_detail": "A validation error occurred while fetching initial data from the panel.",
         "unknown": "An unknown error occurred. Please check the logs for more details.",
         "invalid_auth": "The SmartLAN/G board did not accept the connection. Please check the user name and password.",
+        "invalid_board_reply": "The SmartLAN/G board answered, but its reply was not in the expected format. If the user name and password are correct, this board version may not be supported yet: please report it on GitHub with a debug log.",
         "invalid_pin": "The PIN does not match any user code of the panel.",
         "invalid_pin_format": "The PIN must be 1 to 6 digits.",
         "unsupported_firmware": "The panel's firmware is too old: firmware 5 or later is needed."

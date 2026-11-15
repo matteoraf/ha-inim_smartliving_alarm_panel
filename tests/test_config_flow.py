@@ -21,7 +21,10 @@ from custom_components.inim_smartliving_alarm.config_flow import (
 )
 from custom_components.inim_smartliving_alarm.const import DOMAIN
 from custom_components.inim_smartliving_alarm.discovery import DiscoveryError
-from custom_components.inim_smartliving_alarm.protocol.errors import ProtocolError
+from custom_components.inim_smartliving_alarm.protocol.errors import (
+    DecryptionError,
+    ProtocolError,
+)
 
 from .fake_panel import FakePanel
 from .fake_panel.discovery import DiscoveryResponder
@@ -218,7 +221,7 @@ async def test_undecryptable_reply_means_wrong_credentials(
     with patch.object(
         SmartLivingPanel,
         "identify",
-        side_effect=ProtocolError("reply cannot be decrypted"),
+        side_effect=DecryptionError("reply cannot be decrypted"),
     ):
         result = await submit(
             hass,
@@ -232,6 +235,41 @@ async def test_undecryptable_reply_means_wrong_credentials(
             },
         )
     assert result["errors"] == {"base": "invalid_auth"}
+
+
+async def test_unexpected_smartlan_g_reply(
+    hass: HomeAssistant, g_panel: FakePanel, caplog: pytest.LogCaptureFixture
+) -> None:
+    """A /G reply that decrypts but has the wrong length asks for a report."""
+    g_panel.g_reply_checksum = True  # a board adding the panel's checksum
+    flow_id = await board_form(hass, "smartlan_g")
+    data = {
+        "host": g_panel.host,
+        "port": g_panel.port,
+        "username": USERNAME,
+        "password": PASSWORD,
+        "pin": "1234",
+    }
+    result = await submit(hass, flow_id, data)
+    assert result["errors"] == {"base": "invalid_board_reply"}
+    assert "expected 12 bytes, got 13" in caplog.text
+
+    # The same flow goes on once the board answers as expected
+    g_panel.g_reply_checksum = False
+    result = await submit(hass, flow_id, data)
+    assert result["step_id"] == "initial_options"
+
+
+async def test_unexpected_smartlan_si_reply(
+    hass: HomeAssistant, panel: FakePanel
+) -> None:
+    """On SmartLAN/SI a reply of the wrong form stays a generic panel error."""
+    flow_id = await board_form(hass, "smartlan_si")
+    with patch.object(
+        SmartLivingPanel, "identify", side_effect=ProtocolError("expected 13 bytes")
+    ):
+        result = await submit(hass, flow_id, si_input(panel))
+    assert result["errors"] == {"base": "invalid_panel_response"}
 
 
 async def test_flows_do_not_share_data() -> None:

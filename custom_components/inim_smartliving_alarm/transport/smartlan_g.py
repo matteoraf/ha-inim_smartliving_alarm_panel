@@ -3,8 +3,10 @@
 AES-128-CBC with PKCS#7 padding; the key is MD5(user name + password) of
 the board's web credentials and the IV is the key XOR 00..0F. Each message
 is encrypted on its own with the same key and IV. A read request is one
-block, a write is header and payload together; a reply is the data and its
-checksum, so a reply of n bytes takes (n // 16 + 1) blocks.
+block, a write is header and payload together. A read reply is the data
+alone: the board checks the panel's checksum on its serial side and
+encrypts only the n data bytes, which take (n // 16 + 1) blocks. A write
+acknowledgement is the panel's 1-byte ack in one block.
 
 The board never closes an idle connection; the shared lifecycle (replace an
 idle connection, pause before reconnecting) is kept anyway, as it costs
@@ -22,7 +24,7 @@ import hashlib
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
-from ..protocol.errors import ProtocolError
+from ..protocol.errors import DecryptionError
 from ..protocol.frames import SMARTLAN_G
 from .base import PanelTransport
 
@@ -52,6 +54,7 @@ class SmartLanGTransport(PanelTransport):
     """Frames encrypted with the board's credentials."""
 
     dialect = SMARTLAN_G
+    reply_checksum = False
 
     def __init__(
         self,
@@ -81,6 +84,6 @@ class SmartLanGTransport(PanelTransport):
         try:
             return unpadder.update(plain) + unpadder.finalize()
         except ValueError as err:
-            raise ProtocolError(
+            raise DecryptionError(
                 "reply cannot be decrypted (wrong user name or password?)"
             ) from err

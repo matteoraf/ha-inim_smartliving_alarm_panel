@@ -139,7 +139,10 @@ def not_ready_request(scenario: int, model: PanelModel) -> bytes:
 
 
 def parse_read_reply(reply: bytes, length: int) -> bytes:
-    """Check a read reply (data + checksum) and return the data."""
+    """Check a read reply (data + checksum) and return the data.
+
+    The form of a SmartLAN/SI reply: the panel's reply as it is.
+    """
     if len(reply) != length + 1:
         raise ProtocolError(f"expected {length + 1} bytes, got {len(reply)}")
     data = reply[:-1]
@@ -148,6 +151,17 @@ def parse_read_reply(reply: bytes, length: int) -> bytes:
             f"checksum {reply[-1]:#04x} does not match {checksum(data):#04x}"
         )
     return data
+
+
+def parse_plain_read_reply(reply: bytes, length: int) -> bytes:
+    """Check a read reply without checksum (data only) and return the data.
+
+    The form of a SmartLAN/G reply: the board checks the panel's checksum
+    itself and sends the data alone.
+    """
+    if len(reply) != length:
+        raise ProtocolError(f"expected {length} bytes, got {len(reply)}")
+    return reply
 
 
 PIN_LENGTH = 6

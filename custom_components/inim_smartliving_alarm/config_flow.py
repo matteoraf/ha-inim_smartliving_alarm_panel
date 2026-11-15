@@ -54,7 +54,7 @@ from .const import (
 from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .legacy import create_client
 from .panel_config import async_fetch_panel_configuration
-from .protocol.errors import InvalidPinError, ProtocolError
+from .protocol.errors import DecryptionError, InvalidPinError, ProtocolError
 from .transport.base import TransportError
 
 _LOGGER = logging.getLogger(__name__)
@@ -66,6 +66,7 @@ _ERROR_KEYS = frozenset(
     (
         "auth_failed",
         "invalid_auth",
+        "invalid_board_reply",
         "invalid_panel_response",
         "invalid_pin",
         "invalid_pin_format",
@@ -122,10 +123,18 @@ async def _validate_connection_and_fetch_initial_config(
             firmware = await api.panel.identify()
         except TransportError as err:
             raise ConnectionError(str(err)) from err
+        except DecryptionError as err:
+            # A SmartLAN/G reply that does not decrypt: wrong credentials
+            raise ValueError("invalid_auth") from err
         except ProtocolError as err:
-            # On SmartLAN/G a reply that does not decrypt means wrong credentials
+            # The reply decrypted (or needs no decryption) but has the wrong
+            # form. On SmartLAN/G a wrong password may, rarely, decrypt to
+            # something too: the message asks to check the credentials first.
+            _LOGGER.error(
+                "Unexpected reply from %s:%s: %s", data[CONF_HOST], data[CONF_PORT], err
+            )
             raise ValueError(
-                "invalid_auth"
+                "invalid_board_reply"
                 if board == BOARD_SMARTLAN_G
                 else "invalid_panel_response"
             ) from err

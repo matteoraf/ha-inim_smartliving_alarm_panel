@@ -73,7 +73,7 @@ class Client:
         self.writer.close()
 
     async def exchange(self, request: bytes, reply_length: int) -> bytes:
-        """Send a request (and payload) and read a reply including its checksum."""
+        """Send a request (and payload) and read a reply of reply_length bytes."""
         if self.cipher is not None:
             self.writer.write(smartlan_g_encrypt(self.cipher, request))
             await self.writer.drain()
@@ -87,7 +87,9 @@ class Client:
             return await self.reader.readexactly(reply_length)
 
     async def read(self, request: bytes, data_length: int) -> bytes:
-        """Read data and check the reply checksum."""
+        """Read data and check the reply checksum (SmartLAN/G: data alone)."""
+        if self.cipher is not None:
+            return await self.exchange(request, data_length)
         reply = await self.exchange(request, data_length + 1)
         assert checksum(reply[:-1]) == reply[-1], reply.hex()
         return reply[:-1]

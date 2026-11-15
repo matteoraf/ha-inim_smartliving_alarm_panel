@@ -94,6 +94,7 @@
         "validation_error_detail": "Si è verificato un errore di validazione durante il recupero dei dati iniziali dalla centrale.",
         "unknown": "Si è verificato un errore sconosciuto. Controlla i log per maggiori dettagli.",
         "invalid_auth": "La scheda SmartLAN/G non ha accettato la connessione. Controlla nome utente e password.",
+        "invalid_board_reply": "La scheda SmartLAN/G ha risposto, ma la risposta non è nel formato previsto. Se nome utente e password sono corretti, questa versione della scheda potrebbe non essere ancora supportata: segnalalo su GitHub allegando un log di debug.",
         "invalid_pin": "Il PIN non corrisponde a nessun codice utente della centrale.",
         "invalid_pin_format": "Il PIN deve avere da 1 a 6 cifre.",
         "unsupported_firmware": "Il firmware della centrale è troppo vecchio: serve il firmware 5 o successivo."

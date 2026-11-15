@@ -136,6 +136,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   Your configuration entry is updated once more (version 1.3): the zone list is completed from the panel data already stored, without contacting the panel. If that data is incomplete, a warning asks you to use **Re-read panel configuration**.
     
+*   **SmartLAN/G:** the board's replies are now read the way the board sends them (the data alone, without the panel's checksum). Before, every read failed and setup reported a wrong user name or password even with the right credentials. A wrong user name or password is now reported only when the board's reply cannot be decrypted; any other unexpected reply has its own message (see [Troubleshooting](#troubleshooting)).
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -323,6 +325,18 @@ Troubleshooting
     *   The search only reaches boards on the same subnet as Home Assistant (the boards answer only on their own network segment). Enter a board on another subnet or VLAN by hand.
         
     *   The search listens on UDP ports 5001 (SmartLAN/SI) and 7001 (SmartLAN/G) of the Home Assistant host; another program using them, or a firewall, prevents it. Boards that are already set up are not listed.
+        
+*   **SmartLAN/G: "the board answered, but its reply was not in the expected format"** during setup:
+    
+    *   Check the board's user name and password first. If they are right, your board probably answers in a way this integration does not handle yet. Please open a GitHub issue with your panel model and firmware, the board's version and a debug log of a setup attempt. To get the log, add this to `configuration.yaml`, restart Home Assistant and try the setup again:
+        
+        ```yaml
+        logger:
+          logs:
+            custom_components.inim_smartliving_alarm: debug
+        ```
+        
+        The log shows the requests and replies (the PIN is masked; the board's user name and password are never logged). Remove the lines again afterwards.
         
 *   **The Inim app cannot connect locally while Home Assistant is running**:
     

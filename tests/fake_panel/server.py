@@ -91,6 +91,9 @@ class FakePanel:
         self.reply_delay = 0.0
         self.drop_after_requests: int | None = None
         self.corrupt_replies = 0
+        # SmartLAN/G only: send read replies with the panel's checksum, as
+        # no known board does (the board sends the data alone)
+        self.g_reply_checksum = False
 
         self._server: asyncio.Server | None = None
         self._client: asyncio.StreamWriter | None = None
@@ -263,6 +266,9 @@ class FakePanel:
         if request.write:
             return self._handle_write(request)
         data = self._handle_read(request)
+        if self.transport == TRANSPORT_G and not self.g_reply_checksum:
+            # the board checks the panel's checksum and sends the data alone
+            return data
         return data + bytes((checksum(data),))
 
     def _handle_read(self, request: Request) -> bytes:
