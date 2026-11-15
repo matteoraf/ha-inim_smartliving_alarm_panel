@@ -13,6 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+import voluptuous as vol
 
 from custom_components.inim_smartliving_alarm import async_migrate_entry, discovery
 from custom_components.inim_smartliving_alarm.api import SmartLivingPanel
@@ -480,3 +481,63 @@ async def test_search_cannot_listen(hass: HomeAssistant) -> None:
             result["flow_id"], {"next_step_id": "discover"}
         )
     assert result["step_id"] == "discover_none"
+
+
+# ------------------------------------------------------------- options
+
+
+def form_defaults(result: dict) -> dict[str, Any]:
+    """The values a form offers before the user changes anything."""
+    return {
+        str(key): key.default()
+        for key in result["data_schema"].schema
+        if key.default is not vol.UNDEFINED
+    }
+
+
+MAPPINGS = (
+    "scenario_arm_home",
+    "scenario_arm_away",
+    "scenario_arm_night",
+    "scenario_arm_vacation",
+    "scenario_disarm",
+)
+
+
+async def test_options_with_unmapped_scenarios_save_unchanged(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> None:
+    """Unmapped scenarios are offered as "none" and the form saves as it is."""
+    # set up with arm away = scenario 1, disarm = scenario 2, the rest unmapped
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    defaults = form_defaults(result)
+    assert {key: defaults[key] for key in MAPPINGS} == {
+        "scenario_arm_home": "none",
+        "scenario_arm_away": "0",
+        "scenario_arm_night": "none",
+        "scenario_arm_vacation": "none",
+        "scenario_disarm": "1",
+    }
+
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {})
+    await hass.async_block_till_done()
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert {key: entry.options[key] for key in MAPPINGS} == {
+        "scenario_arm_home": None,
+        "scenario_arm_away": 0,
+        "scenario_arm_night": None,
+        "scenario_arm_vacation": None,
+        "scenario_disarm": 1,
+    }
+
+
+async def test_options_offer_none_for_an_unknown_scenario(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> None:
+    """A stored scenario that is not among the choices is offered as "none"."""
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, "scenario_arm_night": 45}
+    )
+    await hass.async_block_till_done()
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert form_defaults(result)["scenario_arm_night"] == "none"
