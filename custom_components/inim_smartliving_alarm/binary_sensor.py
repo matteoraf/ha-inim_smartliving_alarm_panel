@@ -33,6 +33,11 @@ from .const import (
     KEY_INIT_ZONES,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
+    KEY_LIVE_ALARM_AREAS_LIST,
+    KEY_LIVE_AREAS_STATUS,
+    KEY_LIVE_TAMPER_AREAS_LIST,
+    KEY_LIVE_TAMPER_MEMORY_AREAS_LIST,
+    KEY_LIVE_TRIGGERED_AREAS_LIST,
     KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP,
     KEY_LIVE_ZONES_TRIGGERED_STATUS,
 )
@@ -133,16 +138,22 @@ async def async_setup_entry(
 
     num_areas_to_create = min(len(all_area_names), limit_areas)
     _LOGGER.debug(
-        "Setting up %s Area Triggered Binary Sensors (Limit: %s, Available: %s)",
+        "Setting up alarm, tamper and alarm memory binary sensors for %s areas "
+        "(Limit: %s, Available: %s)",
         num_areas_to_create,
         limit_areas,
         len(all_area_names),
     )
     for i in range(num_areas_to_create):
         area_name = all_area_names[i] if all_area_names[i] else f"Area {i + 1}"
-        binary_sensors_to_add.append(
-            InimAreaTriggeredBinarySensor(
+        binary_sensors_to_add.extend(
+            sensor_class(
                 coordinator, entry, panel_display_name, system_info, i + 1, area_name
+            )
+            for sensor_class in (
+                InimAreaAlarmMemoryBinarySensor,
+                InimAreaAlarmBinarySensor,
+                InimAreaTamperBinarySensor,
             )
         )
 
@@ -347,10 +358,13 @@ class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
         return {"zone_id": self._zone_id_1_based, "zone_name": self._zone_name}
 
 
-class InimAreaTriggeredBinarySensor(BaseInimBinarySensor):
-    """Binary sensor indicating if an Inim Area is currently triggered."""
+class InimAreaBinarySensor(BaseInimBinarySensor):
+    """On while an area is in one of the area lists of the live status."""
 
-    _attr_device_class = BinarySensorDeviceClass.SAFETY
+    _status_key: str  # list of areas in the coordinator's areas_status
+    _label: str  # shown in the name
+    _unique_id_suffix: str
+    _object_id_suffix: str
 
     def __init__(
         self,
@@ -361,40 +375,86 @@ class InimAreaTriggeredBinarySensor(BaseInimBinarySensor):
         area_id_1_based: int,
         area_name: str,
     ) -> None:
-        """Initialize the Inim area triggered binary sensor."""
+        """Initialize the area binary sensor."""
         super().__init__(coordinator, config_entry, panel_display_name, system_info)
         self._area_id_1_based = area_id_1_based
         self._area_name = area_name
-        self._attr_name = f"Area {self._area_id_1_based} Triggered ({self._area_name})"
+        self._attr_name = (
+            f"Area {self._area_id_1_based} {self._label} ({self._area_name})"
+        )
         self._attr_unique_id = (
-            f"{config_entry.entry_id}_area_{self._area_id_1_based}_triggered_bs"
+            f"{config_entry.entry_id}_area_{self._area_id_1_based}"
+            f"_{self._unique_id_suffix}"
         )
         self._update_state_from_coordinator()
 
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_area_{self._area_id_1_based}_triggered"
+        return (
+            f"{self._panel_display_name}_area_{self._area_id_1_based}"
+            f"_{self._object_id_suffix}"
+        )
 
     @callback
     def _handle_coordinator_update(self) -> None:
         self._update_state_from_coordinator()
         self.async_write_ha_state()
 
+    def _areas(self, key: str) -> list[int]:
+        if self.coordinator.data and self.coordinator.data.get(KEY_LIVE_AREAS_STATUS):
+            return self.coordinator.data[KEY_LIVE_AREAS_STATUS].get(key) or []
+        return []
+
     def _update_state_from_coordinator(self) -> None:
-        is_on_state = False
-        if self.coordinator.data and self.coordinator.data.get("areas_status"):
-            triggered_list = self.coordinator.data["areas_status"].get(
-                "triggered_areas", []
-            )
-            if self._area_id_1_based in triggered_list:
-                is_on_state = True
-        self._attr_is_on = is_on_state
+        self._attr_is_on = self._area_id_1_based in self._areas(self._status_key)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return the state attributes."""
         return {"area_id": self._area_id_1_based, "area_name": self._area_name}
+
+
+class InimAreaAlarmMemoryBinarySensor(InimAreaBinarySensor):
+    """Alarm memory of an area: on after an alarm until the memory is reset.
+
+    Was the "triggered" sensor; its unique and object IDs are kept.
+    """
+
+    _attr_device_class = BinarySensorDeviceClass.SAFETY
+    _status_key = KEY_LIVE_TRIGGERED_AREAS_LIST
+    _label = "Alarm memory"
+    _unique_id_suffix = "triggered_bs"
+    _object_id_suffix = "triggered"
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the state attributes, with the area's tamper memory."""
+        return {
+            **super().extra_state_attributes,
+            "tamper_memory": self._area_id_1_based
+            in self._areas(KEY_LIVE_TAMPER_MEMORY_AREAS_LIST),
+        }
+
+
+class InimAreaAlarmBinarySensor(InimAreaBinarySensor):
+    """An area in alarm now."""
+
+    _attr_device_class = BinarySensorDeviceClass.SAFETY
+    _status_key = KEY_LIVE_ALARM_AREAS_LIST
+    _label = "Alarm"
+    _unique_id_suffix = "alarm_bs"
+    _object_id_suffix = "alarm"
+
+
+class InimAreaTamperBinarySensor(InimAreaBinarySensor):
+    """An area in tamper now."""
+
+    _attr_device_class = BinarySensorDeviceClass.TAMPER
+    _status_key = KEY_LIVE_TAMPER_AREAS_LIST
+    _label = "Tamper"
+    _unique_id_suffix = "tamper_bs"
+    _object_id_suffix = "tamper"
 
 
 class InimSpecificScenarioActiveBinarySensor(BaseInimBinarySensor):

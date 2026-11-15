@@ -112,7 +112,14 @@ async def test_live_status_defaults(
     assert status["areas_status"]["area_statuses"] == dict.fromkeys(
         range(1, 11), "disarmed"
     )
+    assert status["areas_status"]["area_modes"] == dict.fromkeys(
+        range(1, 11), "disarmed"
+    )
     assert status["areas_status"]["triggered_areas"] == []
+    assert status["areas_status"]["alarm_areas"] == []
+    assert status["areas_status"]["tamper_areas"] == []
+    assert status["areas_status"]["tamper_memory_areas"] == []
+    assert status["areas_status"]["auto_arm_areas"] == list(range(1, 11))
     assert status["zones_status"]["zone_statuses"] == dict.fromkeys(
         range(1, 51), "clear"
     )
@@ -295,17 +302,55 @@ async def test_fragmented_replies(
     )
 
 
-@pytest.mark.xfail(strict=True, reason="only total arming and disarmed are decoded")
 async def test_partial_arming_is_reported(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
-    """An area armed in partial (stay) or instant mode is not reported as unknown."""
+    """Areas armed in partial (stay) or instant mode are armed, with their mode."""
+    panel.state.area_modes[1] = c.MODE_AWAY
     panel.state.area_modes[2] = c.MODE_STAY
     panel.state.area_modes[3] = c.MODE_INSTANT
     status = await run(hass, api.get_live_status_snapshot)
-    statuses = status["areas_status"]["area_statuses"]
-    assert statuses[3] != "unknown"
-    assert statuses[4] != "unknown"
+    areas = status["areas_status"]
+    assert [areas["area_statuses"][area] for area in (2, 3, 4, 5)] == [
+        "armed",
+        "armed",
+        "armed",
+        "disarmed",
+    ]
+    assert [areas["area_modes"][area] for area in (2, 3, 4, 5)] == [
+        "total",
+        "partial",
+        "instant",
+        "disarmed",
+    ]
+
+
+async def test_invalid_area_mode_is_unknown(
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
+) -> None:
+    """A mode value outside 1-4 (0 = not valid) is reported as unknown."""
+    panel.state.area_modes[9] = c.MODE_NONE
+    status = await run(hass, api.get_live_status_snapshot)
+    assert status["areas_status"]["area_statuses"][10] == "unknown"
+    assert status["areas_status"]["area_modes"][10] == "unknown"
+
+
+async def test_area_alarm_and_tamper_masks(
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
+) -> None:
+    """Live alarm and tamper, tamper memory and auto-arm cover all ten areas."""
+    state = panel.state
+    state.area_alarm = 1 << 1 | 1 << 9
+    state.area_tamper = 1 << 8
+    state.area_tamper_memory = 1 << 2 | 1 << 9
+    state.area_auto_arm = 0b1000000001
+    status = await run(hass, api.get_live_status_snapshot)
+    areas = status["areas_status"]
+    assert areas["alarm_areas"] == [2, 10]
+    assert areas["tamper_areas"] == [9]
+    assert areas["tamper_memory_areas"] == [3, 10]
+    assert areas["auto_arm_areas"] == [1, 10]
+    assert areas["triggered_areas"] == []
 
 
 @pytest.mark.xfail(
@@ -323,9 +368,6 @@ async def test_short_and_tamper_zones_are_reported(
     assert statuses[21] != "unknown"
 
 
-@pytest.mark.xfail(
-    strict=True, reason="only the low byte of the alarm memory mask is read"
-)
 async def test_alarm_memory_of_areas_9_and_10(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:

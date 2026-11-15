@@ -114,11 +114,20 @@ KEY_LIVE_ACTIVE_SCENARIO_NUMBER = "active_scenario_number"  # 0-indexed int
 
 KEY_LIVE_AREAS_STATUS = "areas_status"  # Dict with current area statuses
 KEY_LIVE_AREA_STATUSES_MAP = (
-    "area_statuses"  # Dict within areas_status: {area_id_1_based_str: "status_str"}
+    "area_statuses"  # {area_id: "armed" (any mode) / "disarmed" / "unknown"}
 )
-KEY_LIVE_TRIGGERED_AREAS_LIST = (
-    "triggered_areas"  # List of area_ids (int) that are triggered
-)
+KEY_LIVE_AREA_MODES_MAP = "area_modes"  # {area_id: an AREA_MODE_* value or "unknown"}
+KEY_LIVE_ALARM_AREAS_LIST = "alarm_areas"  # areas (int) in alarm now
+KEY_LIVE_TAMPER_AREAS_LIST = "tamper_areas"  # areas (int) in tamper now
+KEY_LIVE_TRIGGERED_AREAS_LIST = "triggered_areas"  # areas (int) with alarm memory
+KEY_LIVE_TAMPER_MEMORY_AREAS_LIST = "tamper_memory_areas"  # areas with tamper memory
+KEY_LIVE_AUTO_ARM_AREAS_LIST = "auto_arm_areas"  # areas with auto-arm enabled
+
+# Area arming modes as reported in KEY_LIVE_AREA_MODES_MAP
+AREA_MODE_TOTAL = "total"
+AREA_MODE_PARTIAL = "partial"
+AREA_MODE_INSTANT = "instant"
+AREA_MODE_DISARMED = "disarmed"
 
 KEY_LIVE_ZONES_STATUS = "zones_status"  # Dict with current zone statuses
 KEY_LIVE_ZONE_STATUSES_MAP = (

@@ -16,7 +16,8 @@ Environment variables:
   names and event log: keep them local; commit only fixtures with the names
   replaced.
 - INIM_PANEL_WRITE=1 and INIM_TEST_PIN: also run the write tests, which arm
-  and disarm area 4 and bypass and include zone 18 only. Type the PIN
+  (total, partial, instant) and disarm area 4 and bypass and include zone 18
+  only. Type the PIN
   without storing it, and unset it afterwards:
 
       read -rs INIM_TEST_PIN && export INIM_TEST_PIN
@@ -25,10 +26,12 @@ Environment variables:
 
 All traffic goes through a local proxy (tests/real_panel/proxy.py) that
 refuses every write in read-only mode and, in write mode, every write other
-than arm/disarm of area 4 and bypass/include of zone 18. Every test first
-reads the model string and is skipped unless the panel is a 1050 with
-firmware 6.x, whose memory layout the proxy and the tests assume. The write
-tests are also skipped while the panel is in programming mode.
+than arming (any mode) or disarming area 4 and bypass/include of zone 18.
+Area 4 is armed only while it is disarmed without alarm, tamper or alarm
+memory and all its zones are at rest. Every test first reads the model
+string and is skipped unless the panel is a 1050 with firmware 6.x, whose
+memory layout the proxy and the tests assume. The write tests are also
+skipped while the panel is in programming mode.
 """
 
 import asyncio
@@ -48,6 +51,7 @@ from custom_components.inim_smartliving_alarm.legacy import (
     LegacyPanelClient,
     create_client,
 )
+from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
 
 from .fake_panel import FakePanel, checksum
 from .real_panel.proxy import CONNECT_DEADLINE, PanelProxy, WriteGuard
@@ -406,14 +410,30 @@ def quiet_api_log() -> Iterator[None]:
 
 
 @pytest.fixture
-async def zone_slot(hass: HomeAssistant, api: LegacyPanelClient) -> int:
-    """Physical terminal slot of the write-test zone, read from the panel."""
+async def panel_config(hass: HomeAssistant, api: LegacyPanelClient) -> dict[str, Any]:
+    """The panel configuration, read before the write proxy connects."""
     config = require(
         await run(hass, api.get_initial_panel_configuration), "configuration"
     )
     # The board takes one client: free the connection for the write proxy
     await api.close()
-    zone = config["zones_config"]["zones_config_detailed"][WRITE_ZONE - 1]
+    return config
+
+
+@pytest.fixture
+def area_zones(panel_config: dict[str, Any]) -> list[int]:
+    """Zones (1-based) assigned to the write-test area."""
+    return [
+        zone["zone_index"] + 1
+        for zone in panel_config["zones_config"]["zones_config_detailed"]
+        if WRITE_AREA in zone["assigned_areas"]
+    ]
+
+
+@pytest.fixture
+def zone_slot(panel_config: dict[str, Any]) -> int:
+    """Physical terminal slot of the write-test zone, read from the panel."""
+    zone = panel_config["zones_config"]["zones_config_detailed"][WRITE_ZONE - 1]
     assert "internal_index" in zone, f"zone {WRITE_ZONE} has no physical slot"
     return zone["internal_index"]
 
@@ -436,25 +456,53 @@ async def write_api(
     await client.close()
 
 
+@pytest.mark.parametrize(
+    ("mode", "arming_mode"),
+    [(ArmMode.AWAY, "total"), (ArmMode.STAY, "partial"), (ArmMode.INSTANT, "instant")],
+)
 async def test_arm_and_disarm_area(
-    hass: HomeAssistant, write_api: LegacyPanelClient
+    hass: HomeAssistant,
+    write_api: LegacyPanelClient,
+    area_zones: list[int],
+    mode: ArmMode,
+    arming_mode: str,
 ) -> None:
-    """Area 4 can be armed and disarmed; no other area changes."""
+    """Area 4 can be armed in each mode and disarmed; no other area changes.
+
+    The panel may accept arming with a zone not at rest and then go into
+    alarm, so the area is armed only when all its zones are at rest; an
+    alarm after arming disarms at once and fails the test.
+    """
     before = require(await run(hass, write_api.get_live_status_snapshot), "status")
     areas = before["areas_status"]
     if (
         areas["area_statuses"][WRITE_AREA] != "disarmed"
         or WRITE_AREA in areas["triggered_areas"]
+        or WRITE_AREA in areas["alarm_areas"]
+        or WRITE_AREA in areas["tamper_areas"]
     ):
         pytest.skip(f"area {WRITE_AREA} is not disarmed and quiet")
+    zone_statuses = before["zones_status"]["zone_statuses"]
+    not_at_rest = [zone for zone in area_zones if zone_statuses.get(zone) != "clear"]
+    if not_at_rest:
+        pytest.skip(f"zones {not_at_rest} of area {WRITE_AREA} are not at rest")
 
     try:
-        assert await run(
-            hass, write_api.execute_arm_disarm_areas, areas_to_arm=[WRITE_AREA]
-        )
+        if mode is ArmMode.AWAY:  # the area switch's command
+            assert await run(
+                hass, write_api.execute_arm_disarm_areas, areas_to_arm=[WRITE_AREA]
+            )
+        else:
+            result = await write_api.panel.arm_areas({WRITE_AREA: mode})
+            assert result.ok, result.reason
         armed = await run(hass, write_api.get_live_status_snapshot)
+        assert WRITE_AREA not in armed["areas_status"]["alarm_areas"], (
+            f"area {WRITE_AREA} went into alarm after arming; disarmed, "
+            "reset its alarm memory before the next run"
+        )
         statuses = armed["areas_status"]["area_statuses"]
         assert statuses[WRITE_AREA] == "armed"
+        assert armed["areas_status"]["area_modes"][WRITE_AREA] == arming_mode
         assert {k: v for k, v in statuses.items() if k != WRITE_AREA} == {
             k: v for k, v in areas["area_statuses"].items() if k != WRITE_AREA
         }

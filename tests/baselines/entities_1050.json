@@ -8,71 +8,211 @@
   },
   {
     "platform": "binary_sensor",
-    "unique_id": "_area_10_triggered_bs",
-    "original_name": "Area 10 Triggered (Area 10)",
+    "unique_id": "_area_10_alarm_bs",
+    "original_name": "Area 10 Alarm (Area 10)",
     "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_10_tamper_bs",
+    "original_name": "Area 10 Tamper (Area 10)",
+    "device_class": "tamper",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_10_triggered_bs",
+    "original_name": "Area 10 Alarm memory (Area 10)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_1_alarm_bs",
+    "original_name": "Area 1 Alarm (Area 1)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_1_tamper_bs",
+    "original_name": "Area 1 Tamper (Area 1)",
+    "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_1_triggered_bs",
-    "original_name": "Area 1 Triggered (Area 1)",
+    "original_name": "Area 1 Alarm memory (Area 1)",
     "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_2_alarm_bs",
+    "original_name": "Area 2 Alarm (Area 2)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_2_tamper_bs",
+    "original_name": "Area 2 Tamper (Area 2)",
+    "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_2_triggered_bs",
-    "original_name": "Area 2 Triggered (Area 2)",
+    "original_name": "Area 2 Alarm memory (Area 2)",
     "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_3_alarm_bs",
+    "original_name": "Area 3 Alarm (Area 3)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_3_tamper_bs",
+    "original_name": "Area 3 Tamper (Area 3)",
+    "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_3_triggered_bs",
-    "original_name": "Area 3 Triggered (Area 3)",
+    "original_name": "Area 3 Alarm memory (Area 3)",
     "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_4_alarm_bs",
+    "original_name": "Area 4 Alarm (Area 4)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_4_tamper_bs",
+    "original_name": "Area 4 Tamper (Area 4)",
+    "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_4_triggered_bs",
-    "original_name": "Area 4 Triggered (Area 4)",
+    "original_name": "Area 4 Alarm memory (Area 4)",
     "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_5_alarm_bs",
+    "original_name": "Area 5 Alarm (Area 5)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_5_tamper_bs",
+    "original_name": "Area 5 Tamper (Area 5)",
+    "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_5_triggered_bs",
-    "original_name": "Area 5 Triggered (Area 5)",
+    "original_name": "Area 5 Alarm memory (Area 5)",
     "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_6_alarm_bs",
+    "original_name": "Area 6 Alarm (Area 6)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_6_tamper_bs",
+    "original_name": "Area 6 Tamper (Area 6)",
+    "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_6_triggered_bs",
-    "original_name": "Area 6 Triggered (Area 6)",
+    "original_name": "Area 6 Alarm memory (Area 6)",
     "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_7_alarm_bs",
+    "original_name": "Area 7 Alarm (Area 7)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_7_tamper_bs",
+    "original_name": "Area 7 Tamper (Area 7)",
+    "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_7_triggered_bs",
-    "original_name": "Area 7 Triggered (Area 7)",
+    "original_name": "Area 7 Alarm memory (Area 7)",
     "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_8_alarm_bs",
+    "original_name": "Area 8 Alarm (Area 8)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_8_tamper_bs",
+    "original_name": "Area 8 Tamper (Area 8)",
+    "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_8_triggered_bs",
-    "original_name": "Area 8 Triggered (Area 8)",
+    "original_name": "Area 8 Alarm memory (Area 8)",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
+    "unique_id": "_area_9_alarm_bs",
+    "original_name": "Area 9 Alarm (Area 9)",
+    "device_class": "safety",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
+    "unique_id": "_area_9_tamper_bs",
+    "original_name": "Area 9 Tamper (Area 9)",
+    "device_class": "tamper",
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
     "unique_id": "_area_9_triggered_bs",
-    "original_name": "Area 9 Triggered (Area 9)",
+    "original_name": "Area 9 Alarm memory (Area 9)",
     "device_class": "safety",
     "state": "off"
   },

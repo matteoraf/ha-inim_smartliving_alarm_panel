@@ -19,6 +19,7 @@ from custom_components.inim_smartliving_alarm.legacy import (
     LegacyPanelClient,
     create_client,
 )
+from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
 from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
@@ -230,6 +231,10 @@ async def test_guard_allows_the_chosen_area_and_zone(
     assert panel.state.armed_areas() == [AREA]
     assert await api.execute_arm_disarm_areas(areas_to_disarm=[AREA])
     assert panel.state.armed_areas() == []
+    for mode in (ArmMode.STAY, ArmMode.INSTANT):
+        assert (await api.panel.arm_areas({AREA: mode})).ok
+        assert panel.state.area_modes[AREA - 1] == mode
+        assert await api.execute_arm_disarm_areas(areas_to_disarm=[AREA])
 
     assert await api.execute_set_zone_excluded_status(ZONE_SLOT, True)
     assert panel.state.zone_included[17] is False
