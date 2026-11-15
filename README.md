@@ -74,27 +74,55 @@ Prerequisites
 Installation
 ------------
 
-<!--
-It is recommended to install this integration via the [Home Assistant Community Store (HACS)](https://hacs.xyz/) if it's made available there.
+The integration is installed as a custom repository; it needs Home Assistant 2026.1 or later.
 
-**1\. HACS Installation (Recommended if available):**
+**Home Assistant 2026.11 or later (Marketplace):**
 
-1.  Open HACS in your Home Assistant.
+1.  Go to **Settings** -> **Marketplace**.
     
-2.  Go to "Integrations".
+2.  Add `https://github.com/matteoraf/ha-inim_smartliving_alarm_panel` as a custom repository of type **Integration**. Adding custom repositories needs the Marketplace's GitHub connection.
     
-3.  Search for "Inim SmartLiving Alarm" (or the name you publish it under).
-    
-4.  Click "Install".
-    
-5.  Restart Home Assistant.
+3.  Open **Inim Smartliving Alarm** in the Marketplace, install it and restart Home Assistant.
     
 
-**2\. Manual Installation:**
--->
-1.  Download the latest release inim\_smartliving\_alarm folder (or clone the repository) into your config/custom\_components folder.
+**Home Assistant 2026.1 to 2026.10 (HACS):**
+
+1.  In HACS, open the menu (⋮) -> **Custom repositories** and add the same URL with type **Integration**.
+    
+2.  Search for **Inim Smartliving Alarm**, download it and restart Home Assistant.
+    
+
+**Manual installation:**
+
+1.  Download the `inim_smartliving_alarm` folder of the latest release into your `config/custom_components` folder.
     
 2.  Restart Home Assistant.
+    
+
+### Preview versions
+
+Versions such as `0.4.0a1` (preview) or `0.4.0b1` (beta) are published as GitHub *pre-releases*. They are offered only to users who ask for them:
+
+*   **Marketplace or HACS**: turn on the repository's **Pre-release** switch to be offered pre-releases, or use **Redownload** on the integration's page and pick the version.
+    
+*   **Manual**: download the `inim_smartliving_alarm` folder from the pre-release on GitHub.
+    
+
+To go back, install the previous stable version (for example `0.3.1`) the same way and restart Home Assistant. Please report problems with a preview in a GitHub issue, with your panel model, firmware and board type (SmartLAN/SI or SmartLAN/G).
+
+### Upgrading from 0.3.x
+
+Version 0.4 reworks how the integration talks to the panel; your entities and options stay as they are:
+
+*   Your configuration entry is updated automatically (it is marked as a SmartLAN/SI connection). Entity IDs, names and options do not change.
+    
+*   Home Assistant now keeps one connection to the panel and reuses it, so updates are faster. The SmartLAN/SI module accepts only one local connection: see [the Inim app](#troubleshooting) under Troubleshooting.
+    
+*   The PIN is checked from now on when you **Reconfigure**: a PIN that matches no user code of the panel is refused. If your current PIN matches none, the log shows a warning at every connection.
+    
+*   New: SmartLAN/G boards (experimental), a network search when adding a panel, and the active scenario now takes all areas of your user code into account (previously areas 8 to 10 were ignored).
+    
+*   Not changed yet: see [Known limitations](#known-limitations).
     
 
 Configuration
@@ -244,6 +272,24 @@ You can display the event log using a Markdown card in Lovelace, but I recommend
 
 You'll find yaml samples for UI components in the repo.
 
+
+Known limitations
+-----------------
+
+These are known and will be fixed in the coming versions:
+
+*   **Areas armed in partial or instant mode** show as unknown (the area switch is off); only total arming and disarmed are shown.
+    
+*   **Zones in short circuit or tamper** show as unknown, together with the other zone of the same pair.
+    
+*   **The second zone of double terminals** (zones above the number of terminals) is not shown, and output terminals may appear as zones.
+    
+*   **The alarm memory of areas 9 and 10** is not detected.
+    
+*   **Event times** are shown in UTC+1, whatever Home Assistant's time zone; after the panel's event log has wrapped around, new events may stop appearing.
+    
+*   On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example `switch.home_home_area_3`); existing installations keep their IDs.
+    
 
 Troubleshooting
 ---------------
