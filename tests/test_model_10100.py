@@ -218,16 +218,7 @@ async def test_options_cap_an_old_area_limit(
         if key.default is not vol.UNDEFINED
     }
     assert defaults["limit_areas"] == 15
-    mappings = {
-        "scenario_arm_away": "0",
-        "scenario_arm_home": "none",
-        "scenario_arm_night": "none",
-        "scenario_arm_vacation": "none",
-        "scenario_disarm": "1",
-    }
-    result = await hass.config_entries.options.async_configure(
-        result["flow_id"], mappings
-    )
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {})
     await hass.async_block_till_done()
     assert result["type"] == "create_entry"
     assert entry.options["limit_areas"] == 15

@@ -165,6 +165,20 @@ def _capped(settings: Mapping[str, Any], key: str, maximum: int) -> int:
     return min(settings.get(key) or maximum, maximum)
 
 
+def _mapping_default(
+    settings: Mapping[str, Any], key: str, choices: Mapping[str, str]
+) -> str:
+    """The form value of a stored scenario mapping.
+
+    An unmapped scenario is stored as None and shown as "none"; so is a
+    stored scenario that is not among the choices, so that the form never
+    offers a value it would refuse.
+    """
+    value = settings.get(key)
+    choice = "none" if value is None else str(value)
+    return choice if choice in choices else "none"
+
+
 def _board_key(board: DiscoveredBoard) -> str:
     return f"{board.board}|{board.host}|{board.port}"
 
@@ -691,37 +705,18 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
             options_schema_dict.update(
                 {
                     vol.Optional(
+                        key,
+                        default=_mapping_default(
+                            self.current_settings, key, scenario_choices
+                        ),
+                    ): vol.In(scenario_choices)
+                    for key in (
                         CONF_SCENARIO_ARM_HOME,
-                        default=str(
-                            self.current_settings.get(CONF_SCENARIO_ARM_HOME, "none")
-                        ),
-                    ): vol.In(scenario_choices),
-                    vol.Optional(
                         CONF_SCENARIO_ARM_AWAY,
-                        default=str(
-                            self.current_settings.get(CONF_SCENARIO_ARM_AWAY, "none")
-                        ),
-                    ): vol.In(scenario_choices),
-                    vol.Optional(
                         CONF_SCENARIO_ARM_NIGHT,
-                        default=str(
-                            self.current_settings.get(CONF_SCENARIO_ARM_NIGHT, "none")
-                        ),
-                    ): vol.In(scenario_choices),
-                    vol.Optional(
                         CONF_SCENARIO_ARM_VACATION,
-                        default=str(
-                            self.current_settings.get(
-                                CONF_SCENARIO_ARM_VACATION, "none"
-                            )
-                        ),
-                    ): vol.In(scenario_choices),
-                    vol.Optional(
                         CONF_SCENARIO_DISARM,
-                        default=str(
-                            self.current_settings.get(CONF_SCENARIO_DISARM, "none")
-                        ),
-                    ): vol.In(scenario_choices),
+                    )
                 }
             )
         else:
