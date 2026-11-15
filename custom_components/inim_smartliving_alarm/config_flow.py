@@ -163,7 +163,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Inim Alarm."""
 
     VERSION = 1
-    MINOR_VERSION = 2
+    MINOR_VERSION = 3
 
     def __init__(self) -> None:
         """Start with no data (kept per flow, between the steps)."""

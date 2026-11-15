@@ -15,6 +15,7 @@ import pytest
 from custom_components.inim_smartliving_alarm.legacy import (
     LegacyPanelClient,
     create_client,
+    zone_exists,
 )
 
 from .fake_panel import FakePanel, captures, const as c
@@ -69,7 +70,7 @@ async def test_initial_configuration(
     assert config["system_info"]["version"] == "6.07"
     assert config["system_info"]["type"] == "01050"
     assert config["areas"]["names"] == [f"Area {n}" for n in range(1, 11)]
-    assert config["zones"]["zone_names"] == [f"Zone {n}" for n in range(1, 51)]
+    assert config["zones"]["zone_names"] == [f"Zone {n}" for n in range(1, 101)]
     assert config["scenarios"]["names"] == [f"Scenario {n}" for n in range(1, 31)]
     assert config["keyboard_names"]["names"][:2] == ["Tast Zona Giorno", "Tast Garage"]
 
@@ -88,7 +89,7 @@ async def test_initial_configuration(
     assert activations[2]["area_actions"][7] == "arm"
 
     zones = config["zones_config"]["zones_config_detailed"]
-    assert len(zones) == 50
+    assert len(zones) == 100  # every zone number; 51-100 are second zones
     assert zones[19]["assigned_areas"] == [1]
     assert zones[23]["assigned_areas"] == [4]
     assert zones[35]["assigned_areas"] == [7]
@@ -97,6 +98,12 @@ async def test_initial_configuration(
     assert zones[35]["internal_index"] == 110
     assert zones[36]["internal_index"] == 112
     assert "internal_index" not in zones[37]
+    # terminal types: 37 inputs, the rest unused
+    assert zones[0]["terminal_type_desc"] == "Input"
+    assert zones[37]["terminal_type_desc"] == "Not used"
+    assert zones[50]["terminal_index"] == 0
+    assert zones[50]["second_zone"] is True
+    assert [zone_exists(zone) for zone in zones].count(True) == 37
 
 
 # ------------------------------------------------------------ live status
@@ -121,14 +128,20 @@ async def test_live_status_defaults(
     assert status["areas_status"]["tamper_memory_areas"] == []
     assert status["areas_status"]["auto_arm_areas"] == list(range(1, 11))
     assert status["zones_status"]["zone_statuses"] == dict.fromkeys(
-        range(1, 51), "clear"
+        range(1, 101), "clear"
     )
     assert status["zones_excluded_status"]["zone_excluded_statuses"] == dict.fromkeys(
-        range(1, 51), "enabled"
+        range(1, 101), "enabled"
+    )
+    assert status["zones_excluded_status"]["zone_test_statuses"] == dict.fromkeys(
+        range(1, 101), False
     )
     assert status["zones_triggered_status"]["zone_triggered_statuses"] == dict.fromkeys(
-        range(1, 51), "clear"
+        range(1, 101), "clear"
     )
+    assert status["zones_triggered_status"][
+        "zone_tamper_memory_statuses"
+    ] == dict.fromkeys(range(1, 101), False)
     assert status["active_scenario"]["active_scenario_number"] == 1
 
 
@@ -353,19 +366,35 @@ async def test_area_alarm_and_tamper_masks(
     assert areas["triggered_areas"] == []
 
 
-@pytest.mark.xfail(
-    strict=True, reason="zone values 0 (short) and 3 (tamper) are not decoded"
-)
 async def test_short_and_tamper_zones_are_reported(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
-    """Short-circuited and tampered zones get a known status."""
+    """Short-circuited and tampered zones get their own status; neighbours keep theirs."""
     panel.state.zone_states[19] = c.ZONE_SHORT
     panel.state.zone_states[20] = c.ZONE_TAMPER
+    panel.state.zone_states[21] = c.ZONE_ALARM
     status = await run(hass, api.get_live_status_snapshot)
     statuses = status["zones_status"]["zone_statuses"]
-    assert statuses[20] != "unknown"
-    assert statuses[21] != "unknown"
+    assert [statuses[zone] for zone in (19, 20, 21, 22, 23)] == [
+        "clear",
+        "short",
+        "tamper",
+        "alarmed",
+        "clear",
+    ]
+
+
+async def test_zone_test_flags_and_terminal_tamper_memory(
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
+) -> None:
+    """Test flags per zone; tamper memory per terminal, shared by its two zones."""
+    panel.state.zone_inclusion_tail = bytes((0x10,)) + bytes(12)  # zone 5 in test
+    panel.state.zone_memory_middle = bytes((0x04,)) + bytes(6)  # terminal 3
+    status = await run(hass, api.get_live_status_snapshot)
+    test = status["zones_excluded_status"]["zone_test_statuses"]
+    assert [zone for zone, flag in test.items() if flag] == [5]
+    memory = status["zones_triggered_status"]["zone_tamper_memory_statuses"]
+    assert [zone for zone, flag in memory.items() if flag] == [3, 53]
 
 
 async def test_alarm_memory_of_areas_9_and_10(
@@ -377,9 +406,6 @@ async def test_alarm_memory_of_areas_9_and_10(
     assert status["areas_status"]["triggered_areas"] == [9, 10]
 
 
-@pytest.mark.xfail(
-    strict=True, reason="zones 51-100 (second zone of double terminals) are not read"
-)
 async def test_double_terminal_zones_are_reported(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:

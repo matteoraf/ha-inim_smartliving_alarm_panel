@@ -3,10 +3,9 @@
 The entities, the stored panel configuration (entry.data) and the
 coordinator data keep their shapes while the panel is accessed through the
 asynchronous API. Values are derived from the raw replies with the same
-rules as before, including their known limits (zone values other than
-rest/alarm reported as unknown, primary zones only, event indexes not
-wrapping around the log, event times in UTC+1); each of those is lifted by
-its own change later.
+rules as before, including their known limits (event indexes not wrapping
+around the log, event times in UTC+1); each of those is lifted by its own
+change later.
 
 Errors are reported the old way: None, False or a dictionary marking the
 failure, never an exception.
@@ -26,12 +25,17 @@ from .const import (
     AREA_MODE_TOTAL,
     BOARD_SMARTLAN_G,
     BOARD_SMARTLAN_SI,
+    ZONE_STATE_ALARMED,
+    ZONE_STATE_CLEAR,
+    ZONE_STATE_SHORT,
+    ZONE_STATE_TAMPER,
 )
 from .protocol import registers as reg
 from .protocol.commands import ArmMode
+from .protocol.config import ZONE_TYPES, TerminalType
 from .protocol.errors import ProtocolError, UnsupportedPanelError
 from .protocol.model import SMARTLIVING_1050_FW6, PanelModel
-from .protocol.status import AreaMode, AreaStatus
+from .protocol.status import AreaMode, AreaStatus, ZoneState
 from .transport.base import PanelTransport, Priority, TransportError
 from .transport.smartlan_g import SmartLanGTransport
 from .transport.smartlan_si import SmartLanSiTransport
@@ -51,6 +55,18 @@ BALANCING_TYPES = {
     0x03: "Double Balancing",
 }
 SENSOR_TYPES = {0x00: "Generic zone", 0x80: "Shutter type"}
+TERMINAL_TYPES = {
+    TerminalType.INPUT: "Input",
+    TerminalType.OUTPUT: "Output",
+    TerminalType.IN_OUT: "Input/output",
+    TerminalType.DOUBLE: "Double zone",
+    TerminalType.NULL: "Not used",
+    TerminalType.OUT_DIMMING: "Dimmer output",
+    TerminalType.OUT_DAC: "DAC output",
+    TerminalType.OUT_ANALOG: "Analog output",
+    TerminalType.OUT_NOT_ENABLED: "Output not enabled",
+}
+TERMINAL_TYPE_OFFSET = 11  # in the terminal record
 SCENARIO_ACTIONS = {0x1: "arm", 0x4: "disarm", 0x0: "keep"}
 EVENT_ACTIONS = {
     0x9E: "Scenario Activated",
@@ -79,11 +95,11 @@ _AREA_MODES = {
     AreaMode.INSTANT: AREA_MODE_INSTANT,
     AreaMode.DISARMED: AREA_MODE_DISARMED,
 }
-_ZONE_PAIRS = {  # 2-bit zone pair value -> (lower zone, higher zone)
-    0x5: ("clear", "clear"),
-    0x6: ("alarmed", "clear"),
-    0x9: ("clear", "alarmed"),
-    0xA: ("alarmed", "alarmed"),
+_ZONE_STATES = {
+    ZoneState.SHORT: ZONE_STATE_SHORT,
+    ZoneState.STANDBY: ZONE_STATE_CLEAR,
+    ZoneState.ALARM: ZONE_STATE_ALARMED,
+    ZoneState.TAMPER: ZONE_STATE_TAMPER,
 }
 
 _ERRORS = (TransportError, ProtocolError, UnsupportedPanelError, ValueError)
@@ -262,12 +278,22 @@ class LegacyPanelClient:
         )
 
     async def execute_set_zone_excluded_status(
-        self, zone_internal_index: int, excluded_status: bool
+        self,
+        zone_internal_index: int,
+        excluded_status: bool,
+        *,
+        second_zone: bool = False,
     ) -> bool:
-        """Bypass (True) or include the zone at a physical slot; True if accepted."""
+        """Bypass (True) or include the zone at a physical slot; True if accepted.
+
+        second_zone selects the second zone of a double terminal.
+        """
         return await self._run(
-            f"Bypass of slot {zone_internal_index}",
-            self.panel.bypass_zone(zone_internal_index, bypass=excluded_status),
+            f"Bypass of slot {zone_internal_index}"
+            + (" (second zone)" if second_zone else ""),
+            self.panel.bypass_zone(
+                zone_internal_index, bypass=excluded_status, second_zone=second_zone
+            ),
         )
 
     async def execute_activate_scenario(self, scenario_number_0_indexed: int) -> bool:
@@ -330,7 +356,7 @@ def configuration_dict(config: PanelConfiguration) -> dict[str, Any]:
         },
         "zones": {
             "raw_hex_full": config.zone_labels.raw.hex(),
-            "zone_names": _names(config.zone_labels.raw)[: model.terminals],
+            "zone_names": _names(config.zone_labels.raw)[: model.zones],
         },
         "zones_config": {
             "raw_hex_part1_full_response": config.zone_records.hex(),
@@ -357,7 +383,6 @@ def _names(raw: bytes) -> list[str]:
 
 
 def _zones(config: PanelConfiguration) -> list[dict[str, Any]]:
-    model = config.model
     # logical zone -> physical slot; the last slot is not looked at and a
     # later slot wins, as before
     slots = {
@@ -365,16 +390,35 @@ def _zones(config: PanelConfiguration) -> list[dict[str, Any]]:
         for slot, terminal in enumerate(config.physical_map_raw[:-1])
         if terminal != 0xFF
     }
+    return zone_details(
+        config.zone_records, config.terminal_records, slots, config.model
+    )
+
+
+def zone_details(
+    zone_records: bytes,
+    terminal_records: bytes,
+    slots: dict[int, int],
+    model: PanelModel,
+) -> list[dict[str, Any]]:
+    """One entry per zone number (2L), from the raw zone and terminal records.
+
+    Zone L+n is the second zone of terminal n; it has its own zone record
+    and shares the terminal record and physical slot (by terminal index in
+    slots) with zone n. Whether a zone exists is told by zone_exists().
+    """
     zones = []
-    for index in range(model.terminals):
-        record = config.zone_records[
+    for index in range(model.zones):
+        terminal_index = index % model.terminals
+        record = zone_records[
             index * model.zone_record_length : (index + 1) * model.zone_record_length
         ]
-        terminal = config.terminal_records[
-            index * model.terminal_record_length : (index + 1)
+        terminal = terminal_records[
+            terminal_index * model.terminal_record_length : (terminal_index + 1)
             * model.terminal_record_length
         ]
         activation, balancing, sensor = record[2], terminal[5], terminal[6]
+        terminal_type = terminal[TERMINAL_TYPE_OFFSET]
         zone: dict[str, Any] = {
             "zone_index": index,
             "assigned_areas": _areas(record[0] | record[1] << 8, model),
@@ -391,11 +435,96 @@ def _zones(config: PanelConfiguration) -> list[dict[str, Any]]:
             ),
             "sensor_type_val": sensor,
             "sensor_type_desc": SENSOR_TYPES.get(sensor, f"Unknown (0x{sensor:02X})"),
+            "terminal_index": terminal_index,
+            "terminal_type_val": terminal_type,
+            "terminal_type_desc": TERMINAL_TYPES.get(
+                terminal_type, f"Unknown (0x{terminal_type:02X})"
+            ),
+            "second_zone": index >= model.terminals,
         }
-        if index in slots:
-            zone["internal_index"] = slots[index]
+        if terminal_index in slots:
+            zone["internal_index"] = slots[terminal_index]
         zones.append(zone)
     return zones
+
+
+def zone_exists(zone: dict[str, Any]) -> bool:
+    """Whether a zone entry is a zone on the panel.
+
+    A zone of an input, input/output or double terminal, or the second zone
+    of a double terminal. Entries stored without the terminal type (older
+    configuration) are taken as zones, as they always were.
+    """
+    if "terminal_type_val" not in zone:
+        return True
+    terminal_type = zone["terminal_type_val"]
+    if zone.get("second_zone"):
+        return terminal_type == TerminalType.DOUBLE
+    return terminal_type in ZONE_TYPES
+
+
+def zones_to_create(
+    zone_names: list[str],
+    zone_details: list[dict[str, Any]],
+    limit: int,
+) -> list[tuple[int, str, dict[str, Any] | None]]:
+    """(0-based index, name, detail) of the zones that get entities.
+
+    Zone numbers up to the limit that are zones on the panel (zone_exists);
+    without stored zone details, the first zones by name as before.
+    """
+    if not zone_details:
+        return [
+            (index, name or f"Zone {index + 1}", None)
+            for index, name in enumerate(zone_names[:limit])
+        ]
+    zones = []
+    for detail in zone_details:
+        index = detail.get("zone_index")
+        if index is None or index >= limit or not zone_exists(detail):
+            continue
+        name = zone_names[index] if index < len(zone_names) else ""
+        zones.append((index, name or f"Zone {index + 1}", detail))
+    return zones
+
+
+def upgrade_zone_configuration(config: dict[str, Any]) -> dict[str, Any] | None:
+    """A stored configuration with the zone list of every zone number.
+
+    Rebuilt from the raw records and labels the configuration already
+    holds; physical slots are taken from the stored zone list. None when the
+    raw data is missing or too short (the configuration is then kept).
+    """
+    model = SMARTLIVING_1050_FW6
+    try:
+        zones_config = config["zones_config"]
+        stored = zones_config["zones_config_detailed"]
+        zone_records = bytes.fromhex(zones_config["raw_hex_part1_full_response"])
+        terminal_records = bytes.fromhex(zones_config["raw_hex_part2_full_response"])
+        labels = bytes.fromhex(config["zones"]["raw_hex_full"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if (
+        len(zone_records) < model.zones * model.zone_record_length
+        or len(terminal_records) < model.terminals * model.terminal_record_length
+        or len(labels) < model.zones * LABEL_LENGTH
+    ):
+        return None
+    slots = {
+        zone["zone_index"]: zone["internal_index"]
+        for zone in stored
+        if "internal_index" in zone and zone.get("zone_index", -1) < model.terminals
+    }
+    return {
+        **config,
+        "zones": {**config["zones"], "zone_names": _names(labels)[: model.zones]},
+        "zones_config": {
+            **zones_config,
+            "zones_config_detailed": zone_details(
+                zone_records, terminal_records, slots, model
+            ),
+        },
+    }
 
 
 def _time(value: int) -> str:
@@ -439,28 +568,53 @@ def _areas(mask: int, model: PanelModel) -> list[int]:
 
 
 def status_dict(status: PanelStatus, model: PanelModel) -> dict[str, Any]:
-    """The live status as the coordinator has always provided it."""
+    """The live status in the coordinator's dictionaries.
+
+    Zones are numbered 1-2L: L+n is the second zone of terminal n when that
+    terminal is a double one. Which zones exist is decided by the panel
+    configuration, not here: every zone number is reported.
+    """
     raw = status.raw
+    memory = status.zone_memory
+    terminals = model.terminals
     return {
         "areas_status": _area_status(raw[reg.AREA_STATUS], status.areas),
-        "zones_status": _zone_status(raw[reg.ZONE_STATE], model),
+        "zones_status": {
+            "raw_hex_data": raw[reg.ZONE_STATE].hex(),
+            "zone_statuses": {
+                zone + 1: _ZONE_STATES[state]
+                for zone, state in enumerate(status.zone_states)
+            },
+        },
         "zones_excluded_status": {
             "raw_hex_data": raw[reg.ZONE_INCLUSION].hex(),
-            "zone_excluded_statuses": _zone_bits(
-                raw[reg.ZONE_INCLUSION], model, "enabled", "disabled"
+            "zone_excluded_statuses": _flags(
+                status.zone_inclusion.included, "enabled", "disabled"
             ),
+            "zone_test_statuses": _flags(status.zone_inclusion.test, True, False),
         },
         "zones_triggered_status": {
             "raw_hex_data": raw[reg.ZONE_MEMORY].hex(),
-            "zone_triggered_statuses": _zone_bits(
-                raw[reg.ZONE_MEMORY], model, "triggered", "clear"
+            "zone_triggered_statuses": _flags(
+                memory.alarm_memory, "triggered", "clear"
             ),
+            # per terminal; both zones of a double terminal share it
+            "zone_tamper_memory_statuses": {
+                zone + 1: memory.terminal_tamper_memory[zone % terminals]
+                for zone in range(model.zones)
+            },
         },
         "active_scenario": {
             "raw_hex": raw[reg.ACTIVE_SCENARIO].hex(),
             "active_scenario_number": raw[reg.ACTIVE_SCENARIO][0],
         },
         "errors": [],
+    }
+
+
+def _flags(bits: tuple[bool, ...], set_value: Any, clear_value: Any) -> dict[int, Any]:
+    return {
+        zone + 1: set_value if bit else clear_value for zone, bit in enumerate(bits)
     }
 
 
@@ -486,37 +640,6 @@ def _area_status(data: bytes, areas: AreaStatus) -> dict[str, Any]:
         "triggered_areas": sorted(areas.alarm_memory),
         "tamper_memory_areas": sorted(areas.tamper_memory),
         "auto_arm_areas": sorted(areas.auto_arm),
-    }
-
-
-def _zone_status(data: bytes, model: PanelModel) -> dict[str, Any]:
-    statuses: dict[int, str] = {}
-    for zone_pair in range(model.terminals // 2):  # pairs of the first L zones
-        byte = data[zone_pair // 2]
-        value = byte >> 4 if zone_pair % 2 else byte & 0x0F
-        lower, higher = _ZONE_PAIRS.get(value, ("unknown", "unknown"))
-        if value not in _ZONE_PAIRS:
-            _LOGGER.warning(
-                "Unknown status %x for zones %s and %s",
-                value,
-                2 * zone_pair + 1,
-                2 * zone_pair + 2,
-            )
-        statuses[2 * zone_pair + 1] = lower
-        statuses[2 * zone_pair + 2] = higher
-    return {
-        "raw_hex_data": data.hex(),
-        "zone_statuses": statuses,
-        "unknown_byte_after_status_data": data[-1:].hex(),
-    }
-
-
-def _zone_bits(
-    data: bytes, model: PanelModel, set_text: str, clear_text: str
-) -> dict[int, str]:
-    return {
-        zone: set_text if data[(zone - 1) // 8] >> ((zone - 1) % 8) & 1 else clear_text
-        for zone in range(1, model.terminals + 1)
     }
 
 

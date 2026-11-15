@@ -6,6 +6,7 @@ from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import ATTR_CONFIG_ENTRY_ID
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
+from homeassistant.helpers import entity_registry as er
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 import voluptuous as vol
@@ -21,8 +22,11 @@ from .const import (
     CONF_USERNAME,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
+    DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
+    KEY_INIT_ZONES_CONFIG,
+    KEY_INIT_ZONES_CONFIG_DETAILED,
     PLATFORMS,
     SERVICE_REREAD_PANEL_CONFIGURATION,
 )
@@ -31,7 +35,7 @@ from .const import (
 from .coordinator import InimDataUpdateCoordinator
 
 # Import API
-from .legacy import create_client
+from .legacy import create_client, upgrade_zone_configuration, zone_exists
 from .panel_config import async_reread_panel_configuration
 
 _LOGGER = logging.getLogger(__name__)
@@ -148,6 +152,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Set up platforms (alarm_control_panel, binary_sensor, switch, button, sensor)
     _LOGGER.debug("(%s) Forwarding setup to platforms: %s"), entry.title, PLATFORMS
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    _warn_about_leftover_zone_entities(hass, entry)
 
     # Listen for option updates (e.g., if user changes polling interval via UI)
     entry.async_on_unload(entry.add_update_listener(update_listener))
@@ -175,11 +180,58 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Migrate an entry to the current version (1.2).
+# Unique ID suffixes of the zone entities, before the 1-based zone number
+_ZONE_ENTITY_PREFIXES = (
+    "_zone_",
+    "_zone_triggered_",
+    "_zone_tamper_",
+    "_zone_enabled_switch_",
+)
 
-    1.2 adds the board type; every older entry uses SmartLAN/SI. A newer
-    major version (from a later integration release) cannot be loaded.
+
+def _warn_about_leftover_zone_entities(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Log the entities of zone numbers that are not zones on the panel.
+
+    Such entities (unused or output terminals, second zones of terminals
+    that are not double) were created by earlier versions. They are not
+    removed automatically: the user deletes them.
+    """
+    config = entry.data.get(DATA_INITIAL_PANEL_CONFIG) or {}
+    details = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(
+        KEY_INIT_ZONES_CONFIG_DETAILED
+    ) or []
+    not_zones = {
+        detail["zone_index"] + 1
+        for detail in details
+        if "zone_index" in detail and not zone_exists(detail)
+    }
+    if not not_zones:
+        return
+    leftovers = []
+    for entity in er.async_entries_for_config_entry(er.async_get(hass), entry.entry_id):
+        suffix = entity.unique_id.removeprefix(entry.entry_id)
+        for prefix in _ZONE_ENTITY_PREFIXES:
+            number = suffix.removeprefix(prefix)
+            if number != suffix and number.isdigit() and int(number) in not_zones:
+                leftovers.append(entity.entity_id)
+                break
+    if leftovers:
+        _LOGGER.warning(
+            "%s: these entities belong to terminals that are not zones on the "
+            "panel (unused or output terminals) and are no longer updated; "
+            "delete them in Settings > Devices & services > Entities: %s",
+            entry.title,
+            ", ".join(sorted(leftovers)),
+        )
+
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Migrate an entry to the current version (1.3).
+
+    1.2 adds the board type; every older entry uses SmartLAN/SI. 1.3 stores
+    every zone number with its terminal type, rebuilt from the raw panel
+    data the entry already holds (no panel access). A newer major version
+    (from a later integration release) cannot be loaded.
     """
     version, minor = config_entry.version, config_entry.minor_version
     _LOGGER.debug("Checking migration of config entry version %s.%s", version, minor)
@@ -197,6 +249,20 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             minor_version=2,
         )
         _LOGGER.info("Migrated config entry %s to version 1.2", config_entry.title)
+    if config_entry.minor_version < 3:
+        data = dict(config_entry.data)
+        upgraded = upgrade_zone_configuration(data.get(DATA_INITIAL_PANEL_CONFIG) or {})
+        if upgraded is None:
+            _LOGGER.warning(
+                "The stored panel configuration of %s has no complete zone data; "
+                "zones are shown as before. Use 'Re-read panel configuration' to "
+                "read it from the panel",
+                config_entry.title,
+            )
+        else:
+            data[DATA_INITIAL_PANEL_CONFIG] = upgraded
+        hass.config_entries.async_update_entry(config_entry, data=data, minor_version=3)
+        _LOGGER.info("Migrated config entry %s to version 1.3", config_entry.title)
     return True
 
 
