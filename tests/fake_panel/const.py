@@ -1,8 +1,11 @@
-"""Memory layout of a SmartLiving 1050 on firmware 6.x, as used by the fake panel.
+"""Memory layout of the fake panel: a SmartLiving 1050 on firmware 6.x by
+default (the module constants), or another model through a Layout.
 
 These values are kept separate from the integration on purpose, so that tests
 compare the integration against an independent description of the panel.
 """
+
+from dataclasses import dataclass, field
 
 # Panel size
 NUM_AREAS = 10
@@ -155,3 +158,162 @@ EVENT_SCENARIO = 30
 EVENT_ACTIVATION = 0x80
 LOCATION_NETWORK = 0xFE
 NO_SCENARIO = 0xFF
+
+
+# ------------------------------------------------------------- model layouts
+
+
+@dataclass(frozen=True)
+class Layout:
+    """Counts, record sizes and EEPROM addresses of one panel model (FW 6.x).
+
+    Typed independently of the integration's own model profiles, so that
+    tests compare the two.
+    """
+
+    model: str  # model field of the firmware string, e.g. "01050"
+    areas: int
+    terminals: int
+    physical_slots: int
+    codes: int
+    keypads: int
+    readers: int
+    expanders: int
+    keys: int
+    timers: int
+    code_record_length: int
+    code_output_mask_length: int
+    scenario_record_length: int
+    eeprom_pins: int
+    eeprom_codes: int
+    eeprom_zones: int
+    eeprom_terminals: int
+    eeprom_physical_map: int
+    eeprom_scenario_modes: int
+    eeprom_events: int
+    event_ring_size: int
+    # pointer register -> (offset in EEPROM bank 1, number of labels)
+    labels: dict[int, tuple[int, int]] = field(hash=False, compare=False)
+
+    @property
+    def zones(self) -> int:
+        """Zone index space: 2L."""
+        return 2 * self.terminals
+
+    @property
+    def area_mode_bytes(self) -> int:
+        return self.areas // 2 + 1
+
+    @property
+    def zone_state_length(self) -> int:
+        return self.terminals // 2 + 1
+
+    @property
+    def zone_bitmap_length(self) -> int:
+        return self.terminals // 4 + 1
+
+    @property
+    def terminal_bitmap_length(self) -> int:
+        return self.terminals // 8 + 1
+
+    @property
+    def zone_memory_length(self) -> int:
+        return (
+            self.zone_bitmap_length
+            + self.terminal_bitmap_length
+            + self.terminals // 8
+            + 2
+        )
+
+    @property
+    def output_image_offset(self) -> int:
+        return self.zone_bitmap_length + self.terminal_bitmap_length
+
+
+def _packed_labels(counts: dict[int, int]) -> dict[int, tuple[int, int]]:
+    """Label blocks one after the other from offset 0 of EEPROM bank 1."""
+    labels, offset = {}, 0
+    for register, count in counts.items():
+        labels[register] = (offset, count)
+        offset += count * LABEL_LENGTH
+    return labels
+
+
+LAYOUT_1050 = Layout(
+    model="01050",
+    areas=NUM_AREAS,
+    terminals=NUM_TERMINALS,
+    physical_slots=NUM_PHYSICAL_SLOTS,
+    codes=NUM_CODES,
+    keypads=NUM_KEYPADS,
+    readers=20,
+    expanders=20,
+    keys=100,
+    timers=10,
+    code_record_length=CODE_RECORD_LENGTH,
+    code_output_mask_length=CODE_OUTPUT_MASK_LENGTH,
+    scenario_record_length=SCENARIO_RECORD_LENGTH,
+    eeprom_pins=EEPROM_PINS,
+    eeprom_codes=EEPROM_CODES,
+    eeprom_zones=EEPROM_ZONES,
+    eeprom_terminals=EEPROM_TERMINALS,
+    eeprom_physical_map=EEPROM_PHYSICAL_MAP,
+    eeprom_scenario_modes=EEPROM_SCENARIO_MODES,
+    eeprom_events=EEPROM_EVENTS,
+    event_ring_size=EVENT_RING_SIZE,
+    # Areas, zones, keypads and scenarios match captured requests; the
+    # others are placed in the gaps between them.
+    labels={
+        RAM_LABELS_AREAS: (0x0000, NUM_AREAS),
+        RAM_LABELS_ZONES: (0x00A0, NUM_ZONES),
+        RAM_LABELS_CODES: (0x06E0, NUM_CODES),
+        RAM_LABELS_READERS: (0x0A00, 20),
+        RAM_LABELS_KEYPADS: (0x0B40, NUM_KEYPADS),
+        RAM_LABELS_EXPANDERS: (0x0BE0, 20),
+        RAM_LABELS_KEYS: (0x0D20, 100),
+        RAM_LABELS_PHONES: (0x1360, 15),
+        RAM_LABELS_SCENARIOS: (0x1450, NUM_SCENARIOS),
+        RAM_LABELS_TIMERS: (0x1630, 10),
+        RAM_LABELS_OUTPUTS: (0x16D0, 3),
+    },
+)
+
+# SmartLiving 10100, firmware 6.x
+LAYOUT_10100 = Layout(
+    model="10100",
+    areas=15,
+    terminals=100,
+    physical_slots=240,
+    codes=100,
+    keypads=15,
+    readers=30,
+    expanders=40,
+    keys=150,
+    timers=20,
+    code_record_length=65,
+    code_output_mask_length=14,
+    scenario_record_length=10,
+    eeprom_pins=0x0A4CD,
+    eeprom_codes=0x0A731,
+    eeprom_zones=0x089C5,
+    eeprom_terminals=0x090CD,
+    eeprom_physical_map=0x0CF75,
+    eeprom_scenario_modes=0x0C81F,
+    eeprom_events=0x19204,
+    event_ring_size=1000,
+    labels=_packed_labels(
+        {
+            RAM_LABELS_AREAS: 15,
+            RAM_LABELS_ZONES: 200,
+            RAM_LABELS_CODES: 100,
+            RAM_LABELS_READERS: 30,
+            RAM_LABELS_KEYPADS: 15,
+            RAM_LABELS_EXPANDERS: 40,
+            RAM_LABELS_KEYS: 150,
+            RAM_LABELS_PHONES: 15,
+            RAM_LABELS_SCENARIOS: NUM_SCENARIOS,
+            RAM_LABELS_TIMERS: 20,
+            RAM_LABELS_OUTPUTS: 3,
+        }
+    ),
+)

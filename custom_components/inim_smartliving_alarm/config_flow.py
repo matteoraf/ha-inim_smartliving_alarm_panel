@@ -48,6 +48,12 @@ from .const import (
     DEFAULT_POLLING_INTERVAL,
     DEFAULT_PORT,
     DOMAIN,
+    KEY_INIT_AREA_NAMES,
+    KEY_INIT_AREAS,
+    KEY_INIT_ZONE_NAMES,
+    KEY_INIT_ZONES,
+    MAX_LIMIT_AREAS,
+    MAX_LIMIT_ZONES,
     MIN_FIRMWARE_MAJOR,
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
@@ -104,7 +110,8 @@ async def _validate_connection_and_fetch_initial_config(
     Raises ConnectionError if the panel cannot be reached and ValueError
     (with an error key) if it is refused: firmware below 5, a PIN that
     matches no user code, or a configuration that cannot be read. Firmware
-    5.x and models other than the 1050 are accepted with a log warning.
+    5.x and models without a profile (other than the 1050 and 10100) are
+    accepted with a log warning.
     """
     board = data.get(CONF_BOARD, BOARD_SMARTLAN_SI)
     try:
@@ -146,6 +153,16 @@ async def _validate_connection_and_fetch_initial_config(
         return await async_fetch_panel_configuration(hass, api)
     finally:
         await api.close()  # the board may accept only one connection
+
+
+def _panel_count(config: Mapping[str, Any], section: str, names: str) -> int:
+    """How many areas or zone numbers the panel has: its label count."""
+    return len((config.get(section) or {}).get(names) or [])
+
+
+def _capped(settings: Mapping[str, Any], key: str, maximum: int) -> int:
+    """A stored limit, at most the maximum (the maximum if none is stored)."""
+    return min(settings.get(key) or maximum, maximum)
 
 
 def _board_key(board: DiscoveredBoard) -> str:
@@ -367,14 +384,21 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_POLLING_INTERVAL,
                 default=step1_data.get(CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL),
             ): vol.All(vol.Coerce(int), vol.Range(min=5, max=300)),
+            # Proposed: every area and zone number of this panel model
             vol.Optional(
                 CONF_LIMIT_AREAS,
-                default=step1_data.get(CONF_LIMIT_AREAS, DEFAULT_LIMIT_AREAS),
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=16)),
+                default=_panel_count(
+                    initial_config_data, KEY_INIT_AREAS, KEY_INIT_AREA_NAMES
+                )
+                or DEFAULT_LIMIT_AREAS,
+            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_LIMIT_AREAS)),
             vol.Optional(
                 CONF_LIMIT_ZONES,
-                default=step1_data.get(CONF_LIMIT_ZONES, DEFAULT_LIMIT_ZONES),
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
+                default=_panel_count(
+                    initial_config_data, KEY_INIT_ZONES, KEY_INIT_ZONE_NAMES
+                )
+                or DEFAULT_LIMIT_ZONES,
+            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_LIMIT_ZONES)),
             vol.Optional(
                 CONF_LIMIT_SCENARIOS,
                 default=step1_data.get(CONF_LIMIT_SCENARIOS, DEFAULT_LIMIT_SCENARIOS),
@@ -631,12 +655,20 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_POLLING_INTERVAL,
                 default=self.current_settings.get(CONF_POLLING_INTERVAL),
             ): vol.All(vol.Coerce(int), vol.Range(min=5, max=300)),
+            # A limit stored by an older version may be above today's maximum
+            # (areas used to go up to 16): offer the maximum instead
             vol.Optional(
-                CONF_LIMIT_AREAS, default=self.current_settings.get(CONF_LIMIT_AREAS)
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=16)),
+                CONF_LIMIT_AREAS,
+                default=_capped(
+                    self.current_settings, CONF_LIMIT_AREAS, MAX_LIMIT_AREAS
+                ),
+            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_LIMIT_AREAS)),
             vol.Optional(
-                CONF_LIMIT_ZONES, default=self.current_settings.get(CONF_LIMIT_ZONES)
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
+                CONF_LIMIT_ZONES,
+                default=_capped(
+                    self.current_settings, CONF_LIMIT_ZONES, MAX_LIMIT_ZONES
+                ),
+            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_LIMIT_ZONES)),
             vol.Optional(
                 CONF_LIMIT_SCENARIOS,
                 default=self.current_settings.get(CONF_LIMIT_SCENARIOS),

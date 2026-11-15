@@ -25,6 +25,7 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
+    KEY_INIT_TERMINAL_RECORDS_RAW,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
     PLATFORMS,
@@ -35,8 +36,16 @@ from .const import (
 from .coordinator import InimDataUpdateCoordinator
 
 # Import API
-from .legacy import create_client, upgrade_zone_configuration, zone_exists
-from .panel_config import async_reread_panel_configuration
+from .legacy import (
+    LegacyPanelClient,
+    create_client,
+    upgrade_zone_configuration,
+    zone_exists,
+)
+from .panel_config import (
+    async_fetch_panel_configuration,
+    async_reread_panel_configuration,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -139,6 +148,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             f"Failed to fetch initial data from Inim panel at {host}:{port}"
         )
 
+    await _reread_configuration_if_layout_differs(hass, entry, api)
+
     # Store the API instance and coordinator in hass.data for platforms to access.
     # Platforms will also access static config from entry.data (set by config_flow).
     hass.data.setdefault(DOMAIN, {})
@@ -178,6 +189,53 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     else:
         _LOGGER.error("Failed to unload platforms for %s", entry.title)
     return unload_ok
+
+
+async def _reread_configuration_if_layout_differs(
+    hass: HomeAssistant, entry: ConfigEntry, api: LegacyPanelClient
+) -> None:
+    """Read the configuration again if it was stored for another panel model.
+
+    Called at every setup, but it only compares sizes in memory: the panel
+    model is known from the first status read, and the stored terminal
+    records must be L x 12 bytes for it. Nothing is read from the panel
+    unless they differ. That happens once for a panel with its own profile
+    (the 10100) set up with an earlier version, which read every panel with
+    the SmartLiving 1050's addresses; after the re-read the sizes match.
+    Unique IDs do not change. If the re-read fails, setup goes on with the
+    stored configuration.
+    """
+    try:
+        model = api.panel.model
+    except RuntimeError:  # not identified (no successful read)
+        return
+    config = entry.data.get(DATA_INITIAL_PANEL_CONFIG) or {}
+    raw = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(KEY_INIT_TERMINAL_RECORDS_RAW)
+    expected = model.terminals * model.terminal_record_length
+    if not isinstance(raw, str) or len(raw) // 2 == expected:
+        return
+    _LOGGER.warning(
+        "%s: the stored panel configuration does not fit the %s (it was read "
+        "for another model); reading it again from the panel",
+        entry.title,
+        model.name,
+    )
+    try:
+        new_config = await async_fetch_panel_configuration(hass, api)
+    except (ConnectionError, ValueError) as err:
+        _LOGGER.error(
+            "%s: cannot read the panel configuration again (%s); use 'Re-read "
+            "panel configuration' later",
+            entry.title,
+            err,
+        )
+        return
+    hass.config_entries.async_update_entry(
+        entry, data={**entry.data, DATA_INITIAL_PANEL_CONFIG: new_config}
+    )
+    _LOGGER.info(
+        "%s: panel configuration read again for the %s", entry.title, model.name
+    )
 
 
 # Unique ID suffixes of the zone entities, before the 1-based zone number

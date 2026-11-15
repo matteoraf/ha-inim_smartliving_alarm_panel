@@ -43,14 +43,13 @@ DEFAULT_POLLING_INTERVAL = 30  # seconds
 DEFAULT_PORT = 5004  # SmartLAN/SI default; also proposed for SmartLAN/G (no default)
 DEFAULT_PANEL_NAME = "Inim Smartliving"  # Default if user doesn't provide one
 
-# Default limits for entities. Users can reduce these.
-# These should reflect typical maximums or desired "import all" values.
-# The Inim SmartLiving 1050 panel supports:
-# - 10 Areas
-# - 50 Zones
-# - 30 Scenarios
-DEFAULT_LIMIT_AREAS = 10
-DEFAULT_LIMIT_ZONES = 100  # zone numbers 1-2L (second zones from L+1)
+# Limits of the entities to create. A new setup proposes the panel's own
+# counts (areas A, zone numbers 1-2L); these defaults apply only to an entry
+# without a stored limit and mean "everything". Users can reduce them.
+MAX_LIMIT_AREAS = 15  # areas on the SmartLiving 10100
+MAX_LIMIT_ZONES = 200  # zone numbers 1-2L; 2L = 200 on the SmartLiving 10100
+DEFAULT_LIMIT_AREAS = MAX_LIMIT_AREAS
+DEFAULT_LIMIT_ZONES = MAX_LIMIT_ZONES
 DEFAULT_LIMIT_SCENARIOS = 30
 
 # Default limiys for imported events
@@ -97,6 +96,9 @@ KEY_INIT_ZONE_NAMES = "zone_names"  # List of zone names (str)
 KEY_INIT_ZONES_CONFIG = "zones_config"  # Dict containing detailed zone configurations
 KEY_INIT_ZONES_CONFIG_DETAILED = (
     "zones_config_detailed"  # List of dicts, each a detailed zone config
+)
+KEY_INIT_TERMINAL_RECORDS_RAW = (
+    "raw_hex_part2_full_response"  # in zones_config: logical terminal records, hex
 )
 KEY_INIT_ZONE_CONFIG_INDEX = (
     "zone_index"  # Key for 0-indexed zone number in detailed config

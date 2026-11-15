@@ -42,11 +42,12 @@ from custom_components.inim_smartliving_alarm.protocol.frames import (
 )
 from custom_components.inim_smartliving_alarm.protocol.model import (
     SMARTLIVING_1050_FW6 as SL1050,
+    SMARTLIVING_10100_FW6 as SL10100,
     model_for,
     parse_model_string,
 )
 
-from .fake_panel import captures as cap
+from .fake_panel import captures as cap, const as c
 
 # ------------------------------------------------------------------ requests
 
@@ -169,12 +170,91 @@ def test_model_string() -> None:
     assert model_for(info) is SL1050
 
 
+def test_10100_on_firmware_6() -> None:
+    """The 10100 on firmware 6.x has its own profile, marked experimental."""
+    model = model_for(parse_model_string(b"6.08 10100  "))
+    assert model is SL10100
+    assert model.experimental
+    assert not SL1050.experimental
+
+
+def test_10100_profile_matches_the_fake_layout() -> None:
+    """Counts, record sizes and addresses agree with the independent layout."""
+    lay = c.LAYOUT_10100
+    assert (SL10100.areas, SL10100.terminals, SL10100.physical_slots) == (
+        lay.areas,
+        lay.terminals,
+        lay.physical_slots,
+    )
+    assert (SL10100.codes, SL10100.keypads, SL10100.readers) == (
+        lay.codes,
+        lay.keypads,
+        lay.readers,
+    )
+    assert (SL10100.expanders, SL10100.keys, SL10100.timers) == (
+        lay.expanders,
+        lay.keys,
+        lay.timers,
+    )
+    assert (
+        SL10100.code_record_length,
+        SL10100.code_output_mask_length,
+        SL10100.scenario_record_length,
+        SL10100.event_ring_size,
+    ) == (
+        lay.code_record_length,
+        lay.code_output_mask_length,
+        lay.scenario_record_length,
+        lay.event_ring_size,
+    )
+    assert (
+        SL10100.pin_table,
+        SL10100.code_records,
+        SL10100.zone_records,
+        SL10100.terminal_records,
+        SL10100.physical_map,
+        SL10100.scenario_records,
+        SL10100.event_log,
+    ) == (
+        lay.eeprom_pins,
+        lay.eeprom_codes,
+        lay.eeprom_zones,
+        lay.eeprom_terminals,
+        lay.eeprom_physical_map,
+        lay.eeprom_scenario_modes,
+        lay.eeprom_events,
+    )
+
+
+@pytest.mark.parametrize(
+    ("model", "lengths"),
+    [
+        # area status, zone state, inclusion, memory, PIN table,
+        # zone records, terminal records, zone labels (2L)
+        (SL1050, (16, 26, 26, 28, 300, 900, 600, 100)),
+        (SL10100, (18, 51, 52, 53, 600, 1800, 1200, 200)),
+    ],
+)
+def test_status_and_record_lengths(model, lengths: tuple[int, ...]) -> None:
+    """Every request length is the one the model expects."""
+    assert (
+        model.area_status_length,
+        model.zone_state_length,
+        model.zone_inclusion_length,
+        model.zone_memory_length,
+        model.pin_table_length,
+        model.zones * model.zone_record_length,
+        model.terminals * model.terminal_record_length,
+        model.zones,
+    ) == lengths
+
+
 @pytest.mark.parametrize(
     ("text", "reason"),
     [
         (b"5.11 01050  ", "firmware 5.11"),
         (b"6.07 00515  ", "SmartLiving 515"),
-        (b"6.09 10100  ", "SmartLiving 10100"),
+        (b"5.11 10100  ", "firmware 5.11"),
     ],
 )
 def test_unsupported_panels(text: bytes, reason: str) -> None:
