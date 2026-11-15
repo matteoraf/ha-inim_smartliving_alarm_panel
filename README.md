@@ -5,7 +5,7 @@ Home Assistant Integration for Inim SmartLiving Alarm Systems
 > 
 > I could only test this with SmartLiving 1050, I have no way to test and support any other SmartLiving system. Contributors are welcome.
 
-This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI network interface. It enables monitoring and control of your alarm system directly from Home Assistant.
+This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI or SmartLAN/G network interface (SmartLAN/G support is experimental). It enables monitoring and control of your alarm system directly from Home Assistant.
 
 Features
 --------
@@ -62,11 +62,13 @@ Prerequisites
 
 *   An Inim SmartLiving alarm control panel.
     
-*   The panel must be equipped with a SmartLAN/SI network interface module.
+*   The panel must be equipped with a SmartLAN/SI or SmartLAN/G network interface module. SmartLAN/G support is **experimental**: it has only been tested against a simulated panel so far, so please report how it works for you.
+    
+*   Panel firmware 5 or later. The integration is developed and tested on a SmartLiving 1050 with firmware 6.x. Firmware 5.x and other SmartLiving models can be set up, but are handled like a 1050 on firmware 6 and may show wrong data until they are supported (a warning is logged); firmware older than 5 is refused.
     
 *   The SmartLAN module must be connected to your local network and accessible from your Home Assistant instance.
     
-*   You will need the IP address, port (typically 5004), and a valid user PIN code for the alarm panel.
+*   You will need the IP address, port (typically 5004), and a valid user PIN code for the alarm panel. For SmartLAN/G you also need the user name and password of the board's web page.
     
 
 Installation
@@ -106,19 +108,23 @@ After installation and restarting Home Assistant:
     
 3.  Search for "Inim SmartLiving Alarm" and select it.
     
-4.  A configuration dialog will appear. Enter the following details:
+4.  Choose how the panel is connected: **SmartLAN/SI board** or **SmartLAN/G board (experimental)**.
+    
+5.  A configuration dialog will appear. Enter the following details:
     
     *   **Host**: The IP address of your Inim SmartLAN module (e.g., 192.168.1.100).
         
     *   **Port**: The TCP port your SmartLAN module is listening on (default is 5004).
         
-    *   **PIN**: A valid user PIN code for your alarm panel (1 to 6 digits). A PIN that matches no user code is not refused during configuration: Home Assistant logs a warning when it connects, and the panel refuses its commands.
+    *   **Board user name** and **Board password** (SmartLAN/G only): the credentials of the board's web page. The SmartLAN/G board encrypts the connection with them.
+        
+    *   **PIN**: A valid user PIN code for your alarm panel (1 to 6 digits). Commands are sent with this code, so it needs access to the areas you want to control.
         
     *   **Panel Name** (Optional): A friendly name for your alarm panel in Home Assistant (e.g., "Home Alarm").
         
-5.  Click **Submit**. The integration will attempt to connect and fetch initial configuration data from your panel.
+6.  Click **Submit**. The integration connects to your panel, checks it and reads its configuration. The setup is refused, with a message, if the panel cannot be reached, if the PIN does not match any user code of the panel, or if the panel's firmware is older than 5.
     
-6.  If successful, a second dialog will appear for **Initial Options**:
+7.  If successful, a second dialog will appear for **Initial Options**:
     
     *   **Polling Interval**: How often Home Assistant should query the panel for status updates (in seconds).
         
@@ -130,23 +136,23 @@ After installation and restarting Home Assistant:
 
     *   **Readers Names**: You can provide a comma separated list of Proximity readers "friendly" names wich will be mapped to readers in the order in which they appear. The integration cannot query those names. If you don't provide any, you'll see them appear as "Reader X" in the log.
         
-7.  Click **Submit** to complete the setup.
+8.  Click **Submit** to complete the setup.
     
 
 You can change these options later by navigating to the integration on the Devices & Services page and clicking "CONFIGURE".
 
 ### Changing the connection details (Reconfigure)
 
-If the IP address, port or PIN of your panel changes, you don't need to remove and re-add the integration:
+If the IP address, port or PIN of your panel (or, for SmartLAN/G, the board's user name or password) changes, you don't need to remove and re-add the integration:
 
 1.  Go to **Settings** -> **Devices & Services** and open **Inim SmartLiving Alarm**.
     
 2.  Open the menu (⋮) of your panel's entry and choose **Reconfigure**.
     
-3.  Enter the new **Host**, **Port** and/or **PIN** and click **Submit**.
+3.  Enter the new **Host**, **Port**, **PIN** (and, for SmartLAN/G, **Board user name** and **Board password**) and click **Submit**.
     
 
-The integration contacts the panel with the new details, reads its configuration again and reloads. Your options (polling interval, limits, scenario mappings), entities and entity IDs are kept. If the panel cannot be reached, an error is shown and nothing is changed. An address already used by another configured panel is refused. As during setup, the PIN itself is not checked: a wrong PIN only shows up when a command is refused.
+The integration contacts the panel with the new details, reads its configuration again and reloads. Your options (polling interval, limits, scenario mappings), entities and entity IDs are kept. If the panel cannot be reached, an error is shown and nothing is changed. An address already used by another configured panel is refused, and so is a PIN that does not match any user code of the panel. The board type (SmartLAN/SI or SmartLAN/G) cannot be changed here: remove the integration and add it again for that.
 
 ### Re-reading the panel configuration
 
@@ -218,6 +224,18 @@ Use the alarm\_control\_panel entity in a standard Lovelace Alarm Panel card. If
 
 Use the button entities in your dashboard or automations to directly activate specific panel scenarios.
 
+### Resetting the alarm memory
+
+After an alarm, the panel keeps the alarm memory of the areas involved until it is reset. The action `inim_smartliving_alarm.alarm_reset` resets the alarm memory of every area that has one, on the targeted panel:
+
+```yaml
+action: inim_smartliving_alarm.alarm_reset
+target:
+  entity_id: alarm_control_panel.your_panel_name
+```
+
+You can call it from a script, an automation or a dashboard button. Currently the alarm memory of areas 1 to 8 is detected; areas 9 and 10 will follow in a later version.
+
 ### Displaying the Event Log
 
 You can display the event log using a Markdown card in Lovelace, but I recommend the custom:flex-table-card (from HACS) to provide a nice tabular view.
@@ -250,7 +268,7 @@ Troubleshooting
         
 *   **Scenarios not activating or Areas not arming/disarming**:
     
-    *   Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions. If it matches no user code, the log shows a warning ("The PIN does not match any user code of the panel") each time the integration connects. You can change it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)).
+    *   Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions. Setup and **Reconfigure** refuse a PIN that matches no user code; for a panel set up with an older version of the integration, the log shows a warning ("The PIN does not match any user code of the panel") each time the integration connects. You can change it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)).
         
 *   **Entities Not Appearing or Not Updating**:
     

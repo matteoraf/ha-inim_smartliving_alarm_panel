@@ -3,12 +3,42 @@
       "step": {
         "user": {
           "title": "Inim SmartLiving Alarm Setup",
-          "description": "Please enter the connection details for your Inim SmartLAN module.",
+          "description": "How is the panel connected to your network?",
+          "menu_options": {
+            "smartlan_si": "SmartLAN/SI board",
+            "smartlan_g": "SmartLAN/G board (experimental)"
+          }
+        },
+        "smartlan_si": {
+          "title": "SmartLAN/SI connection",
+          "description": "Enter the connection details of the SmartLAN/SI board and a user PIN of the panel.",
           "data": {
             "host": "Host",
             "port": "Port",
             "pin": "PIN Code",
             "panel_name": "Panel Name"
+          },
+          "data_description": {
+            "port": "5004 unless it was changed in the board's settings.",
+            "pin": "A user code of the panel (1 to 6 digits). Commands are sent with it, so it needs the areas you want to control."
+          }
+        },
+        "smartlan_g": {
+          "title": "SmartLAN/G connection (experimental)",
+          "description": "Enter the connection details of the SmartLAN/G board and a user PIN of the panel. SmartLAN/G support has not been tested on a real board yet: please report how it works.",
+          "data": {
+            "host": "Host",
+            "port": "Port",
+            "username": "Board user name",
+            "password": "Board password",
+            "pin": "PIN Code",
+            "panel_name": "Panel Name"
+          },
+          "data_description": {
+            "port": "The port set in the board's settings (the installer software proposes 5004).",
+            "username": "The user name of the board's web page; together with the password it encrypts the connection.",
+            "password": "The password of the board's web page.",
+            "pin": "A user code of the panel (1 to 6 digits). Commands are sent with it, so it needs the areas you want to control."
           }
         },
         "initial_options": {
@@ -34,16 +64,22 @@
           "data": {
             "host": "Host",
             "port": "Port",
+            "username": "Board user name",
+            "password": "Board password",
             "pin": "PIN Code"
           }
         }
       },
       "error": {
-        "cannot_connect": "Failed to connect. Please check the Host and Port and ensure the panel is reachable.",
+        "cannot_connect": "Failed to connect. Please check the Host and Port (and, for SmartLAN/G, the user name and password) and ensure the panel is reachable and no other client is connected to it.",
         "auth_failed": "Authentication failed. Please check your connection.",
         "invalid_panel_response": "Received an invalid response from the panel. Please check your connection and configuration.",
         "validation_error_detail": "A validation error occurred while fetching initial data from the panel.",
-        "unknown": "An unknown error occurred. Please check the logs for more details."
+        "unknown": "An unknown error occurred. Please check the logs for more details.",
+        "invalid_auth": "The SmartLAN/G board did not accept the connection. Please check the user name and password.",
+        "invalid_pin": "The PIN does not match any user code of the panel.",
+        "invalid_pin_format": "The PIN must be 1 to 6 digits.",
+        "unsupported_firmware": "The panel's firmware is too old: firmware 5 or later is needed."
       },
       "abort": {
         "already_configured": "This Inim Alarm panel is already configured.",

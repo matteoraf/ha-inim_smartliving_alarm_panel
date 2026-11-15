@@ -3,12 +3,42 @@
       "step": {
         "user": {
           "title": "Configurazione Inim SmartLiving",
-          "description": "Inserisci i dettagli di connessione al modulo SmartLAN/SI.",
+          "description": "Come è collegata la centrale alla rete?",
+          "menu_options": {
+            "smartlan_si": "Scheda SmartLAN/SI",
+            "smartlan_g": "Scheda SmartLAN/G (sperimentale)"
+          }
+        },
+        "smartlan_si": {
+          "title": "Connessione SmartLAN/SI",
+          "description": "Inserisci i dati di connessione della scheda SmartLAN/SI e un codice utente della centrale.",
           "data": {
             "host": "Host",
             "port": "Porta",
             "pin": "Codice PIN",
             "panel_name": "Nome Centrale"
+          },
+          "data_description": {
+            "port": "5004, se non è stata cambiata nelle impostazioni della scheda.",
+            "pin": "Un codice utente della centrale (da 1 a 6 cifre). I comandi vengono inviati con questo codice, che deve quindi avere le aree da comandare."
+          }
+        },
+        "smartlan_g": {
+          "title": "Connessione SmartLAN/G (sperimentale)",
+          "description": "Inserisci i dati di connessione della scheda SmartLAN/G e un codice utente della centrale. Il supporto SmartLAN/G non è ancora stato provato su una scheda reale: segnala come funziona.",
+          "data": {
+            "host": "Host",
+            "port": "Porta",
+            "username": "Nome utente della scheda",
+            "password": "Password della scheda",
+            "pin": "Codice PIN",
+            "panel_name": "Nome Centrale"
+          },
+          "data_description": {
+            "port": "La porta impostata nella scheda (il software dell'installatore propone 5004).",
+            "username": "Il nome utente della pagina web della scheda; insieme alla password cifra la connessione.",
+            "password": "La password della pagina web della scheda.",
+            "pin": "Un codice utente della centrale (da 1 a 6 cifre). I comandi vengono inviati con questo codice, che deve quindi avere le aree da comandare."
           }
         },
         "initial_options": {
@@ -34,16 +64,22 @@
           "data": {
             "host": "Host",
             "port": "Porta",
+            "username": "Nome utente della scheda",
+            "password": "Password della scheda",
             "pin": "Codice PIN"
           }
         }
       },
       "error": {
-        "cannot_connect": "Connessione fallita. Controlla l'Host e la Porta e assicurati che la centrale sia raggiungibile.",
+        "cannot_connect": "Connessione fallita. Controlla l'Host e la Porta (e, per SmartLAN/G, nome utente e password) e assicurati che la centrale sia raggiungibile e che nessun altro client sia collegato.",
         "auth_failed": "Autenticazione fallita.",
         "invalid_panel_response": "Ricevuta una risposta non valida dalla centrale. Controlla la connessione e la configurazione.",
         "validation_error_detail": "Si è verificato un errore di validazione durante il recupero dei dati iniziali dalla centrale.",
-        "unknown": "Si è verificato un errore sconosciuto. Controlla i log per maggiori dettagli."
+        "unknown": "Si è verificato un errore sconosciuto. Controlla i log per maggiori dettagli.",
+        "invalid_auth": "La scheda SmartLAN/G non ha accettato la connessione. Controlla nome utente e password.",
+        "invalid_pin": "Il PIN non corrisponde a nessun codice utente della centrale.",
+        "invalid_pin_format": "Il PIN deve avere da 1 a 6 cifre.",
+        "unsupported_firmware": "Il firmware della centrale è troppo vecchio: serve il firmware 5 o successivo."
       },
       "abort": {
         "already_configured": "Questa centrale di allarme è già configurata.",

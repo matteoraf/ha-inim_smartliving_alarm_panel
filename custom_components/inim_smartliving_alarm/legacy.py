@@ -19,11 +19,13 @@ import logging
 from typing import Any
 
 from .api import NotReadyError, PanelConfiguration, PanelStatus, SmartLivingPanel
+from .const import BOARD_SMARTLAN_G, BOARD_SMARTLAN_SI
 from .protocol import registers as reg
 from .protocol.commands import ArmMode
 from .protocol.errors import ProtocolError, UnsupportedPanelError
 from .protocol.model import SMARTLIVING_1050_FW6, PanelModel
-from .transport.base import Priority, TransportError
+from .transport.base import PanelTransport, Priority, TransportError
+from .transport.smartlan_g import SmartLanGTransport
 from .transport.smartlan_si import SmartLanSiTransport
 
 _LOGGER = logging.getLogger(__name__)
@@ -74,15 +76,31 @@ _ERRORS = (TransportError, ProtocolError, UnsupportedPanelError, ValueError)
 
 
 def create_client(
-    host: str, port: int, pin: str, **options: float
+    host: str,
+    port: int,
+    pin: str,
+    *,
+    board: str = BOARD_SMARTLAN_SI,
+    username: str = "",
+    password: str = "",
+    **options: float,
 ) -> "LegacyPanelClient":
-    """A client for a panel behind a SmartLAN/SI board.
+    """A client for a panel behind a SmartLAN/SI or SmartLAN/G board.
 
-    Options are the transport's (timeouts, pauses). Panels other than the
-    1050 on firmware 6 are handled with the 1050's layout, as the
-    integration always did.
+    User name and password are the SmartLAN/G board's (they derive its
+    encryption key). Options are the transport's (timeouts, pauses). Panels
+    other than the 1050 on firmware 6 are handled with the 1050's layout,
+    with a warning, as the integration always did.
     """
-    transport = SmartLanSiTransport(host, port, **options)
+    transport: PanelTransport
+    if board == BOARD_SMARTLAN_G:
+        transport = SmartLanGTransport(
+            host, port, username=username, password=password, **options
+        )
+    elif board == BOARD_SMARTLAN_SI:
+        transport = SmartLanSiTransport(host, port, **options)
+    else:
+        raise ValueError(f"unknown board type: {board}")
     panel = SmartLivingPanel(transport, pin, fallback_model=SMARTLIVING_1050_FW6)
     return LegacyPanelClient(panel, host, port)
 

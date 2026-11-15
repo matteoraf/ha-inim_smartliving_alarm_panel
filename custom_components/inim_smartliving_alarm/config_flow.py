@@ -1,29 +1,42 @@
 """Config flow for Inim Alarm integration."""
 
+from collections.abc import Mapping
 import contextlib
 import logging
 from typing import Any
 
 from homeassistant import config_entries
-from homeassistant.const import CONF_HOST, CONF_PIN, CONF_PORT
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.selector import (
+    TextSelector,
+    TextSelectorConfig,
+    TextSelectorType,
+)
 import voluptuous as vol
 
 from .const import (
+    BOARD_SMARTLAN_G,
+    BOARD_SMARTLAN_SI,
+    CONF_BOARD,
     CONF_EVENT_LOG_SIZE,
+    CONF_HOST,
     CONF_LIMIT_AREAS,
     CONF_LIMIT_SCENARIOS,
     CONF_LIMIT_ZONES,
     CONF_PANEL_NAME,
+    CONF_PASSWORD,
+    CONF_PIN,
     CONF_POLLING_INTERVAL,
+    CONF_PORT,
     CONF_READER_NAMES,
     CONF_SCENARIO_ARM_AWAY,
     CONF_SCENARIO_ARM_HOME,
     CONF_SCENARIO_ARM_NIGHT,
     CONF_SCENARIO_ARM_VACATION,
     CONF_SCENARIO_DISARM,
+    CONF_USERNAME,
     DATA_API_CLIENT,
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_EVENT_LOG_SIZE,
@@ -34,20 +47,91 @@ from .const import (
     DEFAULT_POLLING_INTERVAL,
     DEFAULT_PORT,
     DOMAIN,
+    MIN_FIRMWARE_MAJOR,
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
 from .legacy import create_client
 from .panel_config import async_fetch_panel_configuration
+from .protocol.errors import InvalidPinError, ProtocolError
+from .transport.base import TransportError
 
 _LOGGER = logging.getLogger(__name__)
 
 
+# Error keys a failed check may report (strings.json "error"); anything else
+# is shown as a generic validation error
+_ERROR_KEYS = frozenset(
+    (
+        "auth_failed",
+        "invalid_auth",
+        "invalid_panel_response",
+        "invalid_pin",
+        "invalid_pin_format",
+        "unsupported_firmware",
+    )
+)
+
+
+def _error_key(err: ValueError) -> str:
+    return str(err) if str(err) in _ERROR_KEYS else "validation_error_detail"
+
+
+def _connection_schema(board: str, *, panel_name: bool) -> vol.Schema:
+    """Fields of the connection form for a board type."""
+    fields: dict[Any, Any] = {
+        vol.Required(CONF_HOST): str,
+        vol.Required(CONF_PORT, default=DEFAULT_PORT): cv.port,
+    }
+    if board == BOARD_SMARTLAN_G:
+        fields[vol.Required(CONF_USERNAME)] = str
+        fields[vol.Required(CONF_PASSWORD)] = TextSelector(
+            TextSelectorConfig(type=TextSelectorType.PASSWORD)
+        )
+    fields[vol.Required(CONF_PIN)] = str
+    if panel_name:
+        fields[vol.Optional(CONF_PANEL_NAME, default=DEFAULT_PANEL_NAME)] = str
+    return vol.Schema(fields)
+
+
 async def _validate_connection_and_fetch_initial_config(
-    hass: HomeAssistant, host: str, port: int, pin: str
+    hass: HomeAssistant, data: Mapping[str, Any]
 ) -> dict[str, Any]:
-    """Validate connection details by fetching initial panel configuration."""
-    api = create_client(host, port, pin)
+    """Check the panel with these connection details and read its configuration.
+
+    Raises ConnectionError if the panel cannot be reached and ValueError
+    (with an error key) if it is refused: firmware below 5, a PIN that
+    matches no user code, or a configuration that cannot be read. Firmware
+    5.x and models other than the 1050 are accepted with a log warning.
+    """
+    board = data.get(CONF_BOARD, BOARD_SMARTLAN_SI)
     try:
+        api = create_client(
+            data[CONF_HOST],
+            data[CONF_PORT],
+            data[CONF_PIN],
+            board=board,
+            username=data.get(CONF_USERNAME, ""),
+            password=data.get(CONF_PASSWORD, ""),
+        )
+    except InvalidPinError as err:
+        raise ValueError("invalid_pin_format") from err
+    try:
+        try:
+            firmware = await api.panel.identify()
+        except TransportError as err:
+            raise ConnectionError(str(err)) from err
+        except ProtocolError as err:
+            # On SmartLAN/G a reply that does not decrypt means wrong credentials
+            raise ValueError(
+                "invalid_auth"
+                if board == BOARD_SMARTLAN_G
+                else "invalid_panel_response"
+            ) from err
+        if firmware.major < MIN_FIRMWARE_MAJOR:
+            _LOGGER.warning("Firmware %s is not supported", firmware.version)
+            raise ValueError("unsupported_firmware")
+        if not api.panel.user_code_found:
+            raise ValueError("invalid_pin")
         return await async_fetch_panel_configuration(hass, api)
     finally:
         await api.close()  # the board may accept only one connection
@@ -57,101 +141,75 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Inim Alarm."""
 
     VERSION = 1
-    _flow_data: dict = {}  # To store data between steps
+    MINOR_VERSION = 2
+
+    def __init__(self) -> None:
+        """Start with no data (kept per flow, between the steps)."""
+        self._flow_data: dict[str, Any] = {}
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle the initial step (host, port, pin, panel name)."""
+        """Choose the board the panel is reached through."""
+        return self.async_show_menu(
+            step_id="user", menu_options=[BOARD_SMARTLAN_SI, BOARD_SMARTLAN_G]
+        )
+
+    async def async_step_smartlan_si(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Connection details for a SmartLAN/SI board."""
+        return await self._async_step_connection(BOARD_SMARTLAN_SI, user_input)
+
+    async def async_step_smartlan_g(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Connection details for a SmartLAN/G board (experimental)."""
+        return await self._async_step_connection(BOARD_SMARTLAN_G, user_input)
+
+    async def _async_step_connection(
+        self, board: str, user_input: dict[str, Any] | None
+    ) -> FlowResult:
+        """Check the panel with the details entered, then ask for the options."""
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            # Store user input for this step temporarily
-            self._flow_data["user_input_step1"] = user_input
+            data = {**user_input, CONF_BOARD: board}
+            self._flow_data["user_input_step1"] = data
+            host = data[CONF_HOST]
 
-            await self.async_set_unique_id(
-                f"{user_input[CONF_HOST]}:{user_input[CONF_PORT]}"
-            )
+            await self.async_set_unique_id(f"{host}:{data[CONF_PORT]}")
             self._abort_if_unique_id_configured()
 
             try:
-                _LOGGER.info(
-                    "Validating Inim Alarm connection for: %s", user_input[CONF_HOST]
-                )
+                _LOGGER.info("Validating Inim Alarm connection for: %s", host)
                 initial_panel_config = (
-                    await _validate_connection_and_fetch_initial_config(
-                        self.hass,
-                        user_input[CONF_HOST],
-                        user_input[CONF_PORT],
-                        user_input[CONF_PIN],
-                    )
+                    await _validate_connection_and_fetch_initial_config(self.hass, data)
                 )
-                self._flow_data[DATA_INITIAL_PANEL_CONFIG] = initial_panel_config
-                _LOGGER.info(
-                    "Inim Alarm connection validated for %s", user_input[CONF_HOST]
-                )
-
-                # Connection and initial data fetch successful, proceed to next step
-                return await self.async_step_initial_options()
-
             except ConnectionError:
-                _LOGGER.warning("Connection failed for %s", user_input[CONF_HOST])
+                _LOGGER.warning("Connection failed for %s", host)
                 errors["base"] = "cannot_connect"
             except ValueError as vex:
-                _LOGGER.warning(
-                    "Validation error for %s: %s", user_input[CONF_HOST], vex
-                )
-                # Use specific error key if it's 'auth_failed' or 'invalid_panel_response'
-                errors["base"] = (
-                    str(vex)
-                    if str(vex) in ["auth_failed", "invalid_panel_response"]
-                    else "validation_error_detail"
-                )
-                if (
-                    errors["base"] == "validation_error_detail"
-                ):  # For generic ValueErrors with details
-                    errors["detail"] = str(
-                        vex
-                    )  # Not standard, but an idea if form supported it
+                _LOGGER.warning("Validation error for %s: %s", host, vex)
+                errors["base"] = _error_key(vex)
             except Exception as exc:
                 _LOGGER.exception(
                     "Unexpected exception during Inim Alarm setup for %s: %s",
-                    user_input[CONF_HOST],
+                    host,
                     exc,
                 )
                 errors["base"] = "unknown"
-
-        user_data_schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_HOST,
-                    default=self._flow_data.get("user_input_step1", {}).get(
-                        CONF_HOST, ""
-                    ),
-                ): str,
-                vol.Required(
-                    CONF_PORT,
-                    default=self._flow_data.get("user_input_step1", {}).get(
-                        CONF_PORT, DEFAULT_PORT
-                    ),
-                ): cv.port,
-                vol.Required(
-                    CONF_PIN,
-                    default=self._flow_data.get("user_input_step1", {}).get(
-                        CONF_PIN, ""
-                    ),
-                ): str,
-                vol.Optional(
-                    CONF_PANEL_NAME,
-                    default=self._flow_data.get("user_input_step1", {}).get(
-                        CONF_PANEL_NAME, DEFAULT_PANEL_NAME
-                    ),
-                ): str,
-            }
-        )
+            else:
+                self._flow_data[DATA_INITIAL_PANEL_CONFIG] = initial_panel_config
+                _LOGGER.info("Inim Alarm connection validated for %s", host)
+                return await self.async_step_initial_options()
 
         return self.async_show_form(
-            step_id="user", data_schema=user_data_schema, errors=errors
+            step_id=board,
+            data_schema=self.add_suggested_values_to_schema(
+                _connection_schema(board, panel_name=True), user_input or {}
+            ),
+            errors=errors,
         )
 
     async def async_step_initial_options(
@@ -175,12 +233,16 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # Combine data from step 1 and this step
             final_data_for_entry = {
+                CONF_BOARD: step1_data[CONF_BOARD],
                 CONF_HOST: step1_data[CONF_HOST],
                 CONF_PORT: step1_data[CONF_PORT],
                 CONF_PIN: step1_data[CONF_PIN],
                 CONF_PANEL_NAME: step1_data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME),
                 DATA_INITIAL_PANEL_CONFIG: initial_config_data,  # Store all fetched initial data
             }
+            if step1_data[CONF_BOARD] == BOARD_SMARTLAN_G:
+                final_data_for_entry[CONF_USERNAME] = step1_data[CONF_USERNAME]
+                final_data_for_entry[CONF_PASSWORD] = step1_data[CONF_PASSWORD]
 
             final_options_for_entry = {
                 CONF_POLLING_INTERVAL: user_input[CONF_POLLING_INTERVAL],
@@ -265,12 +327,14 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Change host, port and PIN of an existing entry.
+        """Change the connection details of an existing entry.
 
         The panel is contacted with the new details and its configuration is
-        stored again. Options, entities and their unique IDs are kept.
+        stored again. Options, entities and their unique IDs are kept. The
+        board type stays as set up.
         """
         entry = self._get_reconfigure_entry()
+        board = entry.data.get(CONF_BOARD, BOARD_SMARTLAN_SI)
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -298,7 +362,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ):
                     initial_panel_config = (
                         await _validate_connection_and_fetch_initial_config(
-                            self.hass, host, port, user_input[CONF_PIN]
+                            self.hass, {CONF_BOARD: board, **user_input}
                         )
                     )
             except ConnectionError:
@@ -306,11 +370,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "cannot_connect"
             except ValueError as vex:
                 _LOGGER.warning("Validation error for %s:%s: %s", host, port, vex)
-                errors["base"] = (
-                    str(vex)
-                    if str(vex) in ("auth_failed", "invalid_panel_response")
-                    else "validation_error_detail"
-                )
+                errors["base"] = _error_key(vex)
             except Exception:
                 _LOGGER.exception("Unexpected error reconfiguring %s:%s", host, port)
                 errors["base"] = "unknown"
@@ -322,26 +382,17 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     unique_id=unique_id,
                     data={
                         **entry.data,
-                        CONF_HOST: host,
-                        CONF_PORT: port,
-                        CONF_PIN: user_input[CONF_PIN],
+                        **user_input,
                         DATA_INITIAL_PANEL_CONFIG: initial_panel_config,
                     },
                 ):
                     self.hass.config_entries.async_schedule_reload(entry.entry_id)
                 return self.async_abort(reason="reconfigure_successful")
 
-        schema = vol.Schema(
-            {
-                vol.Required(CONF_HOST): str,
-                vol.Required(CONF_PORT): cv.port,
-                vol.Required(CONF_PIN): str,
-            }
-        )
         return self.async_show_form(
             step_id="reconfigure",
             data_schema=self.add_suggested_values_to_schema(
-                schema, user_input or entry.data
+                _connection_schema(board, panel_name=False), user_input or entry.data
             ),
             errors=errors,
             description_placeholders={"panel_name": entry.title},
