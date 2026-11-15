@@ -11,10 +11,14 @@ from homeassistant.helpers.typing import ConfigType
 import voluptuous as vol
 
 from .const import (
+    BOARD_SMARTLAN_SI,
+    CONF_BOARD,
     CONF_HOST,
+    CONF_PASSWORD,
     CONF_PIN,
     CONF_POLLING_INTERVAL,
     CONF_PORT,
+    CONF_USERNAME,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
     DEFAULT_POLLING_INTERVAL,
@@ -88,7 +92,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     # One client per entry, holding one connection to the panel
-    api = create_client(host, port, pin)
+    api = create_client(
+        host,
+        port,
+        pin,
+        board=entry.data.get(CONF_BOARD, BOARD_SMARTLAN_SI),
+        username=entry.data.get(CONF_USERNAME, ""),
+        password=entry.data.get(CONF_PASSWORD, ""),
+    )
 
     # Create the custom coordinator instance
     coordinator_name = f"{DOMAIN} data ({entry.title})"
@@ -165,22 +176,28 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Migrate old entry."""
-    _LOGGER.debug(
-        "Checking migration for Inim Alarm config entry version %s",
-        config_entry.version,
-    )
-    # Add migration logic if config entry version changes in the future.
-    # For now, assuming version 1 is the current version and requires no migration.
-    if config_entry.version == 1:
-        # No migration needed from version 1 to 1
-        return True
+    """Migrate an entry to the current version (1.2).
 
-    _LOGGER.error(
-        "Unsupported Inim Alarm config entry version for migration: %s",
-        config_entry.version,
-    )
-    return False  # Return False if migration fails or is not supported
+    1.2 adds the board type; every older entry uses SmartLAN/SI. A newer
+    major version (from a later integration release) cannot be loaded.
+    """
+    version, minor = config_entry.version, config_entry.minor_version
+    _LOGGER.debug("Checking migration of config entry version %s.%s", version, minor)
+    if version > 1:
+        _LOGGER.error(
+            "Config entry version %s.%s is newer than this integration supports",
+            version,
+            minor,
+        )
+        return False
+    if minor < 2:
+        hass.config_entries.async_update_entry(
+            config_entry,
+            data={**config_entry.data, CONF_BOARD: BOARD_SMARTLAN_SI},
+            minor_version=2,
+        )
+        _LOGGER.info("Migrated config entry %s to version 1.2", config_entry.title)
+    return True
 
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:

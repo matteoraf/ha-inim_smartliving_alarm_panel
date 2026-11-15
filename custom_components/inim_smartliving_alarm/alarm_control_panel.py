@@ -239,9 +239,9 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
             current_active_scenario_idx,
         )
 
-        new_state_enum: (
-            AlarmControlPanelState | None
-        )  # Explicitly allow None if state is truly unknown
+        # None (unknown) unless a state can be determined below; without a
+        # mapped Disarm scenario nothing may set it
+        new_state_enum: AlarmControlPanelState | None = None
 
         # Default to DISARMED if no other conditions are met and a disarm scenario is defined.
         # If no disarm scenario, it's harder to default.

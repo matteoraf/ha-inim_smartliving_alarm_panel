@@ -9,6 +9,9 @@ PLATFORMS = ["alarm_control_panel", "binary_sensor", "button", "sensor", "switch
 CONF_HOST = "host"
 CONF_PORT = "port"
 CONF_PIN = "pin"
+CONF_BOARD = "board"
+CONF_USERNAME = "username"  # SmartLAN/G only
+CONF_PASSWORD = "password"  # SmartLAN/G only
 CONF_POLLING_INTERVAL = "polling_interval"
 CONF_PANEL_NAME = "panel_name"
 
@@ -27,9 +30,16 @@ CONF_SCENARIO_ARM_NIGHT = "scenario_arm_night"
 CONF_SCENARIO_ARM_VACATION = "scenario_arm_vacation"
 CONF_SCENARIO_DISARM = "scenario_disarm"
 
+# Board types (CONF_BOARD)
+BOARD_SMARTLAN_SI = "smartlan_si"
+BOARD_SMARTLAN_G = "smartlan_g"  # experimental: tested against a fake panel only
+
+# Setup refuses panels with older firmware; 5.x is accepted with a warning
+MIN_FIRMWARE_MAJOR = 5
+
 # Defaults
 DEFAULT_POLLING_INTERVAL = 30  # seconds
-DEFAULT_PORT = 5004  # Common default for SmartLAN/SI, user can override
+DEFAULT_PORT = 5004  # SmartLAN/SI default; also proposed for SmartLAN/G (no default)
 DEFAULT_PANEL_NAME = "Inim Smartliving"  # Default if user doesn't provide one
 
 # Default limits for entities. Users can reduce these.

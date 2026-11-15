@@ -152,7 +152,7 @@ def model_for(info: FirmwareInfo) -> PanelModel:
     """The model profile for a panel, or UnsupportedPanelError."""
     if info.major < 6:
         raise UnsupportedPanelError(
-            f"firmware {info.version} is not supported; firmware 6.x is required"
+            f"firmware {info.version} is not supported yet (only 6.x is)"
         )
     if info.model == "1050":
         return SMARTLIVING_1050_FW6

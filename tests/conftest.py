@@ -59,8 +59,13 @@ async def entry(hass: HomeAssistant, panel: FakePanel) -> AsyncGenerator[ConfigE
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": "user"}
     )
-    assert result["type"] is FlowResultType.FORM
+    assert result["type"] is FlowResultType.MENU
     assert result["step_id"] == "user"
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {"next_step_id": "smartlan_si"}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "smartlan_si"
 
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
