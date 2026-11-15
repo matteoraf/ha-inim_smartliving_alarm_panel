@@ -12,6 +12,7 @@ CONF_PIN = "pin"
 CONF_BOARD = "board"
 CONF_USERNAME = "username"  # SmartLAN/G only
 CONF_PASSWORD = "password"  # SmartLAN/G only
+CONF_FOUND_BOARD = "found_board"  # setup: the board picked from a network search
 CONF_POLLING_INTERVAL = "polling_interval"
 CONF_PANEL_NAME = "panel_name"
 

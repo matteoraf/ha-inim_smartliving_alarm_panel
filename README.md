@@ -108,7 +108,7 @@ After installation and restarting Home Assistant:
     
 3.  Search for "Inim SmartLiving Alarm" and select it.
     
-4.  Choose how the panel is connected: **SmartLAN/SI board** or **SmartLAN/G board (experimental)**.
+4.  Choose **Search the network** to look for SmartLAN boards: the boards that answer (and are not set up yet) are listed, and the one you pick has its address and port filled in on the next page. The search only finds boards on the **same subnet as Home Assistant**. Otherwise, or if your board is not found, choose how the panel is connected, **SmartLAN/SI board** or **SmartLAN/G board (experimental)**, and enter its details yourself.
     
 5.  A configuration dialog will appear. Enter the following details:
     
@@ -257,6 +257,12 @@ Troubleshooting
     *   Make sure the SmartLAN module is powered and connected to the network.
         
     *   If the module's IP address or port has changed, update it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)) instead of removing the integration.
+        
+*   **Search the network finds no board**:
+    
+    *   The search only reaches boards on the same subnet as Home Assistant (the boards answer only on their own network segment). Enter a board on another subnet or VLAN by hand.
+        
+    *   The search listens on UDP ports 5001 (SmartLAN/SI) and 7001 (SmartLAN/G) of the Home Assistant host; another program using them, or a firewall, prevents it. Boards that are already set up are not listed.
         
 *   **The Inim app cannot connect locally while Home Assistant is running**:
     

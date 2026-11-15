@@ -21,6 +21,7 @@ from .const import (
     BOARD_SMARTLAN_SI,
     CONF_BOARD,
     CONF_EVENT_LOG_SIZE,
+    CONF_FOUND_BOARD,
     CONF_HOST,
     CONF_LIMIT_AREAS,
     CONF_LIMIT_SCENARIOS,
@@ -50,6 +51,7 @@ from .const import (
     MIN_FIRMWARE_MAJOR,
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
+from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .legacy import create_client
 from .panel_config import async_fetch_panel_configuration
 from .protocol.errors import InvalidPinError, ProtocolError
@@ -137,6 +139,26 @@ async def _validate_connection_and_fetch_initial_config(
         await api.close()  # the board may accept only one connection
 
 
+def _board_key(board: DiscoveredBoard) -> str:
+    return f"{board.board}|{board.host}|{board.port}"
+
+
+def _board_label(board: DiscoveredBoard) -> str:
+    """How a found board is listed: address, type and what it told."""
+    address = board.host if board.port is None else f"{board.host}:{board.port}"
+    if board.board == BOARD_SMARTLAN_SI:
+        details = f"SmartLAN/SI, MAC {board.mac}" if board.mac else "SmartLAN/SI"
+        return f"{address} - {details}"
+    details = ["SmartLAN/G"]
+    if board.model:
+        details.append(f"SmartLiving {board.model.lstrip('0')}")
+    if board.firmware:
+        details.append(f"firmware {board.firmware}")
+    if board.panel_name:
+        details.append(f'"{board.panel_name}"')
+    return f"{address} - {', '.join(details)}"
+
+
 class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Inim Alarm."""
 
@@ -146,13 +168,71 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         """Start with no data (kept per flow, between the steps)."""
         self._flow_data: dict[str, Any] = {}
+        self._discovered: dict[str, DiscoveredBoard] = {}
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Choose the board the panel is reached through."""
+        """Search the network, or choose the board type."""
         return self.async_show_menu(
-            step_id="user", menu_options=[BOARD_SMARTLAN_SI, BOARD_SMARTLAN_G]
+            step_id="user",
+            menu_options=["discover", BOARD_SMARTLAN_SI, BOARD_SMARTLAN_G],
+        )
+
+    async def async_step_discover(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Search the local network for boards, then pick one of them.
+
+        Only boards on Home Assistant's own subnet answer.
+        """
+        if user_input is not None:
+            board = self._discovered[user_input[CONF_FOUND_BOARD]]
+            self._flow_data["discovered"] = {
+                CONF_HOST: board.host,
+                CONF_PORT: board.port or DEFAULT_PORT,
+                CONF_PANEL_NAME: board.panel_name or DEFAULT_PANEL_NAME,
+            }
+            return await self._async_step_connection(board.board, None)
+
+        try:
+            boards = await discover()
+        except DiscoveryError as err:
+            _LOGGER.warning("Cannot search for boards: %s", err)
+            boards = []
+        configured = {
+            entry.unique_id
+            for entry in self._async_current_entries(include_ignore=False)
+        }
+        self._discovered = {
+            _board_key(board): board
+            for board in boards
+            if f"{board.host}:{board.port}" not in configured
+        }
+        if not self._discovered:
+            return await self.async_step_discover_none()
+        return self.async_show_form(
+            step_id="discover",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_FOUND_BOARD): vol.In(
+                        {
+                            key: _board_label(board)
+                            for key, board in self._discovered.items()
+                        }
+                    )
+                }
+            ),
+            description_placeholders={"count": str(len(self._discovered))},
+        )
+
+    async def async_step_discover_none(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """No new board answered: search again, or enter the board by hand."""
+        return self.async_show_menu(
+            step_id="discover_none",
+            menu_options=["discover", BOARD_SMARTLAN_SI, BOARD_SMARTLAN_G],
         )
 
     async def async_step_smartlan_si(
@@ -207,7 +287,8 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id=board,
             data_schema=self.add_suggested_values_to_schema(
-                _connection_schema(board, panel_name=True), user_input or {}
+                _connection_schema(board, panel_name=True),
+                user_input or self._flow_data.get("discovered", {}),
             ),
             errors=errors,
         )
