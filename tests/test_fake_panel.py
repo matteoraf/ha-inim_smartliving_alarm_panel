@@ -403,11 +403,17 @@ async def test_command_writes_an_event(fake_panel: FakePanel) -> None:
             c.RESULT_CODE_NOT_ENABLED,
         ),
         (
-            "zone_0_open",
+            "zone_0_open_blocking",
             command_frame(c.RAM_CMD_ARM, PIN_1234 + b"\x01" + bytes(7)),
             c.RESULT_OPEN_ZONES,
         ),
-        ("zone_0_open", captures.ACTIVATE_SCENARIO_0, c.RESULT_OPEN_ZONES),
+        ("zone_0_open_blocking", captures.ACTIVATE_SCENARIO_0, c.RESULT_OPEN_ZONES),
+        (
+            "zone_0_open",
+            command_frame(c.RAM_CMD_ARM, PIN_1234 + b"\x01" + bytes(7)),
+            c.RESULT_OK,
+        ),
+        ("zone_0_open", captures.ACTIVATE_SCENARIO_0, c.RESULT_OK),
         (
             None,
             command_frame(c.RAM_CMD_BYPASS, PIN_1234 + bytes((200, 0, 1))),
@@ -437,8 +443,10 @@ async def test_command_writes_an_event(fake_panel: FakePanel) -> None:
     ids=[
         "arm_wrong_pin",
         "arm_area_not_in_code",
-        "arm_open_zone",
-        "scenario_open_zone",
+        "arm_open_zone_blocking",
+        "scenario_open_zone_blocking",
+        "arm_open_zone_accepted",
+        "scenario_open_zone_accepted",
         "bypass_slot_out_of_range",
         "bypass_slot_not_connected",
         "include_already_included",
@@ -450,8 +458,9 @@ async def test_command_errors(
     fake_panel: FakePanel, setup: str | None, frame: bytes, result: int
 ) -> None:
     """Commands that cannot run report the panel's result codes."""
-    if setup == "zone_0_open":
+    if setup in ("zone_0_open", "zone_0_open_blocking"):
         fake_panel.state.zone_states[0] = c.ZONE_ALARM
+    fake_panel.state.block_arming_when_not_ready = setup == "zone_0_open_blocking"
     async with Client(fake_panel) as client:
         _ack, actual = await client.command(frame)
     assert actual == result

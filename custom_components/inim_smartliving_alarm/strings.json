@@ -144,6 +144,57 @@
       },
       "entry_not_loaded": {
         "message": "{title} is not loaded, so its panel configuration cannot be read again."
+      },
+      "command_failed": {
+        "message": "The command for {target} could not be completed: {error}"
+      },
+      "zones_not_ready": {
+        "message": "{target} was not activated because these zones are not ready: {zones}."
+      },
+      "refused_invalid_code": {
+        "message": "The panel did not accept the PIN for {target}. The PIN may have been changed or deleted on the panel: enter the current one with Reconfigure."
+      },
+      "refused_open_zones": {
+        "message": "The panel refused to arm {target}: a zone programmed to block arming while not ready is not at rest."
+      },
+      "refused_code_not_enabled": {
+        "message": "The panel refused the command for {target}: the PIN is not enabled for it."
+      },
+      "refused_already_in_state": {
+        "message": "The panel did not change {target}: it is already in the requested state."
+      },
+      "refused_slot_out_of_range": {
+        "message": "The panel refused the command for {target}: its terminal is out of range."
+      },
+      "refused_slot_not_connected": {
+        "message": "The panel refused the command for {target}: its terminal is not connected."
+      },
+      "refused_null_terminal": {
+        "message": "The panel refused the command for {target}: its terminal is not in use."
+      },
+      "refused_cannot_be_bypassed": {
+        "message": "The panel refused the command for {target}: the zone cannot be bypassed."
+      },
+      "refused_no_areas": {
+        "message": "The panel refused the command for {target}: the zone belongs to no area."
+      },
+      "refused_double_zone_error": {
+        "message": "The panel refused the command for {target}: double zone error."
+      },
+      "refused_output_not_enabled": {
+        "message": "The panel refused the command for {target}: the output is not enabled."
+      },
+      "refused_areas_armed": {
+        "message": "The panel refused the command for {target}: the output is locked while its areas are armed."
+      },
+      "refused_refused": {
+        "message": "The panel refused the command for {target}."
+      },
+      "refused_unknown": {
+        "message": "The panel refused the command for {target} (result code {code})."
+      },
+      "scenario_not_mapped": {
+        "message": "No scenario is mapped to {action} for {panel}: choose one in the integration options."
       }
     }
   }

@@ -229,6 +229,7 @@ async def test_connection_held_after_an_accepted_command(
     # A refused command does not hold the connection
     fake_panel.reply_delay = 0
     fake_panel.state.zone_states[0] = c.ZONE_ALARM  # zone 1, area 1
+    fake_panel.state.block_arming_when_not_ready = True
     started = time.monotonic()
     refused = await panel.arm_areas({1: ArmMode.AWAY})
     assert not refused.ok

@@ -4,6 +4,7 @@
 import logging
 from typing import Any
 
+from homeassistant.components import persistent_notification
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -26,9 +27,82 @@ from .const import (
     KEY_LIVE_ZONES_STATUS,
     PROBLEM_ZONE_STATES_FOR_ARMING,
 )
-from .legacy import zone_exists
+from .errors import (
+    CommandFailedError,
+    CommandRefusedError,
+    InimCommandError,
+    async_send_command,
+)
+from .legacy import LegacyPanelClient, zone_exists
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def scenario_label(initial_panel_config: dict[str, Any], index: int) -> str:
+    """A scenario's (0-based) label from the panel configuration."""
+    names = (
+        (initial_panel_config or {})
+        .get(KEY_INIT_SCENARIOS, {})
+        .get(KEY_INIT_SCENARIO_NAMES, [])
+    )
+    if 0 <= index < len(names) and names[index]:
+        return names[index]
+    return f"Scenario {index + 1}"
+
+
+def zone_labels(initial_panel_config: dict[str, Any]) -> list[str]:
+    """The zone labels from the panel configuration, by zone number - 1."""
+    return (
+        (initial_panel_config or {})
+        .get(KEY_INIT_ZONES, {})
+        .get(KEY_INIT_ZONE_NAMES, [])
+    )
+
+
+async def async_activate_scenario(
+    hass: HomeAssistant,
+    coordinator: DataUpdateCoordinator | None,
+    api_client: LegacyPanelClient,
+    initial_panel_config: dict[str, Any],
+    entity_unique_id: str,
+    entity_name: str,
+    scenario_index: int,
+    action_name: str,
+    *,
+    is_disarm_scenario: bool,
+) -> None:
+    """Activate a scenario (0-based) unless zones are not ready for it.
+
+    Raises an InimCommandError when the scenario was not activated; the
+    failure also gets a notification and the scenario_activation_failed event.
+    """
+    try:
+        await async_send_command(
+            api_client.panel.activate_scenario(scenario_index),
+            scenario_label(initial_panel_config, scenario_index),
+            zone_names=zone_labels(initial_panel_config),
+        )
+    except InimCommandError as err:
+        await async_handle_scenario_activation_failure(
+            hass,
+            coordinator,
+            initial_panel_config,
+            entity_unique_id,
+            entity_name,
+            scenario_index,
+            action_name,
+            is_disarm_scenario,
+            error=err,
+        )
+        raise
+    _LOGGER.info(
+        "%s: %s (scenario %s) carried out by the panel",
+        entity_name,
+        action_name,
+        scenario_index,
+    )
+    if coordinator:
+        await coordinator.async_request_refresh()
 
 
 async def async_handle_scenario_activation_failure(
@@ -40,27 +114,28 @@ async def async_handle_scenario_activation_failure(
     scenario_idx_to_activate: int,
     action_name: str,
     is_disarm_scenario: bool,
+    error: InimCommandError | None = None,
 ) -> None:
-    """Handles the failure of a scenario activation, providing detailed notifications and emitting an event."""
+    """Handles the failure of a scenario activation, providing detailed notifications and emitting an event.
+
+    error is what stopped the activation. When the panel refused the command
+    for a reason other than zones (wrong PIN, PIN not enabled, ...) or the
+    command could not be sent, the notification gives that reason instead
+    of looking for zones in the way.
+    """
 
     _LOGGER.error(
-        "%s: Failed to %s (scenario index %s) - API reported failure",
+        "%s: Failed to %s (scenario index %s): %s",
         entity_name,
         action_name,
         scenario_idx_to_activate,
+        error,
     )
 
     # Determine default scenario name for messages/titles if details aren't fully available
-    base_scenario_name_for_msg = f"Scenario {scenario_idx_to_activate + 1}"
-    if initial_panel_config:
-        all_scenario_names_list_for_default = initial_panel_config.get(
-            KEY_INIT_SCENARIOS, {}
-        ).get(KEY_INIT_SCENARIO_NAMES, [])
-        if 0 <= scenario_idx_to_activate < len(all_scenario_names_list_for_default):
-            base_scenario_name_for_msg = (
-                all_scenario_names_list_for_default[scenario_idx_to_activate]
-                or base_scenario_name_for_msg
-            )
+    base_scenario_name_for_msg = scenario_label(
+        initial_panel_config, scenario_idx_to_activate
+    )
 
     notification_title = (
         f"Inim Alarm - '{base_scenario_name_for_msg}' Failed"  # Default title
@@ -74,8 +149,17 @@ async def async_handle_scenario_activation_failure(
     event_reason = "unknown"
     final_scenario_name = base_scenario_name_for_msg
     blocking_zones_event_data = []
+    panel_result = error.reason if isinstance(error, CommandRefusedError) else None
 
-    if (
+    if isinstance(error, CommandFailedError) or panel_result not in {
+        None,
+        "refused",
+        "open_zones",
+    }:
+        event_reason = "command_failed" if panel_result is None else panel_result
+        notification_message = str(error)
+        notification_id_suffix = f"activation_failed_{scenario_idx_to_activate}"
+    elif (
         not is_disarm_scenario
         and coordinator
         and coordinator.data
@@ -254,15 +338,11 @@ async def async_handle_scenario_activation_failure(
         notification_message = f"Failed to {action_name} ({base_scenario_name_for_msg}) for '{entity_name}'. Check panel."
 
     # 1. Trigger the Persistent Notification in the UI
-    await hass.services.async_call(
-        "persistent_notification",
-        "create",
-        {
-            "title": notification_title,
-            "message": notification_message,
-            "notification_id": f"{DOMAIN}_{entity_unique_id}_{notification_id_suffix}",
-        },
-        blocking=False,
+    persistent_notification.async_create(
+        hass,
+        notification_message,
+        title=notification_title,
+        notification_id=f"{DOMAIN}_{entity_unique_id}_{notification_id_suffix}",
     )
 
     # 2. Fire the custom HA event for automations
@@ -273,6 +353,7 @@ async def async_handle_scenario_activation_failure(
         "scenario_index": scenario_idx_to_activate,
         "scenario_name": final_scenario_name,
         "reason": event_reason,
+        "panel_result": panel_result,
         "blocking_zones": blocking_zones_event_data,
         "message": notification_message,
     }

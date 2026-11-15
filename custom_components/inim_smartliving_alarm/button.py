@@ -31,7 +31,7 @@ from .const import (
 )
 from .legacy import LegacyPanelClient
 from .panel_config import async_reread_panel_configuration
-from .utils import async_handle_scenario_activation_failure
+from .utils import async_activate_scenario
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -179,72 +179,33 @@ class InimScenarioActivationButton(ButtonEntity):
         """Handle the button press to activate the scenario."""
         action_name = f"activate scenario '{self._scenario_name}' (index {self._scenario_index_0_based})"
         _LOGGER.info("Button '%s' pressed: Attempting to %s", self.name, action_name)
-        try:
-            # execute_activate_scenario checks that no zone prevents it first
-            success = await self.api_client.execute_activate_scenario(
-                self._scenario_index_0_based
+        is_disarm = False
+        if self._scenario_activation_details:
+            # area_actions is a dict like {'1': 'arm', '2': 'disarm'}
+            area_actions_dict = self._scenario_activation_details.get(
+                KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS, {}
             )
-            if success:
-                _LOGGER.info(
-                    "Scenario %s ('%s') activation command acknowledged by panel",
-                    self._scenario_index_0_based,
-                    self._scenario_name,
-                )
-                if self._coordinator:  # Refresh data if coordinator is available
-                    await self._coordinator.async_request_refresh()
-            else:
-                # Handle activation failure and send notification with details
-                _LOGGER.error(
-                    "API reported failure for %s via button '%s'",
-                    action_name,
-                    self.name,
-                )
-                is_disarm = False
-                if self._scenario_activation_details:
-                    # area_actions is a dict like {'1': 'arm', '2': 'disarm'}
-                    area_actions_dict = self._scenario_activation_details.get(
-                        KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS, {}
-                    )
-                    actions_present = set(
-                        area_actions_dict.values()
-                    )  # e.g., {'arm', 'keep'} or {'disarm'}
+            actions_present = set(
+                area_actions_dict.values()
+            )  # e.g., {'arm', 'keep'} or {'disarm'}
 
-                    if "disarm" in actions_present and "arm" not in actions_present:
-                        # Only consider it a disarm scenario if 'disarm' is present AND 'arm' is NOT.
-                        is_disarm = True
+            if "disarm" in actions_present and "arm" not in actions_present:
+                # Only consider it a disarm scenario if 'disarm' is present AND 'arm' is NOT.
+                is_disarm = True
 
-                await async_handle_scenario_activation_failure(
-                    self.hass,
-                    self._coordinator,
-                    self._initial_panel_config,
-                    self.unique_id,
-                    self.name,
-                    self._scenario_index_0_based,
-                    action_name,
-                    is_disarm_scenario=is_disarm,
-                )
-                # The utility function now handles the coordinator refresh on failure if coordinator is passed.
-        except Exception as e:  # General fallback for truly unexpected errors
-            _LOGGER.error(
-                "Unexpected error during button press for scenario %s ('%s'): %s",
-                self._scenario_index_0_based,
-                self._scenario_name,
-                e,
-                exc_info=True,  # Add exc_info for better debugging
-            )
-            await self.hass.services.async_call(
-                "persistent_notification",
-                "create",
-                {
-                    "title": "Inim Alarm Button - Unexpected Error",
-                    "message": f"An unexpected error occurred while trying to {action_name} via button '{self.name}': {e}",
-                    "notification_id": f"{DOMAIN}_{self.unique_id}_unexpected_error_button",
-                },
-                blocking=False,
-            )
-        finally:  # Ensure coordinator is refreshed if available, even after handled exceptions
-            if self._coordinator:
-                await self._coordinator.async_request_refresh()
+        # Checks that no zone prevents it first; raises an error if not
+        # carried out, after a notification and the activation-failed event
+        await async_activate_scenario(
+            self.hass,
+            self._coordinator,
+            self.api_client,
+            self._initial_panel_config,
+            self.unique_id,
+            self.name,
+            self._scenario_index_0_based,
+            action_name,
+            is_disarm_scenario=is_disarm,
+        )
 
     @property
     def extra_state_attributes(self) -> dict[str, Any] | None:

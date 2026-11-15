@@ -17,12 +17,17 @@ Environment variables:
   replaced.
 - INIM_PANEL_WRITE=1 and INIM_TEST_PIN: also run the write tests, which arm
   (total, partial, instant) and disarm area 4 and bypass and include zone 18
-  only. Type the PIN
+  only, and check the panel's answer to commands that change nothing
+  (include an included zone 18, disarm a disarmed area 4). Type the PIN
   without storing it, and unset it afterwards:
 
       read -rs INIM_TEST_PIN && export INIM_TEST_PIN
       INIM_PANEL_HOST=... INIM_PANEL_WRITE=1 pytest tests/test_real_panel.py
       unset INIM_TEST_PIN
+
+- INIM_PANEL_WRONG_PIN=1: send one disarm of area 4 (only while it is
+  disarmed) with a PIN that matches no user code, to see the panel's
+  answer. The panel may log it as an invalid code; it needs no PIN.
 
 All traffic goes through a local proxy (tests/real_panel/proxy.py) that
 refuses every write in read-only mode and, in write mode, every write other
@@ -47,6 +52,10 @@ from homeassistant.core import HomeAssistant
 import pytest
 import pytest_socket
 
+from custom_components.inim_smartliving_alarm.errors import (
+    CommandRefusedError,
+    async_send_command,
+)
 from custom_components.inim_smartliving_alarm.legacy import (
     LegacyPanelClient,
     create_client,
@@ -60,6 +69,7 @@ HOST = os.environ.get("INIM_PANEL_HOST", "")
 PORT = int(os.environ.get("INIM_PANEL_PORT", "5004"))
 RECORD = bool(os.environ.get("INIM_PANEL_RECORD"))
 WRITE = bool(os.environ.get("INIM_PANEL_WRITE"))
+WRONG_PIN = bool(os.environ.get("INIM_PANEL_WRONG_PIN"))
 RECORDINGS = Path(__file__).parent / "real_panel" / "recordings"
 
 # The only area and zone the write tests may change (owner's choice)
@@ -68,6 +78,9 @@ WRITE_ZONE = 18
 
 # No command is sent in read-only mode, so any PIN will do
 READ_ONLY_PIN = "000000"
+# Tried in turn for the wrong-PIN test; the first that matches no user code
+# of the panel is used
+WRONG_PIN_CANDIDATES = ("975318", "864208", "135797")
 
 # Seconds to wait for a reply: the proxy may retry its connection to the
 # panel for up to CONNECT_DEADLINE seconds first
@@ -539,3 +552,89 @@ async def test_bypass_and_include_zone(
     after = await run(hass, write_api.get_live_status_snapshot)
     statuses = after["zones_excluded_status"]["zone_excluded_statuses"]
     assert statuses[WRITE_ZONE] == "enabled"
+
+
+async def test_include_an_included_zone(
+    hass: HomeAssistant, write_api: LegacyPanelClient, zone_slot: int
+) -> None:
+    """Including zone 18 while it is included: the panel reports no change."""
+    before = require(await run(hass, write_api.get_live_status_snapshot), "status")
+    excluded = before["zones_excluded_status"]["zone_excluded_statuses"]
+    if excluded[WRITE_ZONE] != "enabled":
+        pytest.skip(f"zone {WRITE_ZONE} is not included")
+
+    with pytest.raises(CommandRefusedError) as err:
+        await async_send_command(
+            write_api.panel.bypass_zone(zone_slot, bypass=False), f"Zone {WRITE_ZONE}"
+        )
+    print(f"include of an included zone: result {err.value.code:#04x}")
+    assert err.value.reason == "already_in_state", err.value.code
+
+    after = await run(hass, write_api.get_live_status_snapshot)
+    statuses = after["zones_excluded_status"]["zone_excluded_statuses"]
+    assert statuses[WRITE_ZONE] == "enabled"
+
+
+async def test_disarm_a_disarmed_area(
+    hass: HomeAssistant, write_api: LegacyPanelClient
+) -> None:
+    """Disarming area 4 while it is disarmed changes nothing."""
+    before = require(await run(hass, write_api.get_live_status_snapshot), "status")
+    statuses = before["areas_status"]["area_statuses"]
+    if statuses[WRITE_AREA] != "disarmed":
+        pytest.skip(f"area {WRITE_AREA} is not disarmed")
+
+    result = await write_api.panel.arm_areas({WRITE_AREA: ArmMode.DISARM})
+    print(f"disarm of a disarmed area: result {result.code:#04x}")
+    assert result.ok, result.code
+
+    after = await run(hass, write_api.get_live_status_snapshot)
+    assert after["areas_status"]["area_statuses"] == statuses
+
+
+@pytest.fixture
+async def wrong_pin_api(
+    hass: HomeAssistant,
+    quiet_api_log: None,
+    proxy: PanelProxy,
+    make_proxy: ProxyFactory,
+    zone_slot: int,
+) -> AsyncGenerator[LegacyPanelClient]:
+    """Client with a PIN that matches no user code; may change area 4 only."""
+    if not WRONG_PIN:
+        pytest.skip("set INIM_PANEL_WRONG_PIN=1 to send a command with a wrong PIN")
+    state = await raw_read(proxy, RAM_PANEL_STATE, 2)
+    if state[1] & PANEL_STATE_PROGRAMMING:
+        pytest.skip("the panel is in programming mode, which refuses commands")
+    guarded = await make_proxy(WriteGuard(area=WRITE_AREA, zone_slot=zone_slot))
+    for pin in WRONG_PIN_CANDIDATES:
+        client = client_for(guarded.host, guarded.port, pin)
+        await client.panel.identify()
+        if not client.panel.user_code_found:
+            break
+        await client.close()
+    else:
+        pytest.skip("every candidate PIN matches a user code of the panel")
+    yield client
+    await client.close()
+
+
+async def test_wrong_pin_is_refused(
+    hass: HomeAssistant, wrong_pin_api: LegacyPanelClient
+) -> None:
+    """A PIN that matches no user code is refused; nothing changes."""
+    before = require(await run(hass, wrong_pin_api.get_live_status_snapshot), "status")
+    statuses = before["areas_status"]["area_statuses"]
+    if statuses[WRITE_AREA] != "disarmed":
+        pytest.skip(f"area {WRITE_AREA} is not disarmed")
+
+    with pytest.raises(CommandRefusedError) as err:
+        await async_send_command(
+            wrong_pin_api.panel.arm_areas({WRITE_AREA: ArmMode.DISARM}),
+            f"Area {WRITE_AREA}",
+        )
+    print(f"command with a wrong PIN: result {err.value.code:#04x}")
+    assert err.value.reason == "invalid_code", err.value.code
+
+    after = await run(hass, wrong_pin_api.get_live_status_snapshot)
+    assert after["areas_status"]["area_statuses"] == statuses

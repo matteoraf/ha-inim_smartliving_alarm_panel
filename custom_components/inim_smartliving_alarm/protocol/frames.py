@@ -192,9 +192,13 @@ def describe(frame: bytes) -> str:
 
 
 def check_write_ack(ack: bytes, payload: bytes) -> None:
-    """Check the 1-byte acknowledgement of a write."""
+    """Check the 1-byte acknowledgement of a write.
+
+    The error does not show the byte: for a command it is a checksum over
+    the PIN.
+    """
     if len(ack) != 1 or ack[0] != checksum(payload):
-        raise ProtocolError(f"unexpected write acknowledgement {ack.hex()}")
+        raise ProtocolError("unexpected write acknowledgement")
 
 
 def _check_length(length: int, limit: int) -> None:
