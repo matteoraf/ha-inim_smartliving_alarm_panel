@@ -116,7 +116,7 @@ Versions such as `0.4.0a1` (preview) or `0.4.0b1` (beta) are published as GitHub
 *   **Manual**: download the `inim_smartliving_alarm` folder from the pre-release on GitHub.
     
 
-To go back, install the previous stable version (for example `0.3.1`) the same way and restart Home Assistant. Please report problems with a preview in a GitHub issue, with your panel model, firmware and board type (SmartLAN/SI or SmartLAN/G).
+To go back, install the latest stable version (for example `0.3.2`) the same way and restart Home Assistant. Please report problems with a preview in a GitHub issue, with your panel model, firmware and board type (SmartLAN/SI or SmartLAN/G).
 
 ### Upgrading from 0.3.x
 
