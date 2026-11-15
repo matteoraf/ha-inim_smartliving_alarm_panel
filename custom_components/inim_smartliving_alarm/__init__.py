@@ -27,7 +27,7 @@ from .const import (
 from .coordinator import InimDataUpdateCoordinator
 
 # Import API
-from .inim_api import InimAlarmAPI
+from .legacy import create_client
 from .panel_config import async_reread_panel_configuration
 
 _LOGGER = logging.getLogger(__name__)
@@ -87,12 +87,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.data.get(CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL),
     )
 
-    # Create API instance
-    # The API constructor can take system_max_areas and system_max_zones.
-    # These could be determined during config_flow (e.g., from get_initial_panel_configuration)
-    # and stored in entry.data if we want to be very specific per panel model.
-    # For now, using API defaults for these, which are sensible (e.g., 10 areas, 50 zones).
-    api = InimAlarmAPI(host=host, port=port, pin_code_str=pin)
+    # One client per entry, holding one connection to the panel
+    api = create_client(host, port, pin)
 
     # Create the custom coordinator instance
     coordinator_name = f"{DOMAIN} data ({entry.title})"
@@ -109,7 +105,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug(
         "(%s) Performing initial data refresh for coordinator...", entry.title
     )
-    await coordinator.async_config_entry_first_refresh()
+    try:
+        await coordinator.async_config_entry_first_refresh()
+    except Exception:
+        await api.close()
+        raise
 
     # Check if the first refresh failed critically (e.g., connection error, auth error handled by coordinator)
     if not coordinator.last_update_success:
@@ -119,6 +119,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         # ConfigEntryNotReady tells HA to retry setup later.
         # The specific error (ConnectionError, AuthError) would have been logged by the coordinator.
+        await api.close()
         raise ConfigEntryNotReady(
             f"Failed to fetch initial data from Inim panel at {host}:{port}"
         )
@@ -152,7 +153,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         # Clean up data stored in hass.data
         if DOMAIN in hass.data and entry.entry_id in hass.data[DOMAIN]:
-            hass.data[DOMAIN].pop(entry.entry_id)
+            entry_data = hass.data[DOMAIN].pop(entry.entry_id)
+            await entry_data[DATA_API_CLIENT].close()
             _LOGGER.debug("Cleaned up data for %s", entry.title)
         if not hass.data[DOMAIN]:  # If no more entries for this domain
             hass.data.pop(DOMAIN)

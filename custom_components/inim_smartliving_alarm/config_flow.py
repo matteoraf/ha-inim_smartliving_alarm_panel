@@ -1,15 +1,15 @@
 """Config flow for Inim Alarm integration."""
 
+import contextlib
 import logging
 from typing import Any
-
-import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PIN, CONF_PORT
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
+import voluptuous as vol
 
 from .const import (
     CONF_EVENT_LOG_SIZE,
@@ -24,6 +24,7 @@ from .const import (
     CONF_SCENARIO_ARM_NIGHT,
     CONF_SCENARIO_ARM_VACATION,
     CONF_SCENARIO_DISARM,
+    DATA_API_CLIENT,
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_EVENT_LOG_SIZE,
     DEFAULT_LIMIT_AREAS,
@@ -35,7 +36,7 @@ from .const import (
     DOMAIN,
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
-from .inim_api import InimAlarmAPI
+from .legacy import create_client
 from .panel_config import async_fetch_panel_configuration
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,8 +46,11 @@ async def _validate_connection_and_fetch_initial_config(
     hass: HomeAssistant, host: str, port: int, pin: str
 ) -> dict[str, Any]:
     """Validate connection details by fetching initial panel configuration."""
-    api = InimAlarmAPI(host=host, port=port, pin_code_str=pin)
-    return await async_fetch_panel_configuration(hass, api)
+    api = create_client(host, port, pin)
+    try:
+        return await async_fetch_panel_configuration(hass, api)
+    finally:
+        await api.close()  # the board may accept only one connection
 
 
 class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -280,12 +284,23 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ):
                 return self.async_abort(reason="already_configured")
 
+            # A loaded entry holds the board's only connection: pause it
+            running = (
+                self.hass.data.get(DOMAIN, {})
+                .get(entry.entry_id, {})
+                .get(DATA_API_CLIENT)
+            )
             try:
-                initial_panel_config = (
-                    await _validate_connection_and_fetch_initial_config(
-                        self.hass, host, port, user_input[CONF_PIN]
+                async with (
+                    running.released()
+                    if running is not None
+                    else contextlib.nullcontext()
+                ):
+                    initial_panel_config = (
+                        await _validate_connection_and_fetch_initial_config(
+                            self.hass, host, port, user_input[CONF_PIN]
+                        )
                     )
-                )
             except ConnectionError:
                 _LOGGER.warning("Connection failed for %s:%s", host, port)
                 errors["base"] = "cannot_connect"
@@ -346,9 +361,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.initial_panel_config = config_entry.data.get(
-            DATA_INITIAL_PANEL_CONFIG, {}
-        )
+        self.initial_panel_config = config_entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
         # Combine initial data (from entry.data) with current options (from entry.options)
         # for populating form defaults correctly.
         self.current_pin = config_entry.data.get(CONF_PIN, "")  # Get current PIN

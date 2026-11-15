@@ -44,9 +44,9 @@ from homeassistant.core import HomeAssistant
 import pytest
 import pytest_socket
 
-from custom_components.inim_smartliving_alarm.inim_api import (
-    InimAlarmAPI,
-    InimAlarmConstants,
+from custom_components.inim_smartliving_alarm.legacy import (
+    LegacyPanelClient,
+    create_client,
 )
 
 from .fake_panel import FakePanel, checksum
@@ -92,10 +92,9 @@ pytestmark = [
 ProxyFactory = Callable[[WriteGuard | None], Awaitable[PanelProxy]]
 
 
-@pytest.fixture(autouse=True)
-def patient_api(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Let the API wait as long as the proxy may take to reach the panel."""
-    monkeypatch.setattr(InimAlarmConstants, "DEFAULT_TIMEOUT", REPLY_TIMEOUT)
+def client_for(host: str, port: int, pin: str) -> LegacyPanelClient:
+    """A client that waits as long as the proxy may take to reach the panel."""
+    return create_client(host, port, pin, reply_timeout=REPLY_TIMEOUT)
 
 
 @pytest.fixture
@@ -157,26 +156,28 @@ async def proxy(make_proxy: ProxyFactory) -> PanelProxy:
 
 
 @pytest.fixture
-def api(proxy: PanelProxy) -> InimAlarmAPI:
-    """API client reading the real panel through the read-only proxy."""
-    return InimAlarmAPI(host=proxy.host, port=proxy.port, pin_code_str=READ_ONLY_PIN)
+async def api(proxy: PanelProxy) -> AsyncGenerator[LegacyPanelClient]:
+    """Client reading the real panel through the read-only proxy."""
+    client = client_for(proxy.host, proxy.port, READ_ONLY_PIN)
+    yield client
+    await client.close()
 
 
 async def run(
-    hass: HomeAssistant, func: Callable[..., Any], *args: Any, **kwargs: Any
+    hass: HomeAssistant,
+    func: Callable[..., Awaitable[Any]],
+    *args: Any,
+    **kwargs: Any,
 ) -> Any:
-    """Run a blocking API call in the Home Assistant executor."""
-    return await hass.async_add_executor_job(lambda: func(*args, **kwargs))
+    """Call a client method (hass kept so the tests read as before)."""
+    return await func(*args, **kwargs)
 
 
-def read_system_info(api: InimAlarmAPI) -> dict[str, Any] | None:
-    """Connect, read the model and firmware string and disconnect."""
-    if not api.connect():
-        return None
-    try:
-        return api.get_system_info()
-    finally:
-        api.disconnect()
+async def read_system_info(proxy: PanelProxy) -> dict[str, Any]:
+    """Read the model and firmware string (one request) as version and type."""
+    text = (await raw_read(proxy, RAM_MODEL, MODEL_LENGTH)).decode("ascii")
+    parts = text.strip().split(" ")
+    return {"version": parts[0], "type": parts[1] if len(parts) > 1 else ""}
 
 
 def require(result: Any, what: str) -> Any:
@@ -250,23 +251,26 @@ async def fake_reply(fake: FakePanel, header: bytes) -> bytes:
 # --------------------------------------------------------------- read-only
 
 
-async def test_model_and_firmware(hass: HomeAssistant, api: InimAlarmAPI) -> None:
+async def test_model_and_firmware(proxy: PanelProxy) -> None:
     """The panel is a 1050 with firmware 6.x."""
-    info = require(await run(hass, read_system_info, api), "system information")
+    info = await read_system_info(proxy)
 
     assert info["type"] == "01050"
     assert info["version"].startswith("6.")
 
 
 async def test_configuration_decodes_like_the_fake(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """The configuration has the same structure as the fake panel's."""
-    fake_api = InimAlarmAPI(host=panel.host, port=panel.port, pin_code_str="1234")
+    fake_api = create_client(panel.host, panel.port, "1234")
     real = require(
         await run(hass, api.get_initial_panel_configuration), "configuration"
     )
-    fake = await run(hass, fake_api.get_initial_panel_configuration)
+    try:
+        fake = await run(hass, fake_api.get_initial_panel_configuration)
+    finally:
+        await fake_api.close()
 
     assert real["errors"] == []
     assert real.keys() == fake.keys()
@@ -291,7 +295,7 @@ async def test_configuration_decodes_like_the_fake(
         assert 0 <= zone.get("internal_index", 0) < 130
 
 
-async def test_live_status(hass: HomeAssistant, api: InimAlarmAPI) -> None:
+async def test_live_status(hass: HomeAssistant, api: LegacyPanelClient) -> None:
     """Every area and zone has a decoded status."""
     status = require(await run(hass, api.get_live_status_snapshot), "status")
 
@@ -307,7 +311,7 @@ async def test_live_status(hass: HomeAssistant, api: InimAlarmAPI) -> None:
     assert status["active_scenario"] is not None
 
 
-async def test_recent_events(hass: HomeAssistant, api: InimAlarmAPI) -> None:
+async def test_recent_events(hass: HomeAssistant, api: LegacyPanelClient) -> None:
     """The newest events are read and get plausible timestamps."""
     result = require(
         await run(hass, api.execute_get_compact_events, count=5), "event log"
@@ -324,14 +328,19 @@ async def test_recent_events(hass: HomeAssistant, api: InimAlarmAPI) -> None:
 
 
 async def test_replies_have_the_fake_layout(
-    hass: HomeAssistant, api: InimAlarmAPI, proxy: PanelProxy, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, proxy: PanelProxy, panel: FakePanel
 ) -> None:
     """Every read gets a valid reply as long as the fake panel's."""
     require(await run(hass, api.get_initial_panel_configuration), "configuration")
     require(await run(hass, api.get_live_status_snapshot), "status")
     require(await run(hass, api.execute_get_compact_events, count=3), "event log")
 
-    reads = [exchange for exchange in proxy.exchanges if not exchange.write]
+    # PIN-table replies are not kept by the proxy, so they cannot be compared
+    reads = [
+        exchange
+        for exchange in proxy.exchanges
+        if not exchange.write and not exchange.sensitive
+    ]
     assert reads
     for exchange in reads:
         reply = bytes(exchange.reply)
@@ -388,8 +397,8 @@ def write_pin() -> str:
 
 @pytest.fixture
 def quiet_api_log() -> Iterator[None]:
-    """Keep the API from logging frames, which contain the PIN, at debug level."""
-    logger = logging.getLogger("custom_components.inim_smartliving_alarm.inim_api")
+    """Keep frames out of the debug log during write tests (PIN masked anyway)."""
+    logger = logging.getLogger("custom_components.inim_smartliving_alarm.transport")
     level = logger.level
     logger.setLevel(logging.INFO)
     yield
@@ -397,11 +406,13 @@ def quiet_api_log() -> Iterator[None]:
 
 
 @pytest.fixture
-async def zone_slot(hass: HomeAssistant, api: InimAlarmAPI) -> int:
+async def zone_slot(hass: HomeAssistant, api: LegacyPanelClient) -> int:
     """Physical terminal slot of the write-test zone, read from the panel."""
     config = require(
         await run(hass, api.get_initial_panel_configuration), "configuration"
     )
+    # The board takes one client: free the connection for the write proxy
+    await api.close()
     zone = config["zones_config"]["zones_config_detailed"][WRITE_ZONE - 1]
     assert "internal_index" in zone, f"zone {WRITE_ZONE} has no physical slot"
     return zone["internal_index"]
@@ -414,17 +425,19 @@ async def write_api(
     proxy: PanelProxy,
     make_proxy: ProxyFactory,
     zone_slot: int,
-) -> InimAlarmAPI:
-    """API client that may change area 4 and zone 18 only."""
+) -> AsyncGenerator[LegacyPanelClient]:
+    """Client that may change area 4 and zone 18 only."""
     state = await raw_read(proxy, RAM_PANEL_STATE, 2)
     if state[1] & PANEL_STATE_PROGRAMMING:
         pytest.skip("the panel is in programming mode, which refuses commands")
     guarded = await make_proxy(WriteGuard(area=WRITE_AREA, zone_slot=zone_slot))
-    return InimAlarmAPI(host=guarded.host, port=guarded.port, pin_code_str=write_pin)
+    client = client_for(guarded.host, guarded.port, write_pin)
+    yield client
+    await client.close()
 
 
 async def test_arm_and_disarm_area(
-    hass: HomeAssistant, write_api: InimAlarmAPI
+    hass: HomeAssistant, write_api: LegacyPanelClient
 ) -> None:
     """Area 4 can be armed and disarmed; no other area changes."""
     before = require(await run(hass, write_api.get_live_status_snapshot), "status")
@@ -455,7 +468,7 @@ async def test_arm_and_disarm_area(
 
 
 async def test_bypass_and_include_zone(
-    hass: HomeAssistant, write_api: InimAlarmAPI, zone_slot: int
+    hass: HomeAssistant, write_api: LegacyPanelClient, zone_slot: int
 ) -> None:
     """Zone 18 can be bypassed and included again."""
     slot = zone_slot

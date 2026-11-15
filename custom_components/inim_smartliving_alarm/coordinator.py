@@ -15,7 +15,7 @@ from .const import (
     KEY_LATEST_EVENT_INDEX_VAL,
     KEY_PROCESSED_EVENTS,
 )
-from .inim_api import InimAlarmAPI
+from .legacy import LegacyPanelClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self,
         hass: HomeAssistant,
         entry: ConfigEntry,
-        api_client: InimAlarmAPI,
+        api_client: LegacyPanelClient,
         name: str,
         update_interval_seconds: int,
     ) -> None:
@@ -56,9 +56,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         try:
             # Fetch standard status data
-            status_data = await self.hass.async_add_executor_job(
-                self.api_client.get_live_status_snapshot
-            )
+            status_data = await self.api_client.get_live_status_snapshot()
 
             if status_data is None:
                 raise UpdateFailed(
@@ -112,12 +110,9 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 api_call_count_param,
             )
 
-            # Use a lambda function to pass keyword arguments to the executor job
-            event_result = await self.hass.async_add_executor_job(
-                lambda: self.api_client.execute_get_compact_events(
-                    count=api_call_count_param,
-                    last_processed_compact_event_index_val=api_call_last_index_param,
-                )
+            event_result = await self.api_client.execute_get_compact_events(
+                count=api_call_count_param,
+                last_processed_compact_event_index_val=api_call_last_index_param,
             )
 
             newly_fetched_events_raw: list[dict[str, Any]] = []

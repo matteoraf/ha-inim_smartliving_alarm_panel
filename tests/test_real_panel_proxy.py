@@ -1,8 +1,8 @@
 """The proxy used by the real-panel tests, checked against the fake panel.
 
 These run everywhere: they show that the proxy forwards reads, refuses
-forbidden writes and PIN table reads before they reach the panel, and keeps
-the PIN out of recordings.
+forbidden writes before they reach the panel, and keeps the PIN and the PIN
+table out of recordings.
 """
 
 import asyncio
@@ -15,7 +15,13 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 import pytest
 
-from custom_components.inim_smartliving_alarm.inim_api import InimAlarmAPI
+from custom_components.inim_smartliving_alarm.legacy import (
+    LegacyPanelClient,
+    create_client,
+)
+from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
+    SmartLanSiTransport,
+)
 
 from .fake_panel import FakePanel, checksum
 from .real_panel.proxy import (
@@ -55,26 +61,28 @@ async def make_proxy(panel: FakePanel) -> AsyncGenerator[ProxyFactory]:
         await proxy.stop()
 
 
-def api_for(proxy: PanelProxy) -> InimAlarmAPI:
-    """API client connected through the proxy."""
-    return InimAlarmAPI(host=proxy.host, port=proxy.port, pin_code_str=PIN)
+@pytest.fixture
+async def api_for() -> AsyncGenerator[Callable[[PanelProxy], LegacyPanelClient]]:
+    """Clients connected through a proxy, closed after the test."""
+    clients: list[LegacyPanelClient] = []
+
+    def make(proxy: PanelProxy) -> LegacyPanelClient:
+        client = create_client(proxy.host, proxy.port, PIN)
+        clients.append(client)
+        return client
+
+    yield make
+    for client in clients:
+        await client.close()
 
 
-async def run(
-    hass: HomeAssistant, func: Callable[..., Any], *args: Any, **kwargs: Any
-) -> Any:
-    """Run a blocking API call in the Home Assistant executor."""
-    return await hass.async_add_executor_job(lambda: func(*args, **kwargs))
-
-
-def read_system_info(api: InimAlarmAPI) -> dict[str, Any] | None:
-    """Connect, read the model and firmware string and disconnect."""
-    if not api.connect():
-        return None
+async def read_system_info(proxy: PanelProxy) -> str:
+    """Connect, read the model and firmware string (one request) and disconnect."""
+    link = SmartLanSiTransport(proxy.host, proxy.port)
     try:
-        return api.get_system_info()
+        return (await link.read(SYSTEM_INFO, 12)).decode("ascii")
     finally:
-        api.disconnect()
+        await link.close()
 
 
 async def raw_exchange(proxy: PanelProxy, request: bytes) -> bytes:
@@ -137,9 +145,9 @@ async def test_reads_are_forwarded_and_recorded(
     """A read reaches the panel; request, reply and chunks are recorded."""
     proxy = await make_proxy(None)
 
-    info = await run(hass, read_system_info, api_for(proxy))
+    info = await read_system_info(proxy)
 
-    assert info["version"] == "6.07"
+    assert info.startswith("6.07")
     assert len(proxy.exchanges) == 1
     exchange = proxy.exchanges[0]
     assert exchange.header == SYSTEM_INFO
@@ -163,30 +171,39 @@ async def test_reply_fragments_are_recorded(
 
 
 async def test_writes_are_refused_in_read_only_mode(
-    hass: HomeAssistant, make_proxy: ProxyFactory, panel: FakePanel
+    hass: HomeAssistant, make_proxy: ProxyFactory, panel: FakePanel, api_for
 ) -> None:
     """Without a guard no write reaches the panel."""
     proxy = await make_proxy(None)
 
-    assert not await run(
-        hass, api_for(proxy).execute_arm_disarm_areas, areas_to_arm=[AREA]
-    )
+    assert not await api_for(proxy).execute_arm_disarm_areas(areas_to_arm=[AREA])
 
     assert panel.state.armed_areas() == []
     assert writes(panel) == []
     assert proxy.blocked == ["writes are not allowed in read-only mode"]
 
 
-async def test_pin_table_reads_are_refused(
-    make_proxy: ProxyFactory, panel: FakePanel
+async def test_pin_table_reads_are_forwarded_but_not_kept(
+    make_proxy: ProxyFactory, panel: FakePanel, tmp_path: Path
 ) -> None:
-    """A read of the PIN table is not forwarded."""
+    """A read of the PIN table is answered; only its length is recorded."""
     proxy = await make_proxy(None)
 
-    assert await raw_exchange(proxy, PIN_TABLE_READ) == b""
+    reply = await raw_exchange(proxy, PIN_TABLE_READ)
 
-    assert panel.requests == []
-    assert proxy.blocked == [f"read of the PIN table: {PIN_TABLE_READ.hex()}"]
+    assert len(reply) == 251
+    assert proxy.blocked == []
+    exchange = proxy.exchanges[0]
+    assert exchange.sensitive
+    assert exchange.reply == b""
+    assert exchange.reply_length == 251
+    path = tmp_path / "recording.json"
+    proxy.save(path)
+    record = json.loads(path.read_text(encoding="utf-8"))["exchanges"][0]
+    assert record["reply"] == ""
+    assert record["reply_length"] == 251
+    assert record["sensitive"] is True
+    assert reply[:-1].hex() not in path.read_text(encoding="utf-8")
 
 
 async def test_unknown_opcodes_are_refused(
@@ -204,19 +221,19 @@ async def test_unknown_opcodes_are_refused(
 
 
 async def test_guard_allows_the_chosen_area_and_zone(
-    hass: HomeAssistant, make_proxy: ProxyFactory, panel: FakePanel
+    hass: HomeAssistant, make_proxy: ProxyFactory, panel: FakePanel, api_for
 ) -> None:
     """Area 4 and zone 18 can be changed and restored."""
     api = api_for(await make_proxy(WriteGuard(area=AREA, zone_slot=ZONE_SLOT)))
 
-    assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[AREA])
+    assert await api.execute_arm_disarm_areas(areas_to_arm=[AREA])
     assert panel.state.armed_areas() == [AREA]
-    assert await run(hass, api.execute_arm_disarm_areas, areas_to_disarm=[AREA])
+    assert await api.execute_arm_disarm_areas(areas_to_disarm=[AREA])
     assert panel.state.armed_areas() == []
 
-    assert await run(hass, api.execute_set_zone_excluded_status, ZONE_SLOT, True)
+    assert await api.execute_set_zone_excluded_status(ZONE_SLOT, True)
     assert panel.state.zone_included[17] is False
-    assert await run(hass, api.execute_set_zone_excluded_status, ZONE_SLOT, False)
+    assert await api.execute_set_zone_excluded_status(ZONE_SLOT, False)
     assert panel.state.zone_included[17] is True
 
 
@@ -238,25 +255,27 @@ async def test_guard_refuses_everything_else(
     command: str,
     args: tuple[Any, ...],
     kwargs: dict[str, Any],
+    api_for,
 ) -> None:
     """Other areas, other zones and other commands never reach the panel."""
     proxy = await make_proxy(WriteGuard(area=AREA, zone_slot=ZONE_SLOT))
     panel.state.area_alarm_memory = 1 << (AREA - 1)  # something to reset
 
-    await run(hass, getattr(api_for(proxy), command), *args, **kwargs)
+    await getattr(api_for(proxy), command)(*args, **kwargs)
 
     assert writes(panel) == []
     assert len(proxy.blocked) == 1
 
 
 async def test_recordings_do_not_contain_the_pin(
-    hass: HomeAssistant, make_proxy: ProxyFactory, tmp_path: Path
+    hass: HomeAssistant, make_proxy: ProxyFactory, tmp_path: Path, api_for
 ) -> None:
-    """Write payloads are saved without the PIN and without their ack."""
+    """Write payloads are saved without the PIN or their ack, and the PIN
+    table read at startup without its bytes."""
     proxy = await make_proxy(WriteGuard(area=AREA, zone_slot=ZONE_SLOT))
     api = api_for(proxy)
-    assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[AREA])
-    assert await run(hass, api.execute_arm_disarm_areas, areas_to_disarm=[AREA])
+    assert await api.execute_arm_disarm_areas(areas_to_arm=[AREA])
+    assert await api.execute_arm_disarm_areas(areas_to_disarm=[AREA])
 
     path = tmp_path / "recording.json"
     proxy.save(path)
@@ -270,6 +289,10 @@ async def test_recordings_do_not_contain_the_pin(
         assert item["payload"].startswith("ff" * 6)
         assert item["reply"] == ""
         assert item["reply_length"] == 1
+    sensitive = [item for item in data["exchanges"] if item["sensitive"]]
+    # the PIN table, read once at startup in two parts (250 + 50 bytes)
+    assert [item["reply_length"] for item in sensitive] == [251, 51]
+    assert all(item["reply"] == "" for item in sensitive)
 
 
 # ------------------------------------------------------- panel connections
@@ -285,9 +308,9 @@ async def test_reconnects_are_spaced(
     first = await make_proxy(None)
     second = await make_proxy(None)
 
-    await run(hass, read_system_info, api_for(first))
-    await run(hass, read_system_info, api_for(first))
-    await run(hass, read_system_info, api_for(second))
+    await read_system_info(first)
+    await read_system_info(first)
+    await read_system_info(second)
 
     assert len(first.connected_at) == len(first.closed_at) == 2
     assert first.connected_at[1] - first.closed_at[0] >= RECONNECT_PAUSE - TOLERANCE
@@ -313,11 +336,11 @@ async def test_connect_attempts_that_hang_are_retried(
     proxy = PanelProxy(panel.host, panel.port, connect_timeout=0.2)
     await proxy.start()
     try:
-        info = await run(hass, read_system_info, api_for(proxy))
+        info = await read_system_info(proxy)
     finally:
         await proxy.stop()
 
-    assert info["version"] == "6.07"
+    assert info.startswith("6.07")
     assert len(attempts) == 2
     assert proxy.errors == []
 

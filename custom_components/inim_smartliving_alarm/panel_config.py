@@ -8,13 +8,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import DATA_API_CLIENT, DATA_INITIAL_PANEL_CONFIG, DOMAIN
-from .inim_api import InimAlarmAPI
+from .legacy import LegacyPanelClient
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_fetch_panel_configuration(
-    hass: HomeAssistant, api: InimAlarmAPI
+    hass: HomeAssistant, api: LegacyPanelClient
 ) -> dict[str, Any]:
     """Read the panel configuration (names, zone setup, scenarios) and check it.
 
@@ -24,9 +24,7 @@ async def async_fetch_panel_configuration(
     host, port = api.host, api.port
     _LOGGER.debug("Fetching the panel configuration from %s:%s", host, port)
 
-    initial_config = await hass.async_add_executor_job(
-        api.get_initial_panel_configuration
-    )
+    initial_config = await api.get_initial_panel_configuration()
 
     if initial_config is None:
         _LOGGER.error(
@@ -89,7 +87,7 @@ async def async_reread_panel_configuration(
     Options are left untouched. The entry's own API client is used, so the
     read waits for any poll in progress instead of opening a second socket.
     """
-    api: InimAlarmAPI = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    api: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
     try:
         panel_config = await async_fetch_panel_configuration(hass, api)
     except ConnectionError as err:

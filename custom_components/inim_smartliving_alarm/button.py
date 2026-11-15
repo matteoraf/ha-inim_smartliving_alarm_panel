@@ -29,7 +29,7 @@ from .const import (
     KEY_INIT_SYSTEM_INFO_TYPE,
     KEY_INIT_SYSTEM_INFO_VERSION,
 )
-from .inim_api import InimAlarmAPI
+from .legacy import LegacyPanelClient
 from .panel_config import async_reread_panel_configuration
 from .utils import async_handle_scenario_activation_failure
 
@@ -46,7 +46,7 @@ async def async_setup_entry(
         "Setting up Inim Alarm 'button' platform entities for entry: %s", entry.title
     )
 
-    api_client: InimAlarmAPI = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    api_client: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
 
     coordinator: DataUpdateCoordinator | None = hass.data[DOMAIN][entry.entry_id].get(
         DATA_COORDINATOR
@@ -132,7 +132,7 @@ class InimScenarioActivationButton(ButtonEntity):
 
     def __init__(
         self,
-        api_client: InimAlarmAPI,
+        api_client: LegacyPanelClient,
         coordinator: DataUpdateCoordinator | None,
         config_entry: ConfigEntry,
         initial_panel_config: dict[str, Any],
@@ -180,9 +180,9 @@ class InimScenarioActivationButton(ButtonEntity):
         action_name = f"activate scenario '{self._scenario_name}' (index {self._scenario_index_0_based})"
         _LOGGER.info("Button '%s' pressed: Attempting to %s", self.name, action_name)
         try:
-            # API's execute_activate_scenario handles connect/disconnect and internal checks
-            success = await self.hass.async_add_executor_job(
-                self.api_client.execute_activate_scenario, self._scenario_index_0_based
+            # execute_activate_scenario checks that no zone prevents it first
+            success = await self.api_client.execute_activate_scenario(
+                self._scenario_index_0_based
             )
             if success:
                 _LOGGER.info(

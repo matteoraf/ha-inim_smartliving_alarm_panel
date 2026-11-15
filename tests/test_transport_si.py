@@ -224,6 +224,19 @@ async def test_pause_before_reconnecting(
     assert opened[1] - closed >= 0.2 - 0.01
 
 
+async def test_pause_applies_to_a_new_transport(fake_panel: FakePanel) -> None:
+    """A second transport to the same board also waits after a close."""
+    first = SmartLanSiTransport(fake_panel.host, fake_panel.port, reconnect_pause=0.2)
+    await first.read(MODEL, 12)
+    await first.close()
+    closed = time.monotonic()
+    second = SmartLanSiTransport(fake_panel.host, fake_panel.port, reconnect_pause=0.2)
+    await second.read(MODEL, 12)
+    await second.close()
+    assert second.connections_opened == 1
+    assert time.monotonic() - closed >= 0.2 - 0.01
+
+
 async def test_read_repeated_once_after_a_drop(scripted: ScriptedServer) -> None:
     """A read whose connection is dropped is repeated on a new connection."""
     scripted.scripts = ["drop", "ok"]

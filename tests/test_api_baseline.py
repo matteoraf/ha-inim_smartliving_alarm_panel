@@ -1,17 +1,21 @@
-"""Behaviour of InimAlarmAPI against the fake SmartLiving 1050.
+"""Behaviour of the integration's panel client against the fake SmartLiving 1050.
 
-These tests describe what the API does today. Tests marked xfail describe
-known limitations; they are strict, so fixing one makes the test pass and
-pytest reports it until the marker is removed.
+These tests describe the dictionaries the entities receive (legacy.py, on
+top of the asynchronous API). Tests marked xfail describe known
+limitations; they are strict, so fixing one makes the test pass and pytest
+reports it until the marker is removed.
 """
 
-from collections.abc import AsyncGenerator, Callable
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 import pytest
 
-from custom_components.inim_smartliving_alarm.inim_api import InimAlarmAPI
+from custom_components.inim_smartliving_alarm.legacy import (
+    LegacyPanelClient,
+    create_client,
+)
 
 from .fake_panel import FakePanel, captures, const as c
 
@@ -20,28 +24,29 @@ pytestmark = pytest.mark.usefixtures("socket_enabled")
 
 @pytest.fixture
 async def panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
-    """Fake panel accepting a new connection while the previous one closes.
-
-    The API opens a new connection for every operation; with a single client
-    allowed, the reconnect would race the server noticing the disconnect.
-    """
-    fake = FakePanel(single_client=False)
+    """Fake panel accepting one client, like the SmartLAN/SI board."""
+    fake = FakePanel()
     await fake.start()
     yield fake
     await fake.stop()
 
 
 @pytest.fixture
-def api(panel: FakePanel) -> InimAlarmAPI:
-    """API client for the fake panel, using PIN 1234 (user code 0)."""
-    return InimAlarmAPI(host=panel.host, port=panel.port, pin_code_str="1234")
+async def api(panel: FakePanel) -> AsyncGenerator[LegacyPanelClient]:
+    """Client for the fake panel, using PIN 1234 (user code 0)."""
+    client = create_client(panel.host, panel.port, "1234")
+    yield client
+    await client.close()
 
 
 async def run(
-    hass: HomeAssistant, func: Callable[..., Any], *args: Any, **kwargs: Any
+    hass: HomeAssistant,
+    func: Callable[..., Awaitable[Any]],
+    *args: Any,
+    **kwargs: Any,
 ) -> Any:
-    """Run a blocking API call in the Home Assistant executor."""
-    return await hass.async_add_executor_job(lambda: func(*args, **kwargs))
+    """Call a client method (hass kept so the tests read as before)."""
+    return await func(*args, **kwargs)
 
 
 def writes(panel: FakePanel) -> list[bytes]:
@@ -54,7 +59,9 @@ def writes(panel: FakePanel) -> list[bytes]:
 # ------------------------------------------------------------ configuration
 
 
-async def test_initial_configuration(hass: HomeAssistant, api: InimAlarmAPI) -> None:
+async def test_initial_configuration(
+    hass: HomeAssistant, api: LegacyPanelClient
+) -> None:
     """Names, scenario actions and zone configuration are read and decoded."""
     config = await run(hass, api.get_initial_panel_configuration)
 
@@ -95,7 +102,9 @@ async def test_initial_configuration(hass: HomeAssistant, api: InimAlarmAPI) -> 
 # ------------------------------------------------------------ live status
 
 
-async def test_live_status_defaults(hass: HomeAssistant, api: InimAlarmAPI) -> None:
+async def test_live_status_defaults(
+    hass: HomeAssistant, api: LegacyPanelClient
+) -> None:
     """Everything disarmed and at rest; scenario 1 matches."""
     status = await run(hass, api.get_live_status_snapshot)
 
@@ -117,7 +126,7 @@ async def test_live_status_defaults(hass: HomeAssistant, api: InimAlarmAPI) -> N
 
 
 async def test_live_status_follows_panel(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Armed area, zone alarm, bypass and memories show up in the snapshot."""
     state = panel.state
@@ -143,7 +152,7 @@ async def test_live_status_follows_panel(
 
 
 async def test_arm_and_disarm(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Arming sends the captured frame and the area is armed; disarming reverts it."""
     assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[3]) is True
@@ -156,13 +165,16 @@ async def test_arm_and_disarm(
 
 async def test_arm_with_wrong_pin(hass: HomeAssistant, panel: FakePanel) -> None:
     """A PIN not in the panel is refused and nothing changes."""
-    api = InimAlarmAPI(host=panel.host, port=panel.port, pin_code_str="9999")
-    assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[3]) is False
+    api = create_client(panel.host, panel.port, "9999")
+    try:
+        assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[3]) is False
+    finally:
+        await api.close()
     assert panel.state.armed_areas() == []
 
 
 async def test_arm_with_open_zone(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Arming an area with an open zone is refused."""
     panel.state.zone_states[0] = c.ZONE_ALARM  # zone 1, area 1
@@ -171,7 +183,7 @@ async def test_arm_with_open_zone(
 
 
 async def test_reset_area_alarm(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Reset sends the captured frame and clears the area and zone memories."""
     panel.state.area_alarm_memory = 1 << 6
@@ -183,7 +195,7 @@ async def test_reset_area_alarm(
 
 
 async def test_bypass_and_include_zone(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Bypass by physical slot sends the captured frame; including reverts it."""
     assert await run(hass, api.execute_set_zone_excluded_status, 23, True) is True
@@ -195,7 +207,7 @@ async def test_bypass_and_include_zone(
 
 
 async def test_bypass_keypad_zone_by_physical_slot(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Zone 36 (logical 35) is wired to a keypad and is addressed by its slot 110."""
     assert await run(hass, api.execute_set_zone_excluded_status, 110, True) is True
@@ -203,7 +215,7 @@ async def test_bypass_keypad_zone_by_physical_slot(
 
 
 async def test_activate_scenario(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Scenario activation checks the zones first, then sends the captured frame."""
     assert await run(hass, api.execute_activate_scenario, 0) is True
@@ -212,7 +224,7 @@ async def test_activate_scenario(
 
 
 async def test_activate_scenario_blocked_by_open_zone(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """With an open zone the scenario is not sent at all."""
     panel.state.zone_states[0] = c.ZONE_ALARM
@@ -225,7 +237,7 @@ async def test_activate_scenario_blocked_by_open_zone(
 # ---------------------------------------------------------------- events
 
 
-async def test_recent_events(hass: HomeAssistant, api: InimAlarmAPI) -> None:
+async def test_recent_events(hass: HomeAssistant, api: LegacyPanelClient) -> None:
     """The newest events are read from the end of the log and decoded."""
     result = await run(hass, api.execute_get_compact_events, count=3)
 
@@ -248,7 +260,7 @@ async def test_recent_events(hass: HomeAssistant, api: InimAlarmAPI) -> None:
 
 
 async def test_new_event_after_command(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """An incremental read returns only the event added after the last index."""
     await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[3])
@@ -271,12 +283,12 @@ async def test_new_event_after_command(
 # ------------------------------------------------------- known limitations
 
 
-@pytest.mark.xfail(strict=True, reason="replies are read with a single recv() call")
 async def test_fragmented_replies(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Replies split across TCP segments are read completely."""
     panel.fragment_replies = True
+    panel.fragment_delay = 0.001  # one byte at a time, without hitting the timeout
     status = await run(hass, api.get_live_status_snapshot)
     assert status["areas_status"]["area_statuses"] == dict.fromkeys(
         range(1, 11), "disarmed"
@@ -285,7 +297,7 @@ async def test_fragmented_replies(
 
 @pytest.mark.xfail(strict=True, reason="only total arming and disarmed are decoded")
 async def test_partial_arming_is_reported(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """An area armed in partial (stay) or instant mode is not reported as unknown."""
     panel.state.area_modes[2] = c.MODE_STAY
@@ -300,7 +312,7 @@ async def test_partial_arming_is_reported(
     strict=True, reason="zone values 0 (short) and 3 (tamper) are not decoded"
 )
 async def test_short_and_tamper_zones_are_reported(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Short-circuited and tampered zones get a known status."""
     panel.state.zone_states[19] = c.ZONE_SHORT
@@ -315,7 +327,7 @@ async def test_short_and_tamper_zones_are_reported(
     strict=True, reason="only the low byte of the alarm memory mask is read"
 )
 async def test_alarm_memory_of_areas_9_and_10(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Alarm memory on areas 9 and 10 is reported."""
     panel.state.area_alarm_memory = 0b11 << 8
@@ -327,7 +339,7 @@ async def test_alarm_memory_of_areas_9_and_10(
     strict=True, reason="zones 51-100 (second zone of double terminals) are not read"
 )
 async def test_double_terminal_zones_are_reported(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """The second zone of a double terminal has its own status."""
     panel.state.terminal_types[0] = c.TERMINAL_DOUBLE
@@ -340,7 +352,7 @@ async def test_double_terminal_zones_are_reported(
     strict=True, reason="event indexes do not wrap around the 500-entry log"
 )
 async def test_events_across_the_end_of_the_log(
-    hass: HomeAssistant, api: InimAlarmAPI, panel: FakePanel
+    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """After the log wraps, the newest events continue from the end of the ring."""
     state = panel.state

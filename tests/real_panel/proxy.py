@@ -7,8 +7,10 @@ closed and the refusal is listed in PanelProxy.blocked.
 Recordings never contain the PIN: write payloads start with the 6-byte PIN,
 which is replaced by FF bytes, and the 1-byte write acknowledgement (a
 checksum over the payload, PIN included) is not stored. Reads of the PIN
-table and requests with any other opcode than plain or peripheral read and
-write are refused like a forbidden write.
+table are forwarded (the client looks up its user code there) but only the
+length of their reply is kept, never its bytes. Requests with any other
+opcode than plain or peripheral read and write are refused like a forbidden
+write.
 
 Plain SmartLAN/SI only: the optional SI password and the "SecureSI" XOR
 obfuscation are not supported (nor are they by the integration).
@@ -120,7 +122,9 @@ class Exchange:
 
     header: bytes
     payload: bytes = b""  # PIN already replaced by FF bytes
+    sensitive: bool = False  # a PIN-table read: its reply bytes are not kept
     reply: bytearray = field(default_factory=bytearray)
+    reply_length: int = 0
     chunks: list[int] = field(default_factory=list)  # sizes as received
     sent_at: float = field(default_factory=time.monotonic)
     first_reply_at: float | None = None
@@ -140,8 +144,9 @@ class Exchange:
         return {
             "request": self.header.hex(),
             "payload": self.payload.hex(),
-            "reply": "" if self.write else self.reply.hex(),
-            "reply_length": len(self.reply),
+            "reply": "" if self.write or self.sensitive else self.reply.hex(),
+            "reply_length": self.reply_length,
+            "sensitive": self.sensitive,
             "chunks": self.chunks,
             "reply_ms": delay,
         }
@@ -280,7 +285,9 @@ class PanelProxy:
                     exchange = current[0]
                     if exchange.first_reply_at is None:
                         exchange.first_reply_at = time.monotonic()
-                    exchange.reply.extend(chunk)
+                    if not exchange.sensitive:
+                        exchange.reply.extend(chunk)
+                    exchange.reply_length += len(chunk)
                     exchange.chunks.append(len(chunk))
                 else:
                     self.errors.append(f"unsolicited bytes: {chunk.hex()}")
@@ -302,8 +309,6 @@ class PanelProxy:
                 reason = None
                 if header[0] not in READ_OPS + WRITE_OPS:
                     reason = f"unknown opcode 0x{header[0]:02X}: {header.hex()}"
-                elif reads_pin_table(header):
-                    reason = f"read of the PIN table: {header.hex()}"
                 elif header[0] in WRITE_OPS:
                     reason = (
                         "writes are not allowed in read-only mode"
@@ -317,7 +322,7 @@ class PanelProxy:
                 redacted = (
                     b"\xff" * PIN_LENGTH + payload[PIN_LENGTH:] if payload else b""
                 )
-                current[:] = [Exchange(header, redacted)]
+                current[:] = [Exchange(header, redacted, reads_pin_table(header))]
                 self.exchanges.append(current[0])
                 panel_writer.write(header + payload)
                 await panel_writer.drain()

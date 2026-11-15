@@ -1,6 +1,5 @@
 """Platform for switch entities for the Inim Alarm integration (Areas and Zones)."""
 
-import functools
 import logging
 from typing import Any
 
@@ -36,7 +35,7 @@ from .const import (
     KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP,
     KEY_LIVE_ZONES_EXCLUDED_STATUS,
 )
-from .inim_api import InimAlarmAPI
+from .legacy import LegacyPanelClient
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -52,7 +51,7 @@ async def async_setup_entry(
     )
 
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
-    api_client: InimAlarmAPI = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    api_client: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
 
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
     system_info = initial_panel_config.get(KEY_INIT_SYSTEM_INFO, {})
@@ -167,13 +166,14 @@ async def async_setup_entry(
     else:
         _LOGGER.info("No Inim Alarm switch entities added for %s", entry.title)
 
+
 class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
     """Representation of an Inim Alarm Area as a switch."""
 
     def __init__(
         self,
         coordinator: Any,
-        api_client: InimAlarmAPI,
+        api_client: LegacyPanelClient,
         config_entry: ConfigEntry,
         panel_display_name: str,
         system_info: dict[str, Any],
@@ -240,12 +240,9 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         """Turn the switch on (arm the area)."""
         _LOGGER.info("Arming Area %s (%s)", self._area_id_1_based, self._area_name)
 
-        # Use functools.partial to pre-fill keyword arguments
-        func_to_call = functools.partial(
-            self.api_client.execute_arm_disarm_areas,
-            areas_to_arm=[self._area_id_1_based],
+        success = await self.api_client.execute_arm_disarm_areas(
+            areas_to_arm=[self._area_id_1_based]
         )
-        success = await self.hass.async_add_executor_job(func_to_call)
 
         if success:
             self._attr_is_on = True  # Optimistic update
@@ -259,12 +256,9 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         """Turn the switch off (disarm the area)."""
         _LOGGER.info("Disarming Area %s (%s)", self._area_id_1_based, self._area_name)
 
-        # Use functools.partial to pre-fill keyword arguments
-        func_to_call = functools.partial(
-            self.api_client.execute_arm_disarm_areas,
-            areas_to_disarm=[self._area_id_1_based],
+        success = await self.api_client.execute_arm_disarm_areas(
+            areas_to_disarm=[self._area_id_1_based]
         )
-        success = await self.hass.async_add_executor_job(func_to_call)
 
         if success:
             self._attr_is_on = False  # Optimistic update
@@ -294,7 +288,7 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
     def __init__(
         self,
         coordinator: Any,
-        api_client: InimAlarmAPI,
+        api_client: LegacyPanelClient,
         config_entry: ConfigEntry,
         panel_display_name: str,
         system_info: dict[str, Any],
@@ -367,12 +361,10 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
             self._zone_id_1_based,
             self._zone_internal_index,
         )
-        func = functools.partial(
-            self.api_client.execute_set_zone_excluded_status,
+        if await self.api_client.execute_set_zone_excluded_status(
             zone_internal_index=self._zone_internal_index,
             excluded_status=False,  # False means enable
-        )
-        if await self.hass.async_add_executor_job(func):
+        ):
             await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
@@ -382,12 +374,10 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
             self._zone_id_1_based,
             self._zone_internal_index,
         )
-        func = functools.partial(
-            self.api_client.execute_set_zone_excluded_status,
+        if await self.api_client.execute_set_zone_excluded_status(
             zone_internal_index=self._zone_internal_index,
             excluded_status=True,  # True means exclude
-        )
-        if await self.hass.async_add_executor_job(func):
+        ):
             await self.coordinator.async_request_refresh()
 
     @property
