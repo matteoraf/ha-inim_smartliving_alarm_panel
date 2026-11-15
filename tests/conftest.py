@@ -54,9 +54,16 @@ async def panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
 
 
 async def add_entry(
-    hass: HomeAssistant, panel: FakePanel, *, limit_zones: int = 50
+    hass: HomeAssistant,
+    panel: FakePanel,
+    *,
+    limit_areas: int | None = 10,
+    limit_zones: int | None = 50,
 ) -> ConfigEntry:
-    """Add the integration through the config flow and wait until it is loaded."""
+    """Add the integration through the config flow and wait until it is loaded.
+
+    A limit of None is left out of the form, so the proposed default applies.
+    """
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": "user"}
     )
@@ -80,12 +87,12 @@ async def add_entry(
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "initial_options"
 
+    limits = {"limit_areas": limit_areas, "limit_zones": limit_zones}
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
             "polling_interval": 30,
-            "limit_areas": 10,
-            "limit_zones": limit_zones,
+            **{key: value for key, value in limits.items() if value is not None},
             "limit_scenarios": 30,
             "event_log_size": 5,
             "reader_names": "",

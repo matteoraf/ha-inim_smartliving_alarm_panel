@@ -119,8 +119,9 @@ def create_client(
 
     User name and password are the SmartLAN/G board's (they derive its
     encryption key). Options are the transport's (timeouts, pauses). Panels
-    other than the 1050 on firmware 6 are handled with the 1050's layout,
-    with a warning, as the integration always did.
+    without a profile of their own (models other than the 1050 and 10100,
+    firmware below 6) are handled with the 1050's layout, with a warning, as
+    the integration always did.
     """
     transport: PanelTransport
     if board == BOARD_SMARTLAN_G:
@@ -494,6 +495,10 @@ def upgrade_zone_configuration(config: dict[str, Any]) -> dict[str, Any] | None:
     Rebuilt from the raw records and labels the configuration already
     holds; physical slots are taken from the stored zone list. None when the
     raw data is missing or too short (the configuration is then kept).
+
+    Every configuration stored before this version was read with the 1050's
+    layout, so it is rebuilt with that layout; a panel with another profile
+    has its configuration read again at setup.
     """
     model = SMARTLIVING_1050_FW6
     try:
@@ -542,7 +547,8 @@ def _scenario_activations(config: PanelConfiguration) -> list[dict[str, Any]]:
     for index in range(model.scenarios):
         record = config.scenario_records[index * size : (index + 1) * size]
         actions = {}
-        for byte_index in range(5):
+        area_bytes = (model.areas + 1) // 2  # one nibble per area
+        for byte_index in range(area_bytes):
             for area, nibble in (
                 (2 * byte_index + 1, record[byte_index] & 0x0F),
                 (2 * byte_index + 2, record[byte_index] >> 4),
@@ -554,7 +560,7 @@ def _scenario_activations(config: PanelConfiguration) -> list[dict[str, Any]]:
                 "scenario_index": index,
                 "raw_activation_hex": record.hex(),
                 "area_actions": actions,
-                "unknown_trailing_bytes_hex": record[5:].hex(),
+                "unknown_trailing_bytes_hex": record[area_bytes:].hex(),
             }
         )
     return activations

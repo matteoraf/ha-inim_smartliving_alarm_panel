@@ -1,4 +1,4 @@
-"""State of the fake SmartLiving 1050 and how it is encoded on the wire."""
+"""State of the fake SmartLiving panel and how it is encoded on the wire."""
 
 from __future__ import annotations
 
@@ -40,24 +40,6 @@ def _mask_bits(mask: int, count: int) -> list[int]:
     return [bit + 1 for bit in range(count) if mask >> bit & 1]
 
 
-# Label offsets inside EEPROM bank 1. Areas, zones, keypads and scenarios match
-# captured requests; the others are placed in the gaps between them.
-LABEL_LAYOUT: dict[int, tuple[int, int]] = {
-    # pointer register: (offset, number of labels)
-    c.RAM_LABELS_AREAS: (0x0000, c.NUM_AREAS),
-    c.RAM_LABELS_ZONES: (0x00A0, c.NUM_ZONES),
-    c.RAM_LABELS_CODES: (0x06E0, c.NUM_CODES),
-    c.RAM_LABELS_READERS: (0x0A00, 20),
-    c.RAM_LABELS_KEYPADS: (0x0B40, c.NUM_KEYPADS),
-    c.RAM_LABELS_EXPANDERS: (0x0BE0, 20),
-    c.RAM_LABELS_KEYS: (0x0D20, 100),
-    c.RAM_LABELS_PHONES: (0x1360, 15),
-    c.RAM_LABELS_SCENARIOS: (0x1450, c.NUM_SCENARIOS),
-    c.RAM_LABELS_TIMERS: (0x1630, 10),
-    c.RAM_LABELS_OUTPUTS: (0x16D0, 3),
-}
-
-
 @dataclass
 class EventRecord:
     """One entry of the event log."""
@@ -94,9 +76,14 @@ class EventRecord:
 
 @dataclass
 class PanelState:
-    """Configuration and live state of a fake SmartLiving 1050."""
+    """Configuration and live state of a fake SmartLiving panel (1050 by default).
 
-    firmware: str = "6.07 01050  "
+    Lists sized by the model are created for the layout given, e.g.
+    PanelState(layout=c.LAYOUT_10100).
+    """
+
+    layout: c.Layout = c.LAYOUT_1050
+    firmware: str = ""  # default: "6.07 " + the layout's model field
     brand: int = 0
     hardware_signature: bytes = b"\xb2\x55"
     serial_number: str = "0000000000000001"  # made up; real ones are 16 digits
@@ -154,6 +141,32 @@ class PanelState:
     event_tail: int = 0
     clock: int = 847787415  # seconds since 2000-01-01 (2026-11-12 08:30:15)
 
+    def __post_init__(self) -> None:
+        """Size the model-dependent lists for the layout."""
+        lay = self.layout
+        if not self.firmware:
+            self.firmware = f"6.07 {lay.model}  "
+        sized = {
+            "pins": (lay.codes, None),
+            "code_records": (lay.codes, bytes(lay.code_record_length)),
+            "terminal_types": (lay.terminals, c.TERMINAL_NULL),
+            "physical_map": (lay.physical_slots, 0xFF),
+            "zone_areas": (lay.zones, 0),
+            "scenario_records": (c.NUM_SCENARIOS, bytes(lay.scenario_record_length)),
+            "area_modes": (lay.areas, c.MODE_DISARMED),
+            "zone_states": (lay.zones, c.ZONE_REST),
+            "zone_included": (lay.zones, True),
+            "zone_memory": (lay.zones, False),
+            "events": (lay.event_ring_size, None),
+        }
+        for name, (count, fill) in sized.items():
+            if len(getattr(self, name)) != count:
+                setattr(self, name, [fill] * count)
+        if len(self.zone_memory_middle) != lay.terminal_bitmap_length:
+            self.zone_memory_middle = bytes(lay.terminal_bitmap_length)
+        if len(self.zone_inclusion_tail) != lay.zone_bitmap_length:
+            self.zone_inclusion_tail = bytes(lay.zone_bitmap_length)
+
     # ------------------------------------------------------------------ memory
 
     def ram_read(self, address: int, length: int) -> bytes:
@@ -188,7 +201,7 @@ class PanelState:
             c.RAM_BRAND: self.brand.to_bytes(2, "little"),
             c.RAM_PANEL_STATE: self.encode_panel_state(),
         }
-        for register, (offset, _count) in LABEL_LAYOUT.items():
+        for register, (offset, _count) in self.layout.labels.items():
             ram[register] = offset.to_bytes(2, "little")
         return ram
 
@@ -206,24 +219,25 @@ class PanelState:
     def eeprom_image(self) -> bytearray:
         """Build the EEPROM contents from the configuration and the event log."""
         image = bytearray(0x20000)
+        lay = self.layout
 
         def put(address: int, data: bytes) -> None:
             image[address : address + len(data)] = data
 
         for index, pin in enumerate(self.pins):
-            put(c.EEPROM_PINS + index * c.PIN_LENGTH, encode_pin(pin))
+            put(lay.eeprom_pins + index * c.PIN_LENGTH, encode_pin(pin))
         for index, record in enumerate(self.code_records):
-            put(c.EEPROM_CODES + index * c.CODE_RECORD_LENGTH, record)
+            put(lay.eeprom_codes + index * lay.code_record_length, record)
         for index, areas in enumerate(self.zone_areas):
             record = areas.to_bytes(2, "little") + bytes(c.ZONE_RECORD_LENGTH - 2)
-            put(c.EEPROM_ZONES + index * c.ZONE_RECORD_LENGTH, record)
+            put(lay.eeprom_zones + index * c.ZONE_RECORD_LENGTH, record)
         for index, terminal_type in enumerate(self.terminal_types):
             record = bytes(c.TERMINAL_TYPE_OFFSET) + bytes((terminal_type,))
-            put(c.EEPROM_TERMINALS + index * c.TERMINAL_RECORD_LENGTH, record)
-        put(c.EEPROM_PHYSICAL_MAP, bytes(self.physical_map))
+            put(lay.eeprom_terminals + index * c.TERMINAL_RECORD_LENGTH, record)
+        put(lay.eeprom_physical_map, bytes(self.physical_map))
         for index, record in enumerate(self.scenario_records):
-            put(c.EEPROM_SCENARIO_MODES + index * c.SCENARIO_RECORD_LENGTH, record)
-        for register, (offset, count) in LABEL_LAYOUT.items():
+            put(lay.eeprom_scenario_modes + index * lay.scenario_record_length, record)
+        for register, (offset, count) in lay.labels.items():
             names = self.labels.get(register, [])
             data = b"".join(
                 _label(names[i] if i < len(names) else "") for i in range(count)
@@ -231,7 +245,7 @@ class PanelState:
             put(c.LABEL_BANK + offset, data)
         for index, event in enumerate(self.events):
             if event is not None:
-                put(c.EEPROM_EVENTS + index * c.EVENT_RECORD_LENGTH, event.to_bytes())
+                put(lay.eeprom_events + index * c.EVENT_RECORD_LENGTH, event.to_bytes())
         return image
 
     def eeprom_read(self, address: int, length: int) -> bytes:
@@ -242,7 +256,9 @@ class PanelState:
 
     def encode_area_status(self) -> bytes:
         """Reply of RAM 0x2000: area mode nibbles, then five 16-bit area masks."""
-        modes = bytearray(b"\x44" * c.AREA_MODE_BYTES)  # unused nibbles read as 4
+        modes = bytearray(
+            b"\x44" * self.layout.area_mode_bytes
+        )  # unused nibbles read as 4
         for index, mode in enumerate(self.area_modes):
             shift = 4 if index % 2 else 0
             modes[index // 2] = modes[index // 2] & ~(0x0F << shift) | mode << shift
@@ -257,25 +273,26 @@ class PanelState:
 
     def encode_zone_state(self) -> bytes:
         """Reply of RAM 0x2001: 2 bits per zone, four zones per byte, LSB first."""
-        out = bytearray(c.ZONE_STATE_LENGTH - 1)
+        out = bytearray(self.layout.zone_state_length - 1)
         for zone, state in enumerate(self.zone_states):
             out[zone // 4] |= state << (2 * (zone % 4))
         return bytes(out) + bytes((self.zone_state_tail,))
 
     def encode_zone_inclusion(self) -> bytes:
         """Reply of RAM 0x2002: 1 bit per zone (1 = included), then unknown bytes."""
-        return _bitmap(self.zone_included, c.ZONE_BITMAP_LENGTH, pad=True) + (
+        return _bitmap(self.zone_included, self.layout.zone_bitmap_length, pad=True) + (
             self.zone_inclusion_tail
         )
 
     def encode_zone_memory(self) -> bytes:
         """Reply of RAM 0x2003: zone alarm memory, unknown bytes, output image."""
         output_bits = [
-            self.outputs.get(terminal, 0) > 0 for terminal in range(c.NUM_TERMINALS)
+            self.outputs.get(terminal, 0) > 0
+            for terminal in range(self.layout.terminals)
         ] + list(self.fixed_outputs)
-        output_length = c.ZONE_MEMORY_LENGTH - c.OUTPUT_IMAGE_OFFSET
+        output_length = self.layout.zone_memory_length - self.layout.output_image_offset
         return (
-            _bitmap(self.zone_memory, c.ZONE_BITMAP_LENGTH)
+            _bitmap(self.zone_memory, self.layout.zone_bitmap_length)
             + self.zone_memory_middle
             + _bitmap(output_bits, output_length)
         )
@@ -293,7 +310,7 @@ class PanelState:
             areas = [selector & 0x1F]
         bits = [
             any(self._zone_open_in_area(zone, area) for area in areas)
-            for zone in range(c.NUM_ZONES)
+            for zone in range(self.layout.zones)
         ]
         return _bitmap(bits, length)
 
@@ -320,7 +337,7 @@ class PanelState:
 
     def event_text(self, index: int) -> bytes:
         """Reply of RAM 0x1FFF: an event with its texts already resolved."""
-        event = self.events[index % c.EVENT_RING_SIZE]
+        event = self.events[index % self.layout.event_ring_size]
         if event is None:
             return bytes(c.EVENT_TEXT_LENGTH)
         area_names = self.labels.get(c.RAM_LABELS_AREAS, [])
@@ -369,12 +386,13 @@ class PanelState:
         )
 
     def _area_has_open_zones(self, area: int) -> bool:
-        return any(self._zone_open_in_area(zone, area) for zone in range(c.NUM_ZONES))
+        return any(
+            self._zone_open_in_area(zone, area) for zone in range(self.layout.zones)
+        )
 
-    @staticmethod
-    def _scenario_actions(record: bytes) -> dict[int, int]:
+    def _scenario_actions(self, record: bytes) -> dict[int, int]:
         actions = {}
-        for area in range(1, c.NUM_AREAS + 1):
+        for area in range(1, self.layout.areas + 1):
             byte = record[(area - 1) // 2]
             action = byte >> 4 if area % 2 == 0 else byte & 0x0F
             if action:
@@ -390,7 +408,7 @@ class PanelState:
             code=code,
             text=text,
         )
-        self.event_head = (self.event_head + 1) % c.EVENT_RING_SIZE
+        self.event_head = (self.event_head + 1) % self.layout.event_ring_size
 
     def execute_arm(self, payload: bytes) -> int:
         """Register 0x2006: PIN + one nibble per area."""
@@ -437,7 +455,7 @@ class PanelState:
             return c.RESULT_OPEN_ZONES  # "code not enabled" for this command
         self.area_alarm_memory &= ~areas
         self.area_tamper_memory &= ~areas
-        for zone in range(c.NUM_ZONES):
+        for zone in range(self.layout.zones):
             if self.zone_areas[zone] & areas:
                 self.zone_memory[zone] = False
         self._log(areas, code, c.EVENT_AREA_RESET | c.EVENT_ACTIVATION, "Area reset")
@@ -449,7 +467,7 @@ class PanelState:
         if code is None:
             return c.RESULT_INVALID_CODE
         slot, second, action = payload[6], payload[7], payload[8]
-        if slot >= c.NUM_PHYSICAL_SLOTS:
+        if slot >= self.layout.physical_slots:
             return c.RESULT_SLOT_OUT_OF_RANGE
         terminal = self.physical_map[slot]
         if terminal == 0xFF:
@@ -458,7 +476,7 @@ class PanelState:
             return c.RESULT_NULL_TERMINAL
         if second and self.terminal_types[terminal] != c.TERMINAL_DOUBLE:
             return c.RESULT_DOUBLE_ZONE
-        zone = terminal + (c.NUM_TERMINALS if second else 0)
+        zone = terminal + (self.layout.terminals if second else 0)
         exclude = action == 1
         if self.zone_included[zone] != exclude:
             return c.RESULT_ALREADY_IN_STATE
@@ -477,7 +495,7 @@ class PanelState:
         if code is None:
             return c.RESULT_INVALID_CODE
         slot, value = payload[6], payload[7]
-        if slot >= c.NUM_PHYSICAL_SLOTS:
+        if slot >= self.layout.physical_slots:
             return c.RESULT_SLOT_OUT_OF_RANGE
         terminal = self.physical_map[slot]
         if terminal == 0xFF:
@@ -538,7 +556,7 @@ class PanelState:
 
     def area_numbers(self, mask: int) -> list[int]:
         """1-based area numbers of a mask."""
-        return _mask_bits(mask, c.NUM_AREAS)
+        return _mask_bits(mask, self.layout.areas)
 
 
 def panel_1050() -> PanelState:
@@ -607,4 +625,52 @@ def panel_1050() -> PanelState:
     for offset, event in enumerate(reversed(samples)):
         state.events[(state.event_head - 1 - offset) % c.EVENT_RING_SIZE] = event
 
+    return state
+
+
+def panel_10100() -> PanelState:
+    """A 10100 (firmware 6.x) with every area, 60 input terminals and scenarios.
+
+    Not from captures: a made-up configuration. PINs as on
+    the 1050 fake; code 0 (1234) has all 15 areas, code 1 (4321) areas 1-7,
+    code 2 (5678) area 15 only. Zone n (0-based) is in area n % 15 + 1;
+    terminals 0-59 are inputs on physical slots 0-59.
+    """
+    lay = c.LAYOUT_10100
+    state = PanelState(layout=lay)
+
+    state.pins[0:3] = ["1234", "4321", "5678"]
+    for code, mask in enumerate((0x7FFF, 0x007F, 0x4000)):
+        state.code_records[code] = mask.to_bytes(2, "little") + bytes(
+            lay.code_record_length - 2
+        )
+
+    for terminal in range(60):
+        state.terminal_types[terminal] = c.TERMINAL_INPUT
+        state.physical_map[terminal] = terminal
+    for zone in range(lay.zones):
+        state.zone_areas[zone] = 1 << (zone % lay.areas)
+
+    def scenario(modes: dict[int, int]) -> bytes:
+        record = bytearray(lay.scenario_record_length)
+        for area, mode in modes.items():
+            shift = 4 if area % 2 == 0 else 0
+            record[(area - 1) // 2] |= mode << shift
+        return bytes(record)
+
+    every_area = range(1, lay.areas + 1)
+    state.scenario_records[0] = scenario(dict.fromkeys(every_area, c.MODE_AWAY))
+    state.scenario_records[1] = scenario(dict.fromkeys(every_area, c.MODE_DISARMED))
+    state.scenario_records[2] = scenario({15: c.MODE_AWAY})
+
+    state.labels = {
+        c.RAM_LABELS_AREAS: [f"Area {n}" for n in range(1, lay.areas + 1)],
+        c.RAM_LABELS_ZONES: [f"Zone {n}" for n in range(1, lay.zones + 1)],
+        c.RAM_LABELS_CODES: ["Master"] + [f"User {n}" for n in range(2, lay.codes + 1)],
+        c.RAM_LABELS_KEYPADS: [f"Keypad {n}" for n in range(1, 4)],
+        c.RAM_LABELS_SCENARIOS: [
+            f"Scenario {n}" for n in range(1, c.NUM_SCENARIOS + 1)
+        ],
+    }
+    state.active_scenario = None
     return state

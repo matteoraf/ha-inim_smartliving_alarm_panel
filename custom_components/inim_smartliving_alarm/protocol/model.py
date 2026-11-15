@@ -61,6 +61,8 @@ class PanelModel:
     scenario_records: int
     event_log: int
     label_bank: int  # added to the label pointers read from RAM
+    # Profile not yet confirmed on a real panel
+    experimental: bool = False
 
     scenarios = SCENARIOS
     terminal_record_length = 12
@@ -148,12 +150,42 @@ SMARTLIVING_1050_FW6 = PanelModel(
 )
 
 
+SMARTLIVING_10100_FW6 = PanelModel(
+    name="SmartLiving 10100",
+    areas=15,
+    terminals=100,
+    physical_slots=240,
+    codes=100,
+    keypads=15,
+    readers=30,
+    expanders=40,
+    keys=150,
+    timers=20,
+    scenario_record_length=10,
+    zone_record_length=9,
+    code_record_length=65,
+    code_output_mask_length=14,
+    event_ring_size=1000,
+    pin_table=0x0A4CD,
+    code_records=0x0A731,
+    zone_records=0x089C5,
+    terminal_records=0x090CD,
+    physical_map=0x0CF75,
+    scenario_records=0x0C81F,
+    event_log=0x19204,
+    label_bank=0x10000,
+    experimental=True,
+)
+
+_FW6_MODELS = {"1050": SMARTLIVING_1050_FW6, "10100": SMARTLIVING_10100_FW6}
+
+
 def model_for(info: FirmwareInfo) -> PanelModel:
     """The model profile for a panel, or UnsupportedPanelError."""
     if info.major < 6:
         raise UnsupportedPanelError(
             f"firmware {info.version} is not supported yet (only 6.x is)"
         )
-    if info.model == "1050":
-        return SMARTLIVING_1050_FW6
+    if info.model in _FW6_MODELS:
+        return _FW6_MODELS[info.model]
     raise UnsupportedPanelError(f"SmartLiving {info.model} is not supported yet")

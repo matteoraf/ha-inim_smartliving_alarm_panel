@@ -3,7 +3,7 @@ Home Assistant Integration for Inim SmartLiving Alarm Systems
 
 > \[!WARNING\]This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
 > 
-> I could only test this with SmartLiving 1050, I have no way to test and support any other SmartLiving system. Contributors are welcome.
+> I could only test this with SmartLiving 1050. The SmartLiving 10100 is supported experimentally, without a test on a real panel. Contributors are welcome.
 
 This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI or SmartLAN/G network interface (SmartLAN/G support is experimental). It enables monitoring and control of your alarm system directly from Home Assistant.
 
@@ -66,7 +66,13 @@ Prerequisites
     
 *   The panel must be equipped with a SmartLAN/SI or SmartLAN/G network interface module. SmartLAN/G support is **experimental**: it has only been tested against a simulated panel so far, so please report how it works for you.
     
-*   Panel firmware 5 or later. The integration is developed and tested on a SmartLiving 1050 with firmware 6.x. Firmware 5.x and other SmartLiving models can be set up, but are handled like a 1050 on firmware 6 and may show wrong data until they are supported (a warning is logged); firmware older than 5 is refused.
+*   Panel firmware 5 or later. Supported panels:
+    
+    *   **SmartLiving 1050** with firmware 6.x: developed and tested on it.
+        
+    *   **SmartLiving 10100** with firmware 6.x: **experimental**. It has 15 areas and zone numbers 1 to 200, and has not been tested on a real panel yet; a warning in the log says so. Please report how it works for you.
+        
+    *   Firmware 5.x and other SmartLiving models (505, 515) can be set up, but are handled like a 1050 on firmware 6 and may show wrong data until they are supported (a warning is logged); firmware older than 5 is refused.
     
 *   The SmartLAN module must be connected to your local network and accessible from your Home Assistant instance.
     
@@ -134,6 +140,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **"Zone X Triggered" is now called "Zone X Alarm memory"** (same entity ID). Zones in short circuit or tamper are no longer shown as unknown: a new *Zone X Tamper* sensor turns on, and the zone's `status_text` says `short` or `tamper`. Such zones are also listed when they prevent a scenario from being activated.
     
+*   **SmartLiving 10100 (experimental):** a 10100 now uses its own memory layout. Earlier versions read it as if it were a 1050, so its names and zones were wrong: at the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs of areas and zones stay the same; areas 11 to 15 and zones above 50 appear if your limits allow them (raise them in the options: up to 15 areas and 200 zones).
+    
 *   Your configuration entry is updated once more (version 1.3): the zone list is completed from the panel data already stored, without contacting the panel. If that data is incomplete, a warning asks you to use **Re-read panel configuration**.
     
 *   **SmartLAN/G:** the board's replies are now read the way the board sends them (the data alone, without the panel's checksum). Before, every read failed and setup reported a wrong user name or password even with the right credentials. A wrong user name or password is now reported only when the board's reply cannot be decrypted; any other unexpected reply has its own message (see [Troubleshooting](#troubleshooting)).
@@ -172,7 +180,7 @@ After installation and restarting Home Assistant:
     
     *   **Polling Interval**: How often Home Assistant should query the panel for status updates (in seconds).
         
-    *   **Limit Areas/Zones/Scenarios**: The maximum number of each entity type to create. This is useful for managing the number of entities in Home Assistant. The zone limit counts zone numbers: zones above it get no entities, so keep it at 100 (the default) on a SmartLiving 1050 if you use double terminals, whose second zones are numbered 51 to 100.
+    *   **Limit Areas/Zones/Scenarios**: The maximum number of each entity type to create. This is useful for managing the number of entities in Home Assistant. The setup proposes your panel's own counts: 10 areas and zone numbers 1 to 100 on a SmartLiving 1050, 15 areas and zone numbers 1 to 200 on a 10100. The zone limit counts zone numbers: zones above it get no entities, so keep it at the proposed value if you use double terminals, whose second zones are numbered after the panel's terminals (51 to 100 on the 1050, 101 to 200 on the 10100).
         
     *   **Event Log Size**: The number of recent events to store and display in the event log sensor's attributes.
         
@@ -234,7 +242,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
 *   **Zones**:
     
-    Only zones that exist on the panel get entities: zones of input, input/output and double terminals. Output terminals (for example a siren) and unused terminals have none. Zones 1 to N are the zones of the panel's N terminals (50 on the SmartLiving 1050); a double terminal *n* also has a second zone, numbered N + *n* (51 to 100 on the 1050).
+    Only zones that exist on the panel get entities: zones of input, input/output and double terminals. Output terminals (for example a siren) and unused terminals have none. Zones 1 to N are the zones of the panel's N terminals (50 on the SmartLiving 1050, 100 on the 10100); a double terminal *n* also has a second zone, numbered N + *n* (51 to 100 on the 1050, 101 to 200 on the 10100).
 
     *   *binary\_sensor.your\_panel\_name\_zone\_X*: Represents a single zone. It turns on if the zone is alarmed (open). The device class (motion or opening) is automatically assigned based on the zone's configuration on the panel. Extended attributes provide more details about the zone's configuration, including `terminal_type`, `status_text` (`clear`, `alarmed`, `short` or `tamper`) and `test` (zone in test mode).
 

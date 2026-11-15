@@ -218,6 +218,12 @@ class SmartLivingPanel:
                 self._fallback_model.name,
             )
             model = self._fallback_model
+        if model.experimental:
+            _LOGGER.warning(
+                "Support for the %s is experimental (not yet tested on a real "
+                "panel): please report how it works",
+                model.name,
+            )
 
         table = await session.read_eeprom(
             model.pin_table, model.pin_table_length, sensitive=True
