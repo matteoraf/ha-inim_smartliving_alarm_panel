@@ -3,10 +3,10 @@
 The entities, the stored panel configuration (entry.data) and the
 coordinator data keep their shapes while the panel is accessed through the
 asynchronous API. Values are derived from the raw replies with the same
-rules as before, including their known limits (only total arming decoded,
-alarm memory of areas 1-8, zone values other than rest/alarm reported as
-unknown, primary zones only, event indexes not wrapping around the log,
-event times in UTC+1); each of those is lifted by its own change later.
+rules as before, including their known limits (zone values other than
+rest/alarm reported as unknown, primary zones only, event indexes not
+wrapping around the log, event times in UTC+1); each of those is lifted by
+its own change later.
 
 Errors are reported the old way: None, False or a dictionary marking the
 failure, never an exception.
@@ -19,11 +19,19 @@ import logging
 from typing import Any
 
 from .api import NotReadyError, PanelConfiguration, PanelStatus, SmartLivingPanel
-from .const import BOARD_SMARTLAN_G, BOARD_SMARTLAN_SI
+from .const import (
+    AREA_MODE_DISARMED,
+    AREA_MODE_INSTANT,
+    AREA_MODE_PARTIAL,
+    AREA_MODE_TOTAL,
+    BOARD_SMARTLAN_G,
+    BOARD_SMARTLAN_SI,
+)
 from .protocol import registers as reg
 from .protocol.commands import ArmMode
 from .protocol.errors import ProtocolError, UnsupportedPanelError
 from .protocol.model import SMARTLIVING_1050_FW6, PanelModel
+from .protocol.status import AreaMode, AreaStatus
 from .transport.base import PanelTransport, Priority, TransportError
 from .transport.smartlan_g import SmartLanGTransport
 from .transport.smartlan_si import SmartLanSiTransport
@@ -65,6 +73,12 @@ EVENT_ACTIONS = {
 }
 _AREA_EVENTS = (0x8A, 0x8C, 0x8D, 0x0A, 0x0C, 0x95, 0x96)
 _ZONE_EVENTS = (0x80, 0x00, 0x85, 0x05)
+_AREA_MODES = {
+    AreaMode.AWAY: AREA_MODE_TOTAL,
+    AreaMode.STAY: AREA_MODE_PARTIAL,
+    AreaMode.INSTANT: AREA_MODE_INSTANT,
+    AreaMode.DISARMED: AREA_MODE_DISARMED,
+}
 _ZONE_PAIRS = {  # 2-bit zone pair value -> (lower zone, higher zone)
     0x5: ("clear", "clear"),
     0x6: ("alarmed", "clear"),
@@ -428,7 +442,7 @@ def status_dict(status: PanelStatus, model: PanelModel) -> dict[str, Any]:
     """The live status as the coordinator has always provided it."""
     raw = status.raw
     return {
-        "areas_status": _area_status(raw[reg.AREA_STATUS], model),
+        "areas_status": _area_status(raw[reg.AREA_STATUS], status.areas),
         "zones_status": _zone_status(raw[reg.ZONE_STATE], model),
         "zones_excluded_status": {
             "raw_hex_data": raw[reg.ZONE_INCLUSION].hex(),
@@ -450,19 +464,28 @@ def status_dict(status: PanelStatus, model: PanelModel) -> dict[str, Any]:
     }
 
 
-def _area_status(data: bytes, model: PanelModel) -> dict[str, Any]:
+def _area_status(data: bytes, areas: AreaStatus) -> dict[str, Any]:
+    """Modes and masks of every area; "armed" stands for any armed mode."""
     statuses = {}
-    for area in range(1, model.areas + 1):
-        byte = data[(area - 1) // 2]
-        nibble = byte >> 4 if area % 2 == 0 else byte & 0x0F
-        statuses[area] = {1: "armed", 4: "disarmed"}.get(nibble, "unknown")
-    memory = data[10]  # low byte of the alarm memory mask only
+    modes = {}
+    for area, mode in areas.modes.items():
+        modes[area] = _AREA_MODES.get(mode, "unknown")
+        statuses[area] = (
+            "armed"
+            if mode.armed
+            else "disarmed"
+            if mode is AreaMode.DISARMED
+            else "unknown"
+        )
     return {
         "raw_hex": data.hex(),
         "area_statuses": statuses,
-        "triggered_areas": [
-            area for area in range(1, model.areas + 1) if memory >> (area - 1) & 1
-        ],
+        "area_modes": modes,
+        "alarm_areas": sorted(areas.alarm),
+        "tamper_areas": sorted(areas.tamper),
+        "triggered_areas": sorted(areas.alarm_memory),
+        "tamper_memory_areas": sorted(areas.tamper_memory),
+        "auto_arm_areas": sorted(areas.auto_arm),
     }
 
 

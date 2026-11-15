@@ -30,7 +30,9 @@ from .const import (
     KEY_INIT_SYSTEM_INFO,
     KEY_LIVE_ACTIVE_SCENARIO,
     KEY_LIVE_ACTIVE_SCENARIO_NUMBER,
+    KEY_LIVE_ALARM_AREAS_LIST,
     KEY_LIVE_AREAS_STATUS,
+    KEY_LIVE_TAMPER_MEMORY_AREAS_LIST,
     KEY_LIVE_TRIGGERED_AREAS_LIST,
     SERVICE_ALARM_RESET,
 )
@@ -74,9 +76,7 @@ async def async_setup_entry(
 
     # Register the alarm_reset service
     async def async_alarm_reset_service(call: ServiceCall) -> None:
-        """Handle the service call to reset an area alarm.
-        This function automatically finds all triggered areas and resets them.
-        """
+        """Reset the alarm memory of every area that has an alarm or tamper memory."""
         # Get the platform object that manages all alarm_control_panel entities.
         platform = hass.data.get("alarm_control_panel")
         if not platform:
@@ -102,17 +102,23 @@ async def async_setup_entry(
                 continue
 
             areas_status = coordinator_data.get(KEY_LIVE_AREAS_STATUS, {})
-            triggered_areas = areas_status.get(KEY_LIVE_TRIGGERED_AREAS_LIST, [])
+            triggered_areas = sorted(
+                set(areas_status.get(KEY_LIVE_TRIGGERED_AREAS_LIST) or [])
+                | set(areas_status.get(KEY_LIVE_TAMPER_MEMORY_AREAS_LIST) or [])
+            )
 
             if not triggered_areas:
                 _LOGGER.info(
-                    "Alarm Reset called for %s, but no areas are currently triggered",
+                    "Alarm Reset called for %s, but no area has an alarm or "
+                    "tamper memory",
                     entity.name,
                 )
                 continue
 
             _LOGGER.info(
-                "Found triggered areas to reset on %s: %s", entity.name, triggered_areas
+                "Found areas with an alarm or tamper memory to reset on %s: %s",
+                entity.name,
+                triggered_areas,
             )
             for area_id in triggered_areas:
                 await entity.async_alarm_reset(area_id=area_id)
@@ -248,13 +254,14 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         if self._scenario_mappings.get(CONF_SCENARIO_DISARM) is not None:
             new_state_enum = AlarmControlPanelState.DISARMED
 
-        # Check for TRIGGERED state first (highest priority)
-        if areas_status_data and areas_status_data.get(KEY_LIVE_TRIGGERED_AREAS_LIST):
-            if any(areas_status_data[KEY_LIVE_TRIGGERED_AREAS_LIST]):
+        # TRIGGERED while an area is in alarm now (highest priority); the alarm
+        # memory that stays after the alarm is not considered here
+        if areas_status_data and areas_status_data.get(KEY_LIVE_ALARM_AREAS_LIST):
+            if any(areas_status_data[KEY_LIVE_ALARM_AREAS_LIST]):
                 _LOGGER.info(
-                    "%s: Panel is TRIGGERED. Triggered areas: %s",
+                    "%s: Panel is TRIGGERED. Areas in alarm: %s",
                     self.name,
-                    areas_status_data[KEY_LIVE_TRIGGERED_AREAS_LIST],
+                    areas_status_data[KEY_LIVE_ALARM_AREAS_LIST],
                 )
                 new_state_enum = AlarmControlPanelState.TRIGGERED
                 # If triggered, this state takes precedence over scenario-based states

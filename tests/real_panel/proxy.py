@@ -43,7 +43,10 @@ REGISTER_BYPASS = 0x2009  # PIN + physical slot + second-zone flag + action
 
 ACTION_KEEP = 0
 ACTION_ARM_TOTAL = 1
+ACTION_ARM_PARTIAL = 2
+ACTION_ARM_INSTANT = 3
 ACTION_DISARM = 4
+ARM_ACTIONS = (ACTION_ARM_TOTAL, ACTION_ARM_PARTIAL, ACTION_ARM_INSTANT, ACTION_DISARM)
 
 PIN_LENGTH = 6
 
@@ -98,7 +101,7 @@ class WriteGuard:
             }
             if set(touched) != {self.area}:
                 return f"arm frame touches areas {sorted(touched)}, only {self.area} allowed"
-            if touched[self.area] not in (ACTION_ARM_TOTAL, ACTION_DISARM):
+            if touched[self.area] not in ARM_ACTIONS:
                 return f"arm frame asks mode {touched[self.area]} for area {self.area}"
             return None
 

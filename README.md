@@ -14,9 +14,9 @@ Features
     
 *   **Full Area Management**: Areas (partitions) are exposed as:
     
-    *   **Switch entities**: For direct arming (turn on) and disarming (turn off) of each area.
+    *   **Switch entities**: For direct arming (turn on) and disarming (turn off) of each area. The switch is on whenever the area is armed, in total, partial or instant mode.
         
-    *   **Binary Sensor entities**: To show if an area is currently in an alarm (triggered) state.
+    *   **Binary Sensor entities**: Per area, whether it is in alarm now, in tamper now, and whether it has an alarm memory (kept after the alarm until it is reset).
         
 *   **Detailed Zone Monitoring**: Zones are exposed as:
     
@@ -112,15 +112,21 @@ To go back, install the previous stable version (for example `0.3.1`) the same w
 
 ### Upgrading from 0.3.x
 
-Version 0.4 reworks how the integration talks to the panel; your entities and options stay as they are:
+Version 0.4 reworks how the integration talks to the panel; your entity IDs and options stay as they are:
 
-*   Your configuration entry is updated automatically (it is marked as a SmartLAN/SI connection). Entity IDs, names and options do not change.
+*   Your configuration entry is updated automatically (it is marked as a SmartLAN/SI connection). Entity IDs and options do not change.
     
 *   Home Assistant now keeps one connection to the panel and reuses it, so updates are faster. The SmartLAN/SI module accepts only one local connection: see [the Inim app](#troubleshooting) under Troubleshooting.
     
 *   The PIN is checked from now on when you **Reconfigure**: a PIN that matches no user code of the panel is refused. If your current PIN matches none, the log shows a warning at every connection.
     
 *   New: SmartLAN/G boards (experimental), a network search when adding a panel, and the active scenario now takes all areas of your user code into account (previously areas 8 to 10 were ignored).
+    
+*   **Area switches** are now on for an area armed in partial or instant mode too (before, such an area showed as unknown and its switch was off). Turning a switch on still arms in total mode. The new `arming_mode` attribute tells the mode (`total`, `partial`, `instant` or `disarmed`); `status_text` stays `armed` or `disarmed`.
+    
+*   **"Area X Triggered" is now called "Area X Alarm memory"**: same entity ID, same meaning (on after an alarm until the memory is reset), now also for areas 9 and 10, with a `tamper_memory` attribute. Two new binary sensors per area show the **live** state: *Area X Alarm* and *Area X Tamper*.
+    
+*   **The alarm panel shows Triggered only while an area is in alarm.** Before, it stayed Triggered until the alarm memory was reset; now it returns to its armed or disarmed state when the alarm ends, and the *Alarm memory* sensors keep the memory. Automations that relied on Triggered lasting until the reset should use the *Alarm memory* sensors instead.
     
 *   Not changed yet: see [Known limitations](#known-limitations).
     
@@ -204,13 +210,17 @@ Entities Provided
 
 This integration exposes your Inim alarm system's components as various Home Assistant entities. The entity IDs are programmatically generated based on the panel name and the names of your areas, zones, and scenarios fetched from the panel.
 
-*   **alarm\_control\_panel.your\_panel\_name**: The main entity to arm and disarm the system. Its actions (Arm Home, Arm Away, etc.) are linked to the scenarios you mapped during setup.
+*   **alarm\_control\_panel.your\_panel\_name**: The main entity to arm and disarm the system. Its actions (Arm Home, Arm Away, etc.) are linked to the scenarios you mapped during setup. It shows *Triggered* while any area is in alarm.
     
 *   **Areas**:
     
-    *   *switch.your\_panel\_name\_area\_X*: Allows direct arming (on) and disarming (off) of an individual area.
+    *   *switch.your\_panel\_name\_area\_X*: Allows direct arming (on) and disarming (off) of an individual area. It is on when the area is armed in any mode (total, partial or instant); turning it on arms in total mode. Attributes: `status_text` (`armed`, `disarmed` or `unknown`) and `arming_mode` (`total`, `partial`, `instant`, `disarmed` or `unknown`).
         
-    *   *binary\_sensor.your\_panel\_name\_area\_X\_triggered*: A binary sensor that turns on if the area is in an alarm (triggered) state.
+    *   *binary\_sensor.your\_panel\_name\_area\_X\_alarm*: On while the area is in alarm.
+        
+    *   *binary\_sensor.your\_panel\_name\_area\_X\_tamper*: On while the area is in tamper.
+        
+    *   *binary\_sensor.your\_panel\_name\_area\_X\_triggered* (named *Area X Alarm memory*): On after an alarm in the area until the alarm memory is reset (see [Resetting the alarm memory](#resetting-the-alarm-memory)). The `tamper_memory` attribute tells whether the area also has a tamper memory.
         
 *   **Zones**:
     
@@ -254,7 +264,7 @@ Use the button entities in your dashboard or automations to directly activate sp
 
 ### Resetting the alarm memory
 
-After an alarm, the panel keeps the alarm memory of the areas involved until it is reset. The action `inim_smartliving_alarm.alarm_reset` resets the alarm memory of every area that has one, on the targeted panel:
+After an alarm, the panel keeps the alarm memory of the areas involved until it is reset (the *Area X Alarm memory* sensors show it). The action `inim_smartliving_alarm.alarm_reset` resets every area that has an alarm or tamper memory, on the targeted panel:
 
 ```yaml
 action: inim_smartliving_alarm.alarm_reset
@@ -262,7 +272,7 @@ target:
   entity_id: alarm_control_panel.your_panel_name
 ```
 
-You can call it from a script, an automation or a dashboard button. Currently the alarm memory of areas 1 to 8 is detected; areas 9 and 10 will follow in a later version.
+You can call it from a script, an automation or a dashboard button.
 
 ### Displaying the Event Log
 
@@ -278,13 +288,9 @@ Known limitations
 
 These are known and will be fixed in the coming versions:
 
-*   **Areas armed in partial or instant mode** show as unknown (the area switch is off); only total arming and disarmed are shown.
-    
 *   **Zones in short circuit or tamper** show as unknown, together with the other zone of the same pair.
     
 *   **The second zone of double terminals** (zones above the number of terminals) is not shown, and output terminals may appear as zones.
-    
-*   **The alarm memory of areas 9 and 10** is not detected.
     
 *   **Event times** are shown in UTC+1, whatever Home Assistant's time zone; after the panel's event log has wrapped around, new events may stop appearing.
     

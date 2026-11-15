@@ -37,6 +37,10 @@ AREA_3_SWITCH = ("switch", "_area_switch_3")
 ZONE_36_SWITCH = ("switch", "_zone_enabled_switch_36")
 SCENARIO_3_BUTTON = ("button", "_scenario_button_2")
 ZONE_20_SENSOR = ("binary_sensor", "_zone_20")
+AREA_4_ALARM_MEMORY = ("binary_sensor", "_area_4_triggered_bs")
+AREA_4_ALARM = ("binary_sensor", "_area_4_alarm_bs")
+AREA_4_TAMPER = ("binary_sensor", "_area_4_tamper_bs")
+AREA_10_ALARM_MEMORY = ("binary_sensor", "_area_10_triggered_bs")
 
 
 async def refresh(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -121,6 +125,78 @@ async def test_area_switch_arms_the_area(
     assert state_of(hass, entry, ALARM_PANEL) == "armed_custom_bypass"
 
 
+@pytest.mark.parametrize(
+    ("mode", "arming_mode"),
+    [(c.MODE_AWAY, "total"), (c.MODE_STAY, "partial"), (c.MODE_INSTANT, "instant")],
+)
+async def test_area_switch_is_on_in_every_armed_mode(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    panel: FakePanel,
+    mode: int,
+    arming_mode: str,
+) -> None:
+    """An area armed in any mode turns its switch on; the mode is an attribute."""
+    panel.state.area_modes[2] = mode
+    await refresh(hass, entry)
+    state = hass.states.get(entity_id_for(hass, entry, AREA_3_SWITCH))
+    assert state.state == "on"
+    assert state.attributes["status_text"] == "armed"
+    assert state.attributes["arming_mode"] == arming_mode
+
+    await call(hass, entry, "switch", "turn_off", AREA_3_SWITCH)
+    assert panel.state.armed_areas() == []
+    await refresh(hass, entry)
+    state = hass.states.get(entity_id_for(hass, entry, AREA_3_SWITCH))
+    assert state.state == "off"
+    assert state.attributes["arming_mode"] == "disarmed"
+
+
+async def test_area_binary_sensors(
+    hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
+) -> None:
+    """Live alarm, live tamper and alarm memory each have their own sensor."""
+    for entity in (AREA_4_ALARM, AREA_4_TAMPER, AREA_4_ALARM_MEMORY):
+        assert state_of(hass, entry, entity) == "off"
+
+    panel.state.area_alarm = 1 << 3
+    panel.state.area_tamper = 1 << 3
+    panel.state.area_alarm_memory = 1 << 3 | 1 << 9
+    panel.state.area_tamper_memory = 1 << 3
+    await refresh(hass, entry)
+    for entity in (AREA_4_ALARM, AREA_4_TAMPER, AREA_4_ALARM_MEMORY):
+        assert state_of(hass, entry, entity) == "on"
+    assert state_of(hass, entry, AREA_10_ALARM_MEMORY) == "on"
+    memory = hass.states.get(entity_id_for(hass, entry, AREA_4_ALARM_MEMORY))
+    assert memory.attributes["tamper_memory"] is True
+
+    # The alarm ends: the memory stays until it is reset
+    panel.state.area_alarm = 0
+    panel.state.area_tamper = 0
+    await refresh(hass, entry)
+    assert state_of(hass, entry, AREA_4_ALARM) == "off"
+    assert state_of(hass, entry, AREA_4_TAMPER) == "off"
+    assert state_of(hass, entry, AREA_4_ALARM_MEMORY) == "on"
+
+
+async def test_alarm_panel_is_triggered_only_during_an_alarm(
+    hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
+) -> None:
+    """The live alarm triggers the panel; memory or tamper alone do not."""
+    panel.state.area_alarm_memory = 1 << 9
+    panel.state.area_tamper = 1 << 9
+    await refresh(hass, entry)
+    assert state_of(hass, entry, ALARM_PANEL) == "disarmed"
+
+    panel.state.area_alarm = 1 << 9
+    await refresh(hass, entry)
+    assert state_of(hass, entry, ALARM_PANEL) == "triggered"
+
+    panel.state.area_alarm = 0
+    await refresh(hass, entry)
+    assert state_of(hass, entry, ALARM_PANEL) == "disarmed"
+
+
 async def test_zone_switch_bypasses_the_zone(
     hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
 ) -> None:
@@ -158,18 +234,24 @@ async def test_alarm_panel_arm_away_and_disarm(
 async def test_alarm_reset_service(
     hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
 ) -> None:
-    """The reset service clears the alarm memory of the triggered areas."""
-    panel.state.area_alarm_memory = 1 << 3
+    """The reset service clears every area with an alarm or tamper memory."""
+    panel.state.area_alarm_memory = 1 << 3 | 1 << 9
+    panel.state.area_tamper_memory = 1 << 2
     panel.state.zone_memory[23] = True
     await refresh(hass, entry)
-    assert state_of(hass, entry, ALARM_PANEL) == "triggered"
+    assert state_of(hass, entry, AREA_4_ALARM_MEMORY) == "on"
+    assert state_of(hass, entry, AREA_10_ALARM_MEMORY) == "on"
 
     await call(hass, entry, DOMAIN, SERVICE_ALARM_RESET, ALARM_PANEL)
     assert panel.state.area_alarm_memory == 0
+    assert panel.state.area_tamper_memory == 0
     assert panel.state.zone_memory[23] is False
+    # one reset per area: 3, 4 and 10
+    assert [r.address for r in panel.requests if r.write] == [c.RAM_CMD_RESET] * 3
 
     await refresh(hass, entry)
-    assert state_of(hass, entry, ALARM_PANEL) == "disarmed"
+    assert state_of(hass, entry, AREA_4_ALARM_MEMORY) == "off"
+    assert state_of(hass, entry, AREA_10_ALARM_MEMORY) == "off"
 
 
 async def test_zone_alarm_reaches_binary_sensor(

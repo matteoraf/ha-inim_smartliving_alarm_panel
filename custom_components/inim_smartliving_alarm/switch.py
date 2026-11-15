@@ -30,6 +30,7 @@ from .const import (
     KEY_INIT_ZONES,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
+    KEY_LIVE_AREA_MODES_MAP,
     KEY_LIVE_AREA_STATUSES_MAP,
     KEY_LIVE_AREAS_STATUS,
     KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP,
@@ -168,7 +169,7 @@ async def async_setup_entry(
 
 
 class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
-    """Representation of an Inim Alarm Area as a switch."""
+    """An Inim area as a switch: on in any armed mode, turning on arms total."""
 
     def __init__(
         self,
@@ -279,6 +280,10 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
                 KEY_LIVE_AREA_STATUSES_MAP, {}
             )
             attrs["status_text"] = area_statuses.get(self._area_id_1_based, "Unknown")
+            area_modes = self.coordinator.data[KEY_LIVE_AREAS_STATUS].get(
+                KEY_LIVE_AREA_MODES_MAP, {}
+            )
+            attrs["arming_mode"] = area_modes.get(self._area_id_1_based, "unknown")
         return attrs
 
 
