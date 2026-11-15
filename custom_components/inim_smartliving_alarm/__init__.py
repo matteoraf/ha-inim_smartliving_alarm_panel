@@ -161,7 +161,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     # Set up platforms (alarm_control_panel, binary_sensor, switch, button, sensor)
-    _LOGGER.debug("(%s) Forwarding setup to platforms: %s"), entry.title, PLATFORMS
+    _LOGGER.debug("(%s) Forwarding setup to platforms: %s", entry.title, PLATFORMS)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     _warn_about_leftover_zone_entities(hass, entry)
 

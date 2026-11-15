@@ -142,6 +142,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **SmartLiving 10100 (experimental):** a 10100 now uses its own memory layout. Earlier versions read it as if it were a 1050, so its names and zones were wrong: at the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs of areas and zones stay the same; areas 11 to 15 and zones above 50 appear if your limits allow them (raise them in the options: up to 15 areas and 200 zones).
     
+*   **Event log:** event times are now shown in Home Assistant's time zone, with daylight saving time (before, always UTC+1), and new events keep appearing after the panel's event log wraps around. The event log sensor's state is now the newest event's position in the panel's log (0 to 999) instead of a memory address: automations that only trigger on a change keep working, but compare the new numbers if you used the value itself.
+    
 *   Your configuration entry is updated once more (version 1.3): the zone list is completed from the panel data already stored, without contacting the panel. If that data is incomplete, a warning asks you to use **Re-read panel configuration**.
     
 *   **SmartLAN/G:** the board's replies are now read the way the board sends them (the data alone, without the panel's checksum). Before, every read failed and setup reported a wrong user name or password even with the right credentials. A wrong user name or password is now reported only when the board's reply cannot be decrypted; any other unexpected reply has its own message (see [Troubleshooting](#troubleshooting)).
@@ -260,7 +262,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
 *   **Sensors**:
     
-    *   *sensor.your\_panel\_name\_event\_log*: The state shows the panel's latest event index. The attributes contain a human-readable log of recent events.
+    *   *sensor.your\_panel\_name\_event\_log*: The state is the position of the newest event in the panel's event log (0 to 999; it starts again from 0 when the log wraps around), so it changes with every new event. The attributes contain a human-readable log of recent events. Event times are the panel's clock read in Home Assistant's time zone, with daylight saving time.
         
     *   *sensor.your\_panel\_name\_active\_scenario*: A text sensor that displays the name of the currently active scenario.
         
@@ -310,8 +312,6 @@ Known limitations
 
 These are known and will be fixed in the coming versions:
 
-*   **Event times** are shown in UTC+1, whatever Home Assistant's time zone; after the panel's event log has wrapped around, new events may stop appearing.
-    
 *   On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example `switch.home_home_area_3`); existing installations keep their IDs.
     
 

@@ -311,14 +311,17 @@ async def test_live_status(hass: HomeAssistant, api: LegacyPanelClient) -> None:
         ("zones_excluded_status", "zone_excluded_statuses"),
         ("zones_triggered_status", "zone_triggered_statuses"),
     ):
-        assert set(status[key][statuses]) == set(range(1, 51)), key
+        # every zone number of a 1050: zones 1-50 and second zones 51-100
+        assert set(status[key][statuses]) == set(range(1, 101)), key
     assert status["active_scenario"] is not None
 
 
 async def test_recent_events(hass: HomeAssistant, api: LegacyPanelClient) -> None:
     """The newest events are read and get plausible timestamps."""
+    # any zone will do: only the plausibility of the times is checked
     result = require(
-        await run(hass, api.execute_get_compact_events, count=5), "event log"
+        await run(hass, api.execute_get_compact_events, count=5, time_zone=UTC),
+        "event log",
     )
 
     events = result["events"]

@@ -1432,7 +1432,7 @@
     "unique_id": "_event_log",
     "original_name": "Test Panel Event Log",
     "device_class": null,
-    "state": "41583"
+    "state": "467"
   },
   {
     "platform": "sensor",

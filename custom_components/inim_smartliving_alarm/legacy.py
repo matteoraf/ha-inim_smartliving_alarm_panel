@@ -3,9 +3,7 @@
 The entities, the stored panel configuration (entry.data) and the
 coordinator data keep their shapes while the panel is accessed through the
 asynchronous API. Values are derived from the raw replies with the same
-rules as before, including their known limits (event indexes not wrapping
-around the log, event times in UTC+1); each of those is lifted by its own
-change later.
+rules as before, unless a later change says otherwise.
 
 Errors are reported the old way: None, False or a dictionary marking the
 failure, never an exception.
@@ -13,7 +11,7 @@ failure, never an exception.
 
 from collections.abc import AsyncIterator
 import contextlib
-from datetime import datetime, timedelta, timezone
+from datetime import tzinfo
 import logging
 from typing import Any
 
@@ -34,6 +32,13 @@ from .protocol import registers as reg
 from .protocol.commands import ArmMode
 from .protocol.config import ZONE_TYPES, TerminalType
 from .protocol.errors import ProtocolError, UnsupportedPanelError
+from .protocol.events import (
+    EVENT_RECORD_LENGTH,
+    decode_event_pointers,
+    decode_timestamp,
+    event_address,
+    newest_indexes,
+)
 from .protocol.model import SMARTLIVING_1050_FW6, PanelModel
 from .protocol.status import AreaMode, AreaStatus, ZoneState
 from .transport.base import PanelTransport, Priority, TransportError
@@ -44,9 +49,6 @@ _LOGGER = logging.getLogger(__name__)
 
 LABEL_LENGTH = 16
 MAX_EVENTS_PER_FETCH = 50
-EVENT_RECORD_LENGTH = 9
-EVENT_TIME_ZONE = timezone(timedelta(hours=1))
-EVENT_EPOCH = datetime(2000, 1, 1, tzinfo=EVENT_TIME_ZONE)
 
 ACTIVATION_TYPES = {0x00: "Immediate", 0x01: "Delayed", 0x04: "24 hours"}
 BALANCING_TYPES = {
@@ -212,51 +214,53 @@ class LegacyPanelClient:
         self,
         count: int | None = None,
         last_processed_compact_event_index_val: int | None = None,
+        time_zone: tzinfo | None = None,
     ) -> dict[str, Any]:
         """The newest events (count) or those after a known index, newest first.
 
-        Indexes are the low 16 bits of the record address, as before.
+        Indexes are positions in the panel's event ring (0 to ring size - 1,
+        wrapping around); latest_event_index_val is the newest event's. Event
+        times are the panel's local time in time_zone (without one, they
+        carry no offset).
         """
         try:
-            pointers = await self.panel.read_ram(
+            pointers_data = await self.panel.read_ram(
                 reg.EVENT_POINTERS, reg.EVENT_POINTERS_LENGTH
             )
             model = self.panel.model
+            pointers = decode_event_pointers(pointers_data, model)
         except _ERRORS as err:
             _LOGGER.error("Cannot read the event pointers: %s", err)
             return {"events": [], "latest_event_index_val": None}
 
-        head = int.from_bytes(pointers[0:2], "little")
-        bank = model.event_log & 0xFF0000
-        latest = (
-            (head - 1) * EVENT_RECORD_LENGTH + (model.event_log & 0xFFFF)
-        ) & 0xFFFF
+        size = model.event_ring_size
+        newest = newest_indexes(pointers, model, 1)
+        latest = newest[0] if newest else None
         last = last_processed_compact_event_index_val
         if count is not None:
             wanted = min(max(1, count), MAX_EVENTS_PER_FETCH)
         elif last is not None:
-            if latest <= last:
+            if latest is None or not 0 <= last < size:
                 return {"events": [], "latest_event_index_val": latest}
-            wanted = MAX_EVENTS_PER_FETCH
+            # events written since the last poll; the ring wraps around
+            wanted = min((latest - last) % size, MAX_EVENTS_PER_FETCH)
         else:
             _LOGGER.error("Either count or the last processed index is needed")
             return {"events": [], "latest_event_index_val": latest}
 
         events: list[dict[str, Any]] = []
-        index = latest
-        for _ in range(wanted):
-            if index < 0 or (count is None and last is not None and index <= last):
-                break
+        for index in newest_indexes(pointers, model, wanted):
             try:
-                data = await self.panel.read_eeprom(bank | index, EVENT_RECORD_LENGTH)
+                data = await self.panel.read_eeprom(
+                    event_address(index, model), EVENT_RECORD_LENGTH
+                )
             except _ERRORS as err:
-                _LOGGER.info("Stopped reading events at %04x: %s", index, err)
+                _LOGGER.info("Stopped reading events at %s: %s", index, err)
                 break
-            event = event_dict(data, model)
+            event = event_dict(data, model, time_zone)
             event["query_index_hex"] = f"{index:04x}"
             event["query_index_val"] = index
             events.append(event)
-            index -= EVENT_RECORD_LENGTH
         return {"events": events, "latest_event_index_val": latest}
 
     # ---------------------------------------------------------------- commands
@@ -652,13 +656,19 @@ def _area_status(data: bytes, areas: AreaStatus) -> dict[str, Any]:
 # -------------------------------------------------------------------- events
 
 
-def event_dict(data: bytes, model: PanelModel) -> dict[str, Any]:
+def event_dict(
+    data: bytes, model: PanelModel, time_zone: tzinfo | None = None
+) -> dict[str, Any]:
     """One event record as the event sensor expects it."""
     d1, d2, d3, d4, action = data[4:9]
     seconds = int.from_bytes(data[0:4], "little")
     event: dict[str, Any] = {
         "raw_hex_data": data.hex(),
-        "timestamp_iso": (EVENT_EPOCH + timedelta(seconds=seconds)).isoformat(),
+        # panel local time; for a repeated hour (clocks going back) the
+        # first occurrence is taken
+        "timestamp_iso": decode_timestamp(seconds)
+        .replace(tzinfo=time_zone)
+        .isoformat(),
         "action_code": action,
         "action_description": EVENT_ACTIONS.get(
             action, f"Unknown Action (0x{action:02X})"

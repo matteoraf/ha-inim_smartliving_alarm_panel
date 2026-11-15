@@ -145,7 +145,7 @@ KEY_LIVE_ZONE_TEST_STATUSES_MAP = "zone_test_statuses"  # in zones_excluded_stat
 
 KEY_PROCESSED_EVENTS = "processed_events"  # List of new events from last poll
 KEY_LATEST_EVENT_INDEX_VAL = (
-    "latest_event_index_val"  # Panel's absolute latest event index
+    "latest_event_index_val"  # position of the newest event in the panel's ring
 )
 
 # General usage keys for constructed/parsed data (often used internally in utils or entities)
