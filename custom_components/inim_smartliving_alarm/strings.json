@@ -58,14 +58,38 @@
             "pin": "A user code of the panel (1 to 6 digits). Commands are sent with it, so it needs the areas you want to control."
           }
         },
+        "items": {
+          "title": "Areas, zones and scenarios",
+          "description": "Choose what to import from {panel_name}. Each one ticked gets its entities. Proposed: the zones that belong to an area, the areas of those zones and the scenarios that change an area. You can change this later in the integration's options.",
+          "sections": {
+            "areas": {
+              "name": "Areas",
+              "description": "The areas of the panel.",
+              "data": {
+                "areas": "Areas to import"
+              }
+            },
+            "zones": {
+              "name": "Zones",
+              "description": "The zones of the panel: only terminals programmed as zones are listed.",
+              "data": {
+                "zones": "Zones to import"
+              }
+            },
+            "scenarios": {
+              "name": "Scenarios",
+              "description": "The scenarios of the panel.",
+              "data": {
+                "scenarios": "Scenarios to import"
+              }
+            }
+          }
+        },
         "initial_options": {
           "title": "Initial Options",
           "description": "Set the initial options for your Inim Alarm integration. These can be changed later from the integration's configuration page.",
           "data": {
             "polling_interval": "Polling Interval (seconds)",
-            "limit_areas": "Number of Areas to import",
-            "limit_zones": "Zones to import (up to this zone number)",
-            "limit_scenarios": "Number of Scenarios to import",
             "event_log_size": "Number of Events to store in log",
             "reader_names": "Reader Names (comma-separated)",
             "scenario_arm_home": "Arm Home Scenario",
@@ -109,13 +133,45 @@
       "step": {
         "init": {
           "title": "Inim SmartLiving Alarm Options",
+          "description": "Choose what to change.",
+          "menu_options": {
+            "items": "Areas, zones and scenarios",
+            "general": "General settings"
+          }
+        },
+        "items": {
+          "title": "Areas, zones and scenarios",
+          "description": "Choose what to import. Entities of the items you untick are removed; ticking them again brings them back. Zones wired later and new scenarios are not ticked by themselves: tick them here after re-reading the panel configuration.",
+          "sections": {
+            "areas": {
+              "name": "Areas",
+              "description": "The areas of the panel.",
+              "data": {
+                "areas": "Areas to import"
+              }
+            },
+            "zones": {
+              "name": "Zones",
+              "description": "The zones of the panel: only terminals programmed as zones are listed.",
+              "data": {
+                "zones": "Zones to import"
+              }
+            },
+            "scenarios": {
+              "name": "Scenarios",
+              "description": "The scenarios of the panel.",
+              "data": {
+                "scenarios": "Scenarios to import"
+              }
+            }
+          }
+        },
+        "general": {
+          "title": "General settings",
           "description": "Adjust the settings for your Inim Alarm integration.",
           "data": {
             "pin": "New PIN Code",
             "polling_interval": "Polling Interval (seconds)",
-            "limit_areas": "Number of Areas to import",
-            "limit_zones": "Zones to import (up to this zone number)",
-            "limit_scenarios": "Number of Scenarios to import",
             "event_log_size": "Number of Events to store in log",
             "reader_names": "Reader Names (comma-separated list for Reader 1, Reader 2, etc.)",
             "scenario_arm_home": "Arm Home Scenario",
@@ -134,7 +190,8 @@
         "cannot_connect_new_pin": "Failed to connect to the panel. Please check connection.",
         "auth_failed_new_pin": "Authentication failed with the new PIN. The PIN has not been changed.",
         "pin_validation_error": "An error occurred while validating the new PIN.",
-        "unknown_pin_error": "An unknown error occurred while validating the new PIN. Please check the logs."
+        "unknown_pin_error": "An unknown error occurred while validating the new PIN. Please check the logs.",
+        "mapped_scenario_not_imported": "These scenarios are used by alarm panel modes: {scenarios}. Change those modes in the general settings first."
       }
     },
     "exceptions": {
@@ -213,8 +270,8 @@
       "entry_not_loaded_command": {
         "message": "{title} is not loaded, so the command cannot be sent."
       },
-      "area_out_of_range": {
-        "message": "The panel has {count} areas, so these do not exist: {areas}."
+      "area_not_imported": {
+        "message": "Areas {areas} are not imported from {title}. Import them in the integration's options, under Areas, zones and scenarios."
       }
     },
     "selector": {

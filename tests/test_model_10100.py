@@ -12,7 +12,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
-import voluptuous as vol
 
 from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
@@ -23,7 +22,7 @@ from custom_components.inim_smartliving_alarm.protocol.model import (
     SMARTLIVING_10100_FW6,
 )
 
-from .conftest import add_entry
+from .conftest import ALL, add_entry
 from .fake_panel import FakePanel, const as c, panel_10100
 from .test_init_baseline import call, refresh, state_of
 from .test_zones import has_entity
@@ -46,8 +45,8 @@ async def panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
 
 @pytest.fixture
 async def entry(hass: HomeAssistant, panel: FakePanel) -> AsyncGenerator[ConfigEntry]:
-    """The integration set up with the proposed (model-based) limits."""
-    config_entry = await add_entry(hass, panel, limit_areas=None, limit_zones=None)
+    """The integration set up with every area, zone and scenario."""
+    config_entry = await add_entry(hass, panel, zones=ALL)
     yield config_entry
     assert await hass.config_entries.async_unload(config_entry.entry_id)
     await hass.async_block_till_done()
@@ -85,12 +84,12 @@ async def test_identified_as_10100(
         await client.close()
 
 
-async def test_setup_proposes_every_area_and_zone(
+async def test_setup_offers_every_area_and_zone(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> None:
-    """The proposed limits are the panel's own: 15 areas, zone numbers 1-200."""
-    assert entry.options["limit_areas"] == 15
-    assert entry.options["limit_zones"] == 200
+    """The setup offers the panel's own items: 15 areas, zone numbers to 200."""
+    assert entry.options["areas"] == list(range(1, 16))
+    assert entry.options["zones"][-1] == 200
     for area in (1, 15):
         assert has_entity(hass, entry, ("switch", f"_area_switch_{area}"))
         assert has_entity(hass, entry, ("binary_sensor", f"_area_{area}_alarm_bs"))
@@ -188,38 +187,15 @@ async def test_configuration_of_another_layout_is_read_again(
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 
-async def test_1050_setup_proposes_its_own_counts(hass: HomeAssistant) -> None:
-    """On a 1050 the proposed limits are 10 areas and zone numbers 1-100."""
+async def test_1050_setup_offers_its_own_items(hass: HomeAssistant) -> None:
+    """On a 1050 the setup offers 10 areas, 30 scenarios and its zones."""
     fake = FakePanel()
     await fake.start()
     try:
-        entry = await add_entry(hass, fake, limit_areas=None, limit_zones=None)
-        assert entry.options["limit_areas"] == 10
-        assert entry.options["limit_zones"] == 100
+        entry = await add_entry(hass, fake, zones=ALL)
+        assert entry.options["areas"] == list(range(1, 11))
+        assert entry.options["scenarios"] == list(range(1, 31))
+        assert entry.options["zones"] == list(range(1, 38))  # the fake's zones
         assert await hass.config_entries.async_unload(entry.entry_id)
     finally:
         await fake.stop()
-
-
-async def test_options_cap_an_old_area_limit(
-    hass: HomeAssistant, panel: FakePanel
-) -> None:
-    """An area limit of 16 (allowed by older versions) is offered as 15."""
-    entry = await add_entry(hass, panel, limit_areas=None, limit_zones=None)
-    hass.config_entries.async_update_entry(
-        entry, options={**entry.options, "limit_areas": 16}
-    )
-    await hass.async_block_till_done()
-
-    result = await hass.config_entries.options.async_init(entry.entry_id)
-    defaults = {
-        str(key): key.default()
-        for key in result["data_schema"].schema
-        if key.default is not vol.UNDEFINED
-    }
-    assert defaults["limit_areas"] == 15
-    result = await hass.config_entries.options.async_configure(result["flow_id"], {})
-    await hass.async_block_till_done()
-    assert result["type"] == "create_entry"
-    assert entry.options["limit_areas"] == 15
-    assert await hass.config_entries.async_unload(entry.entry_id)

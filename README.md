@@ -142,11 +142,11 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **The alarm panel shows Triggered only while an area is in alarm.** Before, it stayed Triggered until the alarm memory was reset; now it returns to its armed or disarmed state when the alarm ends, and the *Alarm memory* sensors keep the memory. Automations that relied on Triggered lasting until the reset should use the *Alarm memory* sensors instead.
     
-*   **Zones follow the panel's terminal types.** Output terminals (for example a siren) and unused terminals no longer get zone entities, and the second zones of double terminals (51 to 100 on the 1050) are added. Raise the zone limit in the options to 100 to see second zones: existing installations keep their limit (50 by default before). Entities that earlier versions created for terminals that are not zones are **not deleted automatically**: they stay as unavailable entities, and the log lists them at every start (*"these entities belong to terminals that are not zones on the panel"*). Delete them in **Settings** -> **Devices & services** -> **Entities**.
+*   **Zones follow the panel's terminal types.** Output terminals (for example a siren) and unused terminals no longer get zone entities, and the second zones of double terminals (51 to 100 on the 1050) can be added: tick them in the options under **Areas, zones and scenarios** (existing installations keep the zones they had). Entities that earlier versions created for terminals that are not zones are **not deleted automatically**: they stay as unavailable entities, and the log lists them at every start (*"these entities belong to terminals that are not zones on the panel"*). Delete them in **Settings** -> **Devices & services** -> **Entities**.
     
 *   **"Zone X Triggered" is now called "Zone X Alarm memory"** (same entity ID). Zones in short circuit or tamper are no longer shown as unknown: a new *Zone X Tamper* sensor turns on, and the zone's `status_text` says `short` or `tamper`. Such zones are also listed when they prevent a scenario from being activated.
     
-*   **SmartLiving 10100 (experimental):** a 10100 now uses its own memory layout. Earlier versions read it as if it were a 1050, so its names and zones were wrong: at the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs of areas and zones stay the same; areas 11 to 15 and zones above 50 appear if your limits allow them (raise them in the options: up to 15 areas and 200 zones).
+*   **SmartLiving 10100 (experimental):** a 10100 now uses its own memory layout. Earlier versions read it as if it were a 1050, so its names and zones were wrong: at the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs of areas and zones stay the same; areas 11 to 15 and zones above 50 can be ticked in the options under **Areas, zones and scenarios**.
     
 *   **Event log:** event times are now shown in Home Assistant's time zone, with daylight saving time (before, always UTC+1), and new events keep appearing after the panel's event log wraps around. The event log sensor's state is now the newest event's position in the panel's log (0 to 999) instead of a memory address: automations that only trigger on a change keep working, but compare the new numbers if you used the value itself.
     
@@ -159,6 +159,10 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
 *   **New: an arming mode select per area** (*Area X arming mode*: disarmed, total, partial or instant) and the **`arm_area` action**, which arms or disarms several areas in one command (see [Arming areas from automations](#arming-areas-from-automations)).
     
 *   **Programming mode is now detected.** While the panel is being programmed from a keypad, it ignores commands, and earlier versions reported such a command as carried out. Now no command is sent while the panel is in programming mode: the action fails with a message instead, and setup, **Reconfigure** and **Re-read panel configuration** wait until programming has ended. A new diagnostic sensor, *Programming mode*, shows it. The `reason` of the `inim_smartliving_alarm_scenario_activation_failed` event can now also be `panel_programming`.
+    
+*   **You now pick the areas, zones and scenarios to import from lists**, by name, instead of giving how many of each. Your configuration entry is updated once more (version 1.4): the counts you had become the same items (for example, 7 areas become areas 1 to 7), so your entities do not change. A scenario used by an alarm panel mode beyond your scenario count is added, so that the mode keeps working. The options now open a menu: **Areas, zones and scenarios** or **General settings**. Unticking an item there **removes its entities**; ticking it again brings them back with the same entity IDs. Entities left over from areas, zones or scenarios above your old counts are removed at the first start.
+    
+*   **The `arm_area` action lists the imported areas only, by name**, and refuses areas that are not imported. The alarm panel's modes can be mapped only to imported scenarios.
     
 *   Not changed yet: see [Known limitations](#known-limitations).
     
@@ -190,24 +194,32 @@ After installation and restarting Home Assistant:
         
 6.  Click **Submit**. The integration connects to your panel, checks it and reads its configuration. The setup is refused, with a message, if the panel cannot be reached, if the PIN does not match any user code of the panel, or if the panel's firmware is older than 5.
     
-7.  If successful, a second dialog will appear for **Initial Options**:
+7.  If successful, choose the **areas, zones and scenarios** to import, in three sections of checkboxes (each can be folded). Each one you tick gets its entities; they are listed with their number and the name programmed on the panel:
+    
+    *   **Areas**: every area of the panel (10 on a SmartLiving 1050, 15 on a 10100).
+        
+    *   **Zones**: the zones of the panel. Only terminals programmed as zones are listed (outputs and unused terminals are not), including the second zones of double terminals (51 to 100 on the 1050, 101 to 200 on the 10100).
+        
+    *   **Scenarios**: every scenario of the panel (30).
+        
+    The setup ticks what the panel shows in use: the zones that belong to an area, the areas of those zones, and the scenarios that change at least one area. Tick or untick anything you like.
+    
+8.  Then the **Initial Options**:
     
     *   **Polling Interval**: How often Home Assistant should query the panel for status updates (in seconds).
         
-    *   **Limit Areas/Zones/Scenarios**: The maximum number of each entity type to create. This is useful for managing the number of entities in Home Assistant. The setup proposes your panel's own counts: 10 areas and zone numbers 1 to 100 on a SmartLiving 1050, 15 areas and zone numbers 1 to 200 on a 10100. The zone limit counts zone numbers: zones above it get no entities, so keep it at the proposed value if you use double terminals, whose second zones are numbered after the panel's terminals (51 to 100 on the 1050, 101 to 200 on the 10100).
-        
     *   **Event Log Size**: The number of recent events to store and display in the event log sensor's attributes.
         
-    *   **Scenario Mappings**: You can map your panel's scenarios to Home Assistant's standard alarm actions (Arm Home, Arm Away, etc.).
+    *   **Scenario Mappings**: You can map your panel's scenarios to Home Assistant's standard alarm actions (Arm Home, Arm Away, etc.). Only the scenarios you import are offered.
 
     *   **Area switches arm in** (options only, not at setup): the mode an area switch arms in when turned on: total (the default), partial or instant. The *arming mode* select of each area offers every mode.
 
     *   **Readers Names**: You can provide a comma separated list of Proximity readers "friendly" names wich will be mapped to readers in the order in which they appear. The integration cannot query those names. If you don't provide any, you'll see them appear as "Reader X" in the log.
         
-8.  Click **Submit** to complete the setup.
+9.  Click **Submit** to complete the setup.
     
 
-You can change these options later by navigating to the integration on the Devices & Services page and clicking "CONFIGURE".
+You can change all of this later: on the Devices & Services page, open the integration and click **CONFIGURE**, then choose **Areas, zones and scenarios** or **General settings** (everything else, including the PIN). Unticking an area, zone or scenario removes its entities, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs. A scenario that an alarm panel mode uses cannot be unticked: change the mode's scenario in the general settings first.
 
 ### Changing the connection details (Reconfigure)
 
@@ -220,7 +232,7 @@ If the IP address, port or PIN of your panel (or, for SmartLAN/G, the board's us
 3.  Enter the new **Host**, **Port**, **PIN** (and, for SmartLAN/G, **Board user name** and **Board password**) and click **Submit**.
     
 
-The integration contacts the panel with the new details, reads its configuration again and reloads. Your options (polling interval, limits, scenario mappings), entities and entity IDs are kept. If the panel cannot be reached, an error is shown and nothing is changed. An address already used by another configured panel is refused, and so is a PIN that does not match any user code of the panel. The board type (SmartLAN/SI or SmartLAN/G) cannot be changed here: remove the integration and add it again for that.
+The integration contacts the panel with the new details, reads its configuration again and reloads. Your options (polling interval, imported areas, zones and scenarios, scenario mappings), entities and entity IDs are kept. If the panel cannot be reached, an error is shown and nothing is changed. An address already used by another configured panel is refused, and so is a PIN that does not match any user code of the panel. The board type (SmartLAN/SI or SmartLAN/G) cannot be changed here: remove the integration and add it again for that.
 
 ### Re-reading the panel configuration
 
@@ -237,7 +249,7 @@ data:
   config_entry_id: <the panel's config entry ID>
 ```
 
-The integration then reloads with the new configuration. Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel. If the panel cannot be reached, or it is in programming mode, an error is shown and the stored configuration is kept: in programming mode, try again when programming has ended.
+The integration then reloads with the new configuration. Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel. The areas, zones and scenarios you import are not changed either: a zone wired later or a new scenario is listed, unticked, in the options under **Areas, zones and scenarios**. If the panel cannot be reached, or it is in programming mode, an error is shown and the stored configuration is kept: in programming mode, try again when programming has ended.
 
 Entities Provided
 -----------------
@@ -318,7 +330,7 @@ You can call it from a script, an automation or a dashboard button.
 
 ### Arming areas from automations
 
-The action `inim_smartliving_alarm.arm_area` arms or disarms one or more areas of a panel in a single command, so they change together. `areas` are the area numbers as on the panel (also areas without entities); `mode` is `total`, `partial`, `instant` or `disarm`. Pick the panel from the list in the action editor, or give its entry ID:
+The action `inim_smartliving_alarm.arm_area` arms or disarms one or more areas of a panel in a single command, so they change together. Pick the panel and the areas from the lists in the action editor: the areas list shows the areas you import, by name. `mode` is `total`, `partial`, `instant` or `disarm`. In YAML, `areas` are the area numbers as on the panel:
 
 ```yaml
 action: inim_smartliving_alarm.arm_area
@@ -327,6 +339,8 @@ data:
   areas: [1, 3]
   mode: partial
 ```
+
+With several panels, each area number in the list shows the area of every panel that imports it, with the panel's name; the panel you pick decides which one is armed. An area that is not imported from that panel (for example, one you unticked after writing the automation) is refused with a message, and nothing is sent.
 
 Like the area switches and the arming mode selects, the action does not check the zones first. The panel refuses only when it is programmed not to allow arming with zones that are not ready; otherwise it arms, and an open zone can set off an alarm right away. In a later version, arming will follow a readiness setting of the integration. If the panel refuses the command, the action fails with the reason (see [When the panel refuses a command](#when-the-panel-refuses-a-command)).
 
@@ -434,7 +448,9 @@ Troubleshooting
         
 *   **Incorrect Number of Entities**:
     
-    *   Verify the "Limit Areas/Zones/Scenarios" settings in the integration's configuration options.
+    *   Check the integration's options under **Areas, zones and scenarios**: only ticked items get entities.
+        
+    *   A zone is listed only if its terminal is programmed as a zone on the panel. If you changed the panel's programming, use **Re-read panel configuration** first.
         
 
 Contributing

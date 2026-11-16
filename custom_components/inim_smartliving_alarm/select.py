@@ -15,16 +15,13 @@ from .const import (
     AREA_MODE_INSTANT,
     AREA_MODE_PARTIAL,
     AREA_MODE_TOTAL,
-    CONF_LIMIT_AREAS,
+    CONF_AREAS,
     CONF_PANEL_NAME,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
-    DEFAULT_LIMIT_AREAS,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_AREA_NAMES,
-    KEY_INIT_AREAS,
     KEY_INIT_SYSTEM_INFO,
     KEY_INIT_SYSTEM_INFO_TYPE,
     KEY_INIT_SYSTEM_INFO_VERSION,
@@ -34,6 +31,7 @@ from .const import (
 from .errors import async_send_command
 from .legacy import LegacyPanelClient
 from .protocol.commands import ArmMode
+from .selection import area_label, selected
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -69,13 +67,6 @@ async def async_setup_entry(
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
     system_info = initial_panel_config.get(KEY_INIT_SYSTEM_INFO, {})
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
-    area_names = (initial_panel_config.get(KEY_INIT_AREAS) or {}).get(
-        KEY_INIT_AREA_NAMES
-    ) or []
-    limit_areas = entry.options.get(
-        CONF_LIMIT_AREAS, entry.data.get(CONF_LIMIT_AREAS, DEFAULT_LIMIT_AREAS)
-    )
-
     async_add_entities(
         InimAreaModeSelect(
             coordinator,
@@ -84,9 +75,9 @@ async def async_setup_entry(
             panel_display_name,
             system_info,
             area,
-            area_names[area - 1] or f"Area {area}",
+            area_label(initial_panel_config, area),
         )
-        for area in range(1, min(len(area_names), limit_areas) + 1)
+        for area in selected(entry.options, initial_panel_config, CONF_AREAS)
     )
 
 

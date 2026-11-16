@@ -9,7 +9,7 @@ Errors are reported the old way: None, False or a dictionary marking the
 failure, never an exception.
 """
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Collection
 import contextlib
 from datetime import tzinfo
 import logging
@@ -477,22 +477,23 @@ def zone_exists(zone: dict[str, Any]) -> bool:
 def zones_to_create(
     zone_names: list[str],
     zone_details: list[dict[str, Any]],
-    limit: int,
+    selected: Collection[int],
 ) -> list[tuple[int, str, dict[str, Any] | None]]:
     """(0-based index, name, detail) of the zones that get entities.
 
-    Zone numbers up to the limit that are zones on the panel (zone_exists);
-    without stored zone details, the first zones by name as before.
+    The selected zone numbers (1-based) that are zones on the panel
+    (zone_exists); without stored zone details, the selected zone numbers.
     """
     if not zone_details:
         return [
             (index, name or f"Zone {index + 1}", None)
-            for index, name in enumerate(zone_names[:limit])
+            for index, name in enumerate(zone_names)
+            if index + 1 in selected
         ]
     zones = []
     for detail in zone_details:
         index = detail.get("zone_index")
-        if index is None or index >= limit or not zone_exists(detail):
+        if index is None or index + 1 not in selected or not zone_exists(detail):
             continue
         name = zone_names[index] if index < len(zone_names) else ""
         zones.append((index, name or f"Zone {index + 1}", detail))

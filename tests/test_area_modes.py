@@ -11,7 +11,7 @@ from custom_components.inim_smartliving_alarm.errors import CommandRefusedError
 
 from .conftest import add_entry
 from .fake_panel import FakePanel, const as c
-from .test_config_flow import form_defaults
+from .test_config_flow import form_defaults, open_options
 from .test_init_baseline import AREA_3_SWITCH, call, entity_id_for, refresh
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
@@ -117,11 +117,11 @@ async def test_select_refused(
     )
 
 
-async def test_no_select_beyond_the_area_limit(
+async def test_selects_of_imported_areas_only(
     hass: HomeAssistant, panel: FakePanel
 ) -> None:
-    """Selects follow the area limit, like the area switches."""
-    entry = await add_entry(hass, panel, limit_areas=2)
+    """Selects follow the imported areas, like the area switches."""
+    entry = await add_entry(hass, panel, areas=[1, 2])
     states = [
         s for s in hass.states.async_all("select") if "arming_mode" in s.entity_id
     ]
@@ -172,15 +172,18 @@ async def test_arm_area_does_not_check_zones(
     assert panel.state.armed_areas() == [3]
 
 
-async def test_arm_area_out_of_range(
-    hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
-) -> None:
-    """Areas the panel does not have are named and nothing is sent."""
+async def test_arm_area_not_imported(hass: HomeAssistant, panel: FakePanel) -> None:
+    """Areas not imported (or not on the panel) are named and nothing is sent."""
+    entry = await add_entry(hass, panel, areas=[1, 2, 3])
     with pytest.raises(ServiceValidationError) as err:
-        await arm_area(hass, entry.entry_id, [2, 11, 12], "total")
-    assert err.value.translation_key == "area_out_of_range"
-    assert err.value.translation_placeholders == {"areas": "11, 12", "count": "10"}
+        await arm_area(hass, entry.entry_id, [2, 4, 11], "total")
+    assert err.value.translation_key == "area_not_imported"
+    assert err.value.translation_placeholders == {
+        "areas": "4, 11",
+        "title": "Test Panel",
+    }
     assert arm_writes(panel) == 0
+    assert await hass.config_entries.async_unload(entry.entry_id)
 
 
 async def test_arm_area_refused(
@@ -215,7 +218,7 @@ async def test_switch_arms_total_by_default(
     hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
 ) -> None:
     """Without the option the switch arms total, as before."""
-    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await open_options(hass, entry)
     assert form_defaults(result)["area_switch_arm_mode"] == "total"
     hass.config_entries.options.async_abort(result["flow_id"])
 
@@ -227,13 +230,11 @@ async def test_entry_saved_before_the_option(
     hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
 ) -> None:
     """Options saved by an earlier version, without the option, mean total."""
-    result = await hass.config_entries.options.async_init(entry.entry_id)
     old_options = {
         key: value
-        for key, value in form_defaults(result).items()
+        for key, value in entry.options.items()
         if key != "area_switch_arm_mode"
     }
-    hass.config_entries.options.async_abort(result["flow_id"])
     hass.config_entries.async_update_entry(entry, options=old_options)  # reloads
     await hass.async_block_till_done()
     assert "area_switch_arm_mode" not in entry.options
@@ -242,7 +243,7 @@ async def test_entry_saved_before_the_option(
     assert panel.state.area_modes[2] == c.MODE_AWAY
 
     # The options form offers total and saves it unless another is chosen
-    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await open_options(hass, entry)
     assert form_defaults(result)["area_switch_arm_mode"] == "total"
     result = await hass.config_entries.options.async_configure(result["flow_id"], {})
     await hass.async_block_till_done()
@@ -257,7 +258,7 @@ async def test_switch_arms_in_the_chosen_mode(
     hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel, option: str, mode: int
 ) -> None:
     """The option chosen in the options form sets the switch's arming mode."""
-    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await open_options(hass, entry)
     result = await hass.config_entries.options.async_configure(
         result["flow_id"], {"area_switch_arm_mode": option}
     )
