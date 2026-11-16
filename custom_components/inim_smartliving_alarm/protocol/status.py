@@ -219,8 +219,8 @@ def decode_panel_state(data: bytes) -> PanelState:
 
 
 def decode_faults(data: bytes) -> Faults:
-    """Decode the faults register (7 bytes; bytes 2-3 are the supply voltage)."""
-    _check_length(data, 7, "faults")
+    """Decode the faults register (6 bytes; bytes 2-3 are the supply voltage)."""
+    _check_length(data, 6, "faults")
     active = frozenset(
         fault for fault, (byte, bit) in _FAULT_BITS.items() if data[byte] >> bit & 1
     )

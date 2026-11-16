@@ -161,7 +161,10 @@ async def test_status_is_fully_decoded(make_panel, fake_panel: FakePanel) -> Non
         reg.ZONE_INCLUSION,
         reg.ZONE_MEMORY,
         reg.ACTIVE_SCENARIO,
+        reg.FAULTS,
     }
+    assert status.panel_state is not None
+    assert not status.panel_state.programming
 
 
 async def test_active_scenario_covers_the_user_code_areas(

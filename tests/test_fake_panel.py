@@ -148,7 +148,7 @@ async def test_serial_number_area(fake_panel: FakePanel) -> None:
     [
         (False, False, True, "0a1c"),  # as read on a real 1050 while idle
         (True, False, True, "0a14"),  # as read on a real 1050 with an area armed
-        (False, True, True, "0a5c"),
+        (False, True, True, "0a5c"),  # as read on a real 1050 in programming
         (False, False, False, "0a9c"),
     ],
 )
@@ -171,7 +171,12 @@ async def test_panel_state_flags(
         )
         # byte 1 alone, read at an offset
         flags = await client.read(read_frame(c.RAM_PANEL_STATE + 1, 1), 1)
+        faults = await client.read(
+            read_frame(c.RAM_FAULTS, c.FAULTS_LENGTH), c.FAULTS_LENGTH
+        )
     assert flags.hex() == expected[2:]
+    # the same flags end the faults register, as on the real panel
+    assert faults[4:].hex() == expected
 
 
 # ------------------------------------------------------------ captured replies

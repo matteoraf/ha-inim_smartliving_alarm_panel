@@ -97,7 +97,8 @@
         "invalid_board_reply": "La scheda SmartLAN/G ha risposto, ma la risposta non è nel formato previsto. Se nome utente e password sono corretti, questa versione della scheda potrebbe non essere ancora supportata: segnalalo su GitHub allegando un log di debug.",
         "invalid_pin": "Il PIN non corrisponde a nessun codice utente della centrale.",
         "invalid_pin_format": "Il PIN deve avere da 1 a 6 cifre.",
-        "unsupported_firmware": "Il firmware della centrale è troppo vecchio: serve il firmware 5 o successivo."
+        "unsupported_firmware": "Il firmware della centrale è troppo vecchio: serve il firmware 5 o successivo.",
+        "panel_programming": "La centrale è in programmazione, quindi ora non è possibile leggerne la configurazione. Riprova al termine della programmazione."
       },
       "abort": {
         "already_configured": "Questa centrale di allarme è già configurata.",
@@ -154,6 +155,15 @@
       },
       "zones_not_ready": {
         "message": "{target} non è stato attivato perché queste zone non sono pronte: {zones}."
+      },
+      "panel_programming": {
+        "message": "Il comando per {target} non è stato inviato: la centrale è in programmazione. Riprova al termine della programmazione."
+      },
+      "panel_programming_started": {
+        "message": "La centrale è entrata in programmazione mentre veniva inviato il comando per {target}, quindi potrebbe non essere stato eseguito. Controlla {target} e riprova al termine della programmazione."
+      },
+      "panel_programming_config": {
+        "message": "La centrale è in programmazione, quindi la configurazione non è stata letta. Riprova al termine della programmazione. La configurazione della centrale non è stata modificata."
       },
       "refused_invalid_code": {
         "message": "La centrale non ha accettato il PIN per {target}. Il PIN potrebbe essere stato cambiato o cancellato sulla centrale: inserisci quello attuale con Riconfigura."
@@ -217,6 +227,11 @@
       }
     },
     "entity": {
+      "binary_sensor": {
+        "programming_mode": {
+          "name": "Modalità programmazione"
+        }
+      },
       "select": {
         "area_arming_mode": {
           "name": "Area {area} modalità di inserimento",

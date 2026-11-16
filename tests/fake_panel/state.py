@@ -120,14 +120,20 @@ class PanelState:
     outputs: dict[int, int] = field(default_factory=dict)  # logical terminal -> value
     fixed_outputs: list[bool] = field(default_factory=lambda: [False] * 3)
     active_scenario: int | None = None
-    faults: bytes = bytes((0, 0)) + (910).to_bytes(2, "little") + bytes(3)  # 13.8 V
+    # Fault flags and supply voltage (13.8 V): bytes 0-3 of the faults register,
+    # which ends with the panel state flags
+    faults: bytes = bytes((0, 0)) + (910).to_bytes(2, "little")
     keypad_temperatures: dict[int, float] = field(default_factory=dict)
     command_result: int = c.RESULT_OK
     # Arming an area (directly or by scenario) with a zone not at rest is
     # accepted, as a real 1050 does; True refuses it with the "open zones"
     # result, as a panel programmed not to allow arming with zones not ready
     block_arming_when_not_ready: bool = False
-    in_programming: bool = False  # panel state flag only; commands are not refused
+    # Programming mode: shown in the panel state flags; commands are ignored
+    # and the result register keeps the previous result, as on a real panel
+    in_programming: bool = False
+    # Enter programming mode when the next command arrives (before it is run)
+    enter_programming_on_command: bool = False
     voice_board: bool = True
     sirens_stopped: int = 0
     calls_cleared: int = 0
@@ -186,7 +192,7 @@ class PanelState:
             c.RAM_ZONE_INCLUSION: self.encode_zone_inclusion,
             c.RAM_ZONE_MEMORY: self.encode_zone_memory,
             c.RAM_COMMAND_RESULT: lambda: bytes((self.command_result,)),
-            c.RAM_FAULTS: lambda: self.faults,
+            c.RAM_FAULTS: lambda: self.faults + self.encode_panel_state(),
         }
         if address in dynamic:
             return dynamic[address]()[:length].ljust(length, b"\x00")

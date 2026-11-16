@@ -307,5 +307,10 @@ class FakePanel:
             c.RAM_CMD_STOP: self.state.execute_stop,
         }
         if request.space == SPACE_RAM and request.address in handlers:
-            self.state.command_result = handlers[request.address](request.payload)
+            if self.state.enter_programming_on_command:
+                self.state.in_programming = True
+            # In programming mode the panel ignores commands: the result
+            # register keeps the previous command's result
+            if not self.state.in_programming:
+                self.state.command_result = handlers[request.address](request.payload)
         return bytes((checksum(request.payload),))

@@ -218,6 +218,13 @@
   },
   {
     "platform": "binary_sensor",
+    "unique_id": "_programming_mode",
+    "original_name": "Programming mode",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
     "unique_id": "_scenario_0_active_bs",
     "original_name": "Scenario 'Scenario 1' Active",
     "device_class": null,

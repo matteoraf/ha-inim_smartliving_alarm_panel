@@ -5,7 +5,8 @@ package (one persistent connection, commands ahead of polls). No Home
 Assistant imports.
 
 The panel has no login: the PIN travels with every command and the panel
-checks it there. The PIN table is read once to find the user code, whose
+checks it there. While the panel is in programming mode it ignores commands
+and keeps the result of the previous one, so commands are not sent then. The PIN table is read once to find the user code, whose
 areas are needed to ask which scenario is active; the table itself is
 never logged or kept.
 """
@@ -51,12 +52,14 @@ from .protocol.model import (
 )
 from .protocol.status import (
     AreaStatus,
+    PanelState,
     ZoneInclusion,
     ZoneMemory,
     ZoneState,
     decode_active_scenario,
     decode_area_status,
     decode_not_ready_zones,
+    decode_panel_state,
     decode_zone_inclusion,
     decode_zone_memory,
     decode_zone_states,
@@ -83,6 +86,26 @@ class NotReadyError(Exception):
         )
         self.scenario = scenario
         self.zones = zones
+
+
+class ProgrammingModeError(Exception):
+    """The panel is in programming mode, so it ignores commands.
+
+    This is keypad programming or a reload of the panel's configuration.
+    sent is False when the command was not sent; True when the panel entered
+    programming mode while it was sent, so it may not have been carried out
+    (the result read back cannot be trusted).
+    """
+
+    def __init__(self, *, sent: bool = False) -> None:
+        """Say whether the command had been sent."""
+        super().__init__(
+            "the panel entered programming mode while the command was sent; "
+            "it may not have been carried out"
+            if sent
+            else "the panel is in programming mode"
+        )
+        self.sent = sent
 
 
 @dataclass(frozen=True, slots=True)
@@ -132,6 +155,7 @@ class PanelStatus:
     zone_inclusion: ZoneInclusion
     zone_memory: ZoneMemory
     active_scenario: int | None  # 0-based; None when no scenario matches
+    panel_state: PanelState | None  # None when the panel's model is not known
     raw: Mapping[int, bytes]  # reply data by register
 
 
@@ -170,6 +194,9 @@ class SmartLivingPanel:
         self._model: PanelModel | None = None
         self._user_areas: frozenset[int] = frozenset()
         self.user_code_found = False
+        # The state flags are read only from models with a profile: other
+        # firmware may lay out the faults register differently
+        self.reads_panel_state = False
 
     @property
     def firmware(self) -> FirmwareInfo:
@@ -207,9 +234,11 @@ class SmartLivingPanel:
             return self._model
         data = await session.read_ram(reg.MODEL_STRING, reg.MODEL_STRING_LENGTH)
         firmware = parse_model_string(data)
+        known = True
         try:
             model = model_for(firmware)
         except UnsupportedPanelError as err:
+            known = False
             if self._fallback_model is None:
                 raise
             _LOGGER.warning(
@@ -246,14 +275,20 @@ class SmartLivingPanel:
         self._model_string = data
         self._user_areas = areas
         self.user_code_found = index is not None
+        self.reads_panel_state = known
         return model
 
     # ----------------------------------------------------------- configuration
 
     async def read_configuration(self) -> PanelConfiguration:
-        """Read labels, terminals, zones and scenarios."""
+        """Read labels, terminals, zones and scenarios.
+
+        Raises ProgrammingModeError if the panel is in programming mode
+        before or after the reads, as the configuration may be changing.
+        """
         async with self.transport.session() as session:
             model = await self._identify(session)
+            await self._check_not_programming(session)
             pointers = await session.read_ram(reg.LABELS_AREAS, _LABEL_POINTERS_LENGTH)
 
             async def labels(register: int, count: int) -> Labels:
@@ -278,6 +313,7 @@ class SmartLivingPanel:
             scenarios = await session.read_eeprom(
                 model.scenario_records, model.scenarios * model.scenario_record_length
             )
+            await self._check_not_programming(session)
         return PanelConfiguration(
             firmware=self.firmware,
             model_string=self._model_string,
@@ -299,7 +335,7 @@ class SmartLivingPanel:
     # ------------------------------------------------------------------ status
 
     async def read_status(self) -> PanelStatus:
-        """Read areas, zones and the active scenario in one go."""
+        """Read areas, zones, the active scenario and the state flags in one go."""
         async with self.transport.session() as session:
             model = await self._identify(session)
             raw: dict[int, bytes] = {}
@@ -313,12 +349,16 @@ class SmartLivingPanel:
             raw[reg.ACTIVE_SCENARIO] = await session.read(
                 active_scenario_request(area_mask(self._user_areas)), 1
             )
+            if self.reads_panel_state:
+                raw[reg.FAULTS] = await session.read_ram(reg.FAULTS, reg.FAULTS_LENGTH)
+        faults = raw.get(reg.FAULTS)
         return PanelStatus(
             areas=decode_area_status(raw[reg.AREA_STATUS], model),
             zone_states=decode_zone_states(raw[reg.ZONE_STATE], model),
             zone_inclusion=decode_zone_inclusion(raw[reg.ZONE_INCLUSION], model),
             zone_memory=decode_zone_memory(raw[reg.ZONE_MEMORY], model),
             active_scenario=decode_active_scenario(raw[reg.ACTIVE_SCENARIO], model),
+            panel_state=None if faults is None else _panel_state(faults),
             raw=raw,
         )
 
@@ -394,7 +434,31 @@ class SmartLivingPanel:
             return await self._send(session, command)
 
     async def _send(self, session: Session, command: Command) -> CommandResult:
+        """Send a command unless the panel is in programming mode.
+
+        The state flags are read again after the command: if programming
+        began meanwhile, the panel may have ignored it, and its result
+        cannot be trusted.
+        """
+        await self._check_not_programming(session)
         result = await session.command(command)
+        await self._check_not_programming(session, sent=True)
         if result.ok and self.command_settle > 0:
             await asyncio.sleep(self.command_settle)  # still holding the session
         return result
+
+    async def _check_not_programming(
+        self, session: Session, *, sent: bool = False
+    ) -> None:
+        """Raise ProgrammingModeError if the panel is in programming mode."""
+        if not self.reads_panel_state:
+            return
+        faults = await session.read_ram(reg.FAULTS, reg.FAULTS_LENGTH)
+        if _panel_state(faults).programming:
+            raise ProgrammingModeError(sent=sent)
+
+
+def _panel_state(faults: bytes) -> PanelState:
+    """The panel state flags, read with the faults register."""
+    start = reg.PANEL_STATE_OFFSET
+    return decode_panel_state(faults[start : start + reg.PANEL_STATE_LENGTH])

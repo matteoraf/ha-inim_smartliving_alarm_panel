@@ -31,6 +31,7 @@ from .errors import (
     CommandFailedError,
     CommandRefusedError,
     InimCommandError,
+    PanelProgrammingError,
     async_send_command,
 )
 from .legacy import LegacyPanelClient, zone_exists
@@ -151,7 +152,11 @@ async def async_handle_scenario_activation_failure(
     blocking_zones_event_data = []
     panel_result = error.reason if isinstance(error, CommandRefusedError) else None
 
-    if isinstance(error, CommandFailedError) or panel_result not in {
+    if isinstance(error, PanelProgrammingError):
+        event_reason = "panel_programming"
+        notification_message = str(error)
+        notification_id_suffix = f"activation_failed_{scenario_idx_to_activate}"
+    elif isinstance(error, CommandFailedError) or panel_result not in {
         None,
         "refused",
         "open_zones",

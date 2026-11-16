@@ -196,13 +196,11 @@ def test_panel_state(
 
 def test_faults_and_voltage() -> None:
     """Fault bits from bytes 0, 1, 4 and 5; supply voltage from bytes 2-3."""
-    idle = decode_faults(panel_1050().faults)
+    idle = decode_faults(panel_1050().ram_read(c.RAM_FAULTS, c.FAULTS_LENGTH))
     assert idle.active == frozenset()
     assert idle.supply_voltage == 13.8
 
-    data = (
-        bytes((0b1001, 0b100000)) + (800).to_bytes(2, "little") + bytes((0x30, 0x01, 0))
-    )
+    data = bytes((0b1001, 0b100000)) + (800).to_bytes(2, "little") + bytes((0x30, 0x01))
     faults = decode_faults(data)
     assert faults.active == {
         Fault.ZONE_FUSE,
@@ -224,7 +222,7 @@ def test_faults_and_voltage() -> None:
         (lambda d: decode_zone_memory(d, SL1050), 28),
         (lambda d: decode_not_ready_zones(d, SL1050), 13),
         (decode_panel_state, 2),
-        (decode_faults, 7),
+        (decode_faults, 6),
     ],
 )
 def test_wrong_lengths_are_refused(decode, length: int) -> None:

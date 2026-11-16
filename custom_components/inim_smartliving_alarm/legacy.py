@@ -15,7 +15,13 @@ from datetime import tzinfo
 import logging
 from typing import Any
 
-from .api import NotReadyError, PanelConfiguration, PanelStatus, SmartLivingPanel
+from .api import (
+    NotReadyError,
+    PanelConfiguration,
+    PanelStatus,
+    ProgrammingModeError,
+    SmartLivingPanel,
+)
 from .const import (
     AREA_MODE_DISARMED,
     AREA_MODE_INSTANT,
@@ -331,7 +337,7 @@ class LegacyPanelClient:
     async def _run(self, what: str, command) -> bool:
         try:
             result = await command
-        except _ERRORS as err:
+        except (*_ERRORS, ProgrammingModeError) as err:
             _LOGGER.error("%s failed: %s", what, err)
             return False
         if not result.ok:
@@ -618,6 +624,10 @@ def status_dict(status: PanelStatus, model: PanelModel) -> dict[str, Any]:
             "raw_hex": raw[reg.ACTIVE_SCENARIO].hex(),
             "active_scenario_number": raw[reg.ACTIVE_SCENARIO][0],
         },
+        # None when the panel's state flags are not read (model not known)
+        "panel_programming": (
+            None if status.panel_state is None else status.panel_state.programming
+        ),
         "errors": [],
     }
 

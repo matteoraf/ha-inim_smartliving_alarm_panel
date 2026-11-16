@@ -8,18 +8,16 @@ SERIAL_NUMBER_LENGTH = 16
 HARDWARE_SIGNATURE = 0xFECC  # 2 bytes, B2 55
 BRAND = 0xFED2  # 2 bytes LE, 0 = standard Inim
 
-# Panel state flags (stato_centrale), 2 bytes
-PANEL_STATE = 0x0D28
-PANEL_STATE_LENGTH = 2
-
 # Status registers (lengths depend on the model, see PanelModel)
 AREA_STATUS = 0x2000
 ZONE_STATE = 0x2001
 ZONE_INCLUSION = 0x2002
 ZONE_MEMORY = 0x2003
 COMMAND_RESULT = 0x2004  # 1 byte
-FAULTS = 0x2005
-FAULTS_LENGTH = 7
+FAULTS = 0x2005  # fault flags, supply voltage, then the panel state flags
+FAULTS_LENGTH = 6
+PANEL_STATE_OFFSET = 4  # panel state flags (stato_centrale): bytes 4-5 of FAULTS
+PANEL_STATE_LENGTH = 2
 
 # Command registers (written with the PIN first)
 ARM_AREAS = 0x2006
