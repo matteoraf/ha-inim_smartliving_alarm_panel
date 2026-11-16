@@ -11,12 +11,17 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
+    ARM_MODE_INSTANT,
+    ARM_MODE_PARTIAL,
+    ARM_MODE_TOTAL,
+    CONF_AREA_SWITCH_ARM_MODE,
     CONF_LIMIT_AREAS,
     CONF_LIMIT_ZONES,
     CONF_PANEL_NAME,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
+    DEFAULT_AREA_SWITCH_ARM_MODE,
     DEFAULT_LIMIT_AREAS,
     DEFAULT_LIMIT_ZONES,
     DEFAULT_PANEL_NAME,
@@ -41,6 +46,13 @@ from .legacy import LegacyPanelClient, zones_to_create
 from .protocol.commands import ArmMode
 
 _LOGGER = logging.getLogger(__name__)
+
+# The area switch's arm mode option -> command
+SWITCH_ARM_MODES = {
+    ARM_MODE_TOTAL: ArmMode.AWAY,
+    ARM_MODE_PARTIAL: ArmMode.STAY,
+    ARM_MODE_INSTANT: ArmMode.INSTANT,
+}
 
 
 async def async_setup_entry(
@@ -162,7 +174,10 @@ async def async_setup_entry(
 
 
 class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
-    """An Inim area as a switch: on in any armed mode, turning on arms total."""
+    """An Inim area as a switch: on in any armed mode.
+
+    Turning it on arms in the mode chosen in the options (total by default).
+    """
 
     def __init__(
         self,
@@ -231,11 +246,15 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         return self._attr_is_on
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        """Turn the switch on (arm the area)."""
+        """Turn the switch on (arm the area in the configured mode)."""
         _LOGGER.info("Arming Area %s (%s)", self._area_id_1_based, self._area_name)
 
+        option = self.config_entry.options.get(
+            CONF_AREA_SWITCH_ARM_MODE, DEFAULT_AREA_SWITCH_ARM_MODE
+        )
+        mode = SWITCH_ARM_MODES.get(option, ArmMode.AWAY)
         await async_send_command(
-            self.api_client.panel.arm_areas({self._area_id_1_based: ArmMode.AWAY}),
+            self.api_client.panel.arm_areas({self._area_id_1_based: mode}),
             self._area_name,
         )
         self._attr_is_on = True  # Optimistic update

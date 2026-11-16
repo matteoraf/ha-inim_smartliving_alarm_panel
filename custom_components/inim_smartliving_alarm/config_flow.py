@@ -10,6 +10,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.selector import (
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
@@ -17,8 +20,12 @@ from homeassistant.helpers.selector import (
 import voluptuous as vol
 
 from .const import (
+    ARM_MODE_INSTANT,
+    ARM_MODE_PARTIAL,
+    ARM_MODE_TOTAL,
     BOARD_SMARTLAN_G,
     BOARD_SMARTLAN_SI,
+    CONF_AREA_SWITCH_ARM_MODE,
     CONF_BOARD,
     CONF_EVENT_LOG_SIZE,
     CONF_FOUND_BOARD,
@@ -40,6 +47,7 @@ from .const import (
     CONF_USERNAME,
     DATA_API_CLIENT,
     DATA_INITIAL_PANEL_CONFIG,
+    DEFAULT_AREA_SWITCH_ARM_MODE,
     DEFAULT_EVENT_LOG_SIZE,
     DEFAULT_LIMIT_AREAS,
     DEFAULT_LIMIT_SCENARIOS,
@@ -629,6 +637,9 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 updated_options[CONF_READER_NAMES] = user_input.get(
                     CONF_READER_NAMES, ""
                 )
+                updated_options[CONF_AREA_SWITCH_ARM_MODE] = user_input.get(
+                    CONF_AREA_SWITCH_ARM_MODE, DEFAULT_AREA_SWITCH_ARM_MODE
+                )
 
                 for key in [
                     CONF_SCENARIO_ARM_HOME,
@@ -699,6 +710,18 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_READER_NAMES,
                 default=self.current_settings.get(CONF_READER_NAMES, ""),
             ): str,
+            vol.Optional(
+                CONF_AREA_SWITCH_ARM_MODE,
+                default=self.current_settings.get(
+                    CONF_AREA_SWITCH_ARM_MODE, DEFAULT_AREA_SWITCH_ARM_MODE
+                ),
+            ): SelectSelector(
+                SelectSelectorConfig(
+                    options=[ARM_MODE_TOTAL, ARM_MODE_PARTIAL, ARM_MODE_INSTANT],
+                    translation_key=CONF_AREA_SWITCH_ARM_MODE,
+                    mode=SelectSelectorMode.DROPDOWN,
+                )
+            ),
         }
 
         if len(scenario_choices) > 1:

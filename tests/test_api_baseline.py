@@ -199,7 +199,7 @@ async def test_arm_with_wrong_pin(hass: HomeAssistant, panel: FakePanel) -> None
 async def test_arm_with_open_zone(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
-    """Arming is refused when a zone that blocks arming while not ready is open."""
+    """A panel that does not allow arming with zones not ready refuses it."""
     panel.state.zone_states[0] = c.ZONE_ALARM  # zone 1, area 1
     panel.state.block_arming_when_not_ready = True
     assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[1]) is False
@@ -209,7 +209,7 @@ async def test_arm_with_open_zone(
 async def test_arm_with_open_zone_accepted(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
-    """Without that zone programming the panel arms with a zone open."""
+    """Otherwise the panel arms with a zone open."""
     panel.state.zone_states[0] = c.ZONE_ALARM  # zone 1, area 1
     assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[1]) is True
     assert panel.state.armed_areas() == [1]

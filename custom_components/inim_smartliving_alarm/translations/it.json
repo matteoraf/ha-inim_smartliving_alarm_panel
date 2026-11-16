@@ -121,7 +121,11 @@
             "scenario_arm_away": "Scenario Inserimento Totale (Fuori)",
             "scenario_arm_night": "Scenario Inserimento Notte",
             "scenario_arm_vacation": "Scenario Inserimento Vacanza",
-            "scenario_disarm": "Scenario Disinserimento"
+            "scenario_disarm": "Scenario Disinserimento",
+            "area_switch_arm_mode": "Gli interruttori area inseriscono in"
+          },
+          "data_description": {
+            "area_switch_arm_mode": "Modalità usata quando si accende un interruttore area. Il selettore della modalità di inserimento di ogni area imposta qualsiasi modalità."
           }
         }
       },
@@ -155,7 +159,7 @@
         "message": "La centrale non ha accettato il PIN per {target}. Il PIN potrebbe essere stato cambiato o cancellato sulla centrale: inserisci quello attuale con Riconfigura."
       },
       "refused_open_zones": {
-        "message": "La centrale ha rifiutato l'inserimento di {target}: una zona programmata per bloccare l'inserimento quando non è pronta non è a riposo."
+        "message": "La centrale ha rifiutato l'inserimento di {target}: non consente l'inserimento con zone non pronte."
       },
       "refused_code_not_enabled": {
         "message": "La centrale ha rifiutato il comando per {target}: il PIN non è abilitato."
@@ -195,6 +199,34 @@
       },
       "scenario_not_mapped": {
         "message": "Nessuno scenario è associato a {action} per {panel}: sceglilo nelle opzioni dell'integrazione."
+      },
+      "entry_not_loaded_command": {
+        "message": "{title} non è caricata, quindi il comando non può essere inviato."
+      },
+      "area_out_of_range": {
+        "message": "La centrale ha {count} aree, quindi queste non esistono: {areas}."
+      }
+    },
+    "selector": {
+      "area_switch_arm_mode": {
+        "options": {
+          "total": "Totale",
+          "partial": "Parziale",
+          "instant": "Istantaneo"
+        }
+      }
+    },
+    "entity": {
+      "select": {
+        "area_arming_mode": {
+          "name": "Area {area} modalità di inserimento",
+          "state": {
+            "disarmed": "Disinserita",
+            "armed_total": "Inserita totale",
+            "armed_partial": "Inserita parziale",
+            "armed_instant": "Inserita istantanea"
+          }
+        }
       }
     }
   }

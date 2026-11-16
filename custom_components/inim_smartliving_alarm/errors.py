@@ -4,7 +4,7 @@ Three cases are kept apart:
 - ZonesNotReadyError: the integration did not send the command, because its
   own check found zones that are not ready;
 - CommandRefusedError: the panel received the command and refused it (wrong
-  code, code not enabled, a zone that blocks arming while not ready, ...);
+  code, code not enabled, arming not allowed while zones are not ready, ...);
 - CommandFailedError: the command could not be sent, or its result could not
   be read (connection or protocol problem).
 """

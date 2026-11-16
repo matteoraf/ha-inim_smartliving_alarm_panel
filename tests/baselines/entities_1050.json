@@ -1421,6 +1421,76 @@
     "state": "unknown"
   },
   {
+    "platform": "select",
+    "unique_id": "_area_mode_select_1",
+    "original_name": "Area 1 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "select",
+    "unique_id": "_area_mode_select_10",
+    "original_name": "Area 10 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "select",
+    "unique_id": "_area_mode_select_2",
+    "original_name": "Area 2 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "select",
+    "unique_id": "_area_mode_select_3",
+    "original_name": "Area 3 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "select",
+    "unique_id": "_area_mode_select_4",
+    "original_name": "Area 4 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "select",
+    "unique_id": "_area_mode_select_5",
+    "original_name": "Area 5 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "select",
+    "unique_id": "_area_mode_select_6",
+    "original_name": "Area 6 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "select",
+    "unique_id": "_area_mode_select_7",
+    "original_name": "Area 7 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "select",
+    "unique_id": "_area_mode_select_8",
+    "original_name": "Area 8 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
+    "platform": "select",
+    "unique_id": "_area_mode_select_9",
+    "original_name": "Area 9 arming mode",
+    "device_class": null,
+    "state": "disarmed"
+  },
+  {
     "platform": "sensor",
     "unique_id": "_active_scenario_name",
     "original_name": "Active Scenario Name",

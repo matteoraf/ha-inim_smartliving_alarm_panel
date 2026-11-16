@@ -12,6 +12,12 @@ from homeassistant.helpers.typing import ConfigType
 import voluptuous as vol
 
 from .const import (
+    ARM_MODE_DISARM,
+    ARM_MODE_INSTANT,
+    ARM_MODE_PARTIAL,
+    ARM_MODE_TOTAL,
+    ATTR_AREAS,
+    ATTR_MODE,
     BOARD_SMARTLAN_SI,
     CONF_BOARD,
     CONF_HOST,
@@ -25,15 +31,19 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
+    KEY_INIT_AREA_NAMES,
+    KEY_INIT_AREAS,
     KEY_INIT_TERMINAL_RECORDS_RAW,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
     PLATFORMS,
+    SERVICE_ARM_AREA,
     SERVICE_REREAD_PANEL_CONFIGURATION,
 )
 
 # Import the custom coordinator
 from .coordinator import InimDataUpdateCoordinator
+from .errors import async_send_command
 
 # Import API
 from .legacy import (
@@ -46,6 +56,7 @@ from .panel_config import (
     async_fetch_panel_configuration,
     async_reread_panel_configuration,
 )
+from .protocol.commands import ArmMode
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,32 +67,94 @@ REREAD_PANEL_CONFIGURATION_SCHEMA = vol.Schema(
 )
 
 
+ARM_AREA_MODES = {
+    ARM_MODE_TOTAL: ArmMode.AWAY,
+    ARM_MODE_PARTIAL: ArmMode.STAY,
+    ARM_MODE_INSTANT: ArmMode.INSTANT,
+    ARM_MODE_DISARM: ArmMode.DISARM,
+}
+
+ARM_AREA_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string,
+        vol.Required(ATTR_AREAS): vol.All(
+            cv.ensure_list,
+            [vol.All(vol.Coerce(int), vol.Range(min=1))],
+            vol.Length(min=1),
+        ),
+        vol.Required(ATTR_MODE): vol.In(list(ARM_AREA_MODES)),
+    }
+)
+
+
+def _loaded_entry(
+    hass: HomeAssistant, entry_id: str, not_loaded_key: str
+) -> ConfigEntry:
+    """The integration's entry with this ID; it must be loaded."""
+    entry = hass.config_entries.async_get_entry(entry_id)
+    if entry is None or entry.domain != DOMAIN:
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="entry_not_found",
+            translation_placeholders={"entry_id": entry_id},
+        )
+    if entry.state is not ConfigEntryState.LOADED:
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key=not_loaded_key,
+            translation_placeholders={"title": entry.title},
+        )
+    return entry
+
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register the integration services."""
 
     async def async_reread_service(call: ServiceCall) -> None:
         """Read the panel configuration of one entry again and reload it."""
-        entry_id = call.data[ATTR_CONFIG_ENTRY_ID]
-        entry = hass.config_entries.async_get_entry(entry_id)
-        if entry is None or entry.domain != DOMAIN:
-            raise ServiceValidationError(
-                translation_domain=DOMAIN,
-                translation_key="entry_not_found",
-                translation_placeholders={"entry_id": entry_id},
-            )
-        if entry.state is not ConfigEntryState.LOADED:
-            raise ServiceValidationError(
-                translation_domain=DOMAIN,
-                translation_key="entry_not_loaded",
-                translation_placeholders={"title": entry.title},
-            )
+        entry = _loaded_entry(hass, call.data[ATTR_CONFIG_ENTRY_ID], "entry_not_loaded")
         await async_reread_panel_configuration(hass, entry)
+
+    async def async_arm_area_service(call: ServiceCall) -> None:
+        """Arm or disarm one or more areas of one panel in a single command."""
+        entry = _loaded_entry(
+            hass, call.data[ATTR_CONFIG_ENTRY_ID], "entry_not_loaded_command"
+        )
+        api: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+        areas = sorted(set(call.data[ATTR_AREAS]))
+        panel_areas = api.panel.model.areas
+        if outside := [area for area in areas if area > panel_areas]:
+            raise ServiceValidationError(
+                translation_domain=DOMAIN,
+                translation_key="area_out_of_range",
+                translation_placeholders={
+                    "areas": ", ".join(str(area) for area in outside),
+                    "count": str(panel_areas),
+                },
+            )
+        names = (
+            entry.data.get(DATA_INITIAL_PANEL_CONFIG, {}).get(KEY_INIT_AREAS) or {}
+        ).get(KEY_INIT_AREA_NAMES) or []
+        target = ", ".join(
+            (names[area - 1] if area <= len(names) else "") or f"Area {area}"
+            for area in areas
+        )
+        mode = ARM_AREA_MODES[call.data[ATTR_MODE]]
+        _LOGGER.info("arm_area: %s -> %s", target, call.data[ATTR_MODE])
+        await async_send_command(
+            api.panel.arm_areas(dict.fromkeys(areas, mode)), target
+        )
+        coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
+        await coordinator.async_request_refresh()
 
     hass.services.async_register(
         DOMAIN,
         SERVICE_REREAD_PANEL_CONFIGURATION,
         async_reread_service,
         schema=REREAD_PANEL_CONFIGURATION_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_ARM_AREA, async_arm_area_service, schema=ARM_AREA_SCHEMA
     )
     return True
 

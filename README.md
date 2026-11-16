@@ -14,7 +14,11 @@ Features
     
 *   **Full Area Management**: Areas (partitions) are exposed as:
     
-    *   **Switch entities**: For direct arming (turn on) and disarming (turn off) of each area. The switch is on whenever the area is armed, in total, partial or instant mode.
+    *   **Switch entities**: For direct arming (turn on) and disarming (turn off) of each area. The switch is on whenever the area is armed, in total, partial or instant mode; turning it on arms in the mode chosen in the options (total by default).
+        
+    *   **Select entities**: The arming mode of each area (Disarmed, Armed total, Armed partial, Armed instant); choosing a mode arms or disarms the area.
+        
+    *   **The `arm_area` action**: Arms or disarms one or more areas in a single command (see [Arming areas from automations](#arming-areas-from-automations)).
         
     *   **Binary Sensor entities**: Per area, whether it is in alarm now, in tamper now, and whether it has an alarm memory (kept after the alarm until it is reset).
         
@@ -130,7 +134,7 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   New: SmartLAN/G boards (experimental), a network search when adding a panel, and the active scenario now takes all areas of your user code into account (previously areas 8 to 10 were ignored).
     
-*   **Area switches** are now on for an area armed in partial or instant mode too (before, such an area showed as unknown and its switch was off). Turning a switch on still arms in total mode. The new `arming_mode` attribute tells the mode (`total`, `partial`, `instant` or `disarmed`); `status_text` stays `armed` or `disarmed`.
+*   **Area switches** are now on for an area armed in partial or instant mode too (before, such an area showed as unknown and its switch was off). Turning a switch on still arms in total mode, unless you choose another mode with the new **Area switches arm in** option. The new `arming_mode` attribute tells the mode (`total`, `partial`, `instant` or `disarmed`); `status_text` stays `armed` or `disarmed`.
     
 *   **"Area X Triggered" is now called "Area X Alarm memory"**: same entity ID, same meaning (on after an alarm until the memory is reset), now also for areas 9 and 10, with a `tamper_memory` attribute. Two new binary sensors per area show the **live** state: *Area X Alarm* and *Area X Tamper*.
     
@@ -149,6 +153,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
 *   **SmartLAN/G:** the board's replies are now read the way the board sends them (the data alone, without the panel's checksum). Before, every read failed and setup reported a wrong user name or password even with the right credentials. A wrong user name or password is now reported only when the board's reply cannot be decrypted; any other unexpected reply has its own message (see [Troubleshooting](#troubleshooting)).
     
 *   **Commands that are not carried out now show an error.** Before, a refused arm, disarm, bypass or reset was only written to the log, and the alarm panel's error notifications did not appear at all. Now the action fails with a message that tells why (for example a PIN the panel no longer accepts, or a PIN not enabled for that area), in the dashboard and in automation traces; see [When the panel refuses a command](#when-the-panel-refuses-a-command). An automation step that fails stops that automation unless the step has `continue_on_error: true`. The `inim_smartliving_alarm_scenario_activation_failed` event has a new `panel_result` field (the panel's answer, or `null` when the panel did not refuse the command), and its `reason` can now also be `command_failed` or `invalid_code`.
+    
+*   **New: an arming mode select per area** (*Area X arming mode*: disarmed, total, partial or instant) and the **`arm_area` action**, which arms or disarms several areas in one command (see [Arming areas from automations](#arming-areas-from-automations)).
     
 *   Not changed yet: see [Known limitations](#known-limitations).
     
@@ -189,6 +195,8 @@ After installation and restarting Home Assistant:
     *   **Event Log Size**: The number of recent events to store and display in the event log sensor's attributes.
         
     *   **Scenario Mappings**: You can map your panel's scenarios to Home Assistant's standard alarm actions (Arm Home, Arm Away, etc.).
+
+    *   **Area switches arm in** (options only, not at setup): the mode an area switch arms in when turned on: total (the default), partial or instant. The *arming mode* select of each area offers every mode.
 
     *   **Readers Names**: You can provide a comma separated list of Proximity readers "friendly" names wich will be mapped to readers in the order in which they appear. The integration cannot query those names. If you don't provide any, you'll see them appear as "Reader X" in the log.
         
@@ -236,7 +244,9 @@ This integration exposes your Inim alarm system's components as various Home Ass
     
 *   **Areas**:
     
-    *   *switch.your\_panel\_name\_area\_X*: Allows direct arming (on) and disarming (off) of an individual area. It is on when the area is armed in any mode (total, partial or instant); turning it on arms in total mode. Attributes: `status_text` (`armed`, `disarmed` or `unknown`) and `arming_mode` (`total`, `partial`, `instant`, `disarmed` or `unknown`).
+    *   *switch.your\_panel\_name\_area\_X*: Allows direct arming (on) and disarming (off) of an individual area. It is on when the area is armed in any mode (total, partial or instant); turning it on arms in the mode set by the **Area switches arm in** option (total by default). Attributes: `status_text` (`armed`, `disarmed` or `unknown`) and `arming_mode` (`total`, `partial`, `instant`, `disarmed` or `unknown`).
+        
+    *   *select.your\_panel\_name\_area\_X\_arming\_mode* (named *Area X arming mode*): The area's arming mode: *Disarmed*, *Armed total*, *Armed partial* or *Armed instant* (unknown while the panel reports none of these). Choosing a mode arms the area in that mode or disarms it; if the panel refuses, an error says why. Attributes: `area_id` and `area_name`.
         
     *   *binary\_sensor.your\_panel\_name\_area\_X\_alarm*: On while the area is in alarm.
         
@@ -300,6 +310,20 @@ target:
 
 You can call it from a script, an automation or a dashboard button.
 
+### Arming areas from automations
+
+The action `inim_smartliving_alarm.arm_area` arms or disarms one or more areas of a panel in a single command, so they change together. `areas` are the area numbers as on the panel (also areas without entities); `mode` is `total`, `partial`, `instant` or `disarm`. Pick the panel from the list in the action editor, or give its entry ID:
+
+```yaml
+action: inim_smartliving_alarm.arm_area
+data:
+  config_entry_id: your_config_entry_id
+  areas: [1, 3]
+  mode: partial
+```
+
+Like the area switches and the arming mode selects, the action does not check the zones first. The panel refuses only when it is programmed not to allow arming with zones that are not ready; otherwise it arms, and an open zone can set off an alarm right away. In a later version, arming will follow a readiness setting of the integration. If the panel refuses the command, the action fails with the reason (see [When the panel refuses a command](#when-the-panel-refuses-a-command)).
+
 ### Displaying the Event Log
 
 You can display the event log using a Markdown card in Lovelace, but I recommend the custom:flex-table-card (from HACS) to provide a nice tabular view.
@@ -329,7 +353,7 @@ Arming, disarming, bypassing a zone, activating a scenario and resetting the ala
     |---|---|
     | The panel did not accept the PIN | The user code was changed or deleted on the panel: enter the current PIN with **Reconfigure**. |
     | The PIN is not enabled for it | The user code does not control that area: enable it on the panel or use another code. |
-    | A zone programmed to block arming while not ready is not at rest | Close or bypass that zone, then arm again. |
+    | The panel does not allow arming while zones are not ready | Close or bypass the open zones of the area, then arm again. |
     | The zone cannot be bypassed / belongs to no area | The zone's programming on the panel does not allow it. |
     | Already in the requested state | Nothing to do: the zone or area was already as requested. |
     | Its terminal is out of range / not connected / not in use | The zone's terminal has changed on the panel: use **Re-read panel configuration**. |
@@ -384,7 +408,7 @@ Troubleshooting
     
     *   Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions. Setup and **Reconfigure** refuse a PIN that matches no user code; for a panel set up with an older version of the integration, the log shows a warning ("The PIN does not match any user code of the panel") each time the integration connects. You can change it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)).
         
-*   **The panel armed an area with a zone open**: the area switches do not check the zones before arming. The panel itself refuses only when the open zone is programmed to block arming while not ready; otherwise it arms, and the open zone can set off an alarm right away. A check of the zones before arming is planned for a later version.
+*   **The panel armed an area with a zone open**: the area switches, the arming mode selects and the `arm_area` action do not check the zones before arming. The panel refuses only when it is programmed not to allow arming with zones that are not ready; otherwise it arms, and an open zone can set off an alarm right away. A check of the zones before arming is planned for a later version.
     
 *   **Entities Not Appearing or Not Updating**:
     
