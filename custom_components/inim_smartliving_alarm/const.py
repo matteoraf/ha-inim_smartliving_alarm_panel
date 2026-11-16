@@ -3,7 +3,14 @@
 DOMAIN = "inim_smartliving_alarm"
 
 # Platforms to be set up for this integration
-PLATFORMS = ["alarm_control_panel", "binary_sensor", "button", "sensor", "switch"]
+PLATFORMS = [
+    "alarm_control_panel",
+    "binary_sensor",
+    "button",
+    "select",
+    "sensor",
+    "switch",
+]
 
 # Configuration keys used in config_flow.py and __init__.py
 CONF_HOST = "host"
@@ -182,3 +189,13 @@ SENSOR_LAST_EVENT_LOG_SUFFIX = "event_log"  # For the new event log sensor
 # Define the new service name as a constant
 SERVICE_ALARM_RESET = "alarm_reset"
 SERVICE_REREAD_PANEL_CONFIGURATION = "reread_panel_configuration"
+SERVICE_ARM_AREA = "arm_area"
+ATTR_AREAS = "areas"
+ATTR_MODE = "mode"
+# arm_area modes (also the values of the area switch's arm mode option)
+ARM_MODE_TOTAL = "total"
+ARM_MODE_PARTIAL = "partial"
+ARM_MODE_INSTANT = "instant"
+ARM_MODE_DISARM = "disarm"
+CONF_AREA_SWITCH_ARM_MODE = "area_switch_arm_mode"  # option: total/partial/instant
+DEFAULT_AREA_SWITCH_ARM_MODE = ARM_MODE_TOTAL

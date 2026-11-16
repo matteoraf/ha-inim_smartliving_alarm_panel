@@ -125,7 +125,7 @@ class PanelState:
     command_result: int = c.RESULT_OK
     # Arming an area (directly or by scenario) with a zone not at rest is
     # accepted, as a real 1050 does; True refuses it with the "open zones"
-    # result, as for zones programmed to block arming while not ready
+    # result, as a panel programmed not to allow arming with zones not ready
     block_arming_when_not_ready: bool = False
     in_programming: bool = False  # panel state flag only; commands are not refused
     voice_board: bool = True

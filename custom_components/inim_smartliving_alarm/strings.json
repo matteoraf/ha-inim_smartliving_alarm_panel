@@ -121,7 +121,11 @@
             "scenario_arm_away": "Arm Away Scenario",
             "scenario_arm_night": "Arm Night Scenario",
             "scenario_arm_vacation": "Arm Vacation Scenario",
-            "scenario_disarm": "Disarm Scenario"
+            "scenario_disarm": "Disarm Scenario",
+            "area_switch_arm_mode": "Area switches arm in"
+          },
+          "data_description": {
+            "area_switch_arm_mode": "Mode used when an area switch is turned on. The arming mode select of each area sets any mode."
           }
         }
       },
@@ -155,7 +159,7 @@
         "message": "The panel did not accept the PIN for {target}. The PIN may have been changed or deleted on the panel: enter the current one with Reconfigure."
       },
       "refused_open_zones": {
-        "message": "The panel refused to arm {target}: a zone programmed to block arming while not ready is not at rest."
+        "message": "The panel refused to arm {target}: it does not allow arming while zones are not ready."
       },
       "refused_code_not_enabled": {
         "message": "The panel refused the command for {target}: the PIN is not enabled for it."
@@ -195,6 +199,34 @@
       },
       "scenario_not_mapped": {
         "message": "No scenario is mapped to {action} for {panel}: choose one in the integration options."
+      },
+      "entry_not_loaded_command": {
+        "message": "{title} is not loaded, so the command cannot be sent."
+      },
+      "area_out_of_range": {
+        "message": "The panel has {count} areas, so these do not exist: {areas}."
+      }
+    },
+    "selector": {
+      "area_switch_arm_mode": {
+        "options": {
+          "total": "Total",
+          "partial": "Partial",
+          "instant": "Instant"
+        }
+      }
+    },
+    "entity": {
+      "select": {
+        "area_arming_mode": {
+          "name": "Area {area} arming mode",
+          "state": {
+            "disarmed": "Disarmed",
+            "armed_total": "Armed total",
+            "armed_partial": "Armed partial",
+            "armed_instant": "Armed instant"
+          }
+        }
       }
     }
   }
