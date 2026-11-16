@@ -294,5 +294,5 @@ async def test_setup_in_programming(hass: HomeAssistant, panel: FakePanel) -> No
 
     panel.state.in_programming = False
     result = await submit(hass, flow_id, si_input(panel))
-    assert result["step_id"] == "initial_options"
+    assert result["step_id"] == "items"
     await unload_all(hass)

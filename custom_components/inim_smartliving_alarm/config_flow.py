@@ -7,9 +7,10 @@ from typing import Any
 
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.data_entry_flow import FlowResult, section
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.selector import (
+    SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
     SelectSelectorMode,
@@ -26,13 +27,11 @@ from .const import (
     BOARD_SMARTLAN_G,
     BOARD_SMARTLAN_SI,
     CONF_AREA_SWITCH_ARM_MODE,
+    CONF_AREAS,
     CONF_BOARD,
     CONF_EVENT_LOG_SIZE,
     CONF_FOUND_BOARD,
     CONF_HOST,
-    CONF_LIMIT_AREAS,
-    CONF_LIMIT_SCENARIOS,
-    CONF_LIMIT_ZONES,
     CONF_PANEL_NAME,
     CONF_PASSWORD,
     CONF_PIN,
@@ -44,24 +43,17 @@ from .const import (
     CONF_SCENARIO_ARM_NIGHT,
     CONF_SCENARIO_ARM_VACATION,
     CONF_SCENARIO_DISARM,
+    CONF_SCENARIOS,
     CONF_USERNAME,
+    CONF_ZONES,
     DATA_API_CLIENT,
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_AREA_SWITCH_ARM_MODE,
     DEFAULT_EVENT_LOG_SIZE,
-    DEFAULT_LIMIT_AREAS,
-    DEFAULT_LIMIT_SCENARIOS,
-    DEFAULT_LIMIT_ZONES,
     DEFAULT_PANEL_NAME,
     DEFAULT_POLLING_INTERVAL,
     DEFAULT_PORT,
     DOMAIN,
-    KEY_INIT_AREA_NAMES,
-    KEY_INIT_AREAS,
-    KEY_INIT_ZONE_NAMES,
-    KEY_INIT_ZONES,
-    MAX_LIMIT_AREAS,
-    MAX_LIMIT_ZONES,
     MIN_FIRMWARE_MAJOR,
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
@@ -69,6 +61,18 @@ from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .legacy import create_client
 from .panel_config import async_fetch_panel_configuration
 from .protocol.errors import DecryptionError, InvalidPinError, ProtocolError
+from .selection import (
+    AVAILABLE,
+    SELECTION_KEYS,
+    area_names,
+    mapped_scenarios,
+    numbers,
+    scenario_label,
+    scenario_names,
+    selected,
+    suggested_selection,
+    zone_names,
+)
 from .transport.base import TransportError
 
 _LOGGER = logging.getLogger(__name__)
@@ -164,14 +168,77 @@ async def _validate_connection_and_fetch_initial_config(
         await api.close()  # the board may accept only one connection
 
 
-def _panel_count(config: Mapping[str, Any], section: str, names: str) -> int:
-    """How many areas or zone numbers the panel has: its label count."""
-    return len((config.get(section) or {}).get(names) or [])
+# Per kind of item: the panel's labels and the word for an unnamed one
+_ITEM_FORMS = {
+    CONF_AREAS: (area_names, "Area"),
+    CONF_ZONES: (zone_names, "Zone"),
+    CONF_SCENARIOS: (scenario_names, "Scenario"),
+}
 
 
-def _capped(settings: Mapping[str, Any], key: str, maximum: int) -> int:
-    """A stored limit, at most the maximum (the maximum if none is stored)."""
-    return min(settings.get(key) or maximum, maximum)
+def _items_schema(
+    config: Mapping[str, Any], chosen: Mapping[str, list[int]]
+) -> vol.Schema:
+    """The areas, zones and scenarios of the panel to tick, with their labels.
+
+    One collapsible section of checkboxes per kind, so that what is left
+    out stays in view.
+    """
+    fields: dict[Any, Any] = {}
+    for key in SELECTION_KEYS:
+        names_of, kind = _ITEM_FORMS[key]
+        names = names_of(config)
+        options = [
+            SelectOptionDict(
+                value=str(number),
+                label=(
+                    f"{number} - {names[number - 1]}"
+                    if number <= len(names) and names[number - 1]
+                    else f"{kind} {number}"
+                ),
+            )
+            for number in AVAILABLE[key](config)
+        ]
+        checkboxes = SelectSelector(
+            SelectSelectorConfig(
+                options=options, multiple=True, mode=SelectSelectorMode.LIST
+            )
+        )
+        suggested = [str(number) for number in chosen[key]]
+        fields[vol.Required(key)] = section(
+            vol.Schema(
+                {
+                    vol.Optional(
+                        key, description={"suggested_value": suggested}
+                    ): checkboxes
+                }
+            ),
+            {"collapsed": False},
+        )
+    return vol.Schema(fields)
+
+
+def _chosen_items(user_input: Mapping[str, Any]) -> dict[str, list[int]]:
+    """The ticked items of the form (one section per kind), as 1-based numbers."""
+    return {
+        key: numbers((user_input.get(key) or {}).get(key) or [])
+        for key in SELECTION_KEYS
+    }
+
+
+def _scenario_choices(
+    config: Mapping[str, Any], scenarios: list[int]
+) -> dict[str, str]:
+    """The scenarios a mode can be mapped to: the imported ones (0-based keys)."""
+    choices = {"none": "None (Do Not Assign)"}
+    for number in scenarios:
+        choices[str(number - 1)] = f"Scenario {number}: " + (
+            scenario_names(config)[number - 1]
+            if number <= len(scenario_names(config))
+            and scenario_names(config)[number - 1]
+            else f"Unnamed Scenario {number}"
+        )
+    return choices
 
 
 def _mapping_default(
@@ -212,7 +279,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Inim Alarm."""
 
     VERSION = 1
-    MINOR_VERSION = 3
+    MINOR_VERSION = 4
 
     def __init__(self) -> None:
         """Start with no data (kept per flow, between the steps)."""
@@ -331,7 +398,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             else:
                 self._flow_data[DATA_INITIAL_PANEL_CONFIG] = initial_panel_config
                 _LOGGER.info("Inim Alarm connection validated for %s", host)
-                return await self.async_step_initial_options()
+                return await self.async_step_items()
 
         return self.async_show_form(
             step_id=board,
@@ -342,23 +409,40 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    async def async_step_items(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Choose the areas, zones and scenarios to import.
+
+        Proposed: what the panel shows in use (see suggested_selection).
+        """
+        config = self._flow_data[DATA_INITIAL_PANEL_CONFIG]
+        if user_input is not None:
+            self._flow_data["selection"] = _chosen_items(user_input)
+            return await self.async_step_initial_options()
+        return self.async_show_form(
+            step_id="items",
+            data_schema=_items_schema(config, suggested_selection(config)),
+            description_placeholders={
+                "panel_name": self._flow_data["user_input_step1"].get(
+                    CONF_PANEL_NAME, DEFAULT_PANEL_NAME
+                )
+            },
+        )
+
     async def async_step_initial_options(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle the second step for initial options (polling, limits, scenario mappings)."""
+        """Handle the last step: polling, events and scenario mappings."""
         errors: dict[str, str] = {}
         step1_data = self._flow_data["user_input_step1"]
         initial_config_data = self._flow_data[DATA_INITIAL_PANEL_CONFIG]
+        selection = self._flow_data["selection"]
 
-        # Prepare scenario choices for the form
-        scenario_names_data = initial_config_data.get("scenarios", {})
-        scenario_names_list = scenario_names_data.get("names", [])
-        scenario_choices = {"none": "None (Do Not Assign)"}
-        if scenario_names_list:
-            for i, name in enumerate(scenario_names_list):
-                scenario_choices[str(i)] = (
-                    f"Scenario {i + 1}: {name if name else f'Unnamed Scenario {i + 1}'}"
-                )
+        # Modes can be mapped to the imported scenarios only
+        scenario_choices = _scenario_choices(
+            initial_config_data, selection[CONF_SCENARIOS]
+        )
 
         if user_input is not None:
             # Combine data from step 1 and this step
@@ -376,9 +460,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             final_options_for_entry = {
                 CONF_POLLING_INTERVAL: user_input[CONF_POLLING_INTERVAL],
-                CONF_LIMIT_AREAS: user_input[CONF_LIMIT_AREAS],
-                CONF_LIMIT_ZONES: user_input[CONF_LIMIT_ZONES],
-                CONF_LIMIT_SCENARIOS: user_input[CONF_LIMIT_SCENARIOS],
+                **selection,
                 CONF_EVENT_LOG_SIZE: min(
                     user_input[CONF_EVENT_LOG_SIZE], SYSTEM_MAX_EVENT_LOG_SIZE
                 ),
@@ -407,25 +489,6 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_POLLING_INTERVAL,
                 default=step1_data.get(CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL),
             ): vol.All(vol.Coerce(int), vol.Range(min=5, max=300)),
-            # Proposed: every area and zone number of this panel model
-            vol.Optional(
-                CONF_LIMIT_AREAS,
-                default=_panel_count(
-                    initial_config_data, KEY_INIT_AREAS, KEY_INIT_AREA_NAMES
-                )
-                or DEFAULT_LIMIT_AREAS,
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_LIMIT_AREAS)),
-            vol.Optional(
-                CONF_LIMIT_ZONES,
-                default=_panel_count(
-                    initial_config_data, KEY_INIT_ZONES, KEY_INIT_ZONE_NAMES
-                )
-                or DEFAULT_LIMIT_ZONES,
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_LIMIT_ZONES)),
-            vol.Optional(
-                CONF_LIMIT_SCENARIOS,
-                default=step1_data.get(CONF_LIMIT_SCENARIOS, DEFAULT_LIMIT_SCENARIOS),
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=30)),
             vol.Optional(CONF_EVENT_LOG_SIZE, default=DEFAULT_EVENT_LOG_SIZE): vol.All(
                 vol.Coerce(int), vol.Range(min=1, max=SYSTEM_MAX_EVENT_LOG_SIZE)
             ),
@@ -558,7 +621,48 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Manage the main options for the Inim Alarm integration, including PIN change."""
+        """Choose what to change."""
+        return self.async_show_menu(step_id="init", menu_options=["items", "general"])
+
+    async def async_step_items(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Change the areas, zones and scenarios to import.
+
+        A scenario mapped to an alarm panel mode cannot be left out: the
+        mapping is changed first, in the general settings.
+        """
+        config = self.initial_panel_config
+        errors: dict[str, str] = {}
+        placeholders: dict[str, str] = {}
+        options = self.config_entry.options
+        if user_input is not None:
+            chosen = _chosen_items(user_input)
+            missing = [
+                f"{number} - {scenario_label(config, number)}"
+                for number in sorted(set(mapped_scenarios(options).values()))
+                if number not in chosen[CONF_SCENARIOS]
+            ]
+            if not missing:
+                return self.async_create_entry(title="", data={**options, **chosen})
+            errors["base"] = "mapped_scenario_not_imported"
+            placeholders["scenarios"] = ", ".join(missing)
+        current = (
+            _chosen_items(user_input)
+            if user_input is not None
+            else {key: selected(options, config, key) for key in SELECTION_KEYS}
+        )
+        return self.async_show_form(
+            step_id="items",
+            data_schema=_items_schema(config, current),
+            errors=errors,
+            description_placeholders=placeholders,
+        )
+
+    async def async_step_general(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the general options, including the PIN."""
         errors: dict[str, str] = {}
 
         if user_input is not None:
@@ -624,11 +728,6 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 updated_options[CONF_POLLING_INTERVAL] = user_input.get(
                     CONF_POLLING_INTERVAL
                 )
-                updated_options[CONF_LIMIT_AREAS] = user_input.get(CONF_LIMIT_AREAS)
-                updated_options[CONF_LIMIT_ZONES] = user_input.get(CONF_LIMIT_ZONES)
-                updated_options[CONF_LIMIT_SCENARIOS] = user_input.get(
-                    CONF_LIMIT_SCENARIOS
-                )
                 event_log_size_input = user_input.get(
                     CONF_EVENT_LOG_SIZE, DEFAULT_EVENT_LOG_SIZE
                 )
@@ -659,18 +758,19 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                             updated_options[key] = None
 
                 _LOGGER.debug("Creating/updating options with: %s", updated_options)
-                return self.async_create_entry(title="", data=updated_options)
+                # The imported items are kept as they are
+                return self.async_create_entry(
+                    title="", data={**self.config_entry.options, **updated_options}
+                )
             # If there was a PIN error, re-show the form with the error
 
-        # Prepare scenario choices for the form
-        scenario_names_data = self.initial_panel_config.get("scenarios", {})
-        scenario_names_list = scenario_names_data.get("names", [])
-        scenario_choices = {"none": "None (Do Not Assign)"}
-        if scenario_names_list is not None:
-            for i, name in enumerate(scenario_names_list):
-                scenario_choices[str(i)] = (
-                    f"Scenario {i + 1}: {name if name else f'Unnamed Scenario {i + 1}'}"
-                )
+        # Modes can be mapped to the imported scenarios only
+        scenario_choices = _scenario_choices(
+            self.initial_panel_config,
+            selected(
+                self.config_entry.options, self.initial_panel_config, CONF_SCENARIOS
+            ),
+        )
 
         # Define the schema for the options form
         options_schema_dict = {
@@ -681,24 +781,6 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 CONF_POLLING_INTERVAL,
                 default=self.current_settings.get(CONF_POLLING_INTERVAL),
             ): vol.All(vol.Coerce(int), vol.Range(min=5, max=300)),
-            # A limit stored by an older version may be above today's maximum
-            # (areas used to go up to 16): offer the maximum instead
-            vol.Optional(
-                CONF_LIMIT_AREAS,
-                default=_capped(
-                    self.current_settings, CONF_LIMIT_AREAS, MAX_LIMIT_AREAS
-                ),
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_LIMIT_AREAS)),
-            vol.Optional(
-                CONF_LIMIT_ZONES,
-                default=_capped(
-                    self.current_settings, CONF_LIMIT_ZONES, MAX_LIMIT_ZONES
-                ),
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=MAX_LIMIT_ZONES)),
-            vol.Optional(
-                CONF_LIMIT_SCENARIOS,
-                default=self.current_settings.get(CONF_LIMIT_SCENARIOS),
-            ): vol.All(vol.Coerce(int), vol.Range(min=1, max=30)),
             vol.Optional(
                 CONF_EVENT_LOG_SIZE,
                 default=self.current_settings.get(
@@ -747,5 +829,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
             _LOGGER.info("No scenarios available to map in options flow")
 
         return self.async_show_form(
-            step_id="init", data_schema=vol.Schema(options_schema_dict), errors=errors
+            step_id="general",
+            data_schema=vol.Schema(options_schema_dict),
+            errors=errors,
         )

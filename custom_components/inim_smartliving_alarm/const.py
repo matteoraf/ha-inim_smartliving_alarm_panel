@@ -23,7 +23,12 @@ CONF_FOUND_BOARD = "found_board"  # setup: the board picked from a network searc
 CONF_POLLING_INTERVAL = "polling_interval"
 CONF_PANEL_NAME = "panel_name"
 
-# Keys for limiting imported entities and events
+# The areas, zones and scenarios that get entities: lists of 1-based numbers
+# in the entry options
+CONF_AREAS = "areas"
+CONF_ZONES = "zones"
+CONF_SCENARIOS = "scenarios"
+# Counts stored by versions before the lists ("the first N"); migrated to them
 CONF_LIMIT_AREAS = "limit_areas"
 CONF_LIMIT_ZONES = "limit_zones"
 CONF_LIMIT_SCENARIOS = "limit_scenarios"
@@ -50,9 +55,8 @@ DEFAULT_POLLING_INTERVAL = 30  # seconds
 DEFAULT_PORT = 5004  # SmartLAN/SI default; also proposed for SmartLAN/G (no default)
 DEFAULT_PANEL_NAME = "Inim Smartliving"  # Default if user doesn't provide one
 
-# Limits of the entities to create. A new setup proposes the panel's own
-# counts (areas A, zone numbers 1-2L); these defaults apply only to an entry
-# without a stored limit and mean "everything". Users can reduce them.
+# Counts an entry migrated from the limits uses when none was stored:
+# everything
 MAX_LIMIT_AREAS = 15  # areas on the SmartLiving 10100
 MAX_LIMIT_ZONES = 200  # zone numbers 1-2L; 2L = 200 on the SmartLiving 10100
 DEFAULT_LIMIT_AREAS = MAX_LIMIT_AREAS

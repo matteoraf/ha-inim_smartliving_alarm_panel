@@ -15,15 +15,13 @@ from .const import (
     ARM_MODE_PARTIAL,
     ARM_MODE_TOTAL,
     CONF_AREA_SWITCH_ARM_MODE,
-    CONF_LIMIT_AREAS,
-    CONF_LIMIT_ZONES,
+    CONF_AREAS,
     CONF_PANEL_NAME,
+    CONF_ZONES,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_AREA_SWITCH_ARM_MODE,
-    DEFAULT_LIMIT_AREAS,
-    DEFAULT_LIMIT_ZONES,
     DEFAULT_PANEL_NAME,
     DOMAIN,
     KEY_INIT_AREA_NAMES,
@@ -44,6 +42,7 @@ from .const import (
 from .errors import async_send_command
 from .legacy import LegacyPanelClient, zones_to_create
 from .protocol.commands import ArmMode
+from .selection import area_label, selected
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -78,10 +77,6 @@ async def async_setup_entry(
     area_data = initial_panel_config.get(KEY_INIT_AREAS, {})
     all_area_names = area_data.get(KEY_INIT_AREA_NAMES, []) if area_data else []
 
-    limit_areas = entry.options.get(
-        CONF_LIMIT_AREAS, entry.data.get(CONF_LIMIT_AREAS, DEFAULT_LIMIT_AREAS)
-    )
-
     if not all_area_names:
         _LOGGER.warning(
             "No area names found in initial config for %s. Cannot create area switches",
@@ -89,19 +84,11 @@ async def async_setup_entry(
         )
         return
 
-    num_areas_to_create = min(len(all_area_names), limit_areas)
-    _LOGGER.debug(
-        "Setting up %s Area Switches (Limit: %s, Available: %s)",
-        num_areas_to_create,
-        limit_areas,
-        len(all_area_names),
-    )
+    areas = selected(entry.options, initial_panel_config, CONF_AREAS)
+    _LOGGER.debug("Setting up area switches for areas %s", areas)
 
-    for i in range(num_areas_to_create):
-        area_id_1_based = i + 1
-        area_name = (
-            all_area_names[i] if all_area_names[i] else f"Area {area_id_1_based}"
-        )
+    for area_id_1_based in areas:
+        area_name = area_label(initial_panel_config, area_id_1_based)
         switches_to_add.append(
             InimAreaSwitch(
                 coordinator,
@@ -125,21 +112,17 @@ async def async_setup_entry(
         zones_config.get(KEY_INIT_ZONES_CONFIG_DETAILED, []) if zones_config else []
     )
 
-    limit_zones = entry.options.get(
-        CONF_LIMIT_ZONES, entry.data.get(CONF_LIMIT_ZONES, DEFAULT_LIMIT_ZONES)
-    )
-
     # a switch needs the zone's physical slot from the zone details
     zones = (
-        zones_to_create(all_zone_names, zones_config_detailed, limit_zones)
+        zones_to_create(
+            all_zone_names,
+            zones_config_detailed,
+            selected(entry.options, initial_panel_config, CONF_ZONES),
+        )
         if zones_config_detailed
         else []
     )
-    _LOGGER.debug(
-        "Setting up zone bypass switches for up to %s zones (Limit: %s)",
-        len(zones),
-        limit_zones,
-    )
+    _LOGGER.debug("Setting up zone bypass switches for %s zones", len(zones))
     for zone_index_0_based, display_zone_name, zone_detail in zones:
         internal_index = zone_detail.get("internal_index") if zone_detail else None
         if internal_index is None:

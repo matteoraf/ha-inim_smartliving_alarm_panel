@@ -15,21 +15,14 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    CONF_LIMIT_AREAS,
-    CONF_LIMIT_SCENARIOS,
-    CONF_LIMIT_ZONES,
+    CONF_AREAS,
     CONF_PANEL_NAME,
+    CONF_SCENARIOS,
+    CONF_ZONES,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
-    DEFAULT_LIMIT_AREAS,
-    DEFAULT_LIMIT_SCENARIOS,
-    DEFAULT_LIMIT_ZONES,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_AREA_NAMES,
-    KEY_INIT_AREAS,
-    KEY_INIT_SCENARIO_NAMES,
-    KEY_INIT_SCENARIOS,
     KEY_INIT_ZONE_NAMES,
     KEY_INIT_ZONES,
     KEY_INIT_ZONES_CONFIG,
@@ -50,6 +43,7 @@ from .const import (
     ZONE_TAMPER_STATES,
 )
 from .legacy import zones_to_create
+from .selection import area_label, scenario_label, selected
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -74,26 +68,6 @@ async def async_setup_entry(
     # Get user-defined panel name
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
-    # Get user-defined limits (from options first, then data, then default)
-    limit_zones = entry.options.get(
-        CONF_LIMIT_ZONES, entry.data.get(CONF_LIMIT_ZONES, DEFAULT_LIMIT_ZONES)
-    )
-    limit_areas = entry.options.get(
-        CONF_LIMIT_AREAS, entry.data.get(CONF_LIMIT_AREAS, DEFAULT_LIMIT_AREAS)
-    )
-    limit_scenarios = entry.options.get(
-        CONF_LIMIT_SCENARIOS,
-        entry.data.get(CONF_LIMIT_SCENARIOS, DEFAULT_LIMIT_SCENARIOS),
-    )
-
-    scenario_data = initial_panel_config.get(KEY_INIT_SCENARIOS, {})
-    all_scenario_names = (
-        scenario_data.get(KEY_INIT_SCENARIO_NAMES, []) if scenario_data else []
-    )
-
-    area_data = initial_panel_config.get(KEY_INIT_AREAS, {})
-    all_area_names = area_data.get(KEY_INIT_AREA_NAMES, []) if area_data else []
-
     zone_data = initial_panel_config.get(KEY_INIT_ZONES, {})
     all_zone_names = zone_data.get(KEY_INIT_ZONE_NAMES, []) if zone_data else []
 
@@ -106,13 +80,12 @@ async def async_setup_entry(
 
     binary_sensors_to_add = []
 
-    zones = zones_to_create(all_zone_names, detailed_zone_configs, limit_zones)
-    _LOGGER.debug(
-        "Setting up binary sensors for %s zones (Limit: %s, Available: %s)",
-        len(zones),
-        limit_zones,
-        len(all_zone_names),
+    zones = zones_to_create(
+        all_zone_names,
+        detailed_zone_configs,
+        selected(entry.options, initial_panel_config, CONF_ZONES),
     )
+    _LOGGER.debug("Setting up binary sensors for %s zones", len(zones))
     for zone_index, zone_name, zone_config_detail in zones:
         binary_sensors_to_add.append(
             InimZoneBinarySensor(
@@ -140,19 +113,16 @@ async def async_setup_entry(
             )
         )
 
-    num_areas_to_create = min(len(all_area_names), limit_areas)
+    areas = selected(entry.options, initial_panel_config, CONF_AREAS)
     _LOGGER.debug(
-        "Setting up alarm, tamper and alarm memory binary sensors for %s areas "
-        "(Limit: %s, Available: %s)",
-        num_areas_to_create,
-        limit_areas,
-        len(all_area_names),
+        "Setting up alarm, tamper and alarm memory binary sensors for areas %s",
+        areas,
     )
-    for i in range(num_areas_to_create):
-        area_name = all_area_names[i] if all_area_names[i] else f"Area {i + 1}"
+    for area in areas:
+        area_name = area_label(initial_panel_config, area)
         binary_sensors_to_add.extend(
             sensor_class(
-                coordinator, entry, panel_display_name, system_info, i + 1, area_name
+                coordinator, entry, panel_display_name, system_info, area, area_name
             )
             for sensor_class in (
                 InimAreaAlarmMemoryBinarySensor,
@@ -161,20 +131,17 @@ async def async_setup_entry(
             )
         )
 
-    num_scenarios_to_create = min(len(all_scenario_names), limit_scenarios)
-    _LOGGER.debug(
-        "Setting up %s Scenario Active Binary Sensors (Limit: %s, Available: %s)",
-        num_scenarios_to_create,
-        limit_scenarios,
-        len(all_scenario_names),
-    )
-    for i in range(num_scenarios_to_create):
-        scenario_name = (
-            all_scenario_names[i] if all_scenario_names[i] else f"Scenario {i + 1}"
-        )
+    scenarios = selected(entry.options, initial_panel_config, CONF_SCENARIOS)
+    _LOGGER.debug("Setting up scenario active binary sensors for %s", scenarios)
+    for number in scenarios:
         binary_sensors_to_add.append(
             InimSpecificScenarioActiveBinarySensor(
-                coordinator, entry, panel_display_name, system_info, i, scenario_name
+                coordinator,
+                entry,
+                panel_display_name,
+                system_info,
+                number - 1,
+                scenario_label(initial_panel_config, number),
             )
         )
 

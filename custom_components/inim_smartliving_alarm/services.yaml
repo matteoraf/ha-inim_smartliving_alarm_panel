@@ -31,13 +31,15 @@ arm_area:
           integration: inim_smartliving_alarm
     areas:
       name: Areas
-      description: "Area numbers as on the panel (1-10 on a 1050, 1-15 on a 10100)."
+      description: "The areas imported from the panel, listed by their names. In YAML, the area numbers as on the panel."
       required: true
       example: "[1, 3]"
       selector:
         select:
           multiple: true
-          options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]
+          # Filled in while the integration runs: the imported areas of the
+          # loaded panels
+          options: []
     mode:
       name: Mode
       description: "How to arm the areas, or disarm them."

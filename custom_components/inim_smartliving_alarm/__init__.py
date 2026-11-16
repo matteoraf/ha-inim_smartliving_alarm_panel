@@ -1,6 +1,9 @@
 """The Inim Alarm integration."""
 
+import copy
 import logging
+from pathlib import Path
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import ATTR_CONFIG_ENTRY_ID
@@ -8,7 +11,9 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.service import async_set_service_schema
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.util.yaml import load_yaml_dict
 import voluptuous as vol
 
 from .const import (
@@ -19,8 +24,12 @@ from .const import (
     ATTR_AREAS,
     ATTR_MODE,
     BOARD_SMARTLAN_SI,
+    CONF_AREAS,
     CONF_BOARD,
     CONF_HOST,
+    CONF_LIMIT_AREAS,
+    CONF_LIMIT_SCENARIOS,
+    CONF_LIMIT_ZONES,
     CONF_PASSWORD,
     CONF_PIN,
     CONF_POLLING_INTERVAL,
@@ -31,8 +40,6 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
-    KEY_INIT_AREA_NAMES,
-    KEY_INIT_AREAS,
     KEY_INIT_TERMINAL_RECORDS_RAW,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
@@ -57,10 +64,22 @@ from .panel_config import (
     async_reread_panel_configuration,
 )
 from .protocol.commands import ArmMode
+from .selection import (
+    area_label,
+    item_of_unique_id,
+    migrated_selection,
+    panel_config,
+    selected,
+    unselected_items,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+# Where the arm_area description from services.yaml is kept (hass.data)
+_ARM_AREA_DESCRIPTION = f"{DOMAIN}_arm_area_description"
+_LIMIT_KEYS = (CONF_LIMIT_AREAS, CONF_LIMIT_ZONES, CONF_LIMIT_SCENARIOS)
 
 REREAD_PANEL_CONFIGURATION_SCHEMA = vol.Schema(
     {vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string}
@@ -122,23 +141,18 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         )
         api: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
         areas = sorted(set(call.data[ATTR_AREAS]))
-        panel_areas = api.panel.model.areas
-        if outside := [area for area in areas if area > panel_areas]:
+        config = panel_config(entry.data)
+        imported = selected(entry.options, config, CONF_AREAS)
+        if missing := [area for area in areas if area not in imported]:
             raise ServiceValidationError(
                 translation_domain=DOMAIN,
-                translation_key="area_out_of_range",
+                translation_key="area_not_imported",
                 translation_placeholders={
-                    "areas": ", ".join(str(area) for area in outside),
-                    "count": str(panel_areas),
+                    "areas": ", ".join(str(area) for area in missing),
+                    "title": entry.title,
                 },
             )
-        names = (
-            entry.data.get(DATA_INITIAL_PANEL_CONFIG, {}).get(KEY_INIT_AREAS) or {}
-        ).get(KEY_INIT_AREA_NAMES) or []
-        target = ", ".join(
-            (names[area - 1] if area <= len(names) else "") or f"Area {area}"
-            for area in areas
-        )
+        target = ", ".join(area_label(config, area) for area in areas)
         mode = ARM_AREA_MODES[call.data[ATTR_MODE]]
         _LOGGER.info("arm_area: %s -> %s", target, call.data[ATTR_MODE])
         await async_send_command(
@@ -222,6 +236,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
 
     await _reread_configuration_if_layout_differs(hass, entry, api)
+    _remove_entities_not_imported(hass, entry)
 
     # Store the API instance and coordinator in hass.data for platforms to access.
     # Platforms will also access static config from entry.data (set by config_flow).
@@ -237,6 +252,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug("(%s) Forwarding setup to platforms: %s", entry.title, PLATFORMS)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     _warn_about_leftover_zone_entities(hass, entry)
+    await async_update_arm_area_description(hass)
 
     # Listen for option updates (e.g., if user changes polling interval via UI)
     entry.async_on_unload(entry.add_update_listener(update_listener))
@@ -259,9 +275,68 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if not hass.data[DOMAIN]:  # If no more entries for this domain
             hass.data.pop(DOMAIN)
             _LOGGER.debug("Cleaned up domain data for %s", DOMAIN)
+        await async_update_arm_area_description(hass)
     else:
         _LOGGER.error("Failed to unload platforms for %s", entry.title)
     return unload_ok
+
+
+async def async_update_arm_area_description(hass: HomeAssistant) -> None:
+    """List the imported areas of the loaded panels in the arm_area action.
+
+    The action's form offers only these areas, by their panel labels. The
+    value of each choice is the area number; with several panels, a number
+    lists the area of each panel that imports it, with the panel's name.
+    services.yaml holds the rest of the description.
+    """
+    base = hass.data.get(_ARM_AREA_DESCRIPTION)
+    if base is None:
+        services = await hass.async_add_executor_job(
+            load_yaml_dict, str(Path(__file__).parent / "services.yaml")
+        )
+        base = hass.data[_ARM_AREA_DESCRIPTION] = services[SERVICE_ARM_AREA]
+    entries = [
+        entry
+        for entry_id in hass.data.get(DOMAIN, {})
+        if (entry := hass.config_entries.async_get_entry(entry_id)) is not None
+    ]
+    labels: dict[int, list[str]] = {}
+    for entry in entries:
+        config = panel_config(entry.data)
+        for area in selected(entry.options, config, CONF_AREAS):
+            label = area_label(config, area)
+            if len(entries) > 1:
+                label = f"{label} ({entry.title})"
+            labels.setdefault(area, []).append(label)
+    description: dict[str, Any] = copy.deepcopy(base)
+    description["fields"][ATTR_AREAS]["selector"]["select"]["options"] = [
+        {"value": str(area), "label": ", ".join(names)}
+        for area, names in sorted(labels.items())
+    ]
+    async_set_service_schema(hass, DOMAIN, SERVICE_ARM_AREA, description)
+
+
+def _remove_entities_not_imported(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Remove the entities of areas, zones and scenarios not imported.
+
+    Only items on the panel that the user left out: entities of zone numbers
+    that are not zones are left to the warning below.
+    """
+    unselected = unselected_items(entry.options, panel_config(entry.data))
+    registry = er.async_get(hass)
+    removed = []
+    for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
+        item = item_of_unique_id(entry.entry_id, entity.unique_id)
+        if item is not None and item[1] in unselected[item[0]]:
+            registry.async_remove(entity.entity_id)
+            removed.append(entity.entity_id)
+    if removed:
+        _LOGGER.info(
+            "%s: removed the entities of areas, zones and scenarios that are not "
+            "imported: %s",
+            entry.title,
+            ", ".join(sorted(removed)),
+        )
 
 
 async def _reread_configuration_if_layout_differs(
@@ -357,12 +432,14 @@ def _warn_about_leftover_zone_entities(hass: HomeAssistant, entry: ConfigEntry) 
 
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Migrate an entry to the current version (1.3).
+    """Migrate an entry to the current version (1.4).
 
     1.2 adds the board type; every older entry uses SmartLAN/SI. 1.3 stores
     every zone number with its terminal type, rebuilt from the raw panel
-    data the entry already holds (no panel access). A newer major version
-    (from a later integration release) cannot be loaded.
+    data the entry already holds (no panel access). 1.4 replaces the counts
+    of areas, zones and scenarios with lists of the items to import, which
+    keep the same entities. A newer major version (from a later integration
+    release) cannot be loaded.
     """
     version, minor = config_entry.version, config_entry.minor_version
     _LOGGER.debug("Checking migration of config entry version %s.%s", version, minor)
@@ -394,6 +471,22 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             data[DATA_INITIAL_PANEL_CONFIG] = upgraded
         hass.config_entries.async_update_entry(config_entry, data=data, minor_version=3)
         _LOGGER.info("Migrated config entry %s to version 1.3", config_entry.title)
+    if config_entry.minor_version < 4:
+        selection = migrated_selection({**config_entry.data, **config_entry.options})
+        options = {
+            key: value
+            for key, value in config_entry.options.items()
+            if key not in _LIMIT_KEYS
+        }
+        data = {
+            key: value
+            for key, value in config_entry.data.items()
+            if key not in _LIMIT_KEYS
+        }
+        hass.config_entries.async_update_entry(
+            config_entry, data=data, options={**options, **selection}, minor_version=4
+        )
+        _LOGGER.info("Migrated config entry %s to version 1.4", config_entry.title)
     return True
 
 

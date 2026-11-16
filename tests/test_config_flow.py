@@ -27,6 +27,7 @@ from custom_components.inim_smartliving_alarm.protocol.errors import (
     ProtocolError,
 )
 
+from .conftest import ALL, items_form
 from .fake_panel import FakePanel
 from .fake_panel.discovery import DiscoveryResponder
 from .fake_panel.server import TRANSPORT_G
@@ -38,9 +39,6 @@ USERNAME = "installer"
 PASSWORD = "s3cret"
 OPTIONS = {
     "polling_interval": 30,
-    "limit_areas": 10,
-    "limit_zones": 50,
-    "limit_scenarios": 30,
     "event_log_size": 5,
     "reader_names": "",
     "scenario_arm_away": "0",
@@ -87,6 +85,31 @@ def si_input(panel: FakePanel, pin: str = "1234") -> dict[str, Any]:
     return {"host": panel.host, "port": panel.port, "pin": pin, "panel_name": "Panel"}
 
 
+async def pick_items(
+    hass: HomeAssistant, flow_id: str, result: dict, **chosen: Any
+) -> dict:
+    """Tick areas, zones and scenarios (all offered unless given); next step."""
+    assert result["step_id"] == "items"
+    kinds = ("areas", "zones", "scenarios")
+    result = await submit(
+        hass, flow_id, items_form(result, {k: chosen.get(k, ALL) for k in kinds})
+    )
+    assert result["step_id"] == "initial_options"
+    return result
+
+
+async def open_options(
+    hass: HomeAssistant, entry: ConfigEntry, step: str = "general"
+) -> dict:
+    """Open the options and pick one of the menu's steps."""
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    assert result["type"] is FlowResultType.MENU
+    assert result["menu_options"] == ["items", "general"]
+    return await hass.config_entries.options.async_configure(
+        result["flow_id"], {"next_step_id": step}
+    )
+
+
 async def unload_all(hass: HomeAssistant) -> None:
     """Unload every entry (frees the fake panel's only connection)."""
     for entry in hass.config_entries.async_entries(DOMAIN):
@@ -98,15 +121,15 @@ async def unload_all(hass: HomeAssistant) -> None:
 
 
 async def test_setup_smartlan_si(hass: HomeAssistant, panel: FakePanel) -> None:
-    """SmartLAN/SI: menu, connection, options; the entry is version 1.2."""
+    """SmartLAN/SI: menu, connection, items, options; the entry is version 1.4."""
     flow_id = await board_form(hass, "smartlan_si")
     result = await submit(hass, flow_id, si_input(panel))
-    assert result["step_id"] == "initial_options"
+    await pick_items(hass, flow_id, result)
     result = await submit(hass, flow_id, OPTIONS)
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     entry: ConfigEntry = result["result"]
-    assert (entry.version, entry.minor_version) == (1, 3)
+    assert (entry.version, entry.minor_version) == (1, 4)
     assert entry.data["board"] == "smartlan_si"
     assert "username" not in entry.data
     assert entry.state is ConfigEntryState.LOADED
@@ -118,7 +141,7 @@ async def test_setup_without_scenario_mappings(
 ) -> None:
     """Without a mapped Disarm scenario the alarm panel loads, state unknown."""
     flow_id = await board_form(hass, "smartlan_si")
-    await submit(hass, flow_id, si_input(panel))
+    await pick_items(hass, flow_id, await submit(hass, flow_id, si_input(panel)))
     unmapped = {
         key: "none" if key.startswith("scenario_") else value
         for key, value in OPTIONS.items()
@@ -148,7 +171,7 @@ async def test_setup_smartlan_g(hass: HomeAssistant, g_panel: FakePanel) -> None
             "panel_name": "Panel G",
         },
     )
-    assert result["step_id"] == "initial_options"
+    await pick_items(hass, flow_id, result)
     result = await submit(hass, flow_id, OPTIONS)
 
     entry: ConfigEntry = result["result"]
@@ -178,7 +201,7 @@ async def test_pin_is_checked(
 
     # Corrected in the same flow
     result = await submit(hass, flow_id, si_input(panel))
-    assert result["step_id"] == "initial_options"
+    assert result["step_id"] == "items"
 
 
 async def test_firmware_below_5_is_refused(
@@ -209,7 +232,7 @@ async def test_firmware_5_and_other_models_are_accepted(
     panel.state.firmware = firmware
     flow_id = await board_form(hass, "smartlan_si")
     result = await submit(hass, flow_id, si_input(panel))
-    assert result["step_id"] == "initial_options"
+    assert result["step_id"] == "items"
     assert warning in caplog.text
     assert "handling the panel as a SmartLiving 1050" in caplog.text
 
@@ -258,7 +281,7 @@ async def test_unexpected_smartlan_g_reply(
     # The same flow goes on once the board answers as expected
     g_panel.g_reply_checksum = False
     result = await submit(hass, flow_id, data)
-    assert result["step_id"] == "initial_options"
+    assert result["step_id"] == "items"
 
 
 async def test_unexpected_smartlan_si_reply(
@@ -292,7 +315,7 @@ async def test_reconfigure_smartlan_g(hass: HomeAssistant, g_panel: FakePanel) -
         "pin": "1234",
         "panel_name": "Panel G",
     }
-    await submit(hass, flow_id, g_input)
+    await pick_items(hass, flow_id, await submit(hass, flow_id, g_input))
     entry: ConfigEntry = (await submit(hass, flow_id, OPTIONS))["result"]
 
     result = await hass.config_entries.flow.async_init(
@@ -316,7 +339,7 @@ async def test_reconfigure_smartlan_g(hass: HomeAssistant, g_panel: FakePanel) -
 
 
 async def test_migration_adds_the_board(hass: HomeAssistant) -> None:
-    """Entries from before 1.2 are SmartLAN/SI entries (and then go to 1.3)."""
+    """Entries from before 1.2 are SmartLAN/SI entries (and then go to 1.4)."""
     entry = MockConfigEntry(
         domain=DOMAIN,
         version=1,
@@ -326,7 +349,7 @@ async def test_migration_adds_the_board(hass: HomeAssistant) -> None:
     entry.add_to_hass(hass)
 
     assert await async_migrate_entry(hass, entry)
-    assert entry.minor_version == 3
+    assert entry.minor_version == 4
     assert entry.data == {
         "host": "192.0.2.10",
         "port": 5004,
@@ -408,7 +431,7 @@ async def test_search_finds_and_prefills_smartlan_si(
     result = await submit(
         hass, result["flow_id"], {**si_input(panel), "panel_name": "Found"}
     )
-    assert result["step_id"] == "initial_options"
+    await pick_items(hass, result["flow_id"], result)
     entry = (await submit(hass, result["flow_id"], OPTIONS))["result"]
     assert entry.data["board"] == "smartlan_si"
     await unload_all(hass)
@@ -465,7 +488,7 @@ async def test_search_finds_nothing(hass: HomeAssistant, panel: FakePanel) -> No
         result["flow_id"], {"next_step_id": "smartlan_si"}
     )
     result = await submit(hass, result["flow_id"], si_input(panel))
-    assert result["step_id"] == "initial_options"
+    assert result["step_id"] == "items"
 
 
 async def test_search_cannot_listen(hass: HomeAssistant) -> None:
@@ -509,7 +532,7 @@ async def test_options_with_unmapped_scenarios_save_unchanged(
 ) -> None:
     """Unmapped scenarios are offered as "none" and the form saves as it is."""
     # set up with arm away = scenario 1, disarm = scenario 2, the rest unmapped
-    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await open_options(hass, entry)
     defaults = form_defaults(result)
     assert {key: defaults[key] for key in MAPPINGS} == {
         "scenario_arm_home": "none",
@@ -539,5 +562,5 @@ async def test_options_offer_none_for_an_unknown_scenario(
         entry, options={**entry.options, "scenario_arm_night": 45}
     )
     await hass.async_block_till_done()
-    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await open_options(hass, entry)
     assert form_defaults(result)["scenario_arm_night"] == "none"

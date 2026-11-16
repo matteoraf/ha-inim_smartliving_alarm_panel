@@ -12,12 +12,11 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
-    CONF_LIMIT_SCENARIOS,
     CONF_PANEL_NAME,
+    CONF_SCENARIOS,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
-    DEFAULT_LIMIT_SCENARIOS,
     DEFAULT_PANEL_NAME,
     DOMAIN,
     KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS,
@@ -31,6 +30,7 @@ from .const import (
 )
 from .legacy import LegacyPanelClient
 from .panel_config import async_reread_panel_configuration
+from .selection import scenario_label, selected
 from .utils import async_activate_scenario
 
 _LOGGER = logging.getLogger(__name__)
@@ -63,10 +63,6 @@ async def async_setup_entry(
     )
 
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
-    limit_scenarios = entry.options.get(
-        CONF_LIMIT_SCENARIOS,
-        entry.data.get(CONF_LIMIT_SCENARIOS, DEFAULT_LIMIT_SCENARIOS),
-    )
 
     async_add_entities(
         [InimRereadConfigurationButton(entry, panel_display_name, system_info)]
@@ -81,21 +77,12 @@ async def async_setup_entry(
         )
         return
 
-    num_scenarios_to_create = min(len(all_scenario_names), limit_scenarios)
-    _LOGGER.debug(
-        "Setting up %s Scenario Buttons (Limit: %s, Available: %s)",
-        num_scenarios_to_create,
-        limit_scenarios,
-        len(all_scenario_names),
-    )
+    scenarios = selected(entry.options, initial_panel_config, CONF_SCENARIOS)
+    _LOGGER.debug("Setting up scenario buttons for %s", scenarios)
 
-    for i in range(num_scenarios_to_create):
-        scenario_index_0_based = i
-        scenario_name = (
-            all_scenario_names[i]
-            if all_scenario_names[i]
-            else f"Scenario {scenario_index_0_based + 1}"
-        )
+    for number in scenarios:
+        scenario_index_0_based = number - 1
+        scenario_name = scenario_label(initial_panel_config, number)
         current_scenario_activation_details = next(
             (
                 sa

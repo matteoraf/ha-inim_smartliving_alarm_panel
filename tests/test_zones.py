@@ -17,7 +17,7 @@ from custom_components.inim_smartliving_alarm.const import (
 )
 from custom_components.inim_smartliving_alarm.legacy import create_client
 
-from .conftest import add_entry
+from .conftest import ALL, add_entry
 from .fake_panel import FakePanel, const as c
 from .test_init_baseline import call, entity_id_for, refresh, state_of
 
@@ -67,11 +67,11 @@ def original_name(
 async def mixed_entry(
     hass: HomeAssistant, panel: FakePanel
 ) -> AsyncGenerator[ConfigEntry]:
-    """Terminal 1 double, 3 output, 4 input/output; zones counted up to 100."""
+    """Terminal 1 double, 3 output, 4 input/output; every zone imported."""
     panel.state.terminal_types[0] = c.TERMINAL_DOUBLE
     panel.state.terminal_types[2] = c.TERMINAL_OUTPUT
     panel.state.terminal_types[3] = c.TERMINAL_IN_OUT
-    entry = await add_entry(hass, panel, limit_zones=100)
+    entry = await add_entry(hass, panel, zones=ALL)
     yield entry
     assert await hass.config_entries.async_unload(entry.entry_id)
     await hass.async_block_till_done()
@@ -115,12 +115,12 @@ async def test_second_zone_state_and_bypass(
     assert state_of(hass, mixed_entry, switch) == "off"
 
 
-async def test_zone_limit_counts_zone_numbers(
+async def test_second_zones_can_be_left_out(
     hass: HomeAssistant, panel: FakePanel
 ) -> None:
-    """With a limit of 50 the second zones (51-100) get no entities."""
+    """Zones that are not ticked get no entities, second zones included."""
     panel.state.terminal_types[0] = c.TERMINAL_DOUBLE
-    entry = await add_entry(hass, panel, limit_zones=50)
+    entry = await add_entry(hass, panel, zones=range(1, 51))
     assert has_entity(hass, entry, ("binary_sensor", "_zone_1"))
     assert not has_entity(hass, entry, ("binary_sensor", "_zone_51"))
     assert await hass.config_entries.async_unload(entry.entry_id)
@@ -234,7 +234,7 @@ async def test_migration_rebuilds_the_zone_list(
     entry.add_to_hass(hass)
     assert await async_migrate_entry(hass, entry)
 
-    assert entry.minor_version == 3
+    assert entry.minor_version == 4
     assert entry.data[DATA_INITIAL_PANEL_CONFIG] == fresh
 
 
@@ -253,6 +253,6 @@ async def test_migration_without_raw_data_keeps_the_zones(
     entry.add_to_hass(hass)
     assert await async_migrate_entry(hass, entry)
 
-    assert entry.minor_version == 3
+    assert entry.minor_version == 4
     assert entry.data[DATA_INITIAL_PANEL_CONFIG] == stored
     assert "Re-read panel configuration" in caplog.text
