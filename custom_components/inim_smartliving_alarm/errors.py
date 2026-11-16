@@ -1,8 +1,11 @@
 """Errors raised when a command to the panel is not carried out.
 
-Three cases are kept apart:
+These cases are kept apart:
 - ZonesNotReadyError: the integration did not send the command, because its
   own check found zones that are not ready;
+- PanelProgrammingError: the panel is in programming mode, so the command was
+  not sent, or the panel entered it while the command was sent and may have
+  ignored it;
 - CommandRefusedError: the panel received the command and refused it (wrong
   code, code not enabled, arming not allowed while zones are not ready, ...);
 - CommandFailedError: the command could not be sent, or its result could not
@@ -14,7 +17,7 @@ import logging
 
 from homeassistant.exceptions import HomeAssistantError
 
-from .api import NotReadyError
+from .api import NotReadyError, ProgrammingModeError
 from .const import DOMAIN
 from .protocol.commands import CommandResult
 from .protocol.errors import ProtocolError, UnsupportedPanelError
@@ -62,6 +65,21 @@ class ZonesNotReadyError(InimCommandError):
             },
         )
         self.zones = tuple(zones)
+
+
+class PanelProgrammingError(InimCommandError):
+    """The panel is in programming mode, so the command was not carried out."""
+
+    def __init__(self, target: str, *, sent: bool) -> None:
+        """Name the target; sent says whether the command had been sent."""
+        super().__init__(
+            translation_domain=DOMAIN,
+            translation_key="panel_programming_started"
+            if sent
+            else "panel_programming",
+            translation_placeholders={"target": target},
+        )
+        self.sent = sent
 
 
 class CommandRefusedError(InimCommandError):
@@ -114,6 +132,9 @@ async def async_send_command(
         zones = sorted(zone + 1 for zone in err.zones)
         _LOGGER.warning("%s: not sent, zones not ready: %s", target, zones)
         raise ZonesNotReadyError(target, zones, zone_names) from err
+    except ProgrammingModeError as err:
+        _LOGGER.warning("%s: %s", target, err)
+        raise PanelProgrammingError(target, sent=err.sent) from err
     except _FAILURES as err:
         _LOGGER.warning("%s: command failed: %s", target, err)
         raise CommandFailedError(target, err) from err

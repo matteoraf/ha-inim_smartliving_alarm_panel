@@ -8,6 +8,7 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -35,6 +36,7 @@ from .const import (
     KEY_INIT_ZONES_CONFIG_DETAILED,
     KEY_LIVE_ALARM_AREAS_LIST,
     KEY_LIVE_AREAS_STATUS,
+    KEY_LIVE_PANEL_PROGRAMMING,
     KEY_LIVE_TAMPER_AREAS_LIST,
     KEY_LIVE_TAMPER_MEMORY_AREAS_LIST,
     KEY_LIVE_TRIGGERED_AREAS_LIST,
@@ -175,6 +177,12 @@ async def async_setup_entry(
                 coordinator, entry, panel_display_name, system_info, i, scenario_name
             )
         )
+
+    binary_sensors_to_add.append(
+        InimProgrammingModeBinarySensor(
+            coordinator, entry, panel_display_name, system_info
+        )
+    )
 
     if binary_sensors_to_add:
         async_add_entities(binary_sensors_to_add)
@@ -589,3 +597,40 @@ class InimSpecificScenarioActiveBinarySensor(BaseInimBinarySensor):
             "scenario_index": self._scenario_index_0_based,
             "scenario_name": self._scenario_name,
         }
+
+
+class InimProgrammingModeBinarySensor(BaseInimBinarySensor):
+    """On while the panel is in programming mode; it ignores commands then.
+
+    Unavailable when the panel's state flags are not read (a panel handled
+    with another model's layout).
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "programming_mode"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:wrench-clock"
+
+    def __init__(
+        self,
+        coordinator: Any,
+        config_entry: ConfigEntry,
+        panel_display_name: str,
+        system_info: dict[str, Any],
+    ) -> None:
+        """Initialize the programming mode sensor of the panel."""
+        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        self._attr_unique_id = f"{config_entry.entry_id}_programming_mode"
+
+    def _value(self) -> bool | None:
+        return (self.coordinator.data or {}).get(KEY_LIVE_PANEL_PROGRAMMING)
+
+    @property
+    def available(self) -> bool:
+        """Available while the state flags are read."""
+        return super().available and self._value() is not None
+
+    @property
+    def is_on(self) -> bool | None:
+        """Whether the panel is in programming mode."""
+        return self._value()

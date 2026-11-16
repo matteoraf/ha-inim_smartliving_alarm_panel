@@ -28,6 +28,9 @@ Environment variables:
 - INIM_PANEL_WRONG_PIN=1: send one disarm of area 4 (only while it is
   disarmed) with a PIN that matches no user code, to see the panel's
   answer. The panel may log it as an invalid code; it needs no PIN.
+- INIM_PANEL_PROGRAMMING=1: run while the panel is in programming mode from
+  a keypad. Checks that the integration reads the programming flag and does
+  not send a command (a disarm of area 4) then; read-only, needs no PIN.
 
 All traffic goes through a local proxy (tests/real_panel/proxy.py) that
 refuses every write in read-only mode and, in write mode, every write other
@@ -54,6 +57,7 @@ import pytest_socket
 
 from custom_components.inim_smartliving_alarm.errors import (
     CommandRefusedError,
+    PanelProgrammingError,
     async_send_command,
 )
 from custom_components.inim_smartliving_alarm.legacy import (
@@ -70,6 +74,7 @@ PORT = int(os.environ.get("INIM_PANEL_PORT", "5004"))
 RECORD = bool(os.environ.get("INIM_PANEL_RECORD"))
 WRITE = bool(os.environ.get("INIM_PANEL_WRITE"))
 WRONG_PIN = bool(os.environ.get("INIM_PANEL_WRONG_PIN"))
+PROGRAMMING = bool(os.environ.get("INIM_PANEL_PROGRAMMING"))
 RECORDINGS = Path(__file__).parent / "real_panel" / "recordings"
 
 # The only area and zone the write tests may change (owner's choice)
@@ -465,7 +470,7 @@ async def write_api(
     """Client that may change area 4 and zone 18 only."""
     state = await raw_read(proxy, RAM_PANEL_STATE, 2)
     if state[1] & PANEL_STATE_PROGRAMMING:
-        pytest.skip("the panel is in programming mode, which refuses commands")
+        pytest.skip("the panel is in programming mode, which ignores commands")
     guarded = await make_proxy(WriteGuard(area=WRITE_AREA, zone_slot=zone_slot))
     client = client_for(guarded.host, guarded.port, write_pin)
     yield client
@@ -605,7 +610,7 @@ async def wrong_pin_api(
         pytest.skip("set INIM_PANEL_WRONG_PIN=1 to send a command with a wrong PIN")
     state = await raw_read(proxy, RAM_PANEL_STATE, 2)
     if state[1] & PANEL_STATE_PROGRAMMING:
-        pytest.skip("the panel is in programming mode, which refuses commands")
+        pytest.skip("the panel is in programming mode, which ignores commands")
     guarded = await make_proxy(WriteGuard(area=WRITE_AREA, zone_slot=zone_slot))
     for pin in WRONG_PIN_CANDIDATES:
         client = client_for(guarded.host, guarded.port, pin)
@@ -638,3 +643,33 @@ async def test_wrong_pin_is_refused(
 
     after = await run(hass, wrong_pin_api.get_live_status_snapshot)
     assert after["areas_status"]["area_statuses"] == statuses
+
+
+async def test_programming_mode_stops_commands(proxy: PanelProxy) -> None:
+    """In programming mode the flag is read and no command is sent.
+
+    The client goes through the read-only proxy, which would refuse (and
+    report) any write: the command must stop before it is sent.
+    """
+    if not PROGRAMMING:
+        pytest.skip(
+            "enter programming mode at a keypad, then set INIM_PANEL_PROGRAMMING=1"
+        )
+    state = await raw_read(proxy, RAM_PANEL_STATE, 2)
+    if not state[1] & PANEL_STATE_PROGRAMMING:
+        pytest.fail(f"the panel is not in programming mode (state {state.hex()})")
+
+    client = client_for(proxy.host, proxy.port, READ_ONLY_PIN)
+    try:
+        status = await client.panel.read_status()
+        assert status.panel_state is not None
+        assert status.panel_state.programming
+        with pytest.raises(PanelProgrammingError) as err:
+            await async_send_command(
+                client.panel.arm_areas({WRITE_AREA: ArmMode.DISARM}),
+                f"Area {WRITE_AREA}",
+            )
+        assert not err.value.sent
+    finally:
+        await client.close()
+    assert proxy.blocked == []

@@ -56,6 +56,8 @@ Features
     
     *   Sensors for the panel's firmware version and system type.
         
+    *   A diagnostic sensor showing when the panel is in programming mode. Commands wait until programming has ended (see [When the panel refuses a command](#when-the-panel-refuses-a-command)).
+        
 *   **Maintenance without re-adding the integration**:
     
     *   **Reconfigure** the host, port and PIN of an existing panel, for example after its IP address changed.
@@ -156,6 +158,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **New: an arming mode select per area** (*Area X arming mode*: disarmed, total, partial or instant) and the **`arm_area` action**, which arms or disarms several areas in one command (see [Arming areas from automations](#arming-areas-from-automations)).
     
+*   **Programming mode is now detected.** While the panel is being programmed from a keypad, it ignores commands, and earlier versions reported such a command as carried out. Now no command is sent while the panel is in programming mode: the action fails with a message instead, and setup, **Reconfigure** and **Re-read panel configuration** wait until programming has ended. A new diagnostic sensor, *Programming mode*, shows it. The `reason` of the `inim_smartliving_alarm_scenario_activation_failed` event can now also be `panel_programming`.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -233,7 +237,7 @@ data:
   config_entry_id: <the panel's config entry ID>
 ```
 
-The integration then reloads with the new configuration. Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel. If the panel cannot be reached, an error is shown and the stored configuration is kept.
+The integration then reloads with the new configuration. Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel. If the panel cannot be reached, or it is in programming mode, an error is shown and the stored configuration is kept: in programming mode, try again when programming has ended.
 
 Entities Provided
 -----------------
@@ -283,6 +287,8 @@ This integration exposes your Inim alarm system's components as various Home Ass
 *   **Maintenance**:
     
     *   *button.your\_panel\_name\_reread\_panel\_configuration*: Reads the panel configuration again and reloads the integration (see [Re-reading the panel configuration](#re-reading-the-panel-configuration)). Shown in the *Configuration* section of the device page.
+        
+    *   *binary\_sensor.your\_panel\_name\_programming\_mode* (named *Programming mode*): On while the panel is in programming mode (being programmed from a keypad, or reloading its configuration). Commands are not sent then. Shown in the *Diagnostic* section of the device page. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5).
         
 
 _(Replace your\_panel\_name, with actual value based on your setup)._
@@ -345,7 +351,11 @@ These are known and will be fixed in the coming versions:
 
 Arming, disarming, bypassing a zone, activating a scenario and resetting the alarm memory fail with a message when they are not carried out. The message says which of three things happened:
 
-*   **The integration did not send the command**: before a scenario, the integration checks the zones it arms. If some are not at rest, the message lists them (for example *"Night was not activated because these zones are not ready: Kitchen window (12)"*) and nothing is sent to the panel.
+*   **The integration did not send the command**:
+    
+    *   Before a scenario, the integration checks the zones it arms. If some are not at rest, the message lists them (for example *"Night was not activated because these zones are not ready: Kitchen window (12)"*) and nothing is sent to the panel.
+        
+    *   While the panel is in programming mode, it ignores commands, so none is sent (*"The command for Area 3 was not sent: the panel is in programming mode. Try again when programming has ended."*). If the panel enters programming mode while a command is being sent, the message says that the command may not have been carried out: check the area or zone, and try again when programming has ended.
     
 *   **The panel refused it**: the message gives the panel's reason:
     
@@ -407,6 +417,12 @@ Troubleshooting
     
     
     *   Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions. Setup and **Reconfigure** refuse a PIN that matches no user code; for a panel set up with an older version of the integration, the log shows a warning ("The PIN does not match any user code of the panel") each time the integration connects. You can change it with **Reconfigure** (see [Changing the connection details](#changing-the-connection-details-reconfigure)).
+        
+*   **Commands fail with "the panel is in programming mode"**:
+    
+    *   Someone is programming the panel from a keypad, or the panel is reloading its configuration. Commands work again when programming has ended; the *Programming mode* sensor shows when.
+        
+    *   Programming from the installer software on a PC does not block commands. After the software writes new programming, the panel may restart by itself, and Home Assistant cannot reach it for a short time. Then use **Re-read panel configuration** to pick up the changes.
         
 *   **The panel armed an area with a zone open**: the area switches, the arming mode selects and the `arm_area` action do not check the zones before arming. The panel refuses only when it is programmed not to allow arming with zones that are not ready; otherwise it arms, and an open zone can set off an alarm right away. A check of the zones before arming is planned for a later version.
     

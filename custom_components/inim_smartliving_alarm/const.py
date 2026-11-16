@@ -120,6 +120,7 @@ KEY_INIT_AREA_NAMES = "names"  # List of area names (str)
 # From coordinator.data (live status snapshot)
 KEY_LIVE_ACTIVE_SCENARIO = "active_scenario"  # Dict with current active scenario info
 KEY_LIVE_ACTIVE_SCENARIO_NUMBER = "active_scenario_number"  # 0-indexed int
+KEY_LIVE_PANEL_PROGRAMMING = "panel_programming"  # bool; None when not read
 
 KEY_LIVE_AREAS_STATUS = "areas_status"  # Dict with current area statuses
 KEY_LIVE_AREA_STATUSES_MAP = (

@@ -84,6 +84,7 @@ _ERROR_KEYS = frozenset(
         "invalid_panel_response",
         "invalid_pin",
         "invalid_pin_format",
+        "panel_programming",
         "unsupported_firmware",
     )
 )

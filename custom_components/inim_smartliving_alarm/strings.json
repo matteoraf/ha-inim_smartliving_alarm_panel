@@ -97,7 +97,8 @@
         "invalid_board_reply": "The SmartLAN/G board answered, but its reply was not in the expected format. If the user name and password are correct, this board version may not be supported yet: please report it on GitHub with a debug log.",
         "invalid_pin": "The PIN does not match any user code of the panel.",
         "invalid_pin_format": "The PIN must be 1 to 6 digits.",
-        "unsupported_firmware": "The panel's firmware is too old: firmware 5 or later is needed."
+        "unsupported_firmware": "The panel's firmware is too old: firmware 5 or later is needed.",
+        "panel_programming": "The panel is in programming mode, so its configuration cannot be read now. Try again when programming has ended."
       },
       "abort": {
         "already_configured": "This Inim Alarm panel is already configured.",
@@ -154,6 +155,15 @@
       },
       "zones_not_ready": {
         "message": "{target} was not activated because these zones are not ready: {zones}."
+      },
+      "panel_programming": {
+        "message": "The command for {target} was not sent: the panel is in programming mode. Try again when programming has ended."
+      },
+      "panel_programming_started": {
+        "message": "The panel entered programming mode while the command for {target} was sent, so it may not have been carried out. Check {target} and try again when programming has ended."
+      },
+      "panel_programming_config": {
+        "message": "The panel is in programming mode, so its configuration was not read. Try again when programming has ended. The panel configuration was not changed."
       },
       "refused_invalid_code": {
         "message": "The panel did not accept the PIN for {target}. The PIN may have been changed or deleted on the panel: enter the current one with Reconfigure."
@@ -217,6 +227,11 @@
       }
     },
     "entity": {
+      "binary_sensor": {
+        "programming_mode": {
+          "name": "Programming mode"
+        }
+      },
       "select": {
         "area_arming_mode": {
           "name": "Area {area} arming mode",

@@ -43,7 +43,8 @@ RAM_BRAND = 0xFED2
 RAM_HW_SIGNATURE = 0xFECC
 RAM_SERIAL_NUMBER = 0xFEA0  # production serial area; 52 bytes reach the brand word
 SERIAL_NUMBER_LENGTH = 16  # ASCII digits at the start of the area
-RAM_PANEL_STATE = 0x0D28  # panel state flags (stato_centrale), 2 bytes
+# Panel state flags (stato_centrale), 2 bytes; also bytes 4-5 of RAM_FAULTS
+RAM_PANEL_STATE = 0x0D28
 PANEL_STATE_NO_AREA_ARMED = 0x08  # byte 1, bit 3
 PANEL_STATE_PROGRAMMING = 0x40  # byte 1, bit 6
 PANEL_STATE_NO_VOICE_BOARD = 0x80  # byte 1, bit 7
@@ -92,7 +93,7 @@ ZONE_MEMORY_LENGTH = (
     ZONE_BITMAP_LENGTH + (NUM_TERMINALS // 8 + 1) + (NUM_TERMINALS // 8 + 2)
 )  # 28
 OUTPUT_IMAGE_OFFSET = ZONE_BITMAP_LENGTH + NUM_TERMINALS // 8 + 1  # 20
-FAULTS_LENGTH = 7
+FAULTS_LENGTH = 6
 EVENT_TEXT_LENGTH = 366
 
 # EEPROM structures (24-bit addresses)

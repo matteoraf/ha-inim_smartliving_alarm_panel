@@ -7,8 +7,12 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
+from .api import ProgrammingModeError
 from .const import DATA_API_CLIENT, DATA_INITIAL_PANEL_CONFIG, DOMAIN
 from .legacy import LegacyPanelClient
+
+# ValueError message (and error key) when the panel is in programming mode
+PANEL_PROGRAMMING = "panel_programming"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,12 +23,22 @@ async def async_fetch_panel_configuration(
     """Read the panel configuration (names, zone setup, scenarios) and check it.
 
     Raises ConnectionError if the panel cannot be reached and ValueError if
-    the configuration is incomplete or invalid.
+    the configuration is incomplete or invalid, or cannot be read because the
+    panel is in programming mode (PANEL_PROGRAMMING).
     """
     host, port = api.host, api.port
     _LOGGER.debug("Fetching the panel configuration from %s:%s", host, port)
 
-    initial_config = await api.get_initial_panel_configuration()
+    try:
+        initial_config = await api.get_initial_panel_configuration()
+    except ProgrammingModeError as err:
+        _LOGGER.warning(
+            "The panel at %s:%s is in programming mode; its configuration is "
+            "not read until programming has ended",
+            host,
+            port,
+        )
+        raise ValueError(PANEL_PROGRAMMING) from err
 
     if initial_config is None:
         _LOGGER.error(
@@ -97,6 +111,10 @@ async def async_reread_panel_configuration(
             translation_placeholders={"host": api.host, "port": str(api.port)},
         ) from err
     except ValueError as err:
+        if str(err) == PANEL_PROGRAMMING:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN, translation_key="panel_programming_config"
+            ) from err
         raise HomeAssistantError(
             translation_domain=DOMAIN,
             translation_key="invalid_panel_configuration",
