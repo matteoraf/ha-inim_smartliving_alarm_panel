@@ -139,6 +139,7 @@
           "description": "Scegli cosa modificare.",
           "menu_options": {
             "items": "Aree, zone e scenari",
+            "area_switches": "Modalità di inserimento per area",
             "general": "Impostazioni generali"
           }
         },
@@ -169,6 +170,10 @@
             }
           }
         },
+        "area_switches": {
+          "title": "Modalità di inserimento per area",
+          "description": "La modalità in cui l'interruttore di ogni area inserisce quando viene acceso. *Usa la predefinita* segue **Modalità di inserimento predefinita delle aree** nelle impostazioni generali. Il selettore della modalità di inserimento di ogni area e l'azione `arm_area` non cambiano."
+        },
         "general": {
           "title": "Impostazioni generali",
           "description": "Modifica le impostazioni per la tua integrazione Inim.\n\nI comandi vengono inviati con il codice utente **{user_code}**, che controlla queste aree: {user_areas}.",
@@ -181,11 +186,11 @@
             "scenario_arm_night": "Scenario Inserimento Notte",
             "scenario_arm_vacation": "Scenario Inserimento Vacanza",
             "scenario_disarm": "Scenario Disinserimento",
-            "area_switch_arm_mode": "Gli interruttori area inseriscono in"
+            "area_switches_default_arm_mode": "Modalità di inserimento predefinita delle aree"
           },
           "data_description": {
             "pin": "Lascia vuoto per mantenere il PIN attuale.",
-            "area_switch_arm_mode": "Modalità usata quando si accende un interruttore area. Il selettore della modalità di inserimento di ogni area imposta qualsiasi modalità."
+            "area_switches_default_arm_mode": "Modalità usata quando si accende un interruttore area, a meno che la sua area non abbia una modalità propria in Modalità di inserimento per area. Il selettore della modalità di inserimento di ogni area imposta qualsiasi modalità."
           }
         }
       },
@@ -285,8 +290,16 @@
       }
     },
     "selector": {
-      "area_switch_arm_mode": {
+      "area_switches_default_arm_mode": {
         "options": {
+          "total": "Totale",
+          "partial": "Parziale",
+          "instant": "Istantaneo"
+        }
+      },
+      "area_switch_arm_mode_by_area": {
+        "options": {
+          "default": "Usa la predefinita",
           "total": "Totale",
           "partial": "Parziale",
           "instant": "Istantaneo"
