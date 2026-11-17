@@ -107,7 +107,6 @@ async def add_entry(
         {
             "polling_interval": 30,
             "event_log_size": 5,
-            "reader_names": "",
             "scenario_arm_away": "0",
             "scenario_arm_home": "none",
             "scenario_arm_night": "none",

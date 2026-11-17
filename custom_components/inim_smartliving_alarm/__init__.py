@@ -34,12 +34,14 @@ from .const import (
     CONF_PIN,
     CONF_POLLING_INTERVAL,
     CONF_PORT,
+    CONF_READER_NAMES,
     CONF_USERNAME,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
+    KEY_INIT_PERIPHERALS,
     KEY_INIT_TERMINAL_RECORDS_RAW,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
@@ -235,7 +237,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             f"Failed to fetch initial data from Inim panel at {host}:{port}"
         )
 
-    await _reread_configuration_if_layout_differs(hass, entry, api)
+    await _reread_configuration_if_outdated(hass, entry, api)
     _remove_entities_not_imported(hass, entry)
 
     # Store the API instance and coordinator in hass.data for platforms to access.
@@ -339,35 +341,46 @@ def _remove_entities_not_imported(hass: HomeAssistant, entry: ConfigEntry) -> No
         )
 
 
-async def _reread_configuration_if_layout_differs(
+async def _reread_configuration_if_outdated(
     hass: HomeAssistant, entry: ConfigEntry, api: LegacyPanelClient
 ) -> None:
-    """Read the configuration again if it was stored for another panel model.
+    """Read the configuration again if it was stored by an earlier version.
 
-    Called at every setup, but it only compares sizes in memory: the panel
-    model is known from the first status read, and the stored terminal
-    records must be L x 12 bytes for it. Nothing is read from the panel
-    unless they differ. That happens once for a panel with its own profile
-    (the 10100) set up with an earlier version, which read every panel with
-    the SmartLiving 1050's addresses; after the re-read the sizes match.
-    Unique IDs do not change. If the re-read fails, setup goes on with the
-    stored configuration.
+    Called at every setup, but it only looks at the stored configuration:
+    nothing is read from the panel unless it lacks the names of user codes,
+    keys and readers and the enabled peripherals (stored from this version
+    on), or it was stored for
+    another panel model. The panel model is known from the first status
+    read, and the stored terminal records must be L x 12 bytes for it; they
+    differ once for a panel with its own profile (the 10100) set up with an
+    earlier version, which read every panel with the SmartLiving 1050's
+    addresses. After the re-read neither applies. Unique IDs do not change.
+    If the re-read fails, setup goes on with the stored configuration.
     """
     try:
         model = api.panel.model
     except RuntimeError:  # not identified (no successful read)
         return
     config = entry.data.get(DATA_INITIAL_PANEL_CONFIG) or {}
+    if not config:
+        return
     raw = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(KEY_INIT_TERMINAL_RECORDS_RAW)
     expected = model.terminals * model.terminal_record_length
-    if not isinstance(raw, str) or len(raw) // 2 == expected:
+    if isinstance(raw, str) and len(raw) // 2 != expected:
+        _LOGGER.warning(
+            "%s: the stored panel configuration does not fit the %s (it was "
+            "read for another model); reading it again from the panel",
+            entry.title,
+            model.name,
+        )
+    elif KEY_INIT_PERIPHERALS not in config:
+        _LOGGER.info(
+            "%s: reading the panel configuration again for the names of user "
+            "codes, keys and readers and the enabled peripherals",
+            entry.title,
+        )
+    else:
         return
-    _LOGGER.warning(
-        "%s: the stored panel configuration does not fit the %s (it was read "
-        "for another model); reading it again from the panel",
-        entry.title,
-        model.name,
-    )
     try:
         new_config = await async_fetch_panel_configuration(hass, api)
     except (ConnectionError, ValueError) as err:
@@ -381,9 +394,7 @@ async def _reread_configuration_if_layout_differs(
     hass.config_entries.async_update_entry(
         entry, data={**entry.data, DATA_INITIAL_PANEL_CONFIG: new_config}
     )
-    _LOGGER.info(
-        "%s: panel configuration read again for the %s", entry.title, model.name
-    )
+    _LOGGER.info("%s: panel configuration read again", entry.title)
 
 
 # Unique ID suffixes of the zone entities, before the 1-based zone number
@@ -432,14 +443,15 @@ def _warn_about_leftover_zone_entities(hass: HomeAssistant, entry: ConfigEntry) 
 
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Migrate an entry to the current version (1.4).
+    """Migrate an entry to the current version (1.5).
 
     1.2 adds the board type; every older entry uses SmartLAN/SI. 1.3 stores
     every zone number with its terminal type, rebuilt from the raw panel
     data the entry already holds (no panel access). 1.4 replaces the counts
     of areas, zones and scenarios with lists of the items to import, which
-    keep the same entities. A newer major version (from a later integration
-    release) cannot be loaded.
+    keep the same entities. 1.5 drops the reader names option: reader
+    names are read from the panel. A newer major version (from a later
+    integration release) cannot be loaded.
     """
     version, minor = config_entry.version, config_entry.minor_version
     _LOGGER.debug("Checking migration of config entry version %s.%s", version, minor)
@@ -487,6 +499,13 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             config_entry, data=data, options={**options, **selection}, minor_version=4
         )
         _LOGGER.info("Migrated config entry %s to version 1.4", config_entry.title)
+    if config_entry.minor_version < 5:
+        options = dict(config_entry.options)
+        options.pop(CONF_READER_NAMES, None)
+        hass.config_entries.async_update_entry(
+            config_entry, options=options, minor_version=5
+        )
+        _LOGGER.info("Migrated config entry %s to version 1.5", config_entry.title)
     return True
 
 

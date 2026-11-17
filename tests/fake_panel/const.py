@@ -81,6 +81,7 @@ RAM_LABELS_PHONES = 0x4022
 RAM_LABELS_SCENARIOS = 0x4024
 RAM_LABELS_TIMERS = 0x4026
 RAM_LABELS_OUTPUTS = 0x4028
+RAM_LABELS_SIRENS = 0x402E
 LABEL_BANK = 0x10000
 
 # Status read lengths
@@ -97,6 +98,15 @@ FAULTS_LENGTH = 6
 EVENT_TEXT_LENGTH = 366
 
 # EEPROM structures (24-bit addresses)
+# Enabled devices, one bit each, at the same address on every model:
+# kind -> (offset in the block, bytes)
+EEPROM_PERIPHERALS = 0x00000
+PERIPHERAL_BITMAPS = {
+    "readers": (0, 4),
+    "expanders": (4, 6),
+    "keypads": (10, 2),
+    "sirens": (12, 2),
+}
 EEPROM_PINS = 0x061F4
 PIN_LENGTH = 6
 EEPROM_CODES = 0x0632C
@@ -276,6 +286,7 @@ LAYOUT_1050 = Layout(
         RAM_LABELS_SCENARIOS: (0x1450, NUM_SCENARIOS),
         RAM_LABELS_TIMERS: (0x1630, 10),
         RAM_LABELS_OUTPUTS: (0x16D0, 3),
+        RAM_LABELS_SIRENS: (0x1700, 10),
     },
 )
 
@@ -315,6 +326,7 @@ LAYOUT_10100 = Layout(
             RAM_LABELS_SCENARIOS: NUM_SCENARIOS,
             RAM_LABELS_TIMERS: 20,
             RAM_LABELS_OUTPUTS: 3,
+            RAM_LABELS_SIRENS: 10,
         }
     ),
 )

@@ -104,6 +104,8 @@ class PanelState:
         default_factory=lambda: [bytes(c.SCENARIO_RECORD_LENGTH)] * c.NUM_SCENARIOS
     )
     labels: dict[int, list[str]] = field(default_factory=dict)
+    # Enabled devices: kind ("keypads", "readers", ...) -> 0-based numbers
+    peripherals: dict[str, list[int]] = field(default_factory=dict)
 
     # Live state
     area_modes: list[int] = field(
@@ -234,6 +236,10 @@ class PanelState:
         def put(address: int, data: bytes) -> None:
             image[address : address + len(data)] = data
 
+        for kind, numbers in self.peripherals.items():
+            offset, length = c.PERIPHERAL_BITMAPS[kind]
+            bitmap = sum(1 << number for number in numbers)
+            put(c.EEPROM_PERIPHERALS + offset, bitmap.to_bytes(length, "little"))
         for index, pin in enumerate(self.pins):
             put(lay.eeprom_pins + index * c.PIN_LENGTH, encode_pin(pin))
         for index, record in enumerate(self.code_records):
@@ -622,6 +628,19 @@ def panel_1050() -> PanelState:
         c.RAM_LABELS_SCENARIOS: [
             f"Scenario {n}" for n in range(1, c.NUM_SCENARIOS + 1)
         ],
+        c.RAM_LABELS_READERS: ["PK Giorno", "PK Garage"],
+        c.RAM_LABELS_KEYS: ["Key Anna", "Key Marco"],
+        c.RAM_LABELS_EXPANDERS: ["Exp Kitchen"],
+        c.RAM_LABELS_TIMERS: ["Timer 1"],
+        c.RAM_LABELS_SIRENS: ["Outdoor siren"],
+    }
+    # Two keypads, three readers (the third without a name), one expander
+    # and one siren
+    state.peripherals = {
+        "keypads": [0, 1],
+        "readers": [0, 1, 2],
+        "expanders": [0],
+        "sirens": [0],
     }
     state.keypad_temperatures = {0: 24.5, 1: 27.7}
 
@@ -684,6 +703,12 @@ def panel_10100() -> PanelState:
         c.RAM_LABELS_SCENARIOS: [
             f"Scenario {n}" for n in range(1, c.NUM_SCENARIOS + 1)
         ],
+    }
+    # Keypads 1-3 and 15, readers 1 and 30, expanders 1 and 40
+    state.peripherals = {
+        "keypads": [0, 1, 2, 14],
+        "readers": [0, 29],
+        "expanders": [0, 39],
     }
     state.active_scenario = None
     return state

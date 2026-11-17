@@ -44,7 +44,7 @@ Features
         
 *   **Configurable Event Log**:
     
-    *   A sensor entity provides a log of recent panel events.
+    *   A sensor entity provides a log of recent panel events, with the names programmed on the panel: who did it (user code or key) and where (keypad or reader).
         
     *   The number of events stored in the sensor's attributes is configurable during setup.
         
@@ -164,6 +164,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **The `arm_area` action lists the imported areas only, by name**, and refuses areas that are not imported. The alarm panel's modes can be mapped only to imported scenarios.
     
+*   **The event log shows the names programmed on the panel**: who caused an event (the user code's or key's name, instead of *User 3* or *Key 5*) and where (the keypad's or reader's name). Commands sent remotely, from the app, the cloud, Home Assistant or the installer software, show *Remote* (before, *Mobile App*). The **Reader names** option is removed: reader names now come from the panel, and names typed in that option are no longer used. Your configuration entry is updated once more (version 1.5), and at the first start the integration reads the panel configuration again by itself to get the names (the log says so). A new diagnostic sensor, *Peripherals*, lists the keypads, readers, expanders and sirens enabled on the panel, and so does the **Areas, zones and scenarios** step.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -203,6 +205,8 @@ After installation and restarting Home Assistant:
     *   **Scenarios**: every scenario of the panel (30).
         
     The setup ticks what the panel shows in use: the zones that belong to an area, the areas of those zones, and the scenarios that change at least one area. Tick or untick anything you like.
+
+    The same step lists, for reference, the keypads, readers, expanders and sirens enabled on the panel, by name.
     
 8.  Then the **Initial Options**:
     
@@ -214,7 +218,6 @@ After installation and restarting Home Assistant:
 
     *   **Area switches arm in** (options only, not at setup): the mode an area switch arms in when turned on: total (the default), partial or instant. The *arming mode* select of each area offers every mode.
 
-    *   **Readers Names**: You can provide a comma separated list of Proximity readers "friendly" names wich will be mapped to readers in the order in which they appear. The integration cannot query those names. If you don't provide any, you'll see them appear as "Reader X" in the log.
         
 9.  Click **Submit** to complete the setup.
     
@@ -236,7 +239,7 @@ The integration contacts the panel with the new details, reads its configuration
 
 ### Re-reading the panel configuration
 
-The names of areas, zones and scenarios, the zone setup and the scenario definitions are read from the panel when the integration is set up. If you change them on the panel later (from a keypad or the installer software), read them again with either:
+The names of areas, zones, scenarios, user codes, keys, keypads, readers, expanders, timers and sirens, which keypads, readers, expanders and sirens are enabled, the zone setup and the scenario definitions are read from the panel when the integration is set up. If you change them on the panel later (from a keypad or the installer software), read them again with either:
 
 *   the **Re-read panel configuration** button, in the *Configuration* section of your panel's device page, or
     
@@ -290,7 +293,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
 *   **Sensors**:
     
-    *   *sensor.your\_panel\_name\_event\_log*: The state is the position of the newest event in the panel's event log (0 to 999; it starts again from 0 when the log wraps around), so it changes with every new event. The attributes contain a human-readable log of recent events. Event times are the panel's clock read in Home Assistant's time zone, with daylight saving time.
+    *   *sensor.your\_panel\_name\_event\_log*: The state is the position of the newest event in the panel's event log (0 to 999; it starts again from 0 when the log wraps around), so it changes with every new event. The attributes contain a human-readable log of recent events: `authorized_by` is the name of the user code or key, `device` the name of the keypad or reader (*Remote* for commands from the app, the cloud, Home Assistant or the installer software). Event times are the panel's clock read in Home Assistant's time zone, with daylight saving time.
         
     *   *sensor.your\_panel\_name\_active\_scenario*: A text sensor that displays the name of the currently active scenario.
         
@@ -300,6 +303,8 @@ This integration exposes your Inim alarm system's components as various Home Ass
     
     *   *button.your\_panel\_name\_reread\_panel\_configuration*: Reads the panel configuration again and reloads the integration (see [Re-reading the panel configuration](#re-reading-the-panel-configuration)). Shown in the *Configuration* section of the device page.
         
+    *   *sensor.your\_panel\_name\_peripherals* (named *Peripherals*): How many keypads, readers, expanders and sirens are enabled on the panel; the `keypads`, `readers`, `expanders` and `sirens` attributes list their names. It does not tell whether a device is answering. Shown in the *Diagnostic* section of the device page.
+
     *   *binary\_sensor.your\_panel\_name\_programming\_mode* (named *Programming mode*): On while the panel is in programming mode (being programmed from a keypad, or reloading its configuration). Commands are not sent then. Shown in the *Diagnostic* section of the device page. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5).
         
 

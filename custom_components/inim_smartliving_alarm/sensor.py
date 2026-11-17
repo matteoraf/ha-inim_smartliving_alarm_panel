@@ -5,6 +5,7 @@ from typing import Any, cast
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -13,7 +14,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import (
     CONF_EVENT_LOG_SIZE,
     CONF_PANEL_NAME,
-    CONF_READER_NAMES,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_EVENT_LOG_SIZE,
@@ -21,8 +21,12 @@ from .const import (
     DOMAIN,
     KEY_INIT_AREA_NAMES,
     KEY_INIT_AREAS,
+    KEY_INIT_CODES,
     KEY_INIT_KEYBOARD_NAMES,
     KEY_INIT_KEYBOARDS,
+    KEY_INIT_KEYS,
+    KEY_INIT_NAMES,
+    KEY_INIT_READERS,
     KEY_INIT_SCENARIO_NAMES,
     KEY_INIT_SCENARIOS,
     KEY_INIT_SYSTEM_INFO,
@@ -37,6 +41,7 @@ from .const import (
     SENSOR_LAST_EVENT_LOG_SUFFIX,
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
+from .peripherals import enabled_peripherals
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -92,6 +97,13 @@ async def async_setup_entry(
         _LOGGER.warning(
             "System info or system type not available for %s, PanelSystemTypeSensor not created",
             entry.title,
+        )
+
+    # Keypads, readers, expanders and sirens enabled on the panel
+    peripherals = enabled_peripherals(initial_panel_config)
+    if peripherals is not None:
+        sensors_to_add.append(
+            PanelPeripheralsSensor(entry, panel_display_name, system_info, peripherals)
         )
 
     # Sensor for Events Log
@@ -277,6 +289,46 @@ class PanelSystemTypeSensor(SensorEntity):
         )
 
 
+class PanelPeripheralsSensor(SensorEntity):
+    """The keypads, readers, expanders and sirens enabled on the panel.
+
+    The state is how many there are; the attributes list their names.
+    Static: it changes when the panel configuration is read again.
+    """
+
+    _attr_should_poll = False
+    _attr_has_entity_name = True
+    _attr_translation_key = "peripherals"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:devices"
+
+    def __init__(
+        self,
+        config_entry: ConfigEntry,
+        panel_display_name: str,
+        system_info: dict[str, Any],
+        peripherals: dict[str, list[str]],
+    ) -> None:
+        """Initialize the sensor from the stored configuration."""
+        self.config_entry = config_entry
+        self._panel_display_name = panel_display_name
+        self._system_info = system_info
+        self._attr_unique_id = f"{config_entry.entry_id}_peripherals"
+        self._attr_native_value = sum(len(names) for names in peripherals.values())
+        self._attr_extra_state_attributes = peripherals
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information for the entity."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.config_entry.entry_id)},
+            name=self._panel_display_name,
+            manufacturer="Inim Electronics",
+            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
+            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+        )
+
+
 class InimEventLogSensor(BaseInimSensorEntity):
     """Sensor to display the latest Inim alarm events."""
 
@@ -300,11 +352,6 @@ class InimEventLogSensor(BaseInimSensorEntity):
             config_entry.options.get(CONF_EVENT_LOG_SIZE, DEFAULT_EVENT_LOG_SIZE),
             SYSTEM_MAX_EVENT_LOG_SIZE,  # Cap with system max
         )
-
-        reader_names_str = config_entry.options.get(CONF_READER_NAMES, "")
-        self._reader_names = [
-            name.strip() for name in reader_names_str.split(",") if name.strip()
-        ]
 
         self._event_log: list[
             dict[str, Any]
@@ -342,11 +389,6 @@ class InimEventLogSensor(BaseInimSensorEntity):
         all_zone_names: list[str] = self._initial_panel_config.get(
             KEY_INIT_ZONES, {}
         ).get(KEY_INIT_ZONE_NAMES, [])
-        keyboard_names: list[str] = self._initial_panel_config.get(
-            KEY_INIT_KEYBOARDS, {}
-        ).get(KEY_INIT_KEYBOARD_NAMES, [])
-
-        action_code = raw_api_event["action_code"]
 
         if "scenario_number_0_indexed" in raw_api_event:
             idx = raw_api_event["scenario_number_0_indexed"]
@@ -385,62 +427,23 @@ class InimEventLogSensor(BaseInimSensorEntity):
                 ", ".join(area_names_display) if area_names_display else "None"
             )
 
-        action_code = raw_api_event.get("action_code")
-        if action_code == 0x96:  # Valid Key
-            if "authorized_id_hex" in raw_api_event:
-                enriched_log_event["authorized_id"] = raw_api_event[
-                    "authorized_id_hex"
-                ]  # Keeping this for context if available
-                enriched_log_event["authorized_by"] = (
-                    f"Key {int(raw_api_event['authorized_id_hex'], 16) + 1}"
-                )
-            if "device_id_hex" in raw_api_event:
-                enriched_log_event["device_id"] = raw_api_event[
-                    "device_id_hex"
-                ]  # Keeping this for context if available
-                device_id_val = int(raw_api_event["device_id_hex"], 16)
-                if 0 <= device_id_val < len(self._reader_names):
-                    enriched_log_event["device"] = self._reader_names[device_id_val]
-                else:
-                    enriched_log_event["device"] = f"Reader {device_id_val + 1}"
-        else:  # Other area actions or events
-            if "device_id_hex" in raw_api_event:
-                enriched_log_event["device_id"] = raw_api_event[
-                    "device_id_hex"
-                ]  # Keeping this for context if available
-                device_id_val = int(raw_api_event["device_id_hex"], 16)
-                if device_id_val == 0xFE:
-                    enriched_log_event["device"] = "Mobile App"
-                elif device_id_val == 0xFF:
-                    enriched_log_event["device"] = "-"
-                elif 0 <= device_id_val <= 9:
-                    if 0 <= device_id_val < len(keyboard_names):
-                        enriched_log_event["device"] = (
-                            keyboard_names[device_id_val]
-                            or f"Keyboard {device_id_val + 1}"
-                        )
-                    else:
-                        enriched_log_event["device"] = f"Keyboard {device_id_val + 1}"
-                elif device_id_val >= 0x0A:
-                    reader_index = device_id_val - 10
-                    if 0 <= reader_index < len(self._reader_names):
-                        enriched_log_event["device"] = self._reader_names[reader_index]
-                    else:
-                        enriched_log_event["device"] = f"Reader {reader_index + 1}"
-
-            if "authorized_id_hex" in raw_api_event:
-                enriched_log_event["authorized_id"] = raw_api_event[
-                    "authorized_id_hex"
-                ]  # Keeping this for context if available
-                auth_id_val = int(raw_api_event["authorized_id_hex"], 16)
-                if auth_id_val == 0xFF:
-                    enriched_log_event["authorized_by"] = "-"
-                elif 0x0A <= device_id_val < 0xF0:
-                    enriched_log_event["authorized_by"] = f"Key {auth_id_val + 1}"
-                elif auth_id_val == 0x00:
-                    enriched_log_event["authorized_by"] = "Master Code"
-                else:
-                    enriched_log_event["authorized_by"] = f"User {auth_id_val}"
+        names = _EventNames(self._initial_panel_config)
+        device = _hex_field(raw_api_event, "device_id_hex")
+        agent = _hex_field(raw_api_event, "authorized_id_hex")
+        if device is not None:
+            enriched_log_event["device_id"] = raw_api_event["device_id_hex"]
+        if agent is not None:
+            enriched_log_event["authorized_id"] = raw_api_event["authorized_id_hex"]
+        if raw_api_event.get("action_code") == 0x96:  # valid key, on a reader
+            if agent is not None:
+                enriched_log_event["authorized_by"] = names.key(agent)
+            if device is not None:
+                enriched_log_event["device"] = names.reader(device)
+        else:
+            if device is not None:
+                enriched_log_event["device"] = names.location(device)
+            if agent is not None:
+                enriched_log_event["authorized_by"] = names.agent(agent, device)
 
         if "raw_hex_data" in raw_api_event:  # Keeping this for context if available
             enriched_log_event["raw_hex_data"] = raw_api_event["raw_hex_data"]
@@ -509,3 +512,75 @@ class InimEventLogSensor(BaseInimSensorEntity):
             "event_log_count_current": len(self._event_log),
             "event_log": self._event_log,
         }
+
+
+def _hex_field(event: dict[str, Any], key: str) -> int | None:
+    """A hex field of a decoded event as a number, None if absent."""
+    value = event.get(key)
+    return None if value is None else int(value, 16)
+
+
+class _EventNames:
+    """Names of what an event refers to, from the stored panel configuration.
+
+    An event's location is a keypad (0 to K-1), a reader (K to K+P-1),
+    254 for a remote command (app, cloud, Home Assistant or the installer
+    software) or 255 for none; its agent is a user code, or a key when the
+    location is a reader. K and P are the model's keypad and reader counts.
+    Names not stored (a configuration from an earlier version) fall back
+    to numbers.
+    """
+
+    def __init__(self, config: dict[str, Any]) -> None:
+        def names(key: str) -> list[str]:
+            return (config.get(key) or {}).get(KEY_INIT_NAMES) or []
+
+        self._keypads = (config.get(KEY_INIT_KEYBOARDS) or {}).get(
+            KEY_INIT_KEYBOARD_NAMES
+        ) or []
+        self._codes = names(KEY_INIT_CODES)
+        self._keys = names(KEY_INIT_KEYS)
+        self._readers = names(KEY_INIT_READERS)
+
+    @staticmethod
+    def _name(names: list[str], index: int, fallback: str) -> str:
+        return (names[index] if 0 <= index < len(names) else "") or fallback
+
+    @property
+    def _keypad_count(self) -> int:
+        # A configuration without keypad names: the 1050's 10, as before
+        return len(self._keypads) or 10
+
+    def _reader_index(self, location: int) -> int | None:
+        index = location - self._keypad_count
+        return index if location < 0xF0 and index >= 0 else None
+
+    def location(self, location: int) -> str:
+        """Where the event comes from."""
+        if location == 0xFE:
+            return "Remote"
+        if location == 0xFF:
+            return "-"
+        if location < self._keypad_count:
+            return self._name(self._keypads, location, f"Keypad {location + 1}")
+        if (reader := self._reader_index(location)) is not None:
+            return self.reader(reader)
+        return f"Location {location}"
+
+    def agent(self, agent: int, location: int | None) -> str:
+        """Who caused the event: a user code, or a key used on a reader."""
+        if agent == 0xFF:
+            return "-"
+        if location is not None and self._reader_index(location) is not None:
+            return self.key(agent)
+        if self._codes:
+            return self._name(self._codes, agent, f"Code {agent + 1}")
+        return "Master Code" if agent == 0 else f"User {agent}"  # as before
+
+    def key(self, index: int) -> str:
+        """A key (tag), by its 0-based index."""
+        return self._name(self._keys, index, f"Key {index + 1}")
+
+    def reader(self, index: int) -> str:
+        """A reader, by its 0-based index."""
+        return self._name(self._readers, index, f"Reader {index + 1}")

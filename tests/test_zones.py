@@ -234,7 +234,7 @@ async def test_migration_rebuilds_the_zone_list(
     entry.add_to_hass(hass)
     assert await async_migrate_entry(hass, entry)
 
-    assert entry.minor_version == 4
+    assert entry.minor_version == 5
     assert entry.data[DATA_INITIAL_PANEL_CONFIG] == fresh
 
 
@@ -253,6 +253,6 @@ async def test_migration_without_raw_data_keeps_the_zones(
     entry.add_to_hass(hass)
     assert await async_migrate_entry(hass, entry)
 
-    assert entry.minor_version == 4
+    assert entry.minor_version == 5
     assert entry.data[DATA_INITIAL_PANEL_CONFIG] == stored
     assert "Re-read panel configuration" in caplog.text

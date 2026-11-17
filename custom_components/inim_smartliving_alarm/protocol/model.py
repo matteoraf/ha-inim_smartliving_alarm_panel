@@ -7,6 +7,10 @@ from .errors import ProtocolError, UnsupportedPanelError
 SCENARIOS = 30  # on every model
 LABEL_LENGTH = 16
 FIXED_OUTPUTS = 3  # O1-O3 on the panel board
+# Which keypads, readers, expanders and sirens are enabled: one bit per
+# device, at the same EEPROM address on every model
+PERIPHERALS_ADDRESS = 0x00000
+PERIPHERALS_LENGTH = 22
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,6 +67,7 @@ class PanelModel:
     label_bank: int  # added to the label pointers read from RAM
     # Profile not yet confirmed on a real panel
     experimental: bool = False
+    sirens: int = 10  # siren labels, on every model
 
     scenarios = SCENARIOS
     terminal_record_length = 12

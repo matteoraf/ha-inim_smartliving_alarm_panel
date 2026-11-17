@@ -5,7 +5,7 @@ from enum import IntEnum
 
 from .commands import ArmMode, encode_pin
 from .errors import ProtocolError
-from .model import FIXED_OUTPUTS, LABEL_LENGTH, PanelModel
+from .model import FIXED_OUTPUTS, LABEL_LENGTH, PERIPHERALS_LENGTH, PanelModel
 
 UNUSED_SLOT = 0xFF
 
@@ -218,6 +218,38 @@ def decode_scenario_records(data: bytes, model: PanelModel) -> list[ScenarioConf
                 modes[area] = ArmMode(value)
         scenarios.append(ScenarioConfig(modes, icon=record[-2], output=record[-1]))
     return scenarios
+
+
+@dataclass(frozen=True, slots=True)
+class Peripherals:
+    """The keypads, readers, expanders and sirens enabled on the panel.
+
+    0-based device numbers, the same as the index into their labels.
+    """
+
+    keypads: tuple[int, ...]
+    readers: tuple[int, ...]
+    expanders: tuple[int, ...]
+    sirens: tuple[int, ...]
+
+
+def decode_peripherals(data: bytes, model: PanelModel) -> Peripherals:
+    """Decode the enabled-device bitmaps (little-endian, bit q = device q).
+
+    Bits beyond the model's count of a device kind are ignored.
+    """
+    _check_length(data, PERIPHERALS_LENGTH, "peripherals")
+
+    def enabled(start: int, length: int, count: int) -> tuple[int, ...]:
+        bitmap = int.from_bytes(data[start : start + length], "little")
+        return tuple(q for q in range(min(count, 8 * length)) if bitmap >> q & 1)
+
+    return Peripherals(
+        readers=enabled(0, 4, model.readers),
+        expanders=enabled(4, 6, model.expanders),
+        keypads=enabled(10, 2, model.keypads),
+        sirens=enabled(12, 2, model.sirens),
+    )
 
 
 def find_code_index(pin_table: bytes, pin: str, model: PanelModel) -> int | None:

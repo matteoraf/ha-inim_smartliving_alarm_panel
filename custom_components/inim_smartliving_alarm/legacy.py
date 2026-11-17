@@ -383,6 +383,26 @@ def configuration_dict(config: PanelConfiguration) -> dict[str, Any]:
             "raw_hex": config.keypad_labels.raw.hex(),
             "names": _names(config.keypad_labels.raw),
         },
+        # Names of the other objects events refer to
+        "code_names": {"names": config.code_labels.names},
+        "key_names": {"names": config.key_labels.names},
+        "reader_names": {"names": config.reader_labels.names},
+        "expander_names": {"names": config.expander_labels.names},
+        "timer_names": {"names": config.timer_labels.names},
+        "siren_names": {"names": config.siren_labels.names},
+        "peripherals": _peripherals(config),
+    }
+
+
+def _peripherals(config: PanelConfiguration) -> dict[str, Any]:
+    """The enabled devices of each kind, as 1-based numbers."""
+    found = config.peripherals
+    return {
+        "raw_hex": config.peripherals_raw.hex(),
+        **{
+            kind: [index + 1 for index in getattr(found, kind)]
+            for kind in ("keypads", "readers", "expanders", "sirens")
+        },
     }
 
 

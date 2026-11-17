@@ -33,7 +33,7 @@ CONF_LIMIT_AREAS = "limit_areas"
 CONF_LIMIT_ZONES = "limit_zones"
 CONF_LIMIT_SCENARIOS = "limit_scenarios"
 CONF_EVENT_LOG_SIZE = "event_log_size"
-CONF_READER_NAMES = "reader_names"
+CONF_READER_NAMES = "reader_names"  # removed option (names come from the panel)
 
 
 # Scenario mapping keys (stored in ConfigEntry options, set by user in config flow)
@@ -83,6 +83,16 @@ DATA_INITIAL_PANEL_CONFIG = "initial_panel_config"
 # From initial_panel_config (entry.data[DATA_INITIAL_PANEL_CONFIG])
 KEY_INIT_KEYBOARDS = "keyboard_names"
 KEY_INIT_KEYBOARD_NAMES = "names"
+# Name tables, each {"names": [...]} (KEY_INIT_NAMES)
+KEY_INIT_CODES = "code_names"
+KEY_INIT_KEYS = "key_names"
+KEY_INIT_READERS = "reader_names"
+KEY_INIT_EXPANDERS = "expander_names"
+KEY_INIT_TIMERS = "timer_names"
+KEY_INIT_SIRENS = "siren_names"
+KEY_INIT_NAMES = "names"
+# Enabled keypads, readers, expanders and sirens: {"keypads": [1, 2], ...}
+KEY_INIT_PERIPHERALS = "peripherals"
 
 KEY_INIT_SYSTEM_INFO = "system_info"
 KEY_INIT_SYSTEM_INFO_TYPE = "type"
