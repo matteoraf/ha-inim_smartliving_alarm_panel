@@ -71,7 +71,7 @@ async def test_identified_as_10100(
         # scenario 3 arms area 15 only: all 15 areas are read from the record
         assert config["scenario_activations"][2]["area_actions"] == {
             **dict.fromkeys(range(1, 15), "keep"),
-            15: "arm",
+            15: "total",
         }
 
         status = await client.get_live_status_snapshot()

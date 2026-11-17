@@ -12,9 +12,6 @@ from .const import (
     DOMAIN,
     KEY_INIT_AREA_NAMES,
     KEY_INIT_AREAS,
-    KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS,
-    KEY_INIT_SCENARIO_ACTIVATION_INDEX,
-    KEY_INIT_SCENARIO_ACTIVATIONS,
     KEY_INIT_SCENARIO_NAMES,
     KEY_INIT_SCENARIOS,
     KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS,
@@ -35,6 +32,7 @@ from .errors import (
     async_send_command,
 )
 from .legacy import LegacyPanelClient, zone_exists
+from .selection import scenario_armed_areas
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -173,9 +171,6 @@ async def async_handle_scenario_activation_failure(
         all_scenario_names_list = initial_panel_config.get(KEY_INIT_SCENARIOS, {}).get(
             KEY_INIT_SCENARIO_NAMES, []
         )
-        all_scenario_activations_list = initial_panel_config.get(
-            KEY_INIT_SCENARIO_ACTIVATIONS, []
-        )
 
         target_scenario_name = f"Scenario {scenario_idx_to_activate + 1}"  # Default
         if 0 <= scenario_idx_to_activate < len(all_scenario_names_list):
@@ -186,26 +181,10 @@ async def async_handle_scenario_activation_failure(
 
         final_scenario_name = target_scenario_name
 
-        target_scenario_activation_detail = next(
-            (
-                sa
-                for sa in all_scenario_activations_list
-                if sa.get(KEY_INIT_SCENARIO_ACTIVATION_INDEX)
-                == scenario_idx_to_activate
-            ),
-            None,
+        # The areas the scenario arms, in any mode
+        areas_controlled_by_scenario = scenario_armed_areas(
+            initial_panel_config, scenario_idx_to_activate + 1
         )
-
-        areas_controlled_by_scenario = []
-        if target_scenario_activation_detail:
-            area_actions_dict = target_scenario_activation_detail.get(
-                KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS, {}
-            )
-            areas_controlled_by_scenario = [
-                int(area_id)
-                for area_id, action in area_actions_dict.items()
-                if action not in {"keep", "disarm"}
-            ]
 
         if not areas_controlled_by_scenario:
             _LOGGER.info(

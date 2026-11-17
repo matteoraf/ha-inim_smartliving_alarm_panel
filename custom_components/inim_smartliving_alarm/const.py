@@ -110,6 +110,8 @@ KEY_INIT_SCENARIO_ACTIVATION_INDEX = (
 KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS = (
     "area_actions"  # Dict within activation detail: {area_id_str: "action_str"}
 )
+# The scenario record as read, hex: one mode nibble per area (area 1 low)
+KEY_INIT_SCENARIO_ACTIVATION_RAW = "raw_activation_hex"
 
 KEY_INIT_ZONES = "zones"  # Dict containing list of zone names
 KEY_INIT_ZONE_NAMES = "zone_names"  # List of zone names (str)

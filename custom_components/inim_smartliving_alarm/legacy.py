@@ -75,7 +75,14 @@ TERMINAL_TYPES = {
     TerminalType.OUT_NOT_ENABLED: "Output not enabled",
 }
 TERMINAL_TYPE_OFFSET = 11  # in the terminal record
-SCENARIO_ACTIONS = {0x1: "arm", 0x4: "disarm", 0x0: "keep"}
+# What a scenario does to an area (one nibble per area in its record)
+SCENARIO_ACTIONS = {
+    0x0: "keep",
+    0x1: "total",
+    0x2: "partial",
+    0x3: "instant",
+    0x4: "disarm",
+}
 EVENT_ACTIONS = {
     0x9E: "Scenario Activated",
     0x80: "Area/Zone Alarm",
