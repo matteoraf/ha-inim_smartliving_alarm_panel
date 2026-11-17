@@ -21,6 +21,8 @@ Features
         
     *   **The `arm_area` action**: Arms or disarms one or more areas in a single command (see [Arming areas from automations](#arming-areas-from-automations)).
         
+    *   **Zones checked before arming**: before arming an area or activating a scenario, the integration asks the panel which zones are not ready, and refuses or arms anyway with a warning, as you choose (see [Zones not ready](#zones-not-ready)).
+        
     *   **Binary Sensor entities**: Per area, whether it is in alarm now, in tamper now, and whether it has an alarm memory (kept after the alarm until it is reset).
         
 *   **Detailed Zone Monitoring**: Every zone of the panel (zones of input, input/output and double terminals, including the second zone of double terminals) is exposed as:
@@ -177,6 +179,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **Each area switch can arm in its own mode**: the new options step **Area switches arm mode per area** has one choice per imported area (use the default, total, partial or instant). Areas left at *Use the default* follow **Area switches default arm mode**, as before. The general option, called **Area switches arm in** in the 0.4.0a3 preview, is now **Area switches default arm mode**: if you changed it in that preview, set it again (it is back to total).
     
+*   **Zones are checked before arming areas too.** The area switches, the arming mode selects and the `arm_area` action now ask the panel which zones are not ready, as scenarios already did, and by default **refuse to arm** when there are some (before, they armed with zones open). The new option **When zones are not ready** (General settings) can arm anyway with a warning instead; `force: true` does it for one action call. A new action, `activate_scenario`, activates a scenario from automations, and a new event, `inim_smartliving_alarm_zones_not_ready`, lists the zones each time. The integration also reads whether the panel itself refuses arming with zones not ready (new diagnostic sensor *Refuses arming with zones not ready*): at the first start it reads the panel configuration again once by itself (the log says so). Zone sensors show each zone's programming options (`autobypass`, `no_arming_if_not_ready`, `interior` and more) as attributes.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -228,6 +232,8 @@ After installation and restarting Home Assistant:
     *   **Scenario Mappings**: You can map your panel's scenarios to Home Assistant's standard alarm actions (Arm Home, Arm Away, etc.). Only the scenarios you import are offered. The setup proposes **Arm Away** and **Disarm**: for Arm Away, an imported scenario that arms every imported area (one that arms them all in total mode first, then the lowest number); for Disarm, the lowest-numbered imported scenario that disarms every imported area. What a scenario does to areas you don't import doesn't matter. If none fits, the mode stays unmapped. Check the proposal and change it if you like; the options keep what you saved.
 
     *   **Area switches default arm mode** (options only, not at setup): the mode an area switch arms in when turned on: total (the default), partial or instant. The *arming mode* select of each area offers every mode. In the options, **Area switches arm mode per area** sets a different mode for single areas (for example, partial for the bedrooms); the others follow this option.
+
+    *   **When zones are not ready** (options only, not at setup): *Refuse* (the default) or *Arm anyway and warn*; see [Zones not ready](#zones-not-ready).
 
         
 9.  Click **Submit** to complete the setup.
@@ -288,7 +294,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
     
     Only zones that exist on the panel get entities: zones of input, input/output and double terminals. Output terminals (for example a siren) and unused terminals have none. Zones 1 to N are the zones of the panel's N terminals (50 on the SmartLiving 1050, 100 on the 10100); a double terminal *n* also has a second zone, numbered N + *n* (51 to 100 on the 1050, 101 to 200 on the 10100).
 
-    *   *binary\_sensor.your\_panel\_name\_zone\_X*: Represents a single zone. It turns on if the zone is alarmed (open). The device class (motion or opening) is automatically assigned based on the zone's configuration on the panel. Extended attributes provide more details about the zone's configuration, including `terminal_type`, `status_text` (`clear`, `alarmed`, `short` or `tamper`) and `test` (zone in test mode).
+    *   *binary\_sensor.your\_panel\_name\_zone\_X*: Represents a single zone. It turns on if the zone is alarmed (open). The device class (motion or opening) is automatically assigned based on the zone's configuration on the panel. Extended attributes provide more details about the zone's configuration, including `terminal_type`, `status_text` (`clear`, `alarmed`, `short` or `tamper`) and `test` (zone in test mode). The zone's programming options are attributes too, each `true` or `false`: `interior`, `autobypass` (bypassed by the panel when its areas arm while it is open), `unbypassable`, `chime`, `test_programmed`, `autobypass_no_reinclude` (autobypassed and not re-included when back at rest), `no_arming_if_not_ready` (stops arming in every mode, when the panel refuses arming with zones not ready), `entry_time_2`, `last_exit_zone`, `reinclude_on_disarm`, `hold_up` and `fault_zone`. Options that only apply to wireless zones are not shown.
 
     *   *binary\_sensor.your\_panel\_name\_zone\_X\_triggered* (named *Zone X Alarm memory*): Turns on if the zone has triggered the system, until the alarm memory is reset. The `tamper_memory` attribute tells whether the zone's terminal has a tamper memory (both zones of a double terminal share it).
 
@@ -318,6 +324,8 @@ This integration exposes your Inim alarm system's components as various Home Ass
 
     *   *sensor.your\_panel\_name\_user\_code* (named *User code*): The name of the user code the PIN belongs to (never the PIN); the `number`, `areas` (the areas it controls, by name) and `type` (standard, manager or master) attributes give more. Commands only work on those areas. Unknown if the PIN matches no user code: commands are refused then. Checked again whenever the integration reloads. Shown in the *Diagnostic* section of the device page.
 
+    *   *binary\_sensor.your\_panel\_name\_refuses\_arming\_with\_zones\_not\_ready* (named *Refuses arming with zones not ready*): On when the installer set the panel to refuse arming with zones not ready (see [Zones not ready](#zones-not-ready)). Read with the panel configuration; unknown until the configuration is read again by this version. Shown in the *Diagnostic* section of the device page.
+
     *   *binary\_sensor.your\_panel\_name\_programming\_mode* (named *Programming mode*): On while the panel is in programming mode (being programmed from a keypad, or reloading its configuration). Commands are not sent then. Shown in the *Diagnostic* section of the device page. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5).
         
 
@@ -332,7 +340,14 @@ Use the alarm\_control\_panel entity in a standard Lovelace Alarm Panel card. If
 
 ### Scenario Activation
 
-Use the button entities in your dashboard or automations to directly activate specific panel scenarios.
+Use the button entities in your dashboard or automations to directly activate specific panel scenarios. From automations you can also use the action `inim_smartliving_alarm.activate_scenario`: pick the panel and the scenario from the lists (the scenarios you import, by name; in YAML, the scenario number as on the panel). Set `force: true` to activate it even if zones are not ready (see [Zones not ready](#zones-not-ready)).
+
+```yaml
+action: inim_smartliving_alarm.activate_scenario
+data:
+  config_entry_id: your_config_entry_id
+  scenario: 2
+```
 
 ### Resetting the alarm memory
 
@@ -360,7 +375,22 @@ data:
 
 With several panels, each area number in the list shows the area of every panel that imports it, with the panel's name; the panel you pick decides which one is armed. An area that is not imported from that panel (for example, one you unticked after writing the automation) is refused with a message, and nothing is sent.
 
-Like the area switches and the arming mode selects, the action does not check the zones first. The panel refuses only when it is programmed not to allow arming with zones that are not ready; otherwise it arms, and an open zone can set off an alarm right away. In a later version, arming will follow a readiness setting of the integration. If the panel refuses the command, the action fails with the reason (see [When the panel refuses a command](#when-the-panel-refuses-a-command)).
+Before arming, the action checks the zones, like the area switches and the arming mode selects (see [Zones not ready](#zones-not-ready)); add `force: true` to arm even if zones are not ready. Disarming is never checked. If the panel refuses the command, the action fails with the reason (see [When the panel refuses a command](#when-the-panel-refuses-a-command)).
+
+### Zones not ready
+
+Before it arms an area (switch, arming mode select, `arm_area` action) or activates a scenario (button, alarm panel, `activate_scenario` action), the integration asks the panel which zones are not ready for it: zones that are not at rest and would be armed. Zones the panel bypasses by itself when arming (autobypassable zones) are not listed. Then the option **When zones are not ready** (General settings) decides:
+
+*   **Refuse** (the default): nothing is sent; the action fails with a message that lists the zones (for example *"Area 3 was not armed because these zones are not ready: Kitchen window (12)"*).
+    
+*   **Arm anyway and warn**: the command is sent, and a persistent notification lists the zones. They can set off an alarm unless they are closed or bypassed in time.
+    
+
+`force: true` on the `arm_area` and `activate_scenario` actions arms anyway for that call, whatever the option says.
+
+Either way the `inim_smartliving_alarm_zones_not_ready` event fires, for example to announce the open zones: `target` (the area or scenario name), `action` (`refused`, `armed_anyway`, or `refused_by_panel` when it was sent anyway and the panel itself refused it), `zones` (each with `zone_id` and `zone_name`) and `panel_refuses_not_ready`.
+
+The panel itself can also be set by the installer not to allow arming with zones not ready. The integration reads that setting with the panel configuration and shows it in the *Refuses arming with zones not ready* sensor (and as `panel_refuses_not_ready` in the event: `true`, `false`, or `null` before the configuration was read again). When it is on, the panel refuses such a command even when you arm anyway or use `force`: the integration still sends it, the message says the panel refused it, and the event's `action` is `refused_by_panel`. The panel's own rule depends on each zone's programming (for example, delayed zones do not stop total arming, and zones with `no_arming_if_not_ready` stop every mode), so it may let through zones the integration lists. When the setting is off, the panel arms whatever the zones' programming says.
 
 ### Displaying the Event Log
 
@@ -385,7 +415,7 @@ Arming, disarming, bypassing a zone, activating a scenario and resetting the ala
 
 *   **The integration did not send the command**:
     
-    *   Before a scenario, the integration checks the zones it arms. If some are not at rest, the message lists them (for example *"Night was not activated because these zones are not ready: Kitchen window (12)"*) and nothing is sent to the panel.
+    *   Before arming or activating a scenario, the integration checks the zones (see [Zones not ready](#zones-not-ready)). If some are not ready and the option says *Refuse*, the message lists them and nothing is sent to the panel.
         
     *   While the panel is in programming mode, it ignores commands, so none is sent (*"The command for Area 3 was not sent: the panel is in programming mode. Try again when programming has ended."*). If the panel enters programming mode while a command is being sent, the message says that the command may not have been carried out: check the area or zone, and try again when programming has ended.
     
@@ -456,7 +486,7 @@ Troubleshooting
         
     *   Programming from the installer software on a PC does not block commands. After the software writes new programming, the panel may restart by itself, and Home Assistant cannot reach it for a short time. Then use **Re-read panel configuration** to pick up the changes.
         
-*   **The panel armed an area with a zone open**: the area switches, the arming mode selects and the `arm_area` action do not check the zones before arming. The panel refuses only when it is programmed not to allow arming with zones that are not ready; otherwise it arms, and an open zone can set off an alarm right away. A check of the zones before arming is planned for a later version.
+*   **Arming is refused because zones are not ready**: close or bypass the zones the message lists, or set **When zones are not ready** to *Arm anyway and warn* (or use `force: true` in an action). See [Zones not ready](#zones-not-ready).
     
 *   **Entities Not Appearing or Not Updating**:
     

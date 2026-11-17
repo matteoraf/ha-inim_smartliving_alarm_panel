@@ -43,6 +43,7 @@ from .const import (
 from .errors import async_send_command
 from .legacy import LegacyPanelClient, zones_to_create
 from .protocol.commands import ArmMode
+from .readiness import async_arm
 from .selection import area_label, selected
 
 _LOGGER = logging.getLogger(__name__)
@@ -241,8 +242,12 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
             CONF_AREA_SWITCHES_DEFAULT_ARM_MODE, DEFAULT_AREA_SWITCHES_ARM_MODE
         )
         mode = SWITCH_ARM_MODES.get(option, ArmMode.AWAY)
-        await async_send_command(
-            self.api_client.panel.arm_areas({self._area_id_1_based: mode}),
+        await async_arm(
+            self.hass,
+            self.config_entry,
+            lambda check: self.api_client.panel.arm_areas(
+                {self._area_id_1_based: mode}, on_not_ready=check
+            ),
             self._area_name,
         )
         self._attr_is_on = True  # Optimistic update

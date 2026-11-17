@@ -225,6 +225,13 @@
   },
   {
     "platform": "binary_sensor",
+    "unique_id": "_refuses_arming_not_ready",
+    "original_name": "Refuses arming with zones not ready",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "binary_sensor",
     "unique_id": "_scenario_0_active_bs",
     "original_name": "Scenario 'Scenario 1' Active",
     "device_class": null,

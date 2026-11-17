@@ -28,9 +28,9 @@ from .const import (
     KEY_LIVE_AREA_MODES_MAP,
     KEY_LIVE_AREAS_STATUS,
 )
-from .errors import async_send_command
 from .legacy import LegacyPanelClient
 from .protocol.commands import ArmMode
+from .readiness import async_arm
 from .selection import area_label, selected
 
 _LOGGER = logging.getLogger(__name__)
@@ -102,6 +102,7 @@ class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
         """Initialize the select of one area (1-based)."""
         super().__init__(coordinator)
         self.api_client = api_client
+        self._entry = config_entry
         self._area = area
         self._area_name = area_name
         self._attr_unique_id = f"{config_entry.entry_id}_area_mode_select_{area}"
@@ -133,8 +134,13 @@ class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
     async def async_select_option(self, option: str) -> None:
         """Arm the area in the chosen mode, or disarm it."""
         _LOGGER.info("Setting area %s (%s) to %s", self._area, self._area_name, option)
-        await async_send_command(
-            self.api_client.panel.arm_areas({self._area: OPTION_MODES[option]}),
+        # Disarming is never checked; arming checks the zones of the area
+        await async_arm(
+            self.hass,
+            self._entry,
+            lambda check: self.api_client.panel.arm_areas(
+                {self._area: OPTION_MODES[option]}, on_not_ready=check
+            ),
             self._area_name,
         )
         self._attr_current_option = option  # until the next update says otherwise

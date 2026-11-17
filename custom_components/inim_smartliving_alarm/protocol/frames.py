@@ -121,6 +121,25 @@ def active_scenario_request(area_mask: int) -> bytes:
     )
 
 
+def not_ready_area_request(area: int, mode: int, model: PanelModel) -> bytes:
+    """Ask which zones would prevent arming one area (1-based) in a mode.
+
+    The selector holds the 0-based area and the mode (total, partial or
+    instant, as in the arming command) less one; the high bit stays clear.
+    """
+    if not 1 <= area <= model.areas:
+        raise ValueError(f"area out of range: {area}")
+    if mode not in (1, 2, 3):
+        raise ValueError(f"not an arming mode: {mode}")
+    return header(
+        OP_READ,
+        0,
+        DEVICE_RAM,
+        reg.NOT_READY_ZONES,
+        ((mode - 1) << 5 | (area - 1)) << 8 | model.zone_bitmap_length,
+    )
+
+
 def not_ready_request(scenario: int, model: PanelModel) -> bytes:
     """Ask which zones would prevent activating a scenario (0-based).
 

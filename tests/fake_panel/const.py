@@ -101,6 +101,8 @@ EVENT_TEXT_LENGTH = 366
 # Enabled devices, one bit each, at the same address on every model:
 # kind -> (offset in the block, bytes)
 EEPROM_PERIPHERALS = 0x00000
+# General options; byte 1 bit 5: refuse arming with zones not ready
+EEPROM_GENERAL_OPTIONS = 0x00017
 PERIPHERAL_BITMAPS = {
     "readers": (0, 4),
     "expanders": (4, 6),

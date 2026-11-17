@@ -7,7 +7,10 @@ from homeassistant.exceptions import ServiceValidationError
 import pytest
 
 from custom_components.inim_smartliving_alarm.const import DOMAIN, SERVICE_ARM_AREA
-from custom_components.inim_smartliving_alarm.errors import CommandRefusedError
+from custom_components.inim_smartliving_alarm.errors import (
+    CommandRefusedError,
+    ZonesNotReadyError,
+)
 
 from .conftest import add_entry
 from .fake_panel import FakePanel, const as c
@@ -163,13 +166,14 @@ async def test_arm_area_modes(
     assert panel.state.area_modes[3] == panel_mode
 
 
-async def test_arm_area_does_not_check_zones(
+async def test_arm_area_checks_zones(
     hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
 ) -> None:
-    """With a zone open the command is still sent; the panel decides."""
+    """With a zone open nothing is sent (more in test_prearm_check)."""
     panel.state.zone_states[36] = c.ZONE_ALARM  # zone 37, area 3
-    await arm_area(hass, entry.entry_id, [3], "total")
-    assert panel.state.armed_areas() == [3]
+    with pytest.raises(ZonesNotReadyError):
+        await arm_area(hass, entry.entry_id, [3], "total")
+    assert panel.state.armed_areas() == []
 
 
 async def test_arm_area_not_imported(hass: HomeAssistant, panel: FakePanel) -> None:

@@ -47,6 +47,7 @@ from .const import (
     CONF_SCENARIOS,
     CONF_USERNAME,
     CONF_ZONES,
+    CONF_ZONES_NOT_READY,
     DATA_API_CLIENT,
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_AREA_SWITCHES_ARM_MODE,
@@ -54,9 +55,12 @@ from .const import (
     DEFAULT_PANEL_NAME,
     DEFAULT_POLLING_INTERVAL,
     DEFAULT_PORT,
+    DEFAULT_ZONES_NOT_READY,
     DOMAIN,
     MIN_FIRMWARE_MAJOR,
     SYSTEM_MAX_EVENT_LOG_SIZE,
+    ZONES_NOT_READY_REFUSE,
+    ZONES_NOT_READY_WARN,
 )
 from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .legacy import create_client
@@ -803,6 +807,9 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 updated_options[CONF_AREA_SWITCHES_DEFAULT_ARM_MODE] = user_input.get(
                     CONF_AREA_SWITCHES_DEFAULT_ARM_MODE, DEFAULT_AREA_SWITCHES_ARM_MODE
                 )
+                updated_options[CONF_ZONES_NOT_READY] = user_input.get(
+                    CONF_ZONES_NOT_READY, DEFAULT_ZONES_NOT_READY
+                )
 
                 for key in [
                     CONF_SCENARIO_ARM_HOME,
@@ -873,6 +880,19 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 )
             ),
         }
+
+        options_schema_dict[
+            vol.Optional(
+                CONF_ZONES_NOT_READY,
+                default=values.get(CONF_ZONES_NOT_READY, DEFAULT_ZONES_NOT_READY),
+            )
+        ] = SelectSelector(
+            SelectSelectorConfig(
+                options=[ZONES_NOT_READY_REFUSE, ZONES_NOT_READY_WARN],
+                translation_key=CONF_ZONES_NOT_READY,
+                mode=SelectSelectorMode.DROPDOWN,
+            )
+        )
 
         if len(scenario_choices) > 1:
             options_schema_dict.update(

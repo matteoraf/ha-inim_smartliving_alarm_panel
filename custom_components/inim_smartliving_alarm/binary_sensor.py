@@ -43,7 +43,8 @@ from .const import (
     ZONE_TAMPER_STATES,
 )
 from .legacy import zones_to_create
-from .selection import area_label, scenario_label, selected
+from .readiness import panel_refuses_not_ready
+from .selection import area_label, scenario_label, selected, zone_option_flags
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -79,6 +80,7 @@ async def async_setup_entry(
     )
 
     binary_sensors_to_add = []
+    option_flags = zone_option_flags(initial_panel_config)
 
     zones = zones_to_create(
         all_zone_names,
@@ -96,6 +98,7 @@ async def async_setup_entry(
                 zone_index,
                 zone_name,
                 zone_config_detail,
+                option_flags.get(zone_index + 1, {}),
             )
         )
         binary_sensors_to_add.extend(
@@ -148,6 +151,15 @@ async def async_setup_entry(
     binary_sensors_to_add.append(
         InimProgrammingModeBinarySensor(
             coordinator, entry, panel_display_name, system_info
+        )
+    )
+    binary_sensors_to_add.append(
+        InimRefusesNotReadyBinarySensor(
+            coordinator,
+            entry,
+            panel_display_name,
+            system_info,
+            panel_refuses_not_ready(initial_panel_config),
         )
     )
 
@@ -211,6 +223,7 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         zone_index_0_based: int,
         zone_name: str,
         zone_config_detail: dict[str, Any] | None,
+        option_flags: dict[str, bool] | None = None,
     ) -> None:
         """Initialize the Inim zone status binary sensor."""
         super().__init__(coordinator, config_entry, panel_display_name, system_info)
@@ -218,6 +231,7 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         self._zone_id_1_based = zone_index_0_based + 1
         self._zone_name = zone_name
         self._zone_config_detail = zone_config_detail if zone_config_detail else {}
+        self._option_flags = option_flags or {}
         self._attr_name = f"Zone {self._zone_id_1_based} ({self._zone_name})"
         self._attr_unique_id = f"{config_entry.entry_id}_zone_{self._zone_id_1_based}"
 
@@ -284,6 +298,8 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
                 ):
                     attr_key = key.replace("_desc", "")
                     attrs[attr_key] = value
+        # The zone's programming options, decoded from the stored record
+        attrs.update(self._option_flags)
         return attrs
 
     @property
@@ -601,3 +617,35 @@ class InimProgrammingModeBinarySensor(BaseInimBinarySensor):
     def is_on(self) -> bool | None:
         """Whether the panel is in programming mode."""
         return self._value()
+
+
+class InimRefusesNotReadyBinarySensor(BaseInimBinarySensor):
+    """On when the panel itself refuses arming with zones not ready.
+
+    An installer setting read with the panel configuration; when it is on,
+    each zone's programming decides whether it stops arming. Unknown until
+    the configuration is read again by this version.
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "refuses_arming_not_ready"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:shield-alert-outline"
+
+    def __init__(
+        self,
+        coordinator: Any,
+        config_entry: ConfigEntry,
+        panel_display_name: str,
+        system_info: dict[str, Any],
+        refuses: bool | None,
+    ) -> None:
+        """Initialize from the stored configuration."""
+        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        self._attr_unique_id = f"{config_entry.entry_id}_refuses_arming_not_ready"
+        self._refuses = refuses
+
+    @property
+    def is_on(self) -> bool | None:
+        """Whether the panel refuses arming with zones not ready."""
+        return self._refuses

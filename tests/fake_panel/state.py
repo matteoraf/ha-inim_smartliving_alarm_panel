@@ -100,6 +100,8 @@ class PanelState:
         default_factory=lambda: [0xFF] * c.NUM_PHYSICAL_SLOTS
     )
     zone_areas: list[int] = field(default_factory=lambda: [0] * c.NUM_ZONES)
+    # Zone record options (byte 3) and options 2 (byte 4), by 0-based zone
+    zone_options: dict[int, tuple[int, int]] = field(default_factory=dict)
     scenario_records: list[bytes] = field(
         default_factory=lambda: [bytes(c.SCENARIO_RECORD_LENGTH)] * c.NUM_SCENARIOS
     )
@@ -236,6 +238,8 @@ class PanelState:
         def put(address: int, data: bytes) -> None:
             image[address : address + len(data)] = data
 
+        if self.block_arming_when_not_ready:
+            put(c.EEPROM_GENERAL_OPTIONS + 1, b"\x20")
         for kind, numbers in self.peripherals.items():
             offset, length = c.PERIPHERAL_BITMAPS[kind]
             bitmap = sum(1 << number for number in numbers)
@@ -245,7 +249,12 @@ class PanelState:
         for index, record in enumerate(self.code_records):
             put(lay.eeprom_codes + index * lay.code_record_length, record)
         for index, areas in enumerate(self.zone_areas):
-            record = areas.to_bytes(2, "little") + bytes(c.ZONE_RECORD_LENGTH - 2)
+            options = self.zone_options.get(index, (0, 0))
+            record = (
+                areas.to_bytes(2, "little")
+                + bytes((0, *options))
+                + bytes(c.ZONE_RECORD_LENGTH - 5)
+            )
             put(lay.eeprom_zones + index * c.ZONE_RECORD_LENGTH, record)
         for index, terminal_type in enumerate(self.terminal_types):
             record = bytes(c.TERMINAL_TYPE_OFFSET) + bytes((terminal_type,))
@@ -322,8 +331,8 @@ class PanelState:
                 for area, action in self._scenario_actions(record).items()
                 if action in (c.MODE_AWAY, c.MODE_STAY, c.MODE_INSTANT)
             ]
-        else:
-            areas = [selector & 0x1F]
+        else:  # one area, 0-based, in the mode of bits 5-6 (not used here)
+            areas = [(selector & 0x1F) + 1]
         bits = [
             any(self._zone_open_in_area(zone, area) for area in areas)
             for zone in range(self.layout.zones)
