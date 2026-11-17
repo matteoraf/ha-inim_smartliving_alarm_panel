@@ -1,11 +1,13 @@
 Home Assistant Integration for Inim SmartLiving Alarm Systems
 =============================================================
 
-> \[!WARNING\]This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
+> [!WARNING]
+> This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
 > 
 > I could only test this with SmartLiving 1050, I have no way to test and support any other SmartLiving system. Contributors are welcome.
 
-> \[!NOTE\]**A new version is being prepared: 0.4 is a major rework of the integration.** The way it talks to the panel has been rewritten from the ground up, and so has the API underneath: a new connection layer that keeps one connection open, a new panel API, and new setup and options. On top of that it brings SmartLAN/G boards, a choice of the areas, zones and scenarios to import, names from the panel in the event log, clear errors when the panel refuses a command, and more. See the [0.4 README](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/blob/v0.4.0a3/README.md) for everything it does and what changes when you upgrade.
+> [!NOTE]
+> **A new version is being prepared: 0.4 is a major rework of the integration.** The way it talks to the panel has been rewritten from the ground up, and so has the API underneath: a new connection layer that keeps one connection open, a new panel API, and new setup and options. On top of that it brings SmartLAN/G boards, a choice of the areas, zones and scenarios to import, names from the panel in the event log, clear errors when the panel refuses a command, and more. See the [0.4 README](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/blob/v0.4.0a3/README.md) for everything it does and what changes when you upgrade.
 > 
 > It is available as a preview: [0.4.0a3](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/releases/tag/v0.4.0a3) or a later one from the [releases page](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/releases).
 > 
