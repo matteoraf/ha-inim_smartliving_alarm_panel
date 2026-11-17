@@ -12,7 +12,7 @@ never logged or kept.
 """
 
 import asyncio
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 import logging
 
@@ -44,12 +44,21 @@ from .protocol.config import (
     decode_zone_records,
     find_code_index,
     label_address,
+    refuses_arming_when_not_ready,
 )
 from .protocol.errors import UnsupportedPanelError
-from .protocol.frames import active_scenario_request, not_ready_request, read_ram
+from .protocol.frames import (
+    active_scenario_request,
+    not_ready_area_request,
+    not_ready_request,
+    read_ram,
+)
 from .protocol.model import (
+    GENERAL_OPTIONS_ADDRESS,
+    GENERAL_OPTIONS_READ_LENGTH,
     PERIPHERALS_ADDRESS,
     PERIPHERALS_LENGTH,
+    SETUP_BLOCK_LENGTH,
     FirmwareInfo,
     PanelModel,
     model_for,
@@ -81,16 +90,29 @@ COMMAND_SETTLE = 0.5
 _LABEL_POINTERS_LENGTH = reg.LABELS_SCENARIOS + 2 - reg.LABELS_AREAS
 
 
-class NotReadyError(Exception):
-    """A scenario cannot be activated because some zones are not ready."""
+# Decides what happens when zones are not ready: given the zones (0-based),
+# True sends the command anyway, False refuses it with NotReadyError
+NotReadyPolicy = Callable[[frozenset[int]], bool]
 
-    def __init__(self, scenario: int, zones: frozenset[int]) -> None:
-        """Record the scenario (0-based) and the zones (0-based) in the way."""
-        super().__init__(
-            f"scenario {scenario} not ready: zones {sorted(zones)} are not at rest"
+
+class NotReadyError(Exception):
+    """Not sent: zones are not ready for a scenario or for arming areas."""
+
+    def __init__(
+        self,
+        zones: frozenset[int],
+        *,
+        scenario: int | None = None,
+        areas: frozenset[int] = frozenset(),
+    ) -> None:
+        """Record the zones (0-based) and the scenario (0-based) or areas."""
+        what = (
+            f"scenario {scenario}" if scenario is not None else f"areas {sorted(areas)}"
         )
-        self.scenario = scenario
+        super().__init__(f"{what} not ready: zones {sorted(zones)} are not at rest")
         self.zones = zones
+        self.scenario = scenario
+        self.areas = areas
 
 
 class ProgrammingModeError(Exception):
@@ -149,6 +171,8 @@ class PanelConfiguration:
     siren_labels: Labels
     peripherals: Peripherals
     peripherals_raw: bytes
+    general_options_raw: bytes
+    refuses_arming_when_not_ready: bool
     physical_map: PhysicalMap
     physical_map_raw: bytes
     terminals: tuple[Terminal, ...]
@@ -330,9 +354,15 @@ class SmartLivingPanel:
             expander_labels = await labels(reg.LABELS_EXPANDERS, model.expanders)
             timer_labels = await labels(reg.LABELS_TIMERS, model.timers)
             siren_labels = await labels(reg.LABELS_SIRENS, model.sirens)
-            peripherals = await session.read_eeprom(
-                PERIPHERALS_ADDRESS, PERIPHERALS_LENGTH
+            # The enabled peripherals and the general options, in one go
+            setup_block = await session.read_eeprom(
+                PERIPHERALS_ADDRESS, SETUP_BLOCK_LENGTH
             )
+            peripherals = setup_block[:PERIPHERALS_LENGTH]
+            general_options = setup_block[
+                GENERAL_OPTIONS_ADDRESS : GENERAL_OPTIONS_ADDRESS
+                + GENERAL_OPTIONS_READ_LENGTH
+            ]
             physical_map = await session.read_eeprom(
                 model.physical_map, model.physical_slots
             )
@@ -362,6 +392,10 @@ class SmartLivingPanel:
             siren_labels=siren_labels,
             peripherals=decode_peripherals(peripherals, model),
             peripherals_raw=peripherals,
+            general_options_raw=general_options,
+            refuses_arming_when_not_ready=refuses_arming_when_not_ready(
+                general_options
+            ),
             physical_map=decode_physical_map(physical_map, model),
             physical_map_raw=physical_map,
             terminals=tuple(decode_terminals(terminals, model)),
@@ -402,6 +436,24 @@ class SmartLivingPanel:
             raw=raw,
         )
 
+    async def _not_ready_for_areas(
+        self, session: Session, modes: Mapping[int, ArmMode]
+    ) -> frozenset[int]:
+        """Zones (0-based) that would prevent arming these areas, one read each.
+
+        Areas disarmed or kept are not checked.
+        """
+        model = await self._identify(session)
+        zones: set[int] = set()
+        for area, mode in sorted(modes.items()):
+            if mode in (ArmMode.AWAY, ArmMode.STAY, ArmMode.INSTANT):
+                data = await session.read(
+                    not_ready_area_request(area, int(mode), model),
+                    model.zone_bitmap_length,
+                )
+                zones |= decode_not_ready_zones(data, model)
+        return frozenset(zones)
+
     async def not_ready_zones(self, scenario: int) -> frozenset[int]:
         """Zones (0-based) that would prevent activating a scenario (0-based)."""
         async with self.transport.session() as session:
@@ -430,9 +482,26 @@ class SmartLivingPanel:
 
     # ---------------------------------------------------------------- commands
 
-    async def arm_areas(self, modes: Mapping[int, ArmMode]) -> CommandResult:
-        """Arm or disarm areas (1-based); areas not given are kept."""
-        return await self._command(lambda model: arm_areas(self._pin, modes, model))
+    async def arm_areas(
+        self,
+        modes: Mapping[int, ArmMode],
+        *,
+        on_not_ready: NotReadyPolicy | None = None,
+    ) -> CommandResult:
+        """Arm or disarm areas (1-based); areas not given are kept.
+
+        With on_not_ready, the zones that are not ready for the areas armed
+        are read first in the same session; if there are any, on_not_ready
+        decides whether to send the command or raise NotReadyError.
+        """
+        async with self.transport.session(Priority.COMMAND) as session:
+            model = await self._identify(session)
+            command = arm_areas(self._pin, modes, model)
+            if on_not_ready is not None:
+                zones = await self._not_ready_for_areas(session, modes)
+                if zones and not on_not_ready(zones):
+                    raise NotReadyError(zones, areas=frozenset(modes))
+            return await self._send(session, command)
 
     async def reset_alarm_memory(self, areas: frozenset[int]) -> CommandResult:
         """Reset the alarm memory of areas (1-based)."""
@@ -451,20 +520,25 @@ class SmartLivingPanel:
         )
 
     async def activate_scenario(
-        self, scenario: int, *, check_ready: bool = True
+        self,
+        scenario: int,
+        *,
+        check_ready: bool = True,
+        on_not_ready: NotReadyPolicy | None = None,
     ) -> CommandResult:
         """Activate a scenario (0-based).
 
         With check_ready, the not-ready zones are read first in the same
-        session and NotReadyError is raised instead of sending the command.
+        session; if there are any, on_not_ready decides whether to send the
+        command anyway (without it, NotReadyError is raised).
         """
         async with self.transport.session(Priority.COMMAND) as session:
             model = await self._identify(session)
             command = activate_scenario(self._pin, scenario, model)
             if check_ready:
                 zones = await self._not_ready_zones(session, scenario)
-                if zones:
-                    raise NotReadyError(scenario, zones)
+                if zones and (on_not_ready is None or not on_not_ready(zones)):
+                    raise NotReadyError(zones, scenario=scenario)
             return await self._send(session, command)
 
     async def _command(self, build) -> CommandResult:

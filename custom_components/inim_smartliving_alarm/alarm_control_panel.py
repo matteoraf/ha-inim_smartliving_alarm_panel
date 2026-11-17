@@ -394,6 +394,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         # carried out, after a notification and the activation-failed event
         await async_activate_scenario(
             self.hass,
+            self.config_entry,
             self.coordinator,
             self.api_client,
             self._initial_panel_config,

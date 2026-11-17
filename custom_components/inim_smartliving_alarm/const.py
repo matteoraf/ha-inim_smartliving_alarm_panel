@@ -93,6 +93,9 @@ KEY_INIT_SIRENS = "siren_names"
 KEY_INIT_NAMES = "names"
 # Enabled keypads, readers, expanders and sirens: {"keypads": [1, 2], ...}
 KEY_INIT_PERIPHERALS = "peripherals"
+# The panel's general options as read: {"raw_hex": ...}
+KEY_INIT_GENERAL_OPTIONS = "general_options"
+KEY_INIT_RAW_HEX = "raw_hex"
 
 KEY_INIT_SYSTEM_INFO = "system_info"
 KEY_INIT_SYSTEM_INFO_TYPE = "type"
@@ -119,6 +122,9 @@ KEY_INIT_ZONE_NAMES = "zone_names"  # List of zone names (str)
 KEY_INIT_ZONES_CONFIG = "zones_config"  # Dict containing detailed zone configurations
 KEY_INIT_ZONES_CONFIG_DETAILED = (
     "zones_config_detailed"  # List of dicts, each a detailed zone config
+)
+KEY_INIT_ZONE_RECORDS_RAW = (
+    "raw_hex_part1_full_response"  # in zones_config: zone records, hex
 )
 KEY_INIT_TERMINAL_RECORDS_RAW = (
     "raw_hex_part2_full_response"  # in zones_config: logical terminal records, hex
@@ -207,8 +213,13 @@ SENSOR_LAST_EVENT_LOG_SUFFIX = "event_log"  # For the new event log sensor
 SERVICE_ALARM_RESET = "alarm_reset"
 SERVICE_REREAD_PANEL_CONFIGURATION = "reread_panel_configuration"
 SERVICE_ARM_AREA = "arm_area"
+SERVICE_ACTIVATE_SCENARIO = "activate_scenario"
+# Fired when zones are not ready for arming areas or activating a scenario
+EVENT_ZONES_NOT_READY = f"{DOMAIN}_zones_not_ready"
 ATTR_AREAS = "areas"
 ATTR_MODE = "mode"
+ATTR_SCENARIO = "scenario"
+ATTR_FORCE_ARM = "force"  # arm even when zones are not ready
 # arm_area modes (also the values of the area switch's arm mode option)
 ARM_MODE_TOTAL = "total"
 ARM_MODE_PARTIAL = "partial"
@@ -221,3 +232,8 @@ DEFAULT_AREA_SWITCHES_ARM_MODE = ARM_MODE_TOTAL
 # listed use CONF_AREA_SWITCHES_DEFAULT_ARM_MODE
 CONF_AREA_SWITCH_ARM_MODE_BY_AREA = "area_switch_arm_mode_by_area"
 AREA_SWITCH_USE_DEFAULT = "default"
+# Option: what to do when zones are not ready for arming
+CONF_ZONES_NOT_READY = "zones_not_ready"
+ZONES_NOT_READY_REFUSE = "refuse"
+ZONES_NOT_READY_WARN = "warn"
+DEFAULT_ZONES_NOT_READY = ZONES_NOT_READY_REFUSE

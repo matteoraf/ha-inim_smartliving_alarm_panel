@@ -5,6 +5,7 @@ import logging
 from typing import Any
 
 from homeassistant.components import persistent_notification
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -29,9 +30,9 @@ from .errors import (
     CommandRefusedError,
     InimCommandError,
     PanelProgrammingError,
-    async_send_command,
 )
 from .legacy import LegacyPanelClient, zone_exists
+from .readiness import async_arm
 from .selection import scenario_armed_areas
 
 _LOGGER = logging.getLogger(__name__)
@@ -60,6 +61,7 @@ def zone_labels(initial_panel_config: dict[str, Any]) -> list[str]:
 
 async def async_activate_scenario(
     hass: HomeAssistant,
+    entry: ConfigEntry,
     coordinator: DataUpdateCoordinator | None,
     api_client: LegacyPanelClient,
     initial_panel_config: dict[str, Any],
@@ -69,17 +71,24 @@ async def async_activate_scenario(
     action_name: str,
     *,
     is_disarm_scenario: bool,
+    force: bool = False,
 ) -> None:
-    """Activate a scenario (0-based) unless zones are not ready for it.
+    """Activate a scenario (0-based), checking first that zones are ready.
 
-    Raises an InimCommandError when the scenario was not activated; the
-    failure also gets a notification and the scenario_activation_failed event.
+    Zones not ready: refused or sent anyway, as the entry's option (or
+    force) says; see readiness. Raises an InimCommandError when the scenario
+    was not activated; the failure also gets a notification and the
+    scenario_activation_failed event.
     """
     try:
-        await async_send_command(
-            api_client.panel.activate_scenario(scenario_index),
+        await async_arm(
+            hass,
+            entry,
+            lambda check: api_client.panel.activate_scenario(
+                scenario_index, on_not_ready=check
+            ),
             scenario_label(initial_panel_config, scenario_index),
-            zone_names=zone_labels(initial_panel_config),
+            force=force,
         )
     except InimCommandError as err:
         await async_handle_scenario_activation_failure(

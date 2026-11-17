@@ -186,11 +186,13 @@
             "scenario_arm_night": "Scenario Inserimento Notte",
             "scenario_arm_vacation": "Scenario Inserimento Vacanza",
             "scenario_disarm": "Scenario Disinserimento",
-            "area_switches_default_arm_mode": "Modalità di inserimento predefinita delle aree"
+            "area_switches_default_arm_mode": "Modalità di inserimento predefinita delle aree",
+            "zones_not_ready": "Quando le zone non sono pronte"
           },
           "data_description": {
             "pin": "Lascia vuoto per mantenere il PIN attuale.",
-            "area_switches_default_arm_mode": "Modalità usata quando si accende un interruttore area, a meno che la sua area non abbia una modalità propria in Modalità di inserimento per area. Il selettore della modalità di inserimento di ogni area imposta qualsiasi modalità."
+            "area_switches_default_arm_mode": "Modalità usata quando si accende un interruttore area, a meno che la sua area non abbia una modalità propria in Modalità di inserimento per area. Il selettore della modalità di inserimento di ogni area imposta qualsiasi modalità.",
+            "zones_not_ready": "Prima di inserire aree o attivare uno scenario, la centrale indica quali zone non sono pronte. Rifiuta: non viene inviato nulla e un errore elenca le zone. Inserisci comunque: il comando viene inviato e una notifica elenca le zone, che possono far scattare un allarme. In entrambi i casi l'evento inim_smartliving_alarm_zones_not_ready le elenca."
           }
         }
       },
@@ -226,7 +228,7 @@
         "message": "Il comando per {target} non è stato completato: {error}"
       },
       "zones_not_ready": {
-        "message": "{target} non è stato attivato perché queste zone non sono pronte: {zones}."
+        "message": "{target} non è stato inserito perché queste zone non sono pronte: {zones}. Chiudile o escludile, oppure imposta \"Quando le zone non sono pronte\" su inserisci comunque nelle opzioni dell'integrazione."
       },
       "panel_programming": {
         "message": "Il comando per {target} non è stato inviato: la centrale è in programmazione. Riprova al termine della programmazione."
@@ -287,6 +289,9 @@
       },
       "area_not_imported": {
         "message": "Le aree {areas} non sono importate da {title}. Importale nelle opzioni dell'integrazione, in Aree, zone e scenari."
+      },
+      "scenario_not_imported": {
+        "message": "Lo scenario {scenario} non è importato da {title}. Importalo nelle opzioni dell'integrazione, in Aree, zone e scenari."
       }
     },
     "selector": {
@@ -304,12 +309,21 @@
           "partial": "Parziale",
           "instant": "Istantaneo"
         }
+      },
+      "zones_not_ready": {
+        "options": {
+          "refuse": "Rifiuta",
+          "warn": "Inserisci comunque e avvisa"
+        }
       }
     },
     "entity": {
       "binary_sensor": {
         "programming_mode": {
           "name": "Modalità programmazione"
+        },
+        "refuses_arming_not_ready": {
+          "name": "Rifiuta l'inserimento con zone non pronte"
         }
       },
       "select": {

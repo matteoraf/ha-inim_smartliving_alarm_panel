@@ -28,15 +28,18 @@ from .const import (
     DEFAULT_LIMIT_ZONES,
     KEY_INIT_AREA_NAMES,
     KEY_INIT_AREAS,
+    KEY_INIT_RAW_HEX,
     KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS,
     KEY_INIT_SCENARIO_ACTIVATION_INDEX,
     KEY_INIT_SCENARIO_ACTIVATION_RAW,
     KEY_INIT_SCENARIO_ACTIVATIONS,
     KEY_INIT_SCENARIO_NAMES,
     KEY_INIT_SCENARIOS,
+    KEY_INIT_SYSTEM_INFO,
     KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS,
     KEY_INIT_ZONE_CONFIG_INDEX,
     KEY_INIT_ZONE_NAMES,
+    KEY_INIT_ZONE_RECORDS_RAW,
     KEY_INIT_ZONES,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
@@ -45,6 +48,9 @@ from .const import (
 )
 from .legacy import SCENARIO_ACTIONS, zone_exists
 from .protocol.commands import ArmMode
+from .protocol.config import decode_zone_records
+from .protocol.errors import ProtocolError, UnsupportedPanelError
+from .protocol.model import PanelModel, model_for, parse_model_string
 
 SELECTION_KEYS = (CONF_AREAS, CONF_ZONES, CONF_SCENARIOS)
 
@@ -220,6 +226,32 @@ def mapped_scenarios(options: Mapping[str, Any]) -> dict[str, int]:
         if value is not None and str(value).isdigit():
             mapped[key] = int(value) + 1
     return mapped
+
+
+def stored_model(config: Mapping[str, Any]) -> PanelModel | None:
+    """The model profile of the stored model string; None if not known."""
+    raw = (config.get(KEY_INIT_SYSTEM_INFO) or {}).get(KEY_INIT_RAW_HEX)
+    try:
+        return model_for(parse_model_string(bytes.fromhex(raw)))
+    except (TypeError, ValueError, ProtocolError, UnsupportedPanelError):
+        return None
+
+
+def zone_option_flags(config: Mapping[str, Any]) -> dict[int, dict[str, bool]]:
+    """Each zone's programming options: 1-based zone -> name -> on.
+
+    Decoded from the stored zone records with the stored model's layout;
+    empty when either is missing or they do not fit.
+    """
+    model = stored_model(config)
+    raw = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(KEY_INIT_ZONE_RECORDS_RAW)
+    if model is None:
+        return {}
+    try:
+        zones = decode_zone_records(bytes.fromhex(raw), model)
+    except (TypeError, ValueError, ProtocolError):
+        return {}
+    return {number: zone.flags for number, zone in enumerate(zones, start=1)}
 
 
 def scenario_area_modes(config: Mapping[str, Any]) -> dict[int, dict[int, int]]:

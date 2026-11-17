@@ -5,7 +5,12 @@ from enum import IntEnum
 
 from .commands import ArmMode, encode_pin
 from .errors import ProtocolError
-from .model import FIXED_OUTPUTS, LABEL_LENGTH, PERIPHERALS_LENGTH, PanelModel
+from .model import (
+    FIXED_OUTPUTS,
+    LABEL_LENGTH,
+    PERIPHERALS_LENGTH,
+    PanelModel,
+)
 
 UNUSED_SLOT = 0xFF
 
@@ -160,19 +165,57 @@ class ZoneConfig:
     options2: int  # byte 4
 
     @property
+    def flags(self) -> dict[str, bool]:
+        """The zone's programming options, by name (see ZONE_OPTION_FLAGS)."""
+        return zone_flags(self.options, self.options2)
+
+    @property
     def interior(self) -> bool:
         """Interior zone."""
-        return bool(self.options & 0x01)
+        return self.flags["interior"]
 
     @property
     def unbypassable(self) -> bool:
         """Zone that cannot be bypassed."""
-        return bool(self.options & 0x04)
+        return self.flags["unbypassable"]
 
     @property
     def hold_up(self) -> bool:
         """Hold-up (robbery) zone."""
-        return bool(self.options2 & 0x20)
+        return self.flags["hold_up"]
+
+
+# Zone record options (byte 3) and options 2 (byte 4): name -> (byte, bit).
+# Bits that apply to wireless zones only (options bits 5-7, options 2 bit 7)
+# are left out: their meaning depends on the device.
+ZONE_OPTION_FLAGS = {
+    "interior": (3, 0),
+    "autobypass": (3, 1),
+    "unbypassable": (3, 2),
+    "chime": (3, 3),
+    "test_programmed": (3, 4),
+    "autobypass_no_reinclude": (4, 0),
+    "no_arming_if_not_ready": (4, 1),
+    "entry_time_2": (4, 2),
+    "last_exit_zone": (4, 3),
+    "reinclude_on_disarm": (4, 4),
+    "hold_up": (4, 5),
+    "fault_zone": (4, 6),
+}
+
+
+# Offsets in a zone record of its two option bytes
+ZONE_OPTIONS_OFFSET = 3
+ZONE_OPTIONS2_OFFSET = 4
+
+
+def zone_flags(options: int, options2: int) -> dict[str, bool]:
+    """The named options of a zone record's bytes 3 and 4."""
+    value = {ZONE_OPTIONS_OFFSET: options, ZONE_OPTIONS2_OFFSET: options2}
+    return {
+        name: bool(value[byte] >> bit & 1)
+        for name, (byte, bit) in ZONE_OPTION_FLAGS.items()
+    }
 
 
 def decode_zone_records(data: bytes, model: PanelModel) -> list[ZoneConfig]:
@@ -187,8 +230,8 @@ def decode_zone_records(data: bytes, model: PanelModel) -> list[ZoneConfig]:
             ZoneConfig(
                 areas=_areas(mask, model),
                 type=record[2],
-                options=record[3],
-                options2=record[4],
+                options=record[ZONE_OPTIONS_OFFSET],
+                options2=record[ZONE_OPTIONS2_OFFSET],
             )
         )
     return zones
@@ -250,6 +293,16 @@ def decode_peripherals(data: bytes, model: PanelModel) -> Peripherals:
         keypads=enabled(10, 2, model.keypads),
         sirens=enabled(12, 2, model.sirens),
     )
+
+
+def refuses_arming_when_not_ready(options: bytes) -> bool:
+    """Whether the installer set the panel to refuse arming with zones not ready.
+
+    Without it the panel arms with zones that are not at rest.
+    """
+    if len(options) < 2:
+        raise ProtocolError(f"general options: {len(options)} bytes, 2 needed")
+    return bool(options[1] & 0x20)
 
 
 def find_code_index(pin_table: bytes, pin: str, model: PanelModel) -> int | None:

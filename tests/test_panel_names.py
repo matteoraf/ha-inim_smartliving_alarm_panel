@@ -158,7 +158,7 @@ async def test_old_configuration_is_read_again_once(
 ) -> None:
     """A configuration without the names is read again at the first start."""
     stored = await stored_configuration(panel)
-    for table in (*NAME_TABLES, "peripherals"):
+    for table in (*NAME_TABLES, "peripherals", "general_options"):
         del stored[table]
     entry = MockConfigEntry(
         domain=DOMAIN,

@@ -11,6 +11,14 @@ FIXED_OUTPUTS = 3  # O1-O3 on the panel board
 # device, at the same EEPROM address on every model
 PERIPHERALS_ADDRESS = 0x00000
 PERIPHERALS_LENGTH = 22
+# The panel's general options, just after: read with the peripherals in one
+# request
+GENERAL_OPTIONS_ADDRESS = 0x00017
+# The block is 10 bytes; bytes 6-9 are flags the panel sets while running,
+# not programming, so only the first 6 are read (as the programming software
+# does)
+GENERAL_OPTIONS_READ_LENGTH = 6
+SETUP_BLOCK_LENGTH = GENERAL_OPTIONS_ADDRESS + GENERAL_OPTIONS_READ_LENGTH
 
 
 @dataclass(frozen=True, slots=True)

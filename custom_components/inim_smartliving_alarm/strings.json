@@ -186,11 +186,13 @@
             "scenario_arm_night": "Arm Night Scenario",
             "scenario_arm_vacation": "Arm Vacation Scenario",
             "scenario_disarm": "Disarm Scenario",
-            "area_switches_default_arm_mode": "Area switches default arm mode"
+            "area_switches_default_arm_mode": "Area switches default arm mode",
+            "zones_not_ready": "When zones are not ready"
           },
           "data_description": {
             "pin": "Leave empty to keep the current PIN.",
-            "area_switches_default_arm_mode": "Mode used when an area switch is turned on, unless its area has its own mode under Area switches arm mode per area. The arming mode select of each area sets any mode."
+            "area_switches_default_arm_mode": "Mode used when an area switch is turned on, unless its area has its own mode under Area switches arm mode per area. The arming mode select of each area sets any mode.",
+            "zones_not_ready": "Before arming areas or activating a scenario, the panel is asked which zones are not ready. Refuse: nothing is sent and an error lists the zones. Arm anyway: the command is sent and a notification lists the zones, which can trigger an alarm. Either way the inim_smartliving_alarm_zones_not_ready event lists them."
           }
         }
       },
@@ -226,7 +228,7 @@
         "message": "The command for {target} could not be completed: {error}"
       },
       "zones_not_ready": {
-        "message": "{target} was not activated because these zones are not ready: {zones}."
+        "message": "{target} was not armed because these zones are not ready: {zones}. Close or bypass them, or set \"When zones are not ready\" to arm anyway in the integration's options."
       },
       "panel_programming": {
         "message": "The command for {target} was not sent: the panel is in programming mode. Try again when programming has ended."
@@ -287,6 +289,9 @@
       },
       "area_not_imported": {
         "message": "Areas {areas} are not imported from {title}. Import them in the integration's options, under Areas, zones and scenarios."
+      },
+      "scenario_not_imported": {
+        "message": "Scenario {scenario} is not imported from {title}. Import it in the integration's options, under Areas, zones and scenarios."
       }
     },
     "selector": {
@@ -304,12 +309,21 @@
           "partial": "Partial",
           "instant": "Instant"
         }
+      },
+      "zones_not_ready": {
+        "options": {
+          "refuse": "Refuse",
+          "warn": "Arm anyway and warn"
+        }
       }
     },
     "entity": {
       "binary_sensor": {
         "programming_mode": {
           "name": "Programming mode"
+        },
+        "refuses_arming_not_ready": {
+          "name": "Refuses arming with zones not ready"
         }
       },
       "select": {

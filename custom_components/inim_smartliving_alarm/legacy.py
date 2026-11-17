@@ -398,6 +398,7 @@ def configuration_dict(config: PanelConfiguration) -> dict[str, Any]:
         "timer_names": {"names": config.timer_labels.names},
         "siren_names": {"names": config.siren_labels.names},
         "peripherals": _peripherals(config),
+        "general_options": {"raw_hex": config.general_options_raw.hex()},
     }
 
 

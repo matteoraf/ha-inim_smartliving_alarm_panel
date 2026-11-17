@@ -150,7 +150,11 @@ async def test_area_switch_pin_not_enabled(
 async def test_area_switch_open_zone_blocking(
     hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
 ) -> None:
-    """The panel's "open zones" refusal reaches the user."""
+    """Arming anyway, the panel's "open zones" refusal reaches the user."""
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, "zones_not_ready": "warn"}
+    )
+    await hass.async_block_till_done()
     panel.state.zone_states[36] = c.ZONE_ALARM  # zone 37, area 3
     panel.state.block_arming_when_not_ready = True
     with pytest.raises(CommandRefusedError) as err:
@@ -159,13 +163,14 @@ async def test_area_switch_open_zone_blocking(
     assert panel.state.armed_areas() == []
 
 
-async def test_area_switch_open_zone_accepted(
+async def test_area_switch_open_zone_refused(
     hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
 ) -> None:
-    """Without that zone programming the area switch arms with a zone open."""
+    """By default the integration refuses first: nothing is sent."""
     panel.state.zone_states[36] = c.ZONE_ALARM  # zone 37, area 3
-    await call(hass, entry, "switch", "turn_on", AREA_3_SWITCH)
-    assert panel.state.armed_areas() == [3]
+    with pytest.raises(ZonesNotReadyError):
+        await call(hass, entry, "switch", "turn_on", AREA_3_SWITCH)
+    assert panel.state.armed_areas() == []
 
 
 async def test_area_switch_disarm_refused(
