@@ -193,7 +193,7 @@ async def test_a_mapped_scenario_cannot_be_unticked(
     result = await change_items(hass, entry, scenarios=[1, 3])
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "mapped_scenario_not_imported"}
-    assert result["description_placeholders"] == {"scenarios": "2 - Scenario 2"}
+    assert result["description_placeholders"]["scenarios"] == "2 - Scenario 2"
     assert dict(entry.options) == options
     hass.config_entries.options.async_abort(result["flow_id"])
 
@@ -249,7 +249,7 @@ async def test_upgrade_keeps_the_entities(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    assert entry.minor_version == 4
+    assert entry.minor_version == 5
     assert not {"limit_areas", "limit_zones", "limit_scenarios"} & set(entry.options)
     assert entry.options["areas"] == [1, 2, 3, 4]
     assert entry.options["zones"] == list(range(1, 21))

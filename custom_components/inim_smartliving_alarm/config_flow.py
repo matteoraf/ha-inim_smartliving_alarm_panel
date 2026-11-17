@@ -37,7 +37,6 @@ from .const import (
     CONF_PIN,
     CONF_POLLING_INTERVAL,
     CONF_PORT,
-    CONF_READER_NAMES,
     CONF_SCENARIO_ARM_AWAY,
     CONF_SCENARIO_ARM_HOME,
     CONF_SCENARIO_ARM_NIGHT,
@@ -60,6 +59,7 @@ from .const import (
 from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .legacy import create_client
 from .panel_config import async_fetch_panel_configuration
+from .peripherals import peripheral_placeholders
 from .protocol.errors import DecryptionError, InvalidPinError, ProtocolError
 from .selection import (
     AVAILABLE,
@@ -279,7 +279,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Inim Alarm."""
 
     VERSION = 1
-    MINOR_VERSION = 4
+    MINOR_VERSION = 5
 
     def __init__(self) -> None:
         """Start with no data (kept per flow, between the steps)."""
@@ -426,7 +426,8 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             description_placeholders={
                 "panel_name": self._flow_data["user_input_step1"].get(
                     CONF_PANEL_NAME, DEFAULT_PANEL_NAME
-                )
+                ),
+                **peripheral_placeholders(config),
             },
         )
 
@@ -464,7 +465,6 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_EVENT_LOG_SIZE: min(
                     user_input[CONF_EVENT_LOG_SIZE], SYSTEM_MAX_EVENT_LOG_SIZE
                 ),
-                CONF_READER_NAMES: user_input.get(CONF_READER_NAMES, ""),
             }
             for key in [
                 CONF_SCENARIO_ARM_HOME,
@@ -492,7 +492,6 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Optional(CONF_EVENT_LOG_SIZE, default=DEFAULT_EVENT_LOG_SIZE): vol.All(
                 vol.Coerce(int), vol.Range(min=1, max=SYSTEM_MAX_EVENT_LOG_SIZE)
             ),
-            vol.Optional(CONF_READER_NAMES, default=""): str,
         }
         if len(scenario_choices) > 1:
             initial_options_schema_dict.update(
@@ -634,7 +633,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
         """
         config = self.initial_panel_config
         errors: dict[str, str] = {}
-        placeholders: dict[str, str] = {}
+        placeholders = peripheral_placeholders(config)
         options = self.config_entry.options
         if user_input is not None:
             chosen = _chosen_items(user_input)
@@ -734,9 +733,6 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 updated_options[CONF_EVENT_LOG_SIZE] = min(
                     event_log_size_input, SYSTEM_MAX_EVENT_LOG_SIZE
                 )
-                updated_options[CONF_READER_NAMES] = user_input.get(
-                    CONF_READER_NAMES, ""
-                )
                 updated_options[CONF_AREA_SWITCH_ARM_MODE] = user_input.get(
                     CONF_AREA_SWITCH_ARM_MODE, DEFAULT_AREA_SWITCH_ARM_MODE
                 )
@@ -789,10 +785,6 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
             ): vol.All(
                 vol.Coerce(int), vol.Range(min=1, max=SYSTEM_MAX_EVENT_LOG_SIZE)
             ),
-            vol.Optional(
-                CONF_READER_NAMES,
-                default=self.current_settings.get(CONF_READER_NAMES, ""),
-            ): str,
             vol.Optional(
                 CONF_AREA_SWITCH_ARM_MODE,
                 default=self.current_settings.get(

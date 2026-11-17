@@ -28,6 +28,7 @@ from .protocol.commands import (
     reset_alarm_memory,
 )
 from .protocol.config import (
+    Peripherals,
     PhysicalMap,
     ScenarioConfig,
     Terminal,
@@ -35,6 +36,7 @@ from .protocol.config import (
     area_mask,
     decode_code_record,
     decode_labels,
+    decode_peripherals,
     decode_physical_map,
     decode_scenario_records,
     decode_terminals,
@@ -45,6 +47,8 @@ from .protocol.config import (
 from .protocol.errors import UnsupportedPanelError
 from .protocol.frames import active_scenario_request, not_ready_request, read_ram
 from .protocol.model import (
+    PERIPHERALS_ADDRESS,
+    PERIPHERALS_LENGTH,
     FirmwareInfo,
     PanelModel,
     model_for,
@@ -136,6 +140,14 @@ class PanelConfiguration:
     zone_labels: Labels  # 2L labels: primary zones, then second zones
     keypad_labels: Labels
     scenario_labels: Labels
+    code_labels: Labels  # user codes
+    key_labels: Labels
+    reader_labels: Labels
+    expander_labels: Labels
+    timer_labels: Labels
+    siren_labels: Labels
+    peripherals: Peripherals
+    peripherals_raw: bytes
     physical_map: PhysicalMap
     physical_map_raw: bytes
     terminals: tuple[Terminal, ...]
@@ -281,7 +293,7 @@ class SmartLivingPanel:
     # ----------------------------------------------------------- configuration
 
     async def read_configuration(self) -> PanelConfiguration:
-        """Read labels, terminals, zones and scenarios.
+        """Read labels, enabled peripherals, terminals, zones and scenarios.
 
         Raises ProgrammingModeError if the panel is in programming mode
         before or after the reads, as the configuration may be changing.
@@ -293,7 +305,11 @@ class SmartLivingPanel:
 
             async def labels(register: int, count: int) -> Labels:
                 offset = register - reg.LABELS_AREAS
-                address = label_address(pointers[offset : offset + 2], model)
+                if 0 <= offset < _LABEL_POINTERS_LENGTH:
+                    pointer = pointers[offset : offset + 2]
+                else:  # after the pointers read in one go
+                    pointer = await session.read_ram(register, 2)
+                address = label_address(pointer, model)
                 raw = await session.read_eeprom(address, count * LABEL_LENGTH)
                 return Labels(raw, count)
 
@@ -301,6 +317,15 @@ class SmartLivingPanel:
             zone_labels = await labels(reg.LABELS_ZONES, model.zones)
             keypad_labels = await labels(reg.LABELS_KEYPADS, model.keypads)
             scenario_labels = await labels(reg.LABELS_SCENARIOS, model.scenarios)
+            code_labels = await labels(reg.LABELS_CODES, model.codes)
+            key_labels = await labels(reg.LABELS_KEYS, model.keys)
+            reader_labels = await labels(reg.LABELS_READERS, model.readers)
+            expander_labels = await labels(reg.LABELS_EXPANDERS, model.expanders)
+            timer_labels = await labels(reg.LABELS_TIMERS, model.timers)
+            siren_labels = await labels(reg.LABELS_SIRENS, model.sirens)
+            peripherals = await session.read_eeprom(
+                PERIPHERALS_ADDRESS, PERIPHERALS_LENGTH
+            )
             physical_map = await session.read_eeprom(
                 model.physical_map, model.physical_slots
             )
@@ -322,6 +347,14 @@ class SmartLivingPanel:
             zone_labels=zone_labels,
             keypad_labels=keypad_labels,
             scenario_labels=scenario_labels,
+            code_labels=code_labels,
+            key_labels=key_labels,
+            reader_labels=reader_labels,
+            expander_labels=expander_labels,
+            timer_labels=timer_labels,
+            siren_labels=siren_labels,
+            peripherals=decode_peripherals(peripherals, model),
+            peripherals_raw=peripherals,
             physical_map=decode_physical_map(physical_map, model),
             physical_map_raw=physical_map,
             terminals=tuple(decode_terminals(terminals, model)),

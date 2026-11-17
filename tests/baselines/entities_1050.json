@@ -1520,6 +1520,13 @@
   },
   {
     "platform": "sensor",
+    "unique_id": "_peripherals",
+    "original_name": "Peripherals",
+    "device_class": null,
+    "state": "7"
+  },
+  {
+    "platform": "sensor",
     "unique_id": "_system_type",
     "original_name": "System Type",
     "device_class": null,
