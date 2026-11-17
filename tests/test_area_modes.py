@@ -219,7 +219,7 @@ async def test_switch_arms_total_by_default(
 ) -> None:
     """Without the option the switch arms total, as before."""
     result = await open_options(hass, entry)
-    assert form_defaults(result)["area_switch_arm_mode"] == "total"
+    assert form_defaults(result)["area_switches_default_arm_mode"] == "total"
     hass.config_entries.options.async_abort(result["flow_id"])
 
     await call(hass, entry, "switch", "turn_on", AREA_3_SWITCH)
@@ -233,22 +233,22 @@ async def test_entry_saved_before_the_option(
     old_options = {
         key: value
         for key, value in entry.options.items()
-        if key != "area_switch_arm_mode"
+        if key != "area_switches_default_arm_mode"
     }
     hass.config_entries.async_update_entry(entry, options=old_options)  # reloads
     await hass.async_block_till_done()
-    assert "area_switch_arm_mode" not in entry.options
+    assert "area_switches_default_arm_mode" not in entry.options
 
     await call(hass, entry, "switch", "turn_on", AREA_3_SWITCH)
     assert panel.state.area_modes[2] == c.MODE_AWAY
 
     # The options form offers total and saves it unless another is chosen
     result = await open_options(hass, entry)
-    assert form_defaults(result)["area_switch_arm_mode"] == "total"
+    assert form_defaults(result)["area_switches_default_arm_mode"] == "total"
     result = await hass.config_entries.options.async_configure(result["flow_id"], {})
     await hass.async_block_till_done()
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.options["area_switch_arm_mode"] == "total"
+    assert entry.options["area_switches_default_arm_mode"] == "total"
 
 
 @pytest.mark.parametrize(
@@ -260,11 +260,11 @@ async def test_switch_arms_in_the_chosen_mode(
     """The option chosen in the options form sets the switch's arming mode."""
     result = await open_options(hass, entry)
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"area_switch_arm_mode": option}
+        result["flow_id"], {"area_switches_default_arm_mode": option}
     )
     await hass.async_block_till_done()
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.options["area_switch_arm_mode"] == option
+    assert entry.options["area_switches_default_arm_mode"] == option
 
     await call(hass, entry, "switch", "turn_on", AREA_3_SWITCH)
     assert panel.state.area_modes[2] == mode

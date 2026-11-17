@@ -1,7 +1,8 @@
 Home Assistant Integration for Inim SmartLiving Alarm Systems
 =============================================================
 
-> \[!WARNING\]This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
+> [!WARNING]
+> This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
 > 
 > I could only test this with SmartLiving 1050. The SmartLiving 10100 is supported experimentally, without a test on a real panel. Contributors are welcome.
 
@@ -138,7 +139,7 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   New: SmartLAN/G boards (experimental), a network search when adding a panel, and the active scenario now takes all areas of your user code into account (previously areas 8 to 10 were ignored).
     
-*   **Area switches** are now on for an area armed in partial or instant mode too (before, such an area showed as unknown and its switch was off). Turning a switch on still arms in total mode, unless you choose another mode with the new **Area switches arm in** option. The new `arming_mode` attribute tells the mode (`total`, `partial`, `instant` or `disarmed`); `status_text` stays `armed` or `disarmed`.
+*   **Area switches** are now on for an area armed in partial or instant mode too (before, such an area showed as unknown and its switch was off). Turning a switch on still arms in total mode, unless you choose another mode with the new **Area switches default arm mode** option. The new `arming_mode` attribute tells the mode (`total`, `partial`, `instant` or `disarmed`); `status_text` stays `armed` or `disarmed`.
     
 *   **"Area X Triggered" is now called "Area X Alarm memory"**: same entity ID, same meaning (on after an alarm until the memory is reset), now also for areas 9 and 10, with a `tamper_memory` attribute. Two new binary sensors per area show the **live** state: *Area X Alarm* and *Area X Tamper*.
     
@@ -173,6 +174,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
 *   **New setups propose the Arm Away and Disarm scenarios** from what your scenarios do to the areas you import. Existing installations keep their mappings.
     
 *   **Scenarios that arm partially or instantly are read correctly.** The `area_actions_details` attribute of the scenario buttons now says `total`, `partial` or `instant` for the areas a scenario arms (before, `arm` for total and `unknown` for the other two). A scenario that disarms some areas and arms others partially or instantly was treated as a disarm scenario, so if the panel refused it, the message did not list the zones that blocked it; now it does.
+    
+*   **Each area switch can arm in its own mode**: the new options step **Area switches arm mode per area** has one choice per imported area (use the default, total, partial or instant). Areas left at *Use the default* follow **Area switches default arm mode**, as before. The general option, called **Area switches arm in** in the 0.4.0a3 preview, is now **Area switches default arm mode**: if you changed it in that preview, set it again (it is back to total).
     
 *   Not changed yet: see [Known limitations](#known-limitations).
     
@@ -224,13 +227,13 @@ After installation and restarting Home Assistant:
         
     *   **Scenario Mappings**: You can map your panel's scenarios to Home Assistant's standard alarm actions (Arm Home, Arm Away, etc.). Only the scenarios you import are offered. The setup proposes **Arm Away** and **Disarm**: for Arm Away, an imported scenario that arms every imported area (one that arms them all in total mode first, then the lowest number); for Disarm, the lowest-numbered imported scenario that disarms every imported area. What a scenario does to areas you don't import doesn't matter. If none fits, the mode stays unmapped. Check the proposal and change it if you like; the options keep what you saved.
 
-    *   **Area switches arm in** (options only, not at setup): the mode an area switch arms in when turned on: total (the default), partial or instant. The *arming mode* select of each area offers every mode.
+    *   **Area switches default arm mode** (options only, not at setup): the mode an area switch arms in when turned on: total (the default), partial or instant. The *arming mode* select of each area offers every mode. In the options, **Area switches arm mode per area** sets a different mode for single areas (for example, partial for the bedrooms); the others follow this option.
 
         
 9.  Click **Submit** to complete the setup.
     
 
-You can change all of this later: on the Devices & Services page, open the integration and click **CONFIGURE**, then choose **Areas, zones and scenarios** or **General settings** (everything else, including the PIN: leave **New PIN Code** empty to keep the current PIN; a new PIN is checked with the panel as at setup. The step names the user code the current PIN belongs to and the areas it controls). Unticking an area, zone or scenario removes its entities, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs. A scenario that an alarm panel mode uses cannot be unticked: change the mode's scenario in the general settings first.
+You can change all of this later: on the Devices & Services page, open the integration and click **CONFIGURE**, then choose **Areas, zones and scenarios**, **Area switches arm mode per area** (the mode each area's switch arms in, if not the general one) or **General settings** (everything else, including the PIN: leave **New PIN Code** empty to keep the current PIN; a new PIN is checked with the panel as at setup. The step names the user code the current PIN belongs to and the areas it controls). Unticking an area, zone or scenario removes its entities, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs. A scenario that an alarm panel mode uses cannot be unticked: change the mode's scenario in the general settings first.
 
 ### Changing the connection details (Reconfigure)
 
@@ -271,7 +274,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
     
 *   **Areas**:
     
-    *   *switch.your\_panel\_name\_area\_X*: Allows direct arming (on) and disarming (off) of an individual area. It is on when the area is armed in any mode (total, partial or instant); turning it on arms in the mode set by the **Area switches arm in** option (total by default). Attributes: `status_text` (`armed`, `disarmed` or `unknown`) and `arming_mode` (`total`, `partial`, `instant`, `disarmed` or `unknown`).
+    *   *switch.your\_panel\_name\_area\_X*: Allows direct arming (on) and disarming (off) of an individual area. It is on when the area is armed in any mode (total, partial or instant); turning it on arms in the area's own mode set under **Area switches arm mode per area**, else in the mode of the **Area switches default arm mode** option (total by default). Attributes: `status_text` (`armed`, `disarmed` or `unknown`) and `arming_mode` (`total`, `partial`, `instant`, `disarmed` or `unknown`).
         
     *   *select.your\_panel\_name\_area\_X\_arming\_mode* (named *Area X arming mode*): The area's arming mode: *Disarmed*, *Armed total*, *Armed partial* or *Armed instant* (unknown while the panel reports none of these). Choosing a mode arms the area in that mode or disarms it; if the panel refuses, an error says why. Attributes: `area_id` and `area_name`.
         

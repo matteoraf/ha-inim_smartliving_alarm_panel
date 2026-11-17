@@ -139,6 +139,7 @@
           "description": "Choose what to change.",
           "menu_options": {
             "items": "Areas, zones and scenarios",
+            "area_switches": "Area switches arm mode per area",
             "general": "General settings"
           }
         },
@@ -169,6 +170,10 @@
             }
           }
         },
+        "area_switches": {
+          "title": "Area switches arm mode per area",
+          "description": "The mode each area's switch arms in when it is turned on. *Use the default* follows **Area switches default arm mode** in the general settings. The arming mode select of each area and the `arm_area` action are not affected."
+        },
         "general": {
           "title": "General settings",
           "description": "Adjust the settings for your Inim Alarm integration.\n\nCommands are sent with the user code **{user_code}**, which controls these areas: {user_areas}.",
@@ -181,11 +186,11 @@
             "scenario_arm_night": "Arm Night Scenario",
             "scenario_arm_vacation": "Arm Vacation Scenario",
             "scenario_disarm": "Disarm Scenario",
-            "area_switch_arm_mode": "Area switches arm in"
+            "area_switches_default_arm_mode": "Area switches default arm mode"
           },
           "data_description": {
             "pin": "Leave empty to keep the current PIN.",
-            "area_switch_arm_mode": "Mode used when an area switch is turned on. The arming mode select of each area sets any mode."
+            "area_switches_default_arm_mode": "Mode used when an area switch is turned on, unless its area has its own mode under Area switches arm mode per area. The arming mode select of each area sets any mode."
           }
         }
       },
@@ -285,8 +290,16 @@
       }
     },
     "selector": {
-      "area_switch_arm_mode": {
+      "area_switches_default_arm_mode": {
         "options": {
+          "total": "Total",
+          "partial": "Partial",
+          "instant": "Instant"
+        }
+      },
+      "area_switch_arm_mode_by_area": {
+        "options": {
+          "default": "Use the default",
           "total": "Total",
           "partial": "Partial",
           "instant": "Instant"

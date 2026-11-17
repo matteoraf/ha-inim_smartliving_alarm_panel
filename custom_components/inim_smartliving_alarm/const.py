@@ -214,5 +214,10 @@ ARM_MODE_TOTAL = "total"
 ARM_MODE_PARTIAL = "partial"
 ARM_MODE_INSTANT = "instant"
 ARM_MODE_DISARM = "disarm"
-CONF_AREA_SWITCH_ARM_MODE = "area_switch_arm_mode"  # option: total/partial/instant
-DEFAULT_AREA_SWITCH_ARM_MODE = ARM_MODE_TOTAL
+# Option: the mode every area switch arms in (total/partial/instant)
+CONF_AREA_SWITCHES_DEFAULT_ARM_MODE = "area_switches_default_arm_mode"
+DEFAULT_AREA_SWITCHES_ARM_MODE = ARM_MODE_TOTAL
+# Option: the mode of single areas' switches, {"3": "partial"}; areas not
+# listed use CONF_AREA_SWITCHES_DEFAULT_ARM_MODE
+CONF_AREA_SWITCH_ARM_MODE_BY_AREA = "area_switch_arm_mode_by_area"
+AREA_SWITCH_USE_DEFAULT = "default"

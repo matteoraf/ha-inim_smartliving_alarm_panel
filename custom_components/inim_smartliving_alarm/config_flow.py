@@ -21,12 +21,14 @@ from homeassistant.helpers.selector import (
 import voluptuous as vol
 
 from .const import (
+    AREA_SWITCH_USE_DEFAULT,
     ARM_MODE_INSTANT,
     ARM_MODE_PARTIAL,
     ARM_MODE_TOTAL,
     BOARD_SMARTLAN_G,
     BOARD_SMARTLAN_SI,
-    CONF_AREA_SWITCH_ARM_MODE,
+    CONF_AREA_SWITCH_ARM_MODE_BY_AREA,
+    CONF_AREA_SWITCHES_DEFAULT_ARM_MODE,
     CONF_AREAS,
     CONF_BOARD,
     CONF_EVENT_LOG_SIZE,
@@ -47,7 +49,7 @@ from .const import (
     CONF_ZONES,
     DATA_API_CLIENT,
     DATA_INITIAL_PANEL_CONFIG,
-    DEFAULT_AREA_SWITCH_ARM_MODE,
+    DEFAULT_AREA_SWITCHES_ARM_MODE,
     DEFAULT_EVENT_LOG_SIZE,
     DEFAULT_PANEL_NAME,
     DEFAULT_POLLING_INTERVAL,
@@ -64,6 +66,7 @@ from .protocol.errors import DecryptionError, InvalidPinError, ProtocolError
 from .selection import (
     AVAILABLE,
     SELECTION_KEYS,
+    area_label,
     area_names,
     mapped_scenarios,
     numbers,
@@ -658,7 +661,64 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Choose what to change."""
-        return self.async_show_menu(step_id="init", menu_options=["items", "general"])
+        return self.async_show_menu(
+            step_id="init", menu_options=["items", "area_switches", "general"]
+        )
+
+    async def async_step_area_switches(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """The mode each imported area's switch arms in.
+
+        One select per area, named by its number and label; "Use the
+        default" follows the general "Area switches arm in" option. Only
+        areas set otherwise are stored, and only imported ones.
+        """
+        config = self.initial_panel_config
+        options = self.config_entry.options
+        fields = {
+            f"{number} - {area_label(config, number)}": number
+            for number in selected(options, config, CONF_AREAS)
+        }
+        if user_input is not None:
+            modes = {
+                str(number): user_input[field]
+                for field, number in fields.items()
+                if user_input.get(field, AREA_SWITCH_USE_DEFAULT)
+                != AREA_SWITCH_USE_DEFAULT
+            }
+            return self.async_create_entry(
+                title="", data={**options, CONF_AREA_SWITCH_ARM_MODE_BY_AREA: modes}
+            )
+
+        stored = options.get(CONF_AREA_SWITCH_ARM_MODE_BY_AREA) or {}
+        choices = [
+            AREA_SWITCH_USE_DEFAULT,
+            ARM_MODE_TOTAL,
+            ARM_MODE_PARTIAL,
+            ARM_MODE_INSTANT,
+        ]
+        selector = SelectSelector(
+            SelectSelectorConfig(
+                options=choices,
+                translation_key=CONF_AREA_SWITCH_ARM_MODE_BY_AREA,
+                mode=SelectSelectorMode.DROPDOWN,
+            )
+        )
+        return self.async_show_form(
+            step_id="area_switches",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        field,
+                        default=stored.get(str(number))
+                        if stored.get(str(number)) in choices
+                        else AREA_SWITCH_USE_DEFAULT,
+                    ): selector
+                    for field, number in fields.items()
+                }
+            ),
+        )
 
     async def async_step_items(
         self, user_input: dict[str, Any] | None = None
@@ -740,8 +800,8 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 updated_options[CONF_EVENT_LOG_SIZE] = min(
                     event_log_size_input, SYSTEM_MAX_EVENT_LOG_SIZE
                 )
-                updated_options[CONF_AREA_SWITCH_ARM_MODE] = user_input.get(
-                    CONF_AREA_SWITCH_ARM_MODE, DEFAULT_AREA_SWITCH_ARM_MODE
+                updated_options[CONF_AREA_SWITCHES_DEFAULT_ARM_MODE] = user_input.get(
+                    CONF_AREA_SWITCHES_DEFAULT_ARM_MODE, DEFAULT_AREA_SWITCHES_ARM_MODE
                 )
 
                 for key in [
@@ -801,14 +861,14 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Coerce(int), vol.Range(min=1, max=SYSTEM_MAX_EVENT_LOG_SIZE)
             ),
             vol.Optional(
-                CONF_AREA_SWITCH_ARM_MODE,
+                CONF_AREA_SWITCHES_DEFAULT_ARM_MODE,
                 default=values.get(
-                    CONF_AREA_SWITCH_ARM_MODE, DEFAULT_AREA_SWITCH_ARM_MODE
+                    CONF_AREA_SWITCHES_DEFAULT_ARM_MODE, DEFAULT_AREA_SWITCHES_ARM_MODE
                 ),
             ): SelectSelector(
                 SelectSelectorConfig(
                     options=[ARM_MODE_TOTAL, ARM_MODE_PARTIAL, ARM_MODE_INSTANT],
-                    translation_key=CONF_AREA_SWITCH_ARM_MODE,
+                    translation_key=CONF_AREA_SWITCHES_DEFAULT_ARM_MODE,
                     mode=SelectSelectorMode.DROPDOWN,
                 )
             ),

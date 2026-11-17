@@ -14,14 +14,15 @@ from .const import (
     ARM_MODE_INSTANT,
     ARM_MODE_PARTIAL,
     ARM_MODE_TOTAL,
-    CONF_AREA_SWITCH_ARM_MODE,
+    CONF_AREA_SWITCH_ARM_MODE_BY_AREA,
+    CONF_AREA_SWITCHES_DEFAULT_ARM_MODE,
     CONF_AREAS,
     CONF_PANEL_NAME,
     CONF_ZONES,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
-    DEFAULT_AREA_SWITCH_ARM_MODE,
+    DEFAULT_AREA_SWITCHES_ARM_MODE,
     DEFAULT_PANEL_NAME,
     DOMAIN,
     KEY_INIT_AREA_NAMES,
@@ -232,8 +233,12 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         """Turn the switch on (arm the area in the configured mode)."""
         _LOGGER.info("Arming Area %s (%s)", self._area_id_1_based, self._area_name)
 
-        option = self.config_entry.options.get(
-            CONF_AREA_SWITCH_ARM_MODE, DEFAULT_AREA_SWITCH_ARM_MODE
+        options = self.config_entry.options
+        # This area's own mode, else the default of every area switch
+        option = (options.get(CONF_AREA_SWITCH_ARM_MODE_BY_AREA) or {}).get(
+            str(self._area_id_1_based)
+        ) or options.get(
+            CONF_AREA_SWITCHES_DEFAULT_ARM_MODE, DEFAULT_AREA_SWITCHES_ARM_MODE
         )
         mode = SWITCH_ARM_MODES.get(option, ArmMode.AWAY)
         await async_send_command(
