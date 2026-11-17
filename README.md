@@ -5,6 +5,16 @@ Home Assistant Integration for Inim SmartLiving Alarm Systems
 > 
 > I could only test this with SmartLiving 1050, I have no way to test and support any other SmartLiving system. Contributors are welcome.
 
+> \[!NOTE\]**A new version is being prepared: 0.4 is a major rework of the integration.** The way it talks to the panel has been rewritten from the ground up, and so has the API underneath: a new connection layer that keeps one connection open, a new panel API, and new setup and options. On top of that it brings SmartLAN/G boards, a choice of the areas, zones and scenarios to import, names from the panel in the event log, clear errors when the panel refuses a command, and more. See the [0.4 README](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/blob/v0.4.0a3/README.md) for everything it does and what changes when you upgrade.
+> 
+> It is available as a preview: [0.4.0a3](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/releases/tag/v0.4.0a3) or a later one from the [releases page](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/releases).
+> 
+> To try it, **take a Home Assistant backup first** (**Settings** -> **System** -> **Backups**). Then, in HACS or the Marketplace, turn on the repository's **Pre-release** switch, or use **Redownload** on the integration's page and pick the version; or download the `inim_smartliving_alarm` folder from the pre-release on GitHub. Restart Home Assistant.
+> 
+> A preview updates your configuration entry to a newer format that 0.3.x does not fully understand: installed over it, 0.3.x creates entities again for 10 areas, 50 zones and 30 scenarios (including those you had not imported), and it cannot connect to SmartLAN/G boards. To go back to 0.3.x, restore the backup; this also undoes any other change made in Home Assistant since the backup.
+> 
+> Please report problems with a preview in a GitHub issue, with your panel model, firmware version and board type (SmartLAN/SI or SmartLAN/G).
+
 This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI network interface. It enables monitoring and control of your alarm system directly from Home Assistant.
 
 Features
@@ -84,6 +94,12 @@ It is recommended to install this integration via the [Home Assistant Community 
 
 **2\. Manual Installation:**
 -->
+[![Open your Home Assistant instance and open this repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=matteoraf&repository=ha-inim_smartliving_alarm_panel&category=integration)
+
+The button opens this repository in your Home Assistant: in the Marketplace on 2026.11 or later, in HACS on earlier versions (HACS must be installed). Download **Inim Smartliving Alarm** there and restart Home Assistant.
+
+Or install it manually:
+
 1.  Download the latest release inim\_smartliving\_alarm folder (or clone the repository) into your config/custom\_components folder.
     
 2.  Restart Home Assistant.
