@@ -19,9 +19,6 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS,
-    KEY_INIT_SCENARIO_ACTIVATION_INDEX,
-    KEY_INIT_SCENARIO_ACTIVATIONS,
     KEY_INIT_SCENARIO_NAMES,
     KEY_INIT_SCENARIOS,
     KEY_INIT_SYSTEM_INFO,
@@ -30,7 +27,12 @@ from .const import (
 )
 from .legacy import LegacyPanelClient
 from .panel_config import async_reread_panel_configuration
-from .selection import scenario_label, selected
+from .selection import (
+    is_disarm_scenario,
+    scenario_actions,
+    scenario_label,
+    selected,
+)
 from .utils import async_activate_scenario
 
 _LOGGER = logging.getLogger(__name__)
@@ -58,10 +60,6 @@ async def async_setup_entry(
     all_scenario_names = (
         scenario_data.get(KEY_INIT_SCENARIO_NAMES, []) if scenario_data else []
     )
-    scenario_activations_list = initial_panel_config.get(
-        KEY_INIT_SCENARIO_ACTIVATIONS, []
-    )
-
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
     async_add_entities(
@@ -83,14 +81,6 @@ async def async_setup_entry(
     for number in scenarios:
         scenario_index_0_based = number - 1
         scenario_name = scenario_label(initial_panel_config, number)
-        current_scenario_activation_details = next(
-            (
-                sa
-                for sa in scenario_activations_list
-                if sa.get(KEY_INIT_SCENARIO_ACTIVATION_INDEX) == scenario_index_0_based
-            ),
-            None,
-        )
         buttons_to_add.append(
             InimScenarioActivationButton(
                 api_client,
@@ -101,7 +91,6 @@ async def async_setup_entry(
                 system_info,
                 scenario_index_0_based,
                 scenario_name,
-                current_scenario_activation_details,
             )
         )
 
@@ -127,7 +116,6 @@ class InimScenarioActivationButton(ButtonEntity):
         system_info: dict[str, Any],
         scenario_index_0_based: int,
         scenario_name: str,
-        scenario_activation_details: dict[str, Any] | None = None,
     ) -> None:
         """Initialize the Inim Scenario activation button."""
         self.api_client = api_client
@@ -138,7 +126,6 @@ class InimScenarioActivationButton(ButtonEntity):
         self._system_info = system_info
         self._scenario_index_0_based = scenario_index_0_based
         self._scenario_name = scenario_name
-        self._scenario_activation_details = scenario_activation_details
 
         self._attr_name = f"Activate '{self._scenario_name}'"
         self._attr_unique_id = (
@@ -166,19 +153,10 @@ class InimScenarioActivationButton(ButtonEntity):
         """Handle the button press to activate the scenario."""
         action_name = f"activate scenario '{self._scenario_name}' (index {self._scenario_index_0_based})"
         _LOGGER.info("Button '%s' pressed: Attempting to %s", self.name, action_name)
-        is_disarm = False
-        if self._scenario_activation_details:
-            # area_actions is a dict like {'1': 'arm', '2': 'disarm'}
-            area_actions_dict = self._scenario_activation_details.get(
-                KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS, {}
-            )
-            actions_present = set(
-                area_actions_dict.values()
-            )  # e.g., {'arm', 'keep'} or {'disarm'}
-
-            if "disarm" in actions_present and "arm" not in actions_present:
-                # Only consider it a disarm scenario if 'disarm' is present AND 'arm' is NOT.
-                is_disarm = True
+        # A refusal is explained by open zones unless the scenario only disarms
+        is_disarm = is_disarm_scenario(
+            self._initial_panel_config, self._scenario_index_0_based + 1
+        )
 
         # Checks that no zone prevents it first; raises an error if not
         # carried out, after a notification and the activation-failed event
@@ -201,12 +179,11 @@ class InimScenarioActivationButton(ButtonEntity):
             "scenario_index": self._scenario_index_0_based,
             "scenario_name": self._scenario_name,
         }
-        if self._scenario_activation_details and self._scenario_activation_details.get(
-            KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS
+        # Per area: keep, total, partial, instant or disarm
+        if actions := scenario_actions(
+            self._initial_panel_config, self._scenario_index_0_based + 1
         ):
-            attrs["area_actions_details"] = self._scenario_activation_details.get(
-                KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS
-            )
+            attrs["area_actions_details"] = actions
         return attrs
 
 

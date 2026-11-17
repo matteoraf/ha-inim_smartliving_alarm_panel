@@ -80,7 +80,7 @@ async def test_initial_configuration(
     activations = config["scenario_activations"]
     assert len(activations) == 30
     assert activations[0]["area_actions"] == {
-        **dict.fromkeys(range(1, 8), "arm"),
+        **dict.fromkeys(range(1, 8), "total"),
         **dict.fromkeys(range(8, 11), "keep"),
     }
     assert activations[1]["area_actions"] == {
@@ -88,8 +88,8 @@ async def test_initial_configuration(
         9: "keep",
         10: "keep",
     }
-    assert activations[2]["area_actions"][1] == "arm"
-    assert activations[2]["area_actions"][7] == "arm"
+    assert activations[2]["area_actions"][1] == "total"
+    assert activations[2]["area_actions"][7] == "total"
 
     zones = config["zones_config"]["zones_config_detailed"]
     assert len(zones) == 100  # every zone number; 51-100 are second zones

@@ -168,6 +168,10 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **Changing the PIN in the options works again**, and the PIN is no longer shown. The **New PIN Code** field in **General settings** is now empty: leave it empty to keep the current PIN, or enter a new one, which is checked with the panel as at setup. Before, the field showed the current PIN in clear text and any new PIN was refused. The PIN (and, for SmartLAN/G, the board password) is now a password field at setup and in **Reconfigure**, where it is no longer filled in: leave it empty to keep the current one. A new diagnostic sensor, *User code*, names the user code the PIN belongs to, and **General settings** says it too.
     
+*   **New setups propose the Arm Away and Disarm scenarios** from what your scenarios do to the areas you import. Existing installations keep their mappings.
+    
+*   **Scenarios that arm partially or instantly are read correctly.** The `area_actions_details` attribute of the scenario buttons now says `total`, `partial` or `instant` for the areas a scenario arms (before, `arm` for total and `unknown` for the other two). A scenario that disarms some areas and arms others partially or instantly was treated as a disarm scenario, so if the panel refused it, the message did not list the zones that blocked it; now it does.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -216,7 +220,7 @@ After installation and restarting Home Assistant:
         
     *   **Event Log Size**: The number of recent events to store and display in the event log sensor's attributes.
         
-    *   **Scenario Mappings**: You can map your panel's scenarios to Home Assistant's standard alarm actions (Arm Home, Arm Away, etc.). Only the scenarios you import are offered.
+    *   **Scenario Mappings**: You can map your panel's scenarios to Home Assistant's standard alarm actions (Arm Home, Arm Away, etc.). Only the scenarios you import are offered. The setup proposes **Arm Away** and **Disarm**: for Arm Away, an imported scenario that arms every imported area (one that arms them all in total mode first, then the lowest number); for Disarm, the lowest-numbered imported scenario that disarms every imported area. What a scenario does to areas you don't import doesn't matter. If none fits, the mode stays unmapped. Check the proposal and change it if you like; the options keep what you saved.
 
     *   **Area switches arm in** (options only, not at setup): the mode an area switch arms in when turned on: total (the default), partial or instant. The *arming mode* select of each area offers every mode.
 
@@ -289,7 +293,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
 *   **Scenarios**:
     
-    *   *button.your\_panel\_name\_scenario\_X*: Allows direct activation of a specific scenario. If the activation fails (a zone not ready, or the panel refuses it), an error and a persistent notification with the reason appear in Home Assistant.
+    *   *button.your\_panel\_name\_scenario\_X*: Allows direct activation of a specific scenario. If the activation fails (a zone not ready, or the panel refuses it), an error and a persistent notification with the reason appear in Home Assistant. The `area_actions_details` attribute tells what the scenario does to each area: `keep`, `total`, `partial`, `instant` or `disarm`.
         
     *   *binary\_sensor.your\_panel\_name\_scenario\_X\_active*: A binary sensor that is 'on' if that specific scenario is currently the active one on the panel.
         

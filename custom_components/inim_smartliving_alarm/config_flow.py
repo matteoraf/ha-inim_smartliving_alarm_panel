@@ -70,6 +70,7 @@ from .selection import (
     scenario_label,
     scenario_names,
     selected,
+    suggested_mappings,
     suggested_selection,
     zone_names,
 )
@@ -523,23 +524,30 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
         }
         if len(scenario_choices) > 1:
+            # Arm Away and Disarm proposed from what the scenarios do
+            proposed = {
+                key: "none" if index is None else str(index)
+                for key, index in suggested_mappings(
+                    initial_config_data, selection
+                ).items()
+            }
             initial_options_schema_dict.update(
                 {
                     vol.Optional(CONF_SCENARIO_ARM_HOME, default="none"): vol.In(
                         scenario_choices
                     ),
-                    vol.Optional(CONF_SCENARIO_ARM_AWAY, default="none"): vol.In(
-                        scenario_choices
-                    ),
+                    vol.Optional(
+                        CONF_SCENARIO_ARM_AWAY, default=proposed[CONF_SCENARIO_ARM_AWAY]
+                    ): vol.In(scenario_choices),
                     vol.Optional(CONF_SCENARIO_ARM_NIGHT, default="none"): vol.In(
                         scenario_choices
                     ),
                     vol.Optional(CONF_SCENARIO_ARM_VACATION, default="none"): vol.In(
                         scenario_choices
                     ),
-                    vol.Optional(CONF_SCENARIO_DISARM, default="none"): vol.In(
-                        scenario_choices
-                    ),
+                    vol.Optional(
+                        CONF_SCENARIO_DISARM, default=proposed[CONF_SCENARIO_DISARM]
+                    ): vol.In(scenario_choices),
                 }
             )
 

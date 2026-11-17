@@ -30,6 +30,7 @@ from .const import (
     KEY_INIT_AREAS,
     KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS,
     KEY_INIT_SCENARIO_ACTIVATION_INDEX,
+    KEY_INIT_SCENARIO_ACTIVATION_RAW,
     KEY_INIT_SCENARIO_ACTIVATIONS,
     KEY_INIT_SCENARIO_NAMES,
     KEY_INIT_SCENARIOS,
@@ -42,7 +43,8 @@ from .const import (
     MAX_LIMIT_AREAS,
     MAX_LIMIT_ZONES,
 )
-from .legacy import zone_exists
+from .legacy import SCENARIO_ACTIONS, zone_exists
+from .protocol.commands import ArmMode
 
 SELECTION_KEYS = (CONF_AREAS, CONF_ZONES, CONF_SCENARIOS)
 
@@ -218,6 +220,86 @@ def mapped_scenarios(options: Mapping[str, Any]) -> dict[str, int]:
         if value is not None and str(value).isdigit():
             mapped[key] = int(value) + 1
     return mapped
+
+
+def scenario_area_modes(config: Mapping[str, Any]) -> dict[int, dict[int, int]]:
+    """What each scenario does to each area: number -> area -> mode.
+
+    Decoded from the stored scenario records (one nibble per area, area 1
+    in the low nibble of the first byte; see ArmMode).
+    """
+    areas = len(area_names(config))
+    modes: dict[int, dict[int, int]] = {}
+    for activation in config.get(KEY_INIT_SCENARIO_ACTIVATIONS) or []:
+        raw = activation.get(KEY_INIT_SCENARIO_ACTIVATION_RAW)
+        if KEY_INIT_SCENARIO_ACTIVATION_INDEX not in activation or not raw:
+            continue
+        record = bytes.fromhex(raw)
+        modes[activation[KEY_INIT_SCENARIO_ACTIVATION_INDEX] + 1] = {
+            area: record[(area - 1) // 2] >> (4 * ((area - 1) % 2)) & 0x0F
+            for area in range(1, areas + 1)
+            if (area - 1) // 2 < len(record)
+        }
+    return modes
+
+
+_ARMED = frozenset((ArmMode.AWAY, ArmMode.STAY, ArmMode.INSTANT))
+
+
+def scenario_actions(config: Mapping[str, Any], number: int) -> dict[str, str]:
+    """What a scenario does to each area: "keep", "total", "partial", ...
+
+    Keyed by area number as text; empty if its record is not stored.
+    """
+    return {
+        str(area): SCENARIO_ACTIONS.get(mode, "unknown")
+        for area, mode in scenario_area_modes(config).get(number, {}).items()
+    }
+
+
+def scenario_armed_areas(config: Mapping[str, Any], number: int) -> list[int]:
+    """The areas a scenario arms, in any mode."""
+    return [
+        area
+        for area, mode in scenario_area_modes(config).get(number, {}).items()
+        if mode in _ARMED
+    ]
+
+
+def is_disarm_scenario(config: Mapping[str, Any], number: int) -> bool:
+    """Whether a scenario disarms areas and arms none."""
+    modes = scenario_area_modes(config).get(number, {}).values()
+    return ArmMode.DISARM in modes and not any(mode in _ARMED for mode in modes)
+
+
+def suggested_mappings(
+    config: Mapping[str, Any], selection: Mapping[str, list[int]]
+) -> dict[str, int | None]:
+    """Arm Away and Disarm scenarios a new setup proposes (0-based, or None).
+
+    Among the imported scenarios: Arm Away is one that arms every imported
+    area, in any mode, preferring one that arms them all in total mode, then
+    the lowest number; Disarm is the lowest-numbered one that disarms every
+    imported area. What a scenario does to areas not imported does not
+    matter. Without imported areas nothing is proposed.
+    """
+    areas = selection.get(CONF_AREAS) or []
+    modes = scenario_area_modes(config)
+    arming: list[tuple[bool, int]] = []
+    disarming: list[int] = []
+    for number in sorted(selection.get(CONF_SCENARIOS) or []):
+        record = modes.get(number)
+        if not areas or record is None:
+            continue
+        chosen = [record.get(area) for area in areas]
+        if all(mode in _ARMED for mode in chosen):
+            arming.append((not all(mode == ArmMode.AWAY for mode in chosen), number))
+        elif all(mode == ArmMode.DISARM for mode in chosen):
+            disarming.append(number)
+    return {
+        CONF_SCENARIO_ARM_AWAY: min(arming)[1] - 1 if arming else None,
+        CONF_SCENARIO_DISARM: disarming[0] - 1 if disarming else None,
+    }
 
 
 def migrated_selection(settings: Mapping[str, Any]) -> dict[str, list[int]]:
