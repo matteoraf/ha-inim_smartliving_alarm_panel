@@ -1533,6 +1533,13 @@
     "state": "01050"
   },
   {
+    "platform": "sensor",
+    "unique_id": "_user_code",
+    "original_name": "User code",
+    "device_class": null,
+    "state": "Master"
+  },
+  {
     "platform": "switch",
     "unique_id": "_area_switch_1",
     "original_name": "Test Panel Area 1 (Area 1)",

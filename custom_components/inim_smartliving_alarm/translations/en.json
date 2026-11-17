@@ -107,6 +107,10 @@
             "username": "Board user name",
             "password": "Board password",
             "pin": "PIN Code"
+          },
+          "data_description": {
+            "password": "Leave empty to keep the current password.",
+            "pin": "Leave empty to keep the current PIN."
           }
         }
       },
@@ -167,7 +171,7 @@
         },
         "general": {
           "title": "General settings",
-          "description": "Adjust the settings for your Inim Alarm integration.",
+          "description": "Adjust the settings for your Inim Alarm integration.\n\nCommands are sent with the user code **{user_code}**, which controls these areas: {user_areas}.",
           "data": {
             "pin": "New PIN Code",
             "polling_interval": "Polling Interval (seconds)",
@@ -180,15 +184,23 @@
             "area_switch_arm_mode": "Area switches arm in"
           },
           "data_description": {
+            "pin": "Leave empty to keep the current PIN.",
             "area_switch_arm_mode": "Mode used when an area switch is turned on. The arming mode select of each area sets any mode."
           }
         }
       },
       "error": {
-        "cannot_connect_new_pin": "Failed to connect to the panel. Please check connection.",
-        "auth_failed_new_pin": "Authentication failed with the new PIN. The PIN has not been changed.",
-        "pin_validation_error": "An error occurred while validating the new PIN.",
-        "unknown_pin_error": "An unknown error occurred while validating the new PIN. Please check the logs.",
+        "cannot_connect": "Failed to connect. Please check the Host and Port (and, for SmartLAN/G, the user name and password) and ensure the panel is reachable and no other client is connected to it.",
+        "auth_failed": "Authentication failed. Please check your connection.",
+        "invalid_panel_response": "Received an invalid response from the panel. Please check your connection and configuration.",
+        "validation_error_detail": "A validation error occurred while fetching initial data from the panel.",
+        "unknown": "An unknown error occurred. Please check the logs for more details.",
+        "invalid_auth": "The SmartLAN/G board did not accept the connection. Please check the user name and password.",
+        "invalid_board_reply": "The SmartLAN/G board answered, but its reply was not in the expected format. If the user name and password are correct, this board version may not be supported yet: please report it on GitHub with a debug log.",
+        "invalid_pin": "The PIN does not match any user code of the panel.",
+        "invalid_pin_format": "The PIN must be 1 to 6 digits.",
+        "unsupported_firmware": "The panel's firmware is too old: firmware 5 or later is needed.",
+        "panel_programming": "The panel is in programming mode, so its configuration cannot be read now. Try again when programming has ended.",
         "mapped_scenario_not_imported": "These scenarios are used by alarm panel modes: {scenarios}. Change those modes in the general settings first."
       }
     },
@@ -301,6 +313,9 @@
       "sensor": {
         "peripherals": {
           "name": "Peripherals"
+        },
+        "user_code": {
+          "name": "User code"
         }
       }
     }
