@@ -32,6 +32,7 @@ from .protocol.config import (
     PhysicalMap,
     ScenarioConfig,
     Terminal,
+    UserCode,
     ZoneConfig,
     area_mask,
     decode_code_record,
@@ -206,6 +207,9 @@ class SmartLivingPanel:
         self._model: PanelModel | None = None
         self._user_areas: frozenset[int] = frozenset()
         self.user_code_found = False
+        # The user code the PIN belongs to: its 0-based number and record
+        self.user_code_index: int | None = None
+        self.user_code: UserCode | None = None
         # The state flags are read only from models with a profile: other
         # firmware may lay out the faults register differently
         self.reads_panel_state = False
@@ -271,6 +275,7 @@ class SmartLivingPanel:
         )
         index = find_code_index(table, self._pin, model)
         del table
+        code = None
         if index is None:
             _LOGGER.warning(
                 "The PIN does not match any user code of the panel; "
@@ -282,11 +287,13 @@ class SmartLivingPanel:
                 model.code_records + index * model.code_record_length,
                 model.code_record_length,
             )
-            areas = decode_code_record(record, model).areas
+            code = decode_code_record(record, model)
+            areas = code.areas
         self._firmware, self._model = firmware, model
         self._model_string = data
         self._user_areas = areas
         self.user_code_found = index is not None
+        self.user_code_index, self.user_code = index, code
         self.reads_panel_state = known
         return model
 

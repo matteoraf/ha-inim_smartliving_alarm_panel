@@ -166,6 +166,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **The event log shows the names programmed on the panel**: who caused an event (the user code's or key's name, instead of *User 3* or *Key 5*) and where (the keypad's or reader's name). Commands sent remotely, from the app, the cloud, Home Assistant or the installer software, show *Remote* (before, *Mobile App*). The **Reader names** option is removed: reader names now come from the panel, and names typed in that option are no longer used. Your configuration entry is updated once more (version 1.5), and at the first start the integration reads the panel configuration again by itself to get the names (the log says so). A new diagnostic sensor, *Peripherals*, lists the keypads, readers, expanders and sirens enabled on the panel, and so does the **Areas, zones and scenarios** step.
     
+*   **Changing the PIN in the options works again**, and the PIN is no longer shown. The **New PIN Code** field in **General settings** is now empty: leave it empty to keep the current PIN, or enter a new one, which is checked with the panel as at setup. Before, the field showed the current PIN in clear text and any new PIN was refused. The PIN (and, for SmartLAN/G, the board password) is now a password field at setup and in **Reconfigure**, where it is no longer filled in: leave it empty to keep the current one. A new diagnostic sensor, *User code*, names the user code the PIN belongs to, and **General settings** says it too.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -222,7 +224,7 @@ After installation and restarting Home Assistant:
 9.  Click **Submit** to complete the setup.
     
 
-You can change all of this later: on the Devices & Services page, open the integration and click **CONFIGURE**, then choose **Areas, zones and scenarios** or **General settings** (everything else, including the PIN). Unticking an area, zone or scenario removes its entities, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs. A scenario that an alarm panel mode uses cannot be unticked: change the mode's scenario in the general settings first.
+You can change all of this later: on the Devices & Services page, open the integration and click **CONFIGURE**, then choose **Areas, zones and scenarios** or **General settings** (everything else, including the PIN: leave **New PIN Code** empty to keep the current PIN; a new PIN is checked with the panel as at setup. The step names the user code the current PIN belongs to and the areas it controls). Unticking an area, zone or scenario removes its entities, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs. A scenario that an alarm panel mode uses cannot be unticked: change the mode's scenario in the general settings first.
 
 ### Changing the connection details (Reconfigure)
 
@@ -232,7 +234,7 @@ If the IP address, port or PIN of your panel (or, for SmartLAN/G, the board's us
     
 2.  Open the menu (⋮) of your panel's entry and choose **Reconfigure**.
     
-3.  Enter the new **Host**, **Port**, **PIN** (and, for SmartLAN/G, **Board user name** and **Board password**) and click **Submit**.
+3.  Enter the new **Host**, **Port**, **PIN** (and, for SmartLAN/G, **Board user name** and **Board password**) and click **Submit**. The PIN and the board password are not filled in: leave them empty to keep the current ones.
     
 
 The integration contacts the panel with the new details, reads its configuration again and reloads. Your options (polling interval, imported areas, zones and scenarios, scenario mappings), entities and entity IDs are kept. If the panel cannot be reached, an error is shown and nothing is changed. An address already used by another configured panel is refused, and so is a PIN that does not match any user code of the panel. The board type (SmartLAN/SI or SmartLAN/G) cannot be changed here: remove the integration and add it again for that.
@@ -304,6 +306,8 @@ This integration exposes your Inim alarm system's components as various Home Ass
     *   *button.your\_panel\_name\_reread\_panel\_configuration*: Reads the panel configuration again and reloads the integration (see [Re-reading the panel configuration](#re-reading-the-panel-configuration)). Shown in the *Configuration* section of the device page.
         
     *   *sensor.your\_panel\_name\_peripherals* (named *Peripherals*): How many keypads, readers, expanders and sirens are enabled on the panel; the `keypads`, `readers`, `expanders` and `sirens` attributes list their names. It does not tell whether a device is answering. Shown in the *Diagnostic* section of the device page.
+
+    *   *sensor.your\_panel\_name\_user\_code* (named *User code*): The name of the user code the PIN belongs to (never the PIN); the `number`, `areas` (the areas it controls, by name) and `type` (standard, manager or master) attributes give more. Commands only work on those areas. Unknown if the PIN matches no user code: commands are refused then. Checked again whenever the integration reloads. Shown in the *Diagnostic* section of the device page.
 
     *   *binary\_sensor.your\_panel\_name\_programming\_mode* (named *Programming mode*): On while the panel is in programming mode (being programmed from a keypad, or reloading its configuration). Commands are not sent then. Shown in the *Diagnostic* section of the device page. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5).
         

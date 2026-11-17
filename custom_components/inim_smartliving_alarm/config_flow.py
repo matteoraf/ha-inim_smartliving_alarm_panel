@@ -74,6 +74,7 @@ from .selection import (
     zone_names,
 )
 from .transport.base import TransportError
+from .user_code import user_code_placeholders
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -98,18 +99,46 @@ def _error_key(err: ValueError) -> str:
     return str(err) if str(err) in _ERROR_KEYS else "validation_error_detail"
 
 
-def _connection_schema(board: str, *, panel_name: bool) -> vol.Schema:
-    """Fields of the connection form for a board type."""
+async def _validate_for_entry(
+    hass: HomeAssistant,
+    entry: config_entries.ConfigEntry,
+    data: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Check an entry's new connection details, as at setup.
+
+    A loaded entry holds the board's only connection: it is paused
+    meanwhile. Raises as _validate_connection_and_fetch_initial_config.
+    """
+    running = hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get(DATA_API_CLIENT)
+    async with running.released() if running is not None else contextlib.nullcontext():
+        return await _validate_connection_and_fetch_initial_config(hass, data)
+
+
+# Secrets of an entry: never sent back to a form, shown as password fields
+_SECRETS = (CONF_PIN, CONF_PASSWORD)
+
+
+def _secret_field() -> TextSelector:
+    return TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD))
+
+
+def _connection_schema(
+    board: str, *, panel_name: bool, keep_secrets: bool = False
+) -> vol.Schema:
+    """Fields of the connection form for a board type.
+
+    With keep_secrets (Reconfigure) the PIN and the board password may be
+    left empty to keep the stored ones.
+    """
+    secret = vol.Optional if keep_secrets else vol.Required
     fields: dict[Any, Any] = {
         vol.Required(CONF_HOST): str,
         vol.Required(CONF_PORT, default=DEFAULT_PORT): cv.port,
     }
     if board == BOARD_SMARTLAN_G:
         fields[vol.Required(CONF_USERNAME)] = str
-        fields[vol.Required(CONF_PASSWORD)] = TextSelector(
-            TextSelectorConfig(type=TextSelectorType.PASSWORD)
-        )
-    fields[vol.Required(CONF_PIN)] = str
+        fields[secret(CONF_PASSWORD)] = _secret_field()
+    fields[secret(CONF_PIN)] = _secret_field()
     if panel_name:
         fields[vol.Optional(CONF_PANEL_NAME, default=DEFAULT_PANEL_NAME)] = str
     return vol.Schema(fields)
@@ -537,8 +566,17 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            host = user_input[CONF_HOST]
-            port = user_input[CONF_PORT]
+            # An empty PIN or board password keeps the stored one
+            details = {
+                **user_input,
+                **{
+                    key: entry.data[key]
+                    for key in _SECRETS
+                    if not user_input.get(key) and key in entry.data
+                },
+            }
+            host = details[CONF_HOST]
+            port = details[CONF_PORT]
             unique_id = f"{host}:{port}"
 
             if any(
@@ -547,23 +585,10 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ):
                 return self.async_abort(reason="already_configured")
 
-            # A loaded entry holds the board's only connection: pause it
-            running = (
-                self.hass.data.get(DOMAIN, {})
-                .get(entry.entry_id, {})
-                .get(DATA_API_CLIENT)
-            )
             try:
-                async with (
-                    running.released()
-                    if running is not None
-                    else contextlib.nullcontext()
-                ):
-                    initial_panel_config = (
-                        await _validate_connection_and_fetch_initial_config(
-                            self.hass, {CONF_BOARD: board, **user_input}
-                        )
-                    )
+                initial_panel_config = await _validate_for_entry(
+                    self.hass, entry, {CONF_BOARD: board, **details}
+                )
             except ConnectionError:
                 _LOGGER.warning("Connection failed for %s:%s", host, port)
                 errors["base"] = "cannot_connect"
@@ -581,7 +606,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     unique_id=unique_id,
                     data={
                         **entry.data,
-                        **user_input,
+                        **details,
                         DATA_INITIAL_PANEL_CONFIG: initial_panel_config,
                     },
                 ):
@@ -591,7 +616,12 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="reconfigure",
             data_schema=self.add_suggested_values_to_schema(
-                _connection_schema(board, panel_name=False), user_input or entry.data
+                _connection_schema(board, panel_name=False, keep_secrets=True),
+                {
+                    key: value
+                    for key, value in (user_input or entry.data).items()
+                    if key not in _SECRETS
+                },
             ),
             errors=errors,
             description_placeholders={"panel_name": entry.title},
@@ -614,7 +644,6 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
         self.initial_panel_config = config_entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
         # Combine initial data (from entry.data) with current options (from entry.options)
         # for populating form defaults correctly.
-        self.current_pin = config_entry.data.get(CONF_PIN, "")  # Get current PIN
         self.current_settings = {**config_entry.data, **config_entry.options}
 
     async def async_step_init(
@@ -661,69 +690,39 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_general(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Manage the general options, including the PIN."""
+        """Manage the general options, including the PIN.
+
+        An empty PIN field keeps the current PIN. A new one is checked with
+        the panel as at setup; the PIN and the options are then saved
+        together, so that the entry reloads once.
+        """
         errors: dict[str, str] = {}
+        entry = self.config_entry
 
         if user_input is not None:
-            updated_options = {}
-            new_data = (
-                self.config_entry.data.copy()
-            )  # Start with existing data for potential PIN update
-
-            # Handle PIN change
-            new_pin = user_input.get(CONF_PIN)
-            if new_pin and new_pin != self.current_pin:
-                _LOGGER.info(
-                    "Attempting to validate new PIN for %s",
-                    self.config_entry.data[CONF_HOST],
-                )
+            data = dict(entry.data)
+            new_pin = user_input.get(CONF_PIN) or ""
+            if new_pin and new_pin != entry.data.get(CONF_PIN):
                 try:
-                    await _validate_connection_and_fetch_initial_config(
-                        self.hass,
-                        self.config_entry.data[CONF_HOST],
-                        self.config_entry.data[CONF_PORT],
-                        new_pin,
+                    await _validate_for_entry(
+                        self.hass, entry, {**entry.data, CONF_PIN: new_pin}
                     )
-                    _LOGGER.info(
-                        "New PIN validated successfully for %s",
-                        self.config_entry.data[CONF_HOST],
-                    )
-                    new_data[CONF_PIN] = new_pin  # Update PIN in data
                 except ConnectionError:
                     _LOGGER.warning(
-                        "Connection failed with new PIN for %s",
-                        self.config_entry.data[CONF_HOST],
+                        "Cannot reach %s to check the new PIN", entry.data[CONF_HOST]
                     )
-                    errors[CONF_PIN] = "cannot_connect_new_pin"
-                except ValueError as vex:
-                    _LOGGER.warning(
-                        "PIN validation error for %s: %s",
-                        self.config_entry.data[CONF_HOST],
-                        vex,
-                    )
-                    if str(vex) == "auth_failed":
-                        errors[CONF_PIN] = "auth_failed_new_pin"
-                    else:
-                        errors[CONF_PIN] = "pin_validation_error"
-                except Exception as exc:
-                    _LOGGER.exception("Unexpected error validating new PIN: %s", exc)
-                    errors[CONF_PIN] = "unknown_pin_error"
+                    errors[CONF_PIN] = "cannot_connect"
+                except ValueError as err:
+                    _LOGGER.warning("New PIN refused for %s: %s", entry.title, err)
+                    errors[CONF_PIN] = _error_key(err)
+                except Exception:
+                    _LOGGER.exception("Unexpected error checking the new PIN")
+                    errors[CONF_PIN] = "unknown"
+                else:
+                    data[CONF_PIN] = new_pin
 
-            if not errors.get(
-                CONF_PIN
-            ):  # If PIN validation passed or PIN wasn't changed
-                if (
-                    new_data != self.config_entry.data
-                ):  # If PIN was changed and validated
-                    self.hass.config_entries.async_update_entry(
-                        self.config_entry, data=new_data
-                    )
-                    _LOGGER.info(
-                        "Updated PIN in config entry data for %s",
-                        self.config_entry.title,
-                    )
-
-                # Process other options
+            if not errors:
+                updated_options: dict[str, Any] = {}
                 updated_options[CONF_POLLING_INTERVAL] = user_input.get(
                     CONF_POLLING_INTERVAL
                 )
@@ -753,12 +752,16 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                         except (ValueError, TypeError):
                             updated_options[key] = None
 
-                _LOGGER.debug("Creating/updating options with: %s", updated_options)
                 # The imported items are kept as they are
-                return self.async_create_entry(
-                    title="", data={**self.config_entry.options, **updated_options}
-                )
-            # If there was a PIN error, re-show the form with the error
+                options = {**entry.options, **updated_options}
+                if data != entry.data:
+                    # One update, one reload; finishing the flow then
+                    # changes nothing more
+                    self.hass.config_entries.async_update_entry(
+                        entry, data=data, options=options
+                    )
+                    _LOGGER.info("PIN changed for %s", entry.title)
+                return self.async_create_entry(title="", data=options)
 
         # Modes can be mapped to the imported scenarios only
         scenario_choices = _scenario_choices(
@@ -768,26 +771,30 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
             ),
         )
 
-        # Define the schema for the options form
+        # Shown again after a refused PIN: keep what was chosen, not the PIN
+        values = {
+            **self.current_settings,
+            **{
+                key: value
+                for key, value in (user_input or {}).items()
+                if key not in _SECRETS
+            },
+        }
         options_schema_dict = {
-            vol.Optional(
-                CONF_PIN, description={"suggested_value": self.current_pin}
-            ): str,  # Show current PIN for re-entry/change
+            vol.Optional(CONF_PIN): _secret_field(),
             vol.Optional(
                 CONF_POLLING_INTERVAL,
-                default=self.current_settings.get(CONF_POLLING_INTERVAL),
+                default=values.get(CONF_POLLING_INTERVAL),
             ): vol.All(vol.Coerce(int), vol.Range(min=5, max=300)),
             vol.Optional(
                 CONF_EVENT_LOG_SIZE,
-                default=self.current_settings.get(
-                    CONF_EVENT_LOG_SIZE, DEFAULT_EVENT_LOG_SIZE
-                ),
+                default=values.get(CONF_EVENT_LOG_SIZE, DEFAULT_EVENT_LOG_SIZE),
             ): vol.All(
                 vol.Coerce(int), vol.Range(min=1, max=SYSTEM_MAX_EVENT_LOG_SIZE)
             ),
             vol.Optional(
                 CONF_AREA_SWITCH_ARM_MODE,
-                default=self.current_settings.get(
+                default=values.get(
                     CONF_AREA_SWITCH_ARM_MODE, DEFAULT_AREA_SWITCH_ARM_MODE
                 ),
             ): SelectSelector(
@@ -804,9 +811,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 {
                     vol.Optional(
                         key,
-                        default=_mapping_default(
-                            self.current_settings, key, scenario_choices
-                        ),
+                        default=_mapping_default(values, key, scenario_choices),
                     ): vol.In(scenario_choices)
                     for key in (
                         CONF_SCENARIO_ARM_HOME,
@@ -820,8 +825,15 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
         else:
             _LOGGER.info("No scenarios available to map in options flow")
 
+        running = (
+            self.hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get(DATA_API_CLIENT)
+        )
         return self.async_show_form(
             step_id="general",
             data_schema=vol.Schema(options_schema_dict),
             errors=errors,
+            description_placeholders=user_code_placeholders(
+                running.panel if running is not None else None,
+                self.initial_panel_config,
+            ),
         )

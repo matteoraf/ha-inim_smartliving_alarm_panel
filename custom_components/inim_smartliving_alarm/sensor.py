@@ -14,6 +14,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import (
     CONF_EVENT_LOG_SIZE,
     CONF_PANEL_NAME,
+    DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_EVENT_LOG_SIZE,
@@ -42,6 +43,7 @@ from .const import (
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
 from .peripherals import enabled_peripherals
+from .user_code import UserCodeInfo, user_code_info
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -105,6 +107,17 @@ async def async_setup_entry(
         sensors_to_add.append(
             PanelPeripheralsSensor(entry, panel_display_name, system_info, peripherals)
         )
+
+    # The user code of the PIN (checked when the integration connected)
+    api = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    sensors_to_add.append(
+        PanelUserCodeSensor(
+            entry,
+            panel_display_name,
+            system_info,
+            user_code_info(api.panel, initial_panel_config),
+        )
+    )
 
     # Sensor for Events Log
     sensors_to_add.append(
@@ -316,6 +329,51 @@ class PanelPeripheralsSensor(SensorEntity):
         self._attr_unique_id = f"{config_entry.entry_id}_peripherals"
         self._attr_native_value = sum(len(names) for names in peripherals.values())
         self._attr_extra_state_attributes = peripherals
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information for the entity."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.config_entry.entry_id)},
+            name=self._panel_display_name,
+            manufacturer="Inim Electronics",
+            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
+            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+        )
+
+
+class PanelUserCodeSensor(SensorEntity):
+    """The user code the PIN belongs to: its name, never the PIN.
+
+    Unknown if the PIN matches no user code (commands are refused then).
+    The attributes give its number, the areas it controls and its type.
+    Static: checked again when the integration reloads.
+    """
+
+    _attr_should_poll = False
+    _attr_has_entity_name = True
+    _attr_translation_key = "user_code"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:account-key"
+
+    def __init__(
+        self,
+        config_entry: ConfigEntry,
+        panel_display_name: str,
+        system_info: dict[str, Any],
+        info: UserCodeInfo | None,
+    ) -> None:
+        """Initialize the sensor from what the connection found."""
+        self.config_entry = config_entry
+        self._panel_display_name = panel_display_name
+        self._system_info = system_info
+        self._attr_unique_id = f"{config_entry.entry_id}_user_code"
+        self._attr_native_value = info.name if info else None
+        self._attr_extra_state_attributes = {
+            "number": info.number if info else None,
+            "areas": info.areas if info else [],
+            "type": info.code_type if info else None,
+        }
 
     @property
     def device_info(self) -> DeviceInfo:

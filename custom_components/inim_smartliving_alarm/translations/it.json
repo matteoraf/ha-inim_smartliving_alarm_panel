@@ -107,6 +107,10 @@
             "username": "Nome utente della scheda",
             "password": "Password della scheda",
             "pin": "Codice PIN"
+          },
+          "data_description": {
+            "password": "Lascia vuoto per mantenere la password attuale.",
+            "pin": "Lascia vuoto per mantenere il PIN attuale."
           }
         }
       },
@@ -167,9 +171,9 @@
         },
         "general": {
           "title": "Impostazioni generali",
-          "description": "Modifica le impostazioni per la tua integrazione Inim.",
+          "description": "Modifica le impostazioni per la tua integrazione Inim.\n\nI comandi vengono inviati con il codice utente **{user_code}**, che controlla queste aree: {user_areas}.",
           "data": {
-            "pin": "Codice PIN",
+            "pin": "Nuovo codice PIN",
             "polling_interval": "Intervallo di aggiornamento (secondi)",
             "event_log_size": "Numero di eventi da memorizzare nel log",
             "scenario_arm_home": "Scenario Inserimento Parziale (Casa)",
@@ -180,15 +184,23 @@
             "area_switch_arm_mode": "Gli interruttori area inseriscono in"
           },
           "data_description": {
+            "pin": "Lascia vuoto per mantenere il PIN attuale.",
             "area_switch_arm_mode": "Modalità usata quando si accende un interruttore area. Il selettore della modalità di inserimento di ogni area imposta qualsiasi modalità."
           }
         }
       },
       "error": {
-        "cannot_connect_new_pin": "Connessione alla centrale fallita. Verifica la connessione.",
-        "auth_failed_new_pin": "Autenticazione fallita. Il PIN non è stato modificato.",
-        "pin_validation_error": "Si è verificato un errore durante di validazione.",
-        "unknown_pin_error": "Si è verificato un errore sconosciuto. Controlla i log.",
+        "cannot_connect": "Connessione fallita. Controlla l'Host e la Porta (e, per SmartLAN/G, nome utente e password) e assicurati che la centrale sia raggiungibile e che nessun altro client sia collegato.",
+        "auth_failed": "Autenticazione fallita.",
+        "invalid_panel_response": "Ricevuta una risposta non valida dalla centrale. Controlla la connessione e la configurazione.",
+        "validation_error_detail": "Si è verificato un errore di validazione durante il recupero dei dati iniziali dalla centrale.",
+        "unknown": "Si è verificato un errore sconosciuto. Controlla i log per maggiori dettagli.",
+        "invalid_auth": "La scheda SmartLAN/G non ha accettato la connessione. Controlla nome utente e password.",
+        "invalid_board_reply": "La scheda SmartLAN/G ha risposto, ma la risposta non è nel formato previsto. Se nome utente e password sono corretti, questa versione della scheda potrebbe non essere ancora supportata: segnalalo su GitHub allegando un log di debug.",
+        "invalid_pin": "Il PIN non corrisponde a nessun codice utente della centrale.",
+        "invalid_pin_format": "Il PIN deve avere da 1 a 6 cifre.",
+        "unsupported_firmware": "Il firmware della centrale è troppo vecchio: serve il firmware 5 o successivo.",
+        "panel_programming": "La centrale è in programmazione, quindi ora non è possibile leggerne la configurazione. Riprova al termine della programmazione.",
         "mapped_scenario_not_imported": "Questi scenari sono usati dalle modalità del pannello di allarme: {scenarios}. Cambia prima quelle modalità nelle impostazioni generali."
       }
     },
@@ -301,6 +313,9 @@
       "sensor": {
         "peripherals": {
           "name": "Periferiche"
+        },
+        "user_code": {
+          "name": "Codice utente"
         }
       }
     }
