@@ -95,7 +95,7 @@ async def test_unknown_pin_uses_every_area(
 
 async def test_unsupported_panel(make_panel, fake_panel: FakePanel) -> None:
     """Other models are refused, or handled as the fallback model."""
-    fake_panel.state.firmware = "6.07 00515  "
+    fake_panel.state.firmware = "6.07 00999  "
     refused = make_panel()
     with pytest.raises(UnsupportedPanelError):
         await refused.identify()
@@ -103,7 +103,7 @@ async def test_unsupported_panel(make_panel, fake_panel: FakePanel) -> None:
 
     fallback = make_panel(fallback_model=SL1050)
     firmware = await fallback.identify()
-    assert firmware.model == "515"
+    assert firmware.model == "999"
     assert fallback.model is SL1050
 
 

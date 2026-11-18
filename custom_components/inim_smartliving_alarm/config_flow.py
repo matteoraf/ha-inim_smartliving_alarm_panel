@@ -57,7 +57,6 @@ from .const import (
     DEFAULT_PORT,
     DEFAULT_ZONES_NOT_READY,
     DOMAIN,
-    MIN_FIRMWARE_MAJOR,
     SYSTEM_MAX_EVENT_LOG_SIZE,
     ZONES_NOT_READY_REFUSE,
     ZONES_NOT_READY_WARN,
@@ -66,7 +65,13 @@ from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .legacy import create_client
 from .panel_config import async_fetch_panel_configuration
 from .peripherals import peripheral_placeholders
-from .protocol.errors import DecryptionError, InvalidPinError, ProtocolError
+from .protocol.errors import (
+    DecryptionError,
+    InvalidPinError,
+    ProtocolError,
+    UnsupportedPanelError,
+)
+from .protocol.model import model_for
 from .selection import (
     AVAILABLE,
     SELECTION_KEYS,
@@ -99,6 +104,7 @@ _ERROR_KEYS = frozenset(
         "invalid_pin_format",
         "panel_programming",
         "unsupported_firmware",
+        "unsupported_model",
     )
 )
 
@@ -195,9 +201,11 @@ async def _validate_connection_and_fetch_initial_config(
                 if board == BOARD_SMARTLAN_G
                 else "invalid_panel_response"
             ) from err
-        if firmware.major < MIN_FIRMWARE_MAJOR:
-            _LOGGER.warning("Firmware %s is not supported", firmware.version)
-            raise ValueError("unsupported_firmware")
+        try:
+            model_for(firmware)
+        except UnsupportedPanelError as err:
+            _LOGGER.warning("Not set up: %s", err)
+            raise ValueError(f"unsupported_{err.reason}") from err
         if not api.panel.user_code_found:
             raise ValueError("invalid_pin")
         return await async_fetch_panel_configuration(hass, api)

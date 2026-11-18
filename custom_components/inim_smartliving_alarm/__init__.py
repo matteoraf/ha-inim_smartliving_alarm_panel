@@ -9,7 +9,7 @@ from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import ATTR_CONFIG_ENTRY_ID
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
-from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import entity_registry as er, issue_registry as ir
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.service import async_set_service_schema
 from homeassistant.helpers.typing import ConfigType
@@ -72,6 +72,8 @@ from .panel_config import (
     async_reread_panel_configuration,
 )
 from .protocol.commands import ArmMode
+from .protocol.errors import UnsupportedPanelError
+from .protocol.model import model_for
 from .readiness import async_arm
 from .selection import (
     area_label,
@@ -312,6 +314,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
 
     await _reread_configuration_if_outdated(hass, entry, api)
+    _report_unsupported_panel(hass, entry, api)
     _remove_entities_not_imported(hass, entry)
 
     # Store the API instance and coordinator in hass.data for platforms to access.
@@ -421,6 +424,44 @@ def _remove_entities_not_imported(hass: HomeAssistant, entry: ConfigEntry) -> No
             entry.title,
             ", ".join(sorted(removed)),
         )
+
+
+def _unsupported_issue_id(entry: ConfigEntry) -> str:
+    return f"unsupported_panel_{entry.entry_id}"
+
+
+def _report_unsupported_panel(
+    hass: HomeAssistant, entry: ConfigEntry, api: LegacyPanelClient
+) -> None:
+    """A repair issue while the panel has no profile of its own.
+
+    Such a panel (firmware 5, another model) set up earlier keeps running
+    with the fallback layout, so its names, zones and scenarios may be
+    wrong. The issue goes away once the panel is supported.
+    """
+    try:
+        firmware = api.panel.firmware
+    except RuntimeError:  # not identified (no successful read)
+        return
+    try:
+        model_for(firmware)
+    except UnsupportedPanelError:
+        ir.async_create_issue(
+            hass,
+            DOMAIN,
+            _unsupported_issue_id(entry),
+            is_fixable=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="unsupported_panel",
+            translation_placeholders={"title": entry.title, "panel": firmware.text},
+        )
+    else:
+        ir.async_delete_issue(hass, DOMAIN, _unsupported_issue_id(entry))
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Remove the entry's repair issue with it."""
+    ir.async_delete_issue(hass, DOMAIN, _unsupported_issue_id(entry))
 
 
 async def _reread_configuration_if_outdated(

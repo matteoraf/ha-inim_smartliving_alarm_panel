@@ -48,7 +48,6 @@ BOARD_SMARTLAN_SI = "smartlan_si"
 BOARD_SMARTLAN_G = "smartlan_g"  # experimental: tested against a fake panel only
 
 # Setup refuses panels with older firmware; 5.x is accepted with a warning
-MIN_FIRMWARE_MAJOR = 5
 
 # Defaults
 DEFAULT_POLLING_INTERVAL = 30  # seconds

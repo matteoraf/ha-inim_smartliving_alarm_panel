@@ -124,7 +124,8 @@
         "invalid_board_reply": "La scheda SmartLAN/G ha risposto, ma la risposta non è nel formato previsto. Se nome utente e password sono corretti, questa versione della scheda potrebbe non essere ancora supportata: segnalalo su GitHub allegando un log di debug.",
         "invalid_pin": "Il PIN non corrisponde a nessun codice utente della centrale.",
         "invalid_pin_format": "Il PIN deve avere da 1 a 6 cifre.",
-        "unsupported_firmware": "Il firmware della centrale è troppo vecchio: serve il firmware 5 o successivo.",
+        "unsupported_firmware": "Il firmware della centrale non è supportato: serve il firmware 6.",
+        "unsupported_model": "Questo modello SmartLiving non è ancora supportato. Segnalalo su GitHub indicando modello e firmware mostrati dalla centrale.",
         "panel_programming": "La centrale è in programmazione, quindi ora non è possibile leggerne la configurazione. Riprova al termine della programmazione."
       },
       "abort": {
@@ -206,7 +207,8 @@
         "invalid_board_reply": "La scheda SmartLAN/G ha risposto, ma la risposta non è nel formato previsto. Se nome utente e password sono corretti, questa versione della scheda potrebbe non essere ancora supportata: segnalalo su GitHub allegando un log di debug.",
         "invalid_pin": "Il PIN non corrisponde a nessun codice utente della centrale.",
         "invalid_pin_format": "Il PIN deve avere da 1 a 6 cifre.",
-        "unsupported_firmware": "Il firmware della centrale è troppo vecchio: serve il firmware 5 o successivo.",
+        "unsupported_firmware": "Il firmware della centrale non è supportato: serve il firmware 6.",
+        "unsupported_model": "Questo modello SmartLiving non è ancora supportato. Segnalalo su GitHub indicando modello e firmware mostrati dalla centrale.",
         "panel_programming": "La centrale è in programmazione, quindi ora non è possibile leggerne la configurazione. Riprova al termine della programmazione.",
         "mapped_scenario_not_imported": "Questi scenari sono usati dalle modalità del pannello di allarme: {scenarios}. Cambia prima quelle modalità nelle impostazioni generali."
       }
@@ -344,6 +346,12 @@
         "user_code": {
           "name": "Codice utente"
         }
+      }
+    },
+    "issues": {
+      "unsupported_panel": {
+        "title": "{title}: centrale non supportata",
+        "description": "{title} è una centrale per cui l'integrazione non ha ancora la mappa di memoria ({panel}). Continua a funzionare come prima, letta con la mappa della SmartLiving 1050, quindi nomi, zone, scenari e registro eventi possono essere errati. Una nuova configurazione di questa centrale viene rifiutata. Segnalala su GitHub indicando modello e firmware."
       }
     }
   }

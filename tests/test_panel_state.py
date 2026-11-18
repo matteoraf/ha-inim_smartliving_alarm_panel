@@ -187,7 +187,7 @@ async def test_other_models_do_not_read_the_flags(
     make_panel, fake_panel: FakePanel
 ) -> None:
     """A panel handled with the 1050's layout: the flags may be elsewhere."""
-    fake_panel.state.firmware = "6.07 00515  "
+    fake_panel.state.firmware = "6.07 00999  "
     fake_panel.state.in_programming = True
     panel = make_panel(fallback_model=SL1050)
     assert (await panel.read_status()).panel_state is None
