@@ -11,6 +11,9 @@ EPOCH = datetime(2000, 1, 1)  # timestamps count seconds from here, panel local 
 NO_AGENT = 0xFF
 NO_LOCATION = 0xFF
 REMOTE_LOCATION = 0xFE  # app, cloud or installer software
+# Written in place of a code that firmware 6 does not have (it uses 0-113)
+NO_FW6_CODE = 0x7F
+CODE_OFFSET = 8  # byte with the event code (bits 0-6) and activation (bit 7)
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,7 +37,7 @@ class PanelEvent:
     areas: frozenset[int]
     agent: int | None  # user code, key, zone, ... depending on the event code
     location: int | None  # keypad, reader, REMOTE_LOCATION, ...
-    code: int  # event type 0-127
+    code: int | None  # event type, firmware 6 numbering; None if it has none
     activation: bool  # False = restoral
 
 
@@ -68,16 +71,46 @@ def decode_timestamp(seconds: int) -> datetime:
     return EPOCH + timedelta(seconds=seconds)
 
 
+def fw6_event_code(code: int, model: PanelModel) -> int | None:
+    """The firmware 6 number of one of the panel's event codes (0-127)."""
+    if model.event_codes is None:
+        return code
+    return model.event_codes[code]
+
+
+def normalized_event_record(data: bytes, model: PanelModel) -> bytes:
+    """The record with its event code in firmware 6 numbering.
+
+    Unchanged on firmware 6; a code firmware 6 does not have becomes
+    NO_FW6_CODE.
+    """
+    _check_record(data)
+    if model.event_codes is None:
+        return data
+    code = fw6_event_code(data[CODE_OFFSET] & 0x7F, model)
+    flags = data[CODE_OFFSET] & 0x80
+    return data[:CODE_OFFSET] + bytes([flags | (NO_FW6_CODE if code is None else code)])
+
+
 def decode_event_record(data: bytes, model: PanelModel) -> PanelEvent:
-    """Decode a 9-byte event record."""
-    if len(data) != EVENT_RECORD_LENGTH:
-        raise ProtocolError(f"event record: expected 9 bytes, got {len(data)}")
+    """Decode a 9-byte event record as read from the panel (raw).
+
+    The code is given in firmware 6 numbering. Pass the raw record, not one
+    from normalized_event_record: on other firmware it would be translated
+    twice.
+    """
+    _check_record(data)
     mask = int.from_bytes(data[4:6], "little")
     return PanelEvent(
         timestamp=decode_timestamp(int.from_bytes(data[0:4], "little")),
         areas=frozenset(a for a in range(1, model.areas + 1) if mask >> (a - 1) & 1),
         agent=None if data[6] == NO_AGENT else data[6],
         location=None if data[7] == NO_LOCATION else data[7],
-        code=data[8] & 0x7F,
-        activation=bool(data[8] & 0x80),
+        code=fw6_event_code(data[CODE_OFFSET] & 0x7F, model),
+        activation=bool(data[CODE_OFFSET] & 0x80),
     )
+
+
+def _check_record(data: bytes) -> None:
+    if len(data) != EVENT_RECORD_LENGTH:
+        raise ProtocolError(f"event record: expected 9 bytes, got {len(data)}")

@@ -140,15 +140,15 @@ def test_model_for(text: bytes, model) -> None:
 @pytest.mark.parametrize(
     ("text", "reason"),
     [
-        (b"5.11 00515  ", UnsupportedReason.FIRMWARE),
+        (b"5.07 00515  ", UnsupportedReason.FIRMWARE),
         (b"5.07 01050  ", UnsupportedReason.FIRMWARE),
         (b"4.20 01050  ", UnsupportedReason.FIRMWARE),
         (b"6.07 00999  ", UnsupportedReason.MODEL),
-        (b"5.11 00999  ", UnsupportedReason.MODEL),  # the model is checked first
+        (b"5.07 00999  ", UnsupportedReason.MODEL),  # the model is checked first
     ],
 )
 def test_unsupported_panels(text: bytes, reason) -> None:
-    """Firmware below 6 and other models, with the reason."""
+    """Firmware below 5.1 and other models, with the reason."""
     with pytest.raises(UnsupportedPanelError) as err:
         model_for(parse_model_string(text))
     assert err.value.reason is reason
@@ -201,8 +201,8 @@ async def test_setup(
     ("firmware", "error"),
     [
         ("6.07 00999  ", "unsupported_model"),
-        ("5.11 01050  ", "unsupported_firmware"),  # a known model on firmware 5
-        ("5.11 00515  ", "unsupported_firmware"),
+        ("5.07 01050  ", "unsupported_firmware"),  # a known model on firmware 5.0
+        ("5.07 00515  ", "unsupported_firmware"),
     ],
 )
 async def test_reconfigure_refuses_unsupported_panels(
@@ -265,7 +265,7 @@ async def test_existing_515_entry_is_read_again(
 async def test_existing_unsupported_entry_keeps_running(
     hass: HomeAssistant, panel: FakePanel
 ) -> None:
-    """Firmware 5 or another model set up earlier: runs, with a repair issue."""
+    """Firmware 5.0 or another model set up earlier: runs, with a repair issue."""
     stored = await stored_configuration(panel)
     panel.state.firmware = "6.07 00999  "
     entry = entry_for(panel, stored)

@@ -124,7 +124,7 @@
         "invalid_board_reply": "The SmartLAN/G board answered, but its reply was not in the expected format. If the user name and password are correct, this board version may not be supported yet: please report it on GitHub with a debug log.",
         "invalid_pin": "The PIN does not match any user code of the panel.",
         "invalid_pin_format": "The PIN must be 1 to 6 digits.",
-        "unsupported_firmware": "The panel's firmware is not supported: firmware 6 is needed.",
+        "unsupported_firmware": "The panel's firmware is not supported: firmware 5.1 or newer is needed.",
         "unsupported_model": "This SmartLiving model is not supported yet. Please report it on GitHub with the model and firmware shown on the panel.",
         "panel_programming": "The panel is in programming mode, so its configuration cannot be read now. Try again when programming has ended."
       },
@@ -207,7 +207,7 @@
         "invalid_board_reply": "The SmartLAN/G board answered, but its reply was not in the expected format. If the user name and password are correct, this board version may not be supported yet: please report it on GitHub with a debug log.",
         "invalid_pin": "The PIN does not match any user code of the panel.",
         "invalid_pin_format": "The PIN must be 1 to 6 digits.",
-        "unsupported_firmware": "The panel's firmware is not supported: firmware 6 is needed.",
+        "unsupported_firmware": "The panel's firmware is not supported: firmware 5.1 or newer is needed.",
         "unsupported_model": "This SmartLiving model is not supported yet. Please report it on GitHub with the model and firmware shown on the panel.",
         "panel_programming": "The panel is in programming mode, so its configuration cannot be read now. Try again when programming has ended.",
         "mapped_scenario_not_imported": "These scenarios are used by alarm panel modes: {scenarios}. Change those modes in the general settings first."

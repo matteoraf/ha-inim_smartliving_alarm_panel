@@ -5,7 +5,7 @@ These values are kept separate from the integration on purpose, so that tests
 compare the integration against an independent description of the panel.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 # Panel size
 NUM_AREAS = 10
@@ -102,7 +102,7 @@ EVENT_TEXT_LENGTH = 366
 # kind -> (offset in the block, bytes)
 EEPROM_PERIPHERALS = 0x00000
 # General options; byte 1 bit 5: refuse arming with zones not ready
-EEPROM_GENERAL_OPTIONS = 0x00017
+EEPROM_GENERAL_OPTIONS = 0x00017  # firmware 6; 0x00015 on firmware 5.1
 PERIPHERAL_BITMAPS = {
     "readers": (0, 4),
     "expanders": (4, 6),
@@ -169,6 +169,15 @@ EVENT_AREA_DISARMED = 12
 EVENT_AREA_RESET = 13
 EVENT_SCENARIO = 30
 EVENT_ACTIVATION = 0x80
+# Firmware 5.1 numbers its events differently from code 12 on (it has no
+# "area disarmed" event): firmware 6 code -> firmware 5.1 code
+FW51_EVENT_CODES = {
+    EVENT_ZONE_ALARM: 0,
+    EVENT_ZONE_BYPASS: 5,
+    EVENT_AREA_ARMED: 10,
+    EVENT_AREA_RESET: 12,
+    EVENT_SCENARIO: 29,
+}
 LOCATION_NETWORK = 0xFE
 NO_SCENARIO = 0xFF
 
@@ -209,6 +218,11 @@ class Layout:
     # pointer register -> (offset in the label bank, number of labels)
     labels: dict[int, tuple[int, int]] = field(hash=False, compare=False)
     label_bank: int = LABEL_BANK  # bank 0 on the 505 and 515
+    # Bank 0 setup block: peripherals (2 more bytes of video sensors on
+    # firmware 6), then the general options
+    peripherals_length: int = 22
+    general_options_address: int = EEPROM_GENERAL_OPTIONS
+    firmware_51: bool = False  # firmware 5.1 event numbering
 
     @property
     def zones(self) -> int:
@@ -415,4 +429,45 @@ LAYOUT_515 = Layout(
     event_ring_size=500,
     labels=_small_labels(areas=5, zones=40, expanders=10),
     label_bank=0,
+)
+
+
+# Firmware 5.1x: other addresses, the setup block 2 bytes lower, other event
+# numbering; the 1050 has its labels in bank 0 and 500 events
+_FW51 = {
+    "peripherals_length": 20,
+    "general_options_address": 0x00015,
+    "firmware_51": True,
+}
+
+LAYOUT_1050_FW51 = replace(
+    LAYOUT_1050,
+    eeprom_pins=0x052AA,
+    eeprom_codes=0x053E2,
+    eeprom_zones=0x0451A,
+    eeprom_terminals=0x0489E,
+    eeprom_physical_map=0x069B3,
+    eeprom_areas=0x051DC,
+    eeprom_scenario_modes=0x0648E,
+    eeprom_events=0x0EE5C,
+    event_ring_size=500,
+    labels={
+        register: (0x8000 + offset, count)
+        for register, (offset, count) in LAYOUT_1050.labels.items()
+    },
+    label_bank=0,
+    **_FW51,
+)
+
+LAYOUT_505_FW51 = replace(
+    LAYOUT_505,
+    eeprom_pins=0x029DB,
+    eeprom_codes=0x02A9B,
+    eeprom_zones=0x0217A,
+    eeprom_terminals=0x0222E,
+    eeprom_physical_map=0x03689,
+    eeprom_areas=0x0298C,
+    eeprom_scenario_modes=0x033B3,
+    eeprom_events=0x0EE5C,
+    **_FW51,
 )

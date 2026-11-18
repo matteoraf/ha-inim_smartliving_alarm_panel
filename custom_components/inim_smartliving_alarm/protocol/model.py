@@ -1,24 +1,21 @@
 """Panel identification and the sizes and addresses of each model."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from .errors import ProtocolError, UnsupportedPanelError, UnsupportedReason
+from .event_codes import FW51_EVENT_CODES
 
 SCENARIOS = 30  # on every model
 LABEL_LENGTH = 16
 FIXED_OUTPUTS = 3  # O1-O3 on the panel board
 # Which keypads, readers, expanders and sirens are enabled: one bit per
-# device, at the same EEPROM address on every model
+# device, at the start of EEPROM on every model; its length and the address
+# of the general options just after it depend on the firmware (profile)
 PERIPHERALS_ADDRESS = 0x00000
-PERIPHERALS_LENGTH = 22
-# The panel's general options, just after: read with the peripherals in one
-# request
-GENERAL_OPTIONS_ADDRESS = 0x00017
-# The block is 10 bytes; bytes 6-9 are flags the panel sets while running,
-# not programming, so only the first 6 are read (as the programming software
-# does)
+# The general options block is 10 bytes; bytes 6-9 are flags the panel sets
+# while running, not programming, so only the first 6 are read (as the
+# programming software does)
 GENERAL_OPTIONS_READ_LENGTH = 6
-SETUP_BLOCK_LENGTH = GENERAL_OPTIONS_ADDRESS + GENERAL_OPTIONS_READ_LENGTH
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,6 +26,18 @@ class FirmwareInfo:
     major: int  # firmware family, e.g. 6
     model: str  # model number without leading zeros, e.g. "1050"
     text: str  # the whole string, trimmed
+
+    @property
+    def family(self) -> str | None:
+        """The firmware family with its own memory layout: "6" or "5.1".
+
+        None for older firmware (5.0x and below), which has no profile.
+        """
+        if self.major >= 6:
+            return "6"
+        if self.version.startswith("5.1"):
+            return "5.1"
+        return None
 
 
 def parse_model_string(data: bytes) -> FirmwareInfo:
@@ -77,11 +86,23 @@ class PanelModel:
     # Profile not yet confirmed on a real panel
     experimental: bool = False
     sirens: int = 10  # siren labels, on every model
+    # Bank 0 setup block: the enabled-peripherals bitmaps (firmware 6 adds
+    # 2 bytes of video sensors), then the general options
+    peripherals_length: int = 22
+    general_options_address: int = 0x00017
+    # Firmware 6 code of each of the panel's event codes (None: no such
+    # code on firmware 6); None when the panel numbers them as firmware 6
+    event_codes: tuple[int | None, ...] | None = None
 
     scenarios = SCENARIOS
     terminal_record_length = 12
     area_record_length = 7
     pin_length = 6
+
+    @property
+    def setup_block_length(self) -> int:
+        """Bytes read from the start of EEPROM: peripherals and options."""
+        return self.general_options_address + GENERAL_OPTIONS_READ_LENGTH
 
     @property
     def zones(self) -> int:
@@ -258,6 +279,83 @@ _FW6_MODELS = {
     "10100": SMARTLIVING_10100_FW6,
 }
 
+# Firmware 5.1x: the same counts and record formats as firmware 6, other
+# addresses; no video sensors, so the setup block is 2 bytes shorter; the
+# 1050 keeps its labels in bank 0 and 500 events; other event numbering
+_FW51 = {
+    "peripherals_length": 20,
+    "general_options_address": 0x00015,
+    "event_codes": FW51_EVENT_CODES,
+    "experimental": True,
+}
+
+SMARTLIVING_505_FW51 = replace(
+    SMARTLIVING_505_FW6,
+    name="SmartLiving 505 (firmware 5.1)",
+    pin_table=0x029DB,
+    code_records=0x02A9B,
+    zone_records=0x0217A,
+    terminal_records=0x0222E,
+    physical_map=0x03689,
+    scenario_records=0x033B3,
+    event_log=0x0EE5C,
+    area_records=0x0298C,
+    **_FW51,
+)
+
+SMARTLIVING_515_FW51 = replace(
+    SMARTLIVING_515_FW6,
+    name="SmartLiving 515 (firmware 5.1)",
+    pin_table=0x03058,
+    code_records=0x03118,
+    zone_records=0x026AC,
+    terminal_records=0x02814,
+    physical_map=0x03D26,
+    scenario_records=0x03A50,
+    event_log=0x0EE5C,
+    area_records=0x02FEA,
+    **_FW51,
+)
+
+SMARTLIVING_1050_FW51 = replace(
+    SMARTLIVING_1050_FW6,
+    name="SmartLiving 1050 (firmware 5.1)",
+    pin_table=0x052AA,
+    code_records=0x053E2,
+    zone_records=0x0451A,
+    terminal_records=0x0489E,
+    physical_map=0x069B3,
+    scenario_records=0x0648E,
+    event_log=0x0EE5C,
+    event_ring_size=500,
+    label_bank=0,
+    area_records=0x051DC,
+    **_FW51,
+)
+
+SMARTLIVING_10100_FW51 = replace(
+    SMARTLIVING_10100_FW6,
+    name="SmartLiving 10100 (firmware 5.1)",
+    pin_table=0x08BC4,
+    code_records=0x08E28,
+    zone_records=0x070E4,
+    terminal_records=0x077EC,
+    physical_map=0x0B66C,
+    scenario_records=0x0AF16,
+    event_log=0x19004,
+    area_records=0x08A62,
+    **_FW51,
+)
+
+_FW51_MODELS = {
+    "505": SMARTLIVING_505_FW51,
+    "515": SMARTLIVING_515_FW51,
+    "1050": SMARTLIVING_1050_FW51,
+    "10100": SMARTLIVING_10100_FW51,
+}
+
+_MODELS_BY_FAMILY = {"6": _FW6_MODELS, "5.1": _FW51_MODELS}
+
 
 def model_for(info: FirmwareInfo) -> PanelModel:
     """The model profile for a panel, or UnsupportedPanelError.
@@ -268,15 +366,16 @@ def model_for(info: FirmwareInfo) -> PanelModel:
         raise UnsupportedPanelError(
             f"SmartLiving {info.model} is not supported yet", UnsupportedReason.MODEL
         )
-    if info.major < 6:
+    models = _MODELS_BY_FAMILY.get(info.family or "")
+    if models is None:
         raise UnsupportedPanelError(
-            f"firmware {info.version} is not supported yet (only 6.x is)",
+            f"firmware {info.version} is not supported (5.1 or newer is needed)",
             UnsupportedReason.FIRMWARE,
         )
-    return _FW6_MODELS[info.model]
+    return models[info.model]
 
 
-# The profile a panel without its own (another model, firmware 5) is handled
+# The profile a panel without its own (another model, firmware 5.0x) is handled
 # with: its configuration is read, and so must be decoded, with this layout
 FALLBACK_MODEL = SMARTLIVING_1050_FW6
 

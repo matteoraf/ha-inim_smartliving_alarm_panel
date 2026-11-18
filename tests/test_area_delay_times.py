@@ -148,7 +148,7 @@ def test_stored_area_records() -> None:
     assert area_records({}) is None
 
 
-@pytest.mark.parametrize("model_string", [b"6.07 00999  ", b"5.10 01050  "])
+@pytest.mark.parametrize("model_string", [b"6.07 00999  ", b"5.07 01050  "])
 def test_fallback_models_show_no_delays(model_string: bytes) -> None:
     """Handled with the fallback layout: the bytes are stored, not shown."""
     assert area_records(stored(model_string)) is None

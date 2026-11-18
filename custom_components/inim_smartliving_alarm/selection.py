@@ -29,6 +29,7 @@ from .const import (
     KEY_INIT_AREA_NAMES,
     KEY_INIT_AREA_RECORDS,
     KEY_INIT_AREAS,
+    KEY_INIT_PERIPHERALS,
     KEY_INIT_RAW_HEX,
     KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS,
     KEY_INIT_SCENARIO_ACTIVATION_INDEX,
@@ -237,16 +238,42 @@ def mapped_scenarios(options: Mapping[str, Any]) -> dict[str, int]:
     return mapped
 
 
+def stored_layout_fits(config: Mapping[str, Any], model: PanelModel) -> bool:
+    """Whether the stored configuration was read with this model's layout.
+
+    Told by the length of two stored raw blocks: the logical terminal
+    records (L x 12 bytes, which differs between models) and the enabled
+    peripherals (which differs between firmware families). A block that is
+    not stored does not count against it.
+    """
+    terminals = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(
+        KEY_INIT_TERMINAL_RECORDS_RAW
+    )
+    peripherals = (config.get(KEY_INIT_PERIPHERALS) or {}).get(KEY_INIT_RAW_HEX)
+    return all(
+        not isinstance(raw, str) or len(raw) // 2 == expected
+        for raw, expected in (
+            (terminals, model.terminals * model.terminal_record_length),
+            (peripherals, model.peripherals_length),
+        )
+    )
+
+
 def _stored_model_and_fallback(
     config: Mapping[str, Any],
 ) -> tuple[PanelModel, bool] | None:
-    """(layout, whether it is the fallback) of the stored model string."""
+    """(layout, whether it is the fallback) of the stored model string.
+
+    None when the stored blocks were read with another layout.
+    """
     raw = (config.get(KEY_INIT_SYSTEM_INFO) or {}).get(KEY_INIT_RAW_HEX)
     try:
         model, unsupported = model_for_or_fallback(
             parse_model_string(bytes.fromhex(raw))
         )
     except (TypeError, ValueError, ProtocolError):
+        return None
+    if not stored_layout_fits(config, model):
         return None
     return model, unsupported is not None
 
@@ -256,7 +283,9 @@ def stored_model(config: Mapping[str, Any]) -> PanelModel | None:
 
     The model profile of the stored model string, or the fallback profile
     for a panel without its own (as the panel connection uses); None when
-    no valid model string is stored.
+    no valid model string is stored, or the stored blocks were read with
+    another layout (e.g. before the panel's firmware had its own profile,
+    until they are read again).
     """
     found = _stored_model_and_fallback(config)
     return found[0] if found else None

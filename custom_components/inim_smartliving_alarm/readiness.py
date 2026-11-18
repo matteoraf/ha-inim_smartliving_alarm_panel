@@ -36,7 +36,7 @@ from .errors import (
 from .protocol.commands import CommandResult
 from .protocol.config import refuses_arming_when_not_ready
 from .protocol.errors import ProtocolError
-from .selection import panel_config, zone_names
+from .selection import panel_config, stored_model, zone_names
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,9 +49,12 @@ def panel_refuses_not_ready(config: Mapping[str, Any]) -> bool | None:
     """Whether the panel itself refuses arming with zones not ready.
 
     Decoded from the stored general options; None when they are not stored
-    (an earlier version) or cannot be decoded.
+    (an earlier version), were read with another layout, or cannot be
+    decoded.
     """
     raw = (config.get(KEY_INIT_GENERAL_OPTIONS) or {}).get(KEY_INIT_RAW_HEX)
+    if stored_model(config) is None:
+        return None
     try:
         return refuses_arming_when_not_ready(bytes.fromhex(raw))
     except (TypeError, ValueError, ProtocolError):

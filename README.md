@@ -4,7 +4,7 @@ Home Assistant Integration for Inim SmartLiving Alarm Systems
 > [!WARNING]
 > This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
 > 
-> I could only test this with SmartLiving 1050. The SmartLiving 505, 515 and 10100 are supported experimentally, without a test on a real panel. Contributors are welcome.
+> I could only test this with SmartLiving 1050 on firmware 6. The SmartLiving 505, 515 and 10100, and all four models on firmware 5.1, are supported experimentally, without a test on a real panel. Contributors are welcome.
 
 This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI or SmartLAN/G network interface (SmartLAN/G support is experimental). It enables monitoring and control of your alarm system directly from Home Assistant.
 
@@ -75,7 +75,7 @@ Prerequisites
     
 *   The panel must be equipped with a SmartLAN/SI or SmartLAN/G network interface module. SmartLAN/G support is **experimental**: it has only been tested against a simulated panel so far, so please report how it works for you.
     
-*   A supported panel, with firmware 6.x:
+*   A supported panel, with firmware 6.x or 5.1x:
     
     | Model | Areas | Zone numbers | Status |
     |---|---|---|---|
@@ -86,7 +86,17 @@ Prerequisites
     
     Experimental models use the panel's memory map but have not been tested on a real panel yet; a warning in the log says so. Please report how it works for you. Zone numbers above the number of terminals are the second zones of double terminals.
     
-    *   **Firmware 6 is required for now**: panels on older firmware cannot be set up ("The panel's firmware is not supported: firmware 6 is needed").
+    *   **Firmware 6.x** is supported as in the table above.
+
+    *   **Firmware 5.1x is supported experimentally, and with limits**, on all four models:
+        *   it has not been tested on a real panel on firmware 5.1;
+        *   the panel's state flags (such as programming mode) and the results of commands are assumed to work as on firmware 6;
+        *   the event log shows the free events that only firmware 5.1 has (free events 1 to 11) as unknown events;
+        *   video sensors are not supported (firmware 5.1 has none).
+
+        A warning in the log says the panel's support is experimental. Please report how it works for you.
+
+    *   **Firmware 5.0x and older** cannot be set up ("The panel's firmware is not supported: firmware 5.1 or newer is needed").
         
     *   **Other SmartLiving models** cannot be set up ("This SmartLiving model is not supported yet"); please report your model and firmware on GitHub.
     
@@ -196,7 +206,9 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **SmartLiving 505 and 515 (experimental):** they now use their own memory layout. Earlier versions read them as if they were a 1050, so their names, zones, scenarios and event log were wrong. At the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs stay the same; zones and areas the panel does not have stay as unavailable entities and are listed in the log, as for the 10100: delete them in **Settings** -> **Devices & services** -> **Entities**. Please report how it works.
     
-*   **Firmware 5 and other models cannot be set up any more**: a new setup of a panel on firmware older than 6, or of a SmartLiving model without its own layout, is refused with a message. A panel of such a model, or one on firmware 5, that is already set up keeps working as before and shows a repair notice, as its data may be wrong.
+*   **Firmware 5.1 (experimental):** panels on firmware 5.1 now use their own memory layout. Earlier versions read them as if they were a 1050 on firmware 6, so their names, zones, scenarios and event log were wrong. At the first start after the update the integration reads the panel configuration again by itself (the log says so), and the "panel not supported" repair notice goes away. Event log descriptions are now right on these panels. See the [limits of firmware 5.1 support](#known-limitations). Please report how it works.
+
+*   **Firmware 5.0x and other models cannot be set up any more**: a new setup of a panel on firmware older than 5.1, or of a SmartLiving model without its own layout, is refused with a message. A panel of such a model, or one on firmware 5.0x, that is already set up keeps working as before and shows a repair notice, as its data may be wrong.
     
 *   Not changed yet: see [Known limitations](#known-limitations).
     
@@ -226,7 +238,7 @@ After installation and restarting Home Assistant:
         
     *   **Panel Name** (Optional): A friendly name for your alarm panel in Home Assistant (e.g., "Home Alarm").
         
-6.  Click **Submit**. The integration connects to your panel, checks it and reads its configuration. The setup is refused, with a message, if the panel cannot be reached, if the PIN does not match any user code of the panel, if the panel's firmware is older than 6, or if the panel is a SmartLiving model without its own layout (see the supported models above).
+6.  Click **Submit**. The integration connects to your panel, checks it and reads its configuration. The setup is refused, with a message, if the panel cannot be reached, if the PIN does not match any user code of the panel, if the panel's firmware is older than 5.1, or if the panel is a SmartLiving model without its own layout (see the supported models above).
     
 7.  If successful, choose the **areas, zones and scenarios** to import, in three sections of checkboxes (each can be folded). Each one you tick gets its entities; they are listed with their number and the name programmed on the panel:
     
@@ -359,7 +371,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
 
     *   *binary\_sensor.your\_panel\_name\_refuses\_arming\_with\_zones\_not\_ready* (named *Refuses arming with zones not ready*): On when the installer set the panel to refuse arming with zones not ready (see [Zones not ready](#zones-not-ready)). Read with the panel configuration; unknown until the configuration is read again by this version. Shown in the *Diagnostic* section of the device page.
 
-    *   *binary\_sensor.your\_panel\_name\_programming\_mode* (named *Programming mode*): On while the panel is in programming mode (being programmed from a keypad, or reloading its configuration). Commands are not sent then. Shown in the *Diagnostic* section of the device page. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5).
+    *   *binary\_sensor.your\_panel\_name\_programming\_mode* (named *Programming mode*): On while the panel is in programming mode (being programmed from a keypad, or reloading its configuration). Commands are not sent then. Shown in the *Diagnostic* section of the device page. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5.0x).
         
 
 _(Replace your\_panel\_name, with actual value based on your setup)._
@@ -441,7 +453,9 @@ These are known and will be fixed in the coming versions:
 
 *   On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example `switch.home_home_area_3`); existing installations keep their IDs.
     
-*   Panels on firmware 5 or of another model that were set up with an earlier version keep running with the 1050's firmware 6 layout, so their names, zones, scenarios and event log may be wrong and their areas' delays are not shown. A repair notice says so. New setups of such panels are refused.
+*   Panels on firmware 5.0x or of another model that were set up with an earlier version keep running with the 1050's firmware 6 layout, so their names, zones, scenarios and event log may be wrong and their areas' delays are not shown. A repair notice says so. New setups of such panels are refused.
+
+*   Support for firmware 5.1 is experimental and limited: it has not been tested on a real panel on firmware 5.1; the panel's state flags (such as programming mode) and the results of commands are assumed to work as on firmware 6; the free events that only firmware 5.1 has (free events 1 to 11) are shown as unknown events in the event log; and video sensors are not supported.
     
 
 ### When the panel refuses a command

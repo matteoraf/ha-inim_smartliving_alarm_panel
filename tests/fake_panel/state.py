@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from . import captures, const as c
 
@@ -250,7 +250,7 @@ class PanelState:
             image[address : address + len(data)] = data
 
         if self.block_arming_when_not_ready:
-            put(c.EEPROM_GENERAL_OPTIONS + 1, b"\x20")
+            put(lay.general_options_address + 1, b"\x20")
         for kind, numbers in self.peripherals.items():
             offset, length = c.PERIPHERAL_BITMAPS[kind]
             bitmap = sum(1 << number for number in numbers)
@@ -445,6 +445,8 @@ class PanelState:
         return actions
 
     def _log(self, areas: int, agent: int, code: int, text: str) -> None:
+        if self.layout.firmware_51:
+            code = _fw51_event(code)
         self.events[self.event_head] = EventRecord(
             timestamp=self.clock,
             areas=areas,
@@ -602,6 +604,17 @@ class PanelState:
     def area_numbers(self, mask: int) -> list[int]:
         """1-based area numbers of a mask."""
         return _mask_bits(mask, self.layout.areas)
+
+
+def _fw51_event(code: int) -> int:
+    """A firmware 6 event code (with its activation bit) as firmware 5.1 logs it.
+
+    Firmware 5.1 has no "area disarmed" event: it logs the end of "area
+    armed" instead.
+    """
+    if code == c.EVENT_AREA_DISARMED | c.EVENT_ACTIVATION:
+        return c.EVENT_AREA_ARMED
+    return c.FW51_EVENT_CODES[code & 0x7F] | (code & c.EVENT_ACTIVATION)
 
 
 def panel_1050() -> PanelState:
@@ -803,3 +816,24 @@ def panel_505() -> PanelState:
 def panel_515() -> PanelState:
     """A 515 (firmware 6.x): 5 areas, 20 terminals (40 zones)."""
     return _small_panel(c.LAYOUT_515)
+
+
+def panel_1050_fw51() -> PanelState:
+    """The 1050 fake on firmware 5.12: the same configuration at the 5.1x
+    addresses, labels in bank 0, an empty 500-event log.
+    """
+    return replace(
+        panel_1050(),
+        layout=c.LAYOUT_1050_FW51,
+        firmware="5.12 01050  ",
+        events=[None] * c.LAYOUT_1050_FW51.event_ring_size,
+        event_head=0,
+        event_tail=0,
+    )
+
+
+def panel_505_fw51() -> PanelState:
+    """The 505 fake on firmware 5.12."""
+    state = _small_panel(c.LAYOUT_505_FW51)
+    state.firmware = "5.12 00505  "
+    return state

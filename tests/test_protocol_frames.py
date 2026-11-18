@@ -252,10 +252,10 @@ def test_status_and_record_lengths(model, lengths: tuple[int, ...]) -> None:
 @pytest.mark.parametrize(
     ("text", "reason"),
     [
-        (b"5.11 01050  ", "firmware 5.11"),
+        (b"5.07 01050  ", "firmware 5.07"),
         (b"6.07 00999  ", "SmartLiving 999"),
-        (b"5.11 00999  ", "SmartLiving 999"),  # the model is checked first
-        (b"5.11 10100  ", "firmware 5.11"),
+        (b"5.07 00999  ", "SmartLiving 999"),  # the model is checked first
+        (b"4.20 10100  ", "firmware 4.20"),
     ],
 )
 def test_unsupported_panels(text: bytes, reason: str) -> None:
