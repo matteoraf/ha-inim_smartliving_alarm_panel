@@ -73,12 +73,14 @@ class PanelModel:
     scenario_records: int
     event_log: int
     label_bank: int  # added to the label pointers read from RAM
+    area_records: int  # A x 7 bytes: delays and options of each area
     # Profile not yet confirmed on a real panel
     experimental: bool = False
     sirens: int = 10  # siren labels, on every model
 
     scenarios = SCENARIOS
     terminal_record_length = 12
+    area_record_length = 7
     pin_length = 6
 
     @property
@@ -160,6 +162,7 @@ SMARTLIVING_1050_FW6 = PanelModel(
     scenario_records=0x073D8,
     event_log=0x19204,
     label_bank=0x10000,
+    area_records=0x06126,
 )
 
 
@@ -187,6 +190,7 @@ SMARTLIVING_10100_FW6 = PanelModel(
     scenario_records=0x0C81F,
     event_log=0x19204,
     label_bank=0x10000,
+    area_records=0x0A36B,
     experimental=True,
 )
 

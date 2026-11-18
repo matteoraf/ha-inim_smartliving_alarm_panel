@@ -74,6 +74,11 @@ class EventRecord:
         )
 
 
+# An area without delays: pre-arm warning 3 min, patrol 5 min, reset the alarm
+# memory on arming and clear the call queue on disarm (as on a real 1050)
+AREA_RECORD = bytes((0x00, 0x00, 0x00, 0x03, 0x00, 0x05, 0xA0))
+
+
 @dataclass
 class PanelState:
     """Configuration and live state of a fake SmartLiving panel (1050 by default).
@@ -106,6 +111,8 @@ class PanelState:
     # in place of the ones built from the fields above
     zone_records: dict[int, bytes] = field(default_factory=dict)
     terminal_records: dict[int, bytes] = field(default_factory=dict)
+    # Area records (7 bytes) by 0-based area; the others read as AREA_RECORD
+    area_records: dict[int, bytes] = field(default_factory=dict)
     scenario_records: list[bytes] = field(
         default_factory=lambda: [bytes(c.SCENARIO_RECORD_LENGTH)] * c.NUM_SCENARIOS
     )
@@ -267,6 +274,9 @@ class PanelState:
             )
             put(lay.eeprom_terminals + index * c.TERMINAL_RECORD_LENGTH, record)
         put(lay.eeprom_physical_map, bytes(self.physical_map))
+        for index in range(lay.areas):
+            record = self.area_records.get(index, AREA_RECORD)
+            put(lay.eeprom_areas + index * len(AREA_RECORD), record)
         for index, record in enumerate(self.scenario_records):
             put(lay.eeprom_scenario_modes + index * lay.scenario_record_length, record)
         for register, (offset, count) in lay.labels.items():

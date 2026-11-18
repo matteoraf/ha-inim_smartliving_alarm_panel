@@ -27,6 +27,7 @@ from .const import (
     DEFAULT_LIMIT_SCENARIOS,
     DEFAULT_LIMIT_ZONES,
     KEY_INIT_AREA_NAMES,
+    KEY_INIT_AREA_RECORDS,
     KEY_INIT_AREAS,
     KEY_INIT_RAW_HEX,
     KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS,
@@ -50,8 +51,10 @@ from .const import (
 from .legacy import SCENARIO_ACTIONS, zone_exists
 from .protocol.commands import ArmMode
 from .protocol.config import (
+    AreaConfig,
     Terminal,
     ZoneConfig,
+    decode_area_records,
     decode_terminals,
     decode_zone_records,
 )
@@ -234,6 +237,20 @@ def mapped_scenarios(options: Mapping[str, Any]) -> dict[str, int]:
     return mapped
 
 
+def _stored_model_and_fallback(
+    config: Mapping[str, Any],
+) -> tuple[PanelModel, bool] | None:
+    """(layout, whether it is the fallback) of the stored model string."""
+    raw = (config.get(KEY_INIT_SYSTEM_INFO) or {}).get(KEY_INIT_RAW_HEX)
+    try:
+        model, unsupported = model_for_or_fallback(
+            parse_model_string(bytes.fromhex(raw))
+        )
+    except (TypeError, ValueError, ProtocolError):
+        return None
+    return model, unsupported is not None
+
+
 def stored_model(config: Mapping[str, Any]) -> PanelModel | None:
     """The layout the stored configuration was read with.
 
@@ -241,9 +258,23 @@ def stored_model(config: Mapping[str, Any]) -> PanelModel | None:
     for a panel without its own (as the panel connection uses); None when
     no valid model string is stored.
     """
-    raw = (config.get(KEY_INIT_SYSTEM_INFO) or {}).get(KEY_INIT_RAW_HEX)
+    found = _stored_model_and_fallback(config)
+    return found[0] if found else None
+
+
+def area_records(config: Mapping[str, Any]) -> list[AreaConfig] | None:
+    """The stored area records (A, by 0-based area), decoded.
+
+    None when they are not stored or do not fit, and for a panel handled
+    with the fallback layout: on another model the fallback's address is not
+    the area record, so its times would be wrong.
+    """
+    found = _stored_model_and_fallback(config)
+    raw = (config.get(KEY_INIT_AREA_RECORDS) or {}).get(KEY_INIT_RAW_HEX)
+    if found is None or found[1]:
+        return None
     try:
-        return model_for_or_fallback(parse_model_string(bytes.fromhex(raw)))[0]
+        return decode_area_records(bytes.fromhex(raw), found[0])
     except (TypeError, ValueError, ProtocolError):
         return None
 

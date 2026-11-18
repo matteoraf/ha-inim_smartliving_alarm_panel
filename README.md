@@ -185,6 +185,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **Zone device classes follow the zone's programming.** Single EOL zones are now *opening* (before, no class), shock sensors are *vibration* (before, *opening* or none), and roller-blind sensors are *opening* (before, *motion*). Normally open, normally closed and double EOL zones keep their class. To keep the old class on a zone, set it with **Show as** in the entity's settings.
     
+*   **Each area's delays are shown**: the *Area X arming mode* select's attributes now include the area's exit and entry times, entry time 2, pre-arm warning and patrol times, timer program and three options, read from the panel. At the first start the integration reads the panel configuration again once by itself to get them (the log says so); if it cannot, they appear after the next start or a **Re-read panel configuration**.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -288,6 +290,8 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
     *   *select.your\_panel\_name\_area\_X\_arming\_mode* (named *Area X arming mode*): The area's arming mode: *Disarmed*, *Armed total*, *Armed partial* or *Armed instant* (unknown while the panel reports none of these). Choosing a mode arms the area in that mode or disarms it; if the panel refuses, an error says why. Attributes: `area_id` and `area_name`.
         
+        Its attributes also show the area's delays and options, as programmed on the panel: `exit_time` (time to leave after arming) and `entry_time` (time to disarm after a delayed zone opens), for example `120 s` or `2 min`; `entry_time_2` (the second entry time, used by zones with the `entry_time_2` option) or `not used`; `pre_arm_warning_time` and `patrol_time` (in minutes, for example `3 min`); `timer_program` (the arm/disarm timer program, or `none`); and `reset_alarm_memory_on_arming`, `auto_arm_partial` and `clear_call_queue_on_disarm` (`true` or `false`). They are not shown for panels handled with another model's layout (see [Known limitations](#known-limitations)).
+        
     *   *binary\_sensor.your\_panel\_name\_area\_X\_alarm*: On while the area is in alarm.
         
     *   *binary\_sensor.your\_panel\_name\_area\_X\_tamper*: On while the area is in tamper.
@@ -309,7 +313,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
         *   `sensor_kind`: `generic`, `roller_blind` or `shock`, from the terminal's programming. It decides the next attributes:
             *   `alarm_pulse_duration` (generic sensors only), for example `300 ms` or `20 s` (the panel counts it in steps of 15 ms or of 10 s);
             *   `shock_sensitivity` (shock sensors only), 0 to 40;
-            *   `pulse_window_time`, the time in which pulses are counted, and `pulse_count`, how many pulses in that time raise the alarm.
+            *   `pulse_window_time`, the time in which pulses are counted (for example `30 s` or `1 min`), and `pulse_count`, how many pulses in that time raise the alarm.
         *   `balancing`: `normally_open`, `normally_closed`, `single_eol`, `double_eol`, `double_zone`, `double_zone_eol` or `personalized`.
         *   `assigned_areas`, `terminal_index`, `terminal_type` (`input`, `in_out`, `double`, …), `second_zone` (the second zone of a double terminal) and `internal_index`.
         *   The programming options, each `true` or `false`: `interior`, `autobypass` (bypassed by the panel when its areas arm while it is open), `unbypassable`, `chime`, `test_programmed`, `autobypass_no_reinclude` (autobypassed and not re-included when back at rest), `no_arming_if_not_ready` (stops arming in every mode, when the panel refuses arming with zones not ready), `entry_time_2`, `last_exit_zone`, `reinclude_on_disarm`, `hold_up` and `fault_zone`. Options that only apply to wireless zones are not shown.
@@ -425,6 +429,8 @@ Known limitations
 These are known and will be fixed in the coming versions:
 
 *   On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example `switch.home_home_area_3`); existing installations keep their IDs.
+    
+*   Panels without their own memory layout yet (SmartLiving 505 and 515, and firmware 5) are handled with the 1050's layout. Their areas' delays are read but not shown, because on those panels that layout does not point to the area settings.
     
 
 ### When the panel refuses a command

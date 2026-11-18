@@ -10,6 +10,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .attribute_values import minutes_text, time_text
 from .const import (
     AREA_MODE_DISARMED,
     AREA_MODE_INSTANT,
@@ -30,8 +31,9 @@ from .const import (
 )
 from .legacy import LegacyPanelClient
 from .protocol.commands import ArmMode
+from .protocol.config import AreaConfig
 from .readiness import async_arm
-from .selection import area_label, selected
+from .selection import area_label, area_records, selected
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,6 +69,8 @@ async def async_setup_entry(
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
     system_info = initial_panel_config.get(KEY_INIT_SYSTEM_INFO, {})
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
+    # The areas' delays and options, decoded from the stored records
+    records = area_records(initial_panel_config) or []
     async_add_entities(
         InimAreaModeSelect(
             coordinator,
@@ -76,9 +80,27 @@ async def async_setup_entry(
             system_info,
             area,
             area_label(initial_panel_config, area),
+            area_settings_attributes(records[area - 1]) if area <= len(records) else {},
         )
         for area in selected(entry.options, initial_panel_config, CONF_AREAS)
     )
+
+
+def area_settings_attributes(area: AreaConfig) -> dict[str, Any]:
+    """An area's delays and options as attributes (stable English values)."""
+    return {
+        "exit_time": time_text(area.exit_time),
+        "entry_time": time_text(area.entry_time),
+        "entry_time_2": "not used"
+        if area.entry_time_2 is None
+        else time_text(area.entry_time_2),
+        "pre_arm_warning_time": minutes_text(area.pre_arm_warning),
+        "patrol_time": minutes_text(area.patrol),
+        "timer_program": "none" if area.timer_program is None else area.timer_program,
+        "reset_alarm_memory_on_arming": area.reset_alarm_memory_on_arming,
+        "auto_arm_partial": area.auto_arm_partial,
+        "clear_call_queue_on_disarm": area.clear_call_queue_on_disarm,
+    }
 
 
 class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
@@ -98,13 +120,19 @@ class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
         system_info: dict[str, Any],
         area: int,
         area_name: str,
+        settings: dict[str, Any] | None = None,
     ) -> None:
-        """Initialize the select of one area (1-based)."""
+        """Initialize the select of one area (1-based).
+
+        settings: the area's delays and options as attributes (empty when
+        they are not known).
+        """
         super().__init__(coordinator)
         self.api_client = api_client
         self._entry = config_entry
         self._area = area
         self._area_name = area_name
+        self._settings = settings or {}
         self._attr_unique_id = f"{config_entry.entry_id}_area_mode_select_{area}"
         self._attr_translation_placeholders = {"area": str(area)}
         self._attr_device_info = DeviceInfo(
@@ -128,8 +156,8 @@ class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        """The area's number and label."""
-        return {"area_id": self._area, "area_name": self._area_name}
+        """The area's number, label, delays and options."""
+        return {"area_id": self._area, "area_name": self._area_name, **self._settings}
 
     async def async_select_option(self, option: str) -> None:
         """Arm the area in the chosen mode, or disarm it."""

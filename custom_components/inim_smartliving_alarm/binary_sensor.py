@@ -1,6 +1,5 @@
 """Platform for binary sensor entities for the Inim Alarm integration."""
 
-from datetime import timedelta
 import logging
 from typing import Any
 
@@ -15,6 +14,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .attribute_values import duration_text, time_text, value_key
 from .const import (
     CONF_AREAS,
     CONF_PANEL_NAME,
@@ -46,11 +46,9 @@ from .const import (
 from .legacy import zones_to_create
 from .protocol.config import (
     Balancing,
-    PanelTime,
     SensorKind,
     Terminal,
     ZoneConfig,
-    ZoneType,
 )
 from .readiness import panel_refuses_not_ready
 from .selection import (
@@ -228,10 +226,6 @@ class BaseInimBinarySensor(CoordinatorEntity, BinarySensorEntity):
         return bool(self._zone_value(group, key, False))
 
 
-# Attribute values: the enum names in lower case, except where a name is not
-# how one would write it
-_VALUE_KEYS: dict[Any, str] = {ZoneType.H24: "24_hour"}
-
 # Device class from the terminal's programming (a wired zone has no detector
 # type): the sensor kind first, then the balancing
 _KIND_CLASSES = {
@@ -246,26 +240,6 @@ _BALANCING_CLASSES = {
 }
 
 
-def _value_key(value: Any) -> Any:
-    """An enum member as a stable English key; other values as they are."""
-    if value in _VALUE_KEYS:
-        return _VALUE_KEYS[value]
-    name = getattr(value, "name", None)
-    return name.lower() if isinstance(name, str) else value
-
-
-def _time_text(time: PanelTime) -> str:
-    return f"{time.value} {time.unit}"
-
-
-def _duration_text(duration: timedelta) -> str:
-    """Whole seconds as "20 s", anything else in milliseconds ("300 ms")."""
-    milliseconds = round(duration.total_seconds() * 1000)
-    if milliseconds and milliseconds % 1000 == 0:
-        return f"{milliseconds // 1000} s"
-    return f"{milliseconds} ms"
-
-
 def zone_programming_attributes(
     zone: ZoneConfig, terminal: Terminal, terminal_index: int, second_zone: bool
 ) -> dict[str, Any]:
@@ -278,20 +252,20 @@ def zone_programming_attributes(
     kind = terminal.sensor_kind
     attributes: dict[str, Any] = {
         "assigned_areas": sorted(zone.areas),
-        "zone_type": _value_key(zone.zone_type),
+        "zone_type": value_key(zone.zone_type),
         "alarm_cycles": "unlimited" if zone.alarm_cycles is None else zone.alarm_cycles,
     }
     if kind is SensorKind.GENERIC:
-        attributes["alarm_pulse_duration"] = _duration_text(zone.alarm_pulse_duration)
+        attributes["alarm_pulse_duration"] = duration_text(zone.alarm_pulse_duration)
     elif kind is SensorKind.SHOCK:
         attributes["shock_sensitivity"] = zone.shock_sensitivity
     attributes |= {
-        "pulse_window_time": _time_text(zone.pulse_window_time),
+        "pulse_window_time": time_text(zone.pulse_window_time),
         "pulse_count": zone.pulse_count,
-        "balancing": _value_key(terminal.balancing),
+        "balancing": value_key(terminal.balancing),
         "sensor_kind": kind.value,
         "terminal_index": terminal_index,
-        "terminal_type": _value_key(terminal.terminal_type),
+        "terminal_type": value_key(terminal.terminal_type),
         "second_zone": second_zone,
         **zone.flags,
     }

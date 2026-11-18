@@ -28,6 +28,7 @@ from .protocol.commands import (
     reset_alarm_memory,
 )
 from .protocol.config import (
+    AreaConfig,
     Peripherals,
     PhysicalMap,
     ScenarioConfig,
@@ -35,6 +36,7 @@ from .protocol.config import (
     UserCode,
     ZoneConfig,
     area_mask,
+    decode_area_records,
     decode_code_record,
     decode_labels,
     decode_peripherals,
@@ -180,6 +182,8 @@ class PanelConfiguration:
     zone_records: bytes
     scenarios: tuple[ScenarioConfig, ...]
     scenario_records: bytes
+    area_records: tuple[AreaConfig, ...]
+    area_records_raw: bytes
 
 
 @dataclass(frozen=True, slots=True)
@@ -365,6 +369,9 @@ class SmartLivingPanel:
             scenarios = await session.read_eeprom(
                 model.scenario_records, model.scenarios * model.scenario_record_length
             )
+            areas = await session.read_eeprom(
+                model.area_records, model.areas * model.area_record_length
+            )
             await self._check_not_programming(session)
         return PanelConfiguration(
             firmware=self.firmware,
@@ -394,6 +401,8 @@ class SmartLivingPanel:
             zone_records=zones,
             scenarios=tuple(decode_scenario_records(scenarios, model)),
             scenario_records=scenarios,
+            area_records=tuple(decode_area_records(areas, model)),
+            area_records_raw=areas,
         )
 
     # ------------------------------------------------------------------ status
