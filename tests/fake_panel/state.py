@@ -102,6 +102,10 @@ class PanelState:
     zone_areas: list[int] = field(default_factory=lambda: [0] * c.NUM_ZONES)
     # Zone record options (byte 3) and options 2 (byte 4), by 0-based zone
     zone_options: dict[int, tuple[int, int]] = field(default_factory=dict)
+    # Whole zone (9-byte) and terminal (12-byte) records, by 0-based index,
+    # in place of the ones built from the fields above
+    zone_records: dict[int, bytes] = field(default_factory=dict)
+    terminal_records: dict[int, bytes] = field(default_factory=dict)
     scenario_records: list[bytes] = field(
         default_factory=lambda: [bytes(c.SCENARIO_RECORD_LENGTH)] * c.NUM_SCENARIOS
     )
@@ -255,9 +259,12 @@ class PanelState:
                 + bytes((0, *options))
                 + bytes(c.ZONE_RECORD_LENGTH - 5)
             )
+            record = self.zone_records.get(index, record)
             put(lay.eeprom_zones + index * c.ZONE_RECORD_LENGTH, record)
         for index, terminal_type in enumerate(self.terminal_types):
-            record = bytes(c.TERMINAL_TYPE_OFFSET) + bytes((terminal_type,))
+            record = self.terminal_records.get(
+                index, bytes(c.TERMINAL_TYPE_OFFSET) + bytes((terminal_type,))
+            )
             put(lay.eeprom_terminals + index * c.TERMINAL_RECORD_LENGTH, record)
         put(lay.eeprom_physical_map, bytes(self.physical_map))
         for index, record in enumerate(self.scenario_records):

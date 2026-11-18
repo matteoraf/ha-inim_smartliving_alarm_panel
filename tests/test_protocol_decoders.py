@@ -288,7 +288,9 @@ def test_terminal_records() -> None:
     assert decode_terminals(bytes(record) * 50, SL1050)[0].has_output
     record[11] = 9  # unknown type: kept, neither zone nor output
     unknown = decode_terminals(bytes(record) * 50, SL1050)[0]
-    assert unknown.type == 9 and not unknown.has_zone and not unknown.has_output
+    assert (
+        unknown.terminal_type == 9 and not unknown.has_zone and not unknown.has_output
+    )
 
 
 def test_zone_records() -> None:
@@ -303,7 +305,7 @@ def test_zone_records() -> None:
     record = bytes((0x03, 0x00, 4, 0x05, 0x20)) + bytes(4)
     zone = decode_zone_records(record * 100, SL1050)[0]
     assert zone.areas == {1, 2}
-    assert zone.type == 4  # 24 h
+    assert zone.zone_type == 4  # 24 h
     assert zone.interior and zone.unbypassable and zone.hold_up
 
 

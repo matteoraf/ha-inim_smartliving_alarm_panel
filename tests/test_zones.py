@@ -150,7 +150,7 @@ async def test_zone_tamper_short_and_flags(
     assert state_of(hass, entry, tamper) == "off"
     state = hass.states.get(entity_id_for(hass, entry, zone_sensor))
     assert state.attributes["test"] is True
-    assert state.attributes["terminal_type"] == "Input"
+    assert state.attributes["terminal_type"] == "input"
     assert original_name(hass, entry, memory) == "Zone 20 Alarm memory (Zone 20)"
     state = hass.states.get(entity_id_for(hass, entry, memory))
     assert state.attributes["tamper_memory"] is True

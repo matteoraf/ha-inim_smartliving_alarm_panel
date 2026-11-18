@@ -46,7 +46,6 @@ from .protocol.config import (
     label_address,
     refuses_arming_when_not_ready,
 )
-from .protocol.errors import UnsupportedPanelError
 from .protocol.frames import (
     active_scenario_request,
     not_ready_area_request,
@@ -61,7 +60,7 @@ from .protocol.model import (
     SETUP_BLOCK_LENGTH,
     FirmwareInfo,
     PanelModel,
-    model_for,
+    model_for_or_fallback,
     parse_model_string,
 )
 from .protocol.status import (
@@ -274,19 +273,10 @@ class SmartLivingPanel:
             return self._model
         data = await session.read_ram(reg.MODEL_STRING, reg.MODEL_STRING_LENGTH)
         firmware = parse_model_string(data)
-        known = True
-        try:
-            model = model_for(firmware)
-        except UnsupportedPanelError as err:
-            known = False
-            if self._fallback_model is None:
-                raise
-            _LOGGER.warning(
-                "%s; handling the panel as a %s",
-                err,
-                self._fallback_model.name,
-            )
-            model = self._fallback_model
+        model, unsupported = model_for_or_fallback(firmware, self._fallback_model)
+        known = unsupported is None
+        if unsupported is not None:
+            _LOGGER.warning("%s; handling the panel as a %s", unsupported, model.name)
         if model.experimental:
             _LOGGER.warning(
                 "Support for the %s is experimental (not yet tested on a real "

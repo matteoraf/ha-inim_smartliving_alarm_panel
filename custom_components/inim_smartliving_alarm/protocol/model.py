@@ -202,3 +202,23 @@ def model_for(info: FirmwareInfo) -> PanelModel:
     if info.model in _FW6_MODELS:
         return _FW6_MODELS[info.model]
     raise UnsupportedPanelError(f"SmartLiving {info.model} is not supported yet")
+
+
+# The profile a panel without its own (another model, firmware 5) is handled
+# with: its configuration is read, and so must be decoded, with this layout
+FALLBACK_MODEL = SMARTLIVING_1050_FW6
+
+
+def model_for_or_fallback(
+    info: FirmwareInfo, fallback: PanelModel | None = FALLBACK_MODEL
+) -> tuple[PanelModel, UnsupportedPanelError | None]:
+    """The model profile for a panel, else the fallback, with the reason.
+
+    Without a fallback the UnsupportedPanelError is raised.
+    """
+    try:
+        return model_for(info), None
+    except UnsupportedPanelError as err:
+        if fallback is None:
+            raise
+        return fallback, err
