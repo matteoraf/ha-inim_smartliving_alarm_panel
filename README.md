@@ -4,7 +4,7 @@ Home Assistant Integration for Inim SmartLiving Alarm Systems
 > [!WARNING]
 > This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
 > 
-> I could only test this with SmartLiving 1050. The SmartLiving 10100 is supported experimentally, without a test on a real panel. Contributors are welcome.
+> I could only test this with SmartLiving 1050. The SmartLiving 505, 515 and 10100 are supported experimentally, without a test on a real panel. Contributors are welcome.
 
 This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI or SmartLAN/G network interface (SmartLAN/G support is experimental). It enables monitoring and control of your alarm system directly from Home Assistant.
 
@@ -75,13 +75,20 @@ Prerequisites
     
 *   The panel must be equipped with a SmartLAN/SI or SmartLAN/G network interface module. SmartLAN/G support is **experimental**: it has only been tested against a simulated panel so far, so please report how it works for you.
     
-*   Panel firmware 5 or later. Supported panels:
+*   A supported panel, with firmware 6.x:
     
-    *   **SmartLiving 1050** with firmware 6.x: developed and tested on it.
+    | Model | Areas | Zone numbers | Status |
+    |---|---|---|---|
+    | SmartLiving 1050 | 10 | 1-100 | developed and tested on it |
+    | SmartLiving 10100 | 15 | 1-200 | **experimental** |
+    | SmartLiving 515 | 5 | 1-40 | **experimental** |
+    | SmartLiving 505 | 5 | 1-20 | **experimental** |
+    
+    Experimental models use the panel's memory map but have not been tested on a real panel yet; a warning in the log says so. Please report how it works for you. Zone numbers above the number of terminals are the second zones of double terminals.
+    
+    *   **Firmware 6 is required for now**: panels on older firmware cannot be set up ("The panel's firmware is not supported: firmware 6 is needed").
         
-    *   **SmartLiving 10100** with firmware 6.x: **experimental**. It has 15 areas and zone numbers 1 to 200, and has not been tested on a real panel yet; a warning in the log says so. Please report how it works for you.
-        
-    *   Firmware 5.x and other SmartLiving models (505, 515) can be set up, but are handled like a 1050 on firmware 6 and may show wrong data until they are supported (a warning is logged); firmware older than 5 is refused.
+    *   **Other SmartLiving models** cannot be set up ("This SmartLiving model is not supported yet"); please report your model and firmware on GitHub.
     
 *   The SmartLAN module must be connected to your local network and accessible from your Home Assistant instance.
     
@@ -187,6 +194,10 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **Each area's delays are shown**: the *Area X arming mode* select's attributes now include the area's exit and entry times, entry time 2, pre-arm warning and patrol times, timer program and three options, read from the panel. At the first start the integration reads the panel configuration again once by itself to get them (the log says so); if it cannot, they appear after the next start or a **Re-read panel configuration**.
     
+*   **SmartLiving 505 and 515 (experimental):** they now use their own memory layout. Earlier versions read them as if they were a 1050, so their names, zones, scenarios and event log were wrong. At the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs stay the same; zones and areas the panel does not have stay as unavailable entities and are listed in the log, as for the 10100: delete them in **Settings** -> **Devices & services** -> **Entities**. Please report how it works.
+    
+*   **Firmware 5 and other models cannot be set up any more**: a new setup of a panel on firmware older than 6, or of a SmartLiving model without its own layout, is refused with a message. A panel of such a model, or one on firmware 5, that is already set up keeps working as before and shows a repair notice, as its data may be wrong.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -215,13 +226,13 @@ After installation and restarting Home Assistant:
         
     *   **Panel Name** (Optional): A friendly name for your alarm panel in Home Assistant (e.g., "Home Alarm").
         
-6.  Click **Submit**. The integration connects to your panel, checks it and reads its configuration. The setup is refused, with a message, if the panel cannot be reached, if the PIN does not match any user code of the panel, or if the panel's firmware is older than 5.
+6.  Click **Submit**. The integration connects to your panel, checks it and reads its configuration. The setup is refused, with a message, if the panel cannot be reached, if the PIN does not match any user code of the panel, if the panel's firmware is older than 6, or if the panel is a SmartLiving model without its own layout (see the supported models above).
     
 7.  If successful, choose the **areas, zones and scenarios** to import, in three sections of checkboxes (each can be folded). Each one you tick gets its entities; they are listed with their number and the name programmed on the panel:
     
-    *   **Areas**: every area of the panel (10 on a SmartLiving 1050, 15 on a 10100).
+    *   **Areas**: every area of the panel (5 on a SmartLiving 505 or 515, 10 on a 1050, 15 on a 10100).
         
-    *   **Zones**: the zones of the panel. Only terminals programmed as zones are listed (outputs and unused terminals are not), including the second zones of double terminals (51 to 100 on the 1050, 101 to 200 on the 10100).
+    *   **Zones**: the zones of the panel. Only terminals programmed as zones are listed (outputs and unused terminals are not), including the second zones of double terminals (11 to 20 on the 505, 21 to 40 on the 515, 51 to 100 on the 1050, 101 to 200 on the 10100).
         
     *   **Scenarios**: every scenario of the panel (30).
         
@@ -430,7 +441,7 @@ These are known and will be fixed in the coming versions:
 
 *   On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example `switch.home_home_area_3`); existing installations keep their IDs.
     
-*   Panels without their own memory layout yet (SmartLiving 505 and 515, and firmware 5) are handled with the 1050's layout. Their areas' delays are read but not shown, because on those panels that layout does not point to the area settings.
+*   Panels on firmware 5 or of another model that were set up with an earlier version keep running with the 1050's firmware 6 layout, so their names, zones, scenarios and event log may be wrong and their areas' delays are not shown. A repair notice says so. New setups of such panels are refused.
     
 
 ### When the panel refuses a command

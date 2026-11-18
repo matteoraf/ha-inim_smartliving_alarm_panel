@@ -284,7 +284,7 @@ class PanelState:
             data = b"".join(
                 _label(names[i] if i < len(names) else "") for i in range(count)
             )
-            put(c.LABEL_BANK + offset, data)
+            put(lay.label_bank + offset, data)
         for index, event in enumerate(self.events):
             if event is not None:
                 put(lay.eeprom_events + index * c.EVENT_RECORD_LENGTH, event.to_bytes())
@@ -738,3 +738,68 @@ def panel_10100() -> PanelState:
     }
     state.active_scenario = None
     return state
+
+
+def _small_panel(lay: c.Layout) -> PanelState:
+    """A 505 or 515 (firmware 6.x), made up like panel_10100.
+
+    PINs as on the 1050 fake; code 0 (1234) has all 5 areas, code 1 (4321)
+    areas 1-2, code 2 (5678) area 5. Every terminal is an input on the
+    physical slot of the same number; zone n (0-based) is in area
+    n % 5 + 1. Scenario 1 arms every area, 2 disarms them, 3 arms area 5.
+    """
+    state = PanelState(layout=lay)
+
+    state.pins[0:3] = ["1234", "4321", "5678"]
+    for code, mask in enumerate((0x1F, 0x03, 0x10)):
+        state.code_records[code] = mask.to_bytes(2, "little") + bytes(
+            lay.code_record_length - 2
+        )
+
+    for terminal in range(lay.terminals):
+        state.terminal_types[terminal] = c.TERMINAL_INPUT
+        state.physical_map[terminal] = terminal
+    for zone in range(lay.terminals):
+        state.zone_areas[zone] = 1 << (zone % lay.areas)
+
+    def scenario(modes: dict[int, int]) -> bytes:
+        record = bytearray(lay.scenario_record_length)
+        for area, mode in modes.items():
+            shift = 4 if area % 2 == 0 else 0
+            record[(area - 1) // 2] |= mode << shift
+        return bytes(record)
+
+    every_area = range(1, lay.areas + 1)
+    state.scenario_records[0] = scenario(dict.fromkeys(every_area, c.MODE_AWAY))
+    state.scenario_records[1] = scenario(dict.fromkeys(every_area, c.MODE_DISARMED))
+    state.scenario_records[2] = scenario({5: c.MODE_AWAY})
+
+    state.labels = {
+        c.RAM_LABELS_AREAS: [f"Area {n}" for n in range(1, lay.areas + 1)],
+        c.RAM_LABELS_ZONES: [f"Zone {n}" for n in range(1, lay.zones + 1)],
+        c.RAM_LABELS_CODES: ["Master"] + [f"User {n}" for n in range(2, lay.codes + 1)],
+        c.RAM_LABELS_KEYPADS: ["Keypad 1", "Keypad 2"],
+        c.RAM_LABELS_EXPANDERS: ["Exp 1"],
+        c.RAM_LABELS_SCENARIOS: [
+            f"Scenario {n}" for n in range(1, c.NUM_SCENARIOS + 1)
+        ],
+    }
+    # Keypads 1-2 and 5, reader 10, expanders 1 and 4 (the 505's last)
+    state.peripherals = {
+        "keypads": [0, 1, 4],
+        "readers": [9],
+        "expanders": [0, 3],
+    }
+    state.area_records[1] = bytes((0x1E, 0x1E, 0x00, 0x03, 0x00, 0x05, 0xA0))
+    state.active_scenario = None
+    return state
+
+
+def panel_505() -> PanelState:
+    """A 505 (firmware 6.x): 5 areas, 10 terminals (20 zones)."""
+    return _small_panel(c.LAYOUT_505)
+
+
+def panel_515() -> PanelState:
+    """A 515 (firmware 6.x): 5 areas, 20 terminals (40 zones)."""
+    return _small_panel(c.LAYOUT_515)

@@ -206,8 +206,9 @@ class Layout:
     eeprom_scenario_modes: int
     eeprom_events: int
     event_ring_size: int
-    # pointer register -> (offset in EEPROM bank 1, number of labels)
+    # pointer register -> (offset in the label bank, number of labels)
     labels: dict[int, tuple[int, int]] = field(hash=False, compare=False)
+    label_bank: int = LABEL_BANK  # bank 0 on the 505 and 515
 
     @property
     def zones(self) -> int:
@@ -244,9 +245,11 @@ class Layout:
         return self.zone_bitmap_length + self.terminal_bitmap_length
 
 
-def _packed_labels(counts: dict[int, int]) -> dict[int, tuple[int, int]]:
-    """Label blocks one after the other from offset 0 of EEPROM bank 1."""
-    labels, offset = {}, 0
+def _packed_labels(
+    counts: dict[int, int], start: int = 0
+) -> dict[int, tuple[int, int]]:
+    """Label blocks one after the other from an offset of the label bank."""
+    labels, offset = {}, start
     for register, count in counts.items():
         labels[register] = (offset, count)
         offset += count * LABEL_LENGTH
@@ -334,4 +337,82 @@ LAYOUT_10100 = Layout(
             RAM_LABELS_SIRENS: 10,
         }
     ),
+)
+
+
+def _small_labels(areas: int, zones: int, expanders: int) -> dict[int, tuple[int, int]]:
+    """Labels of a 505 or 515: in bank 0, after the other programming."""
+    return _packed_labels(
+        {
+            RAM_LABELS_AREAS: areas,
+            RAM_LABELS_ZONES: zones,
+            RAM_LABELS_CODES: 30,
+            RAM_LABELS_READERS: 10,
+            RAM_LABELS_KEYPADS: 5,
+            RAM_LABELS_EXPANDERS: expanders,
+            RAM_LABELS_KEYS: 50,
+            RAM_LABELS_PHONES: 15,
+            RAM_LABELS_SCENARIOS: NUM_SCENARIOS,
+            RAM_LABELS_TIMERS: 10,
+            RAM_LABELS_OUTPUTS: 3,
+            RAM_LABELS_SIRENS: 10,
+        },
+        start=0x8000,
+    )
+
+
+# SmartLiving 505, firmware 6.x
+LAYOUT_505 = Layout(
+    model="00505",
+    areas=5,
+    terminals=10,
+    physical_slots=40,
+    codes=30,
+    keypads=5,
+    readers=10,
+    expanders=4,
+    keys=50,
+    timers=10,
+    code_record_length=54,
+    code_output_mask_length=3,
+    scenario_record_length=5,
+    eeprom_pins=0x03132,
+    eeprom_codes=0x031F2,
+    eeprom_zones=0x028BD,
+    eeprom_terminals=0x02971,
+    eeprom_physical_map=0x03DE0,
+    eeprom_areas=0x030E3,
+    eeprom_scenario_modes=0x03B0A,
+    eeprom_events=0x0EE5C,
+    event_ring_size=500,
+    labels=_small_labels(areas=5, zones=20, expanders=5),
+    label_bank=0,
+)
+
+# SmartLiving 515, firmware 6.x
+LAYOUT_515 = Layout(
+    model="00515",
+    areas=5,
+    terminals=20,
+    physical_slots=70,
+    codes=30,
+    keypads=5,
+    readers=10,
+    expanders=10,
+    keys=50,
+    timers=10,
+    code_record_length=55,
+    code_output_mask_length=4,
+    scenario_record_length=5,
+    eeprom_pins=0x038C7,
+    eeprom_codes=0x03987,
+    eeprom_zones=0x02F07,
+    eeprom_terminals=0x0306F,
+    eeprom_physical_map=0x04595,
+    eeprom_areas=0x03859,
+    eeprom_scenario_modes=0x042BF,
+    eeprom_events=0x0EE5C,
+    event_ring_size=500,
+    labels=_small_labels(areas=5, zones=40, expanders=10),
+    label_bank=0,
 )

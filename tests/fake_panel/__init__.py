@@ -1,4 +1,4 @@
-"""A fake SmartLiving panel (1050, or 10100) for tests."""
+"""A fake SmartLiving panel (1050, 505, 515 or 10100) for tests."""
 
 from .server import TRANSPORT_G, TRANSPORT_SI, FakePanel, Request
 from .state import (
@@ -6,6 +6,8 @@ from .state import (
     PanelState,
     checksum,
     encode_pin,
+    panel_505,
+    panel_515,
     panel_1050,
     panel_10100,
 )
@@ -19,6 +21,8 @@ __all__ = [
     "Request",
     "checksum",
     "encode_pin",
+    "panel_505",
+    "panel_515",
     "panel_1050",
     "panel_10100",
 ]

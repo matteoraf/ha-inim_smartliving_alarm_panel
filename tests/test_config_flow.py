@@ -213,27 +213,26 @@ async def test_firmware_below_5_is_refused(
     assert result["errors"] == {"base": "unsupported_firmware"}
 
 
-@pytest.mark.parametrize(
-    ("firmware", "warning"),
-    [
-        ("5.07 01050  ", "firmware 5.07 is not supported yet"),
-        ("6.07 00515  ", "SmartLiving 515 is not supported yet"),
-    ],
-)
-async def test_firmware_5_and_other_models_are_accepted(
-    hass: HomeAssistant,
-    panel: FakePanel,
-    caplog: pytest.LogCaptureFixture,
-    firmware: str,
-    warning: str,
+async def test_firmware_5_is_refused(
+    hass: HomeAssistant, panel: FakePanel, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """Firmware 5.x and other models (rebranded too) only get a warning."""
+    """Firmware 5.x cannot be set up: firmware 6 is needed."""
+    panel.state.firmware = "5.11 01050  "
+    flow_id = await board_form(hass, "smartlan_si")
+    result = await submit(hass, flow_id, si_input(panel))
+    assert result["errors"] == {"base": "unsupported_firmware"}
+    assert "firmware 5.11 is not supported yet" in caplog.text
+
+
+@pytest.mark.parametrize("firmware", ["6.07 00999  ", "5.07 00999  "])
+async def test_other_models_are_refused(
+    hass: HomeAssistant, panel: FakePanel, firmware: str
+) -> None:
+    """A model without a profile cannot be set up, whatever its firmware."""
     panel.state.firmware = firmware
     flow_id = await board_form(hass, "smartlan_si")
     result = await submit(hass, flow_id, si_input(panel))
-    assert result["step_id"] == "items"
-    assert warning in caplog.text
-    assert "handling the panel as a SmartLiving 1050" in caplog.text
+    assert result["errors"] == {"base": "unsupported_model"}
 
 
 async def test_undecryptable_reply_means_wrong_credentials(

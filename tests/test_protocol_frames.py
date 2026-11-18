@@ -253,7 +253,8 @@ def test_status_and_record_lengths(model, lengths: tuple[int, ...]) -> None:
     ("text", "reason"),
     [
         (b"5.11 01050  ", "firmware 5.11"),
-        (b"6.07 00515  ", "SmartLiving 515"),
+        (b"6.07 00999  ", "SmartLiving 999"),
+        (b"5.11 00999  ", "SmartLiving 999"),  # the model is checked first
         (b"5.11 10100  ", "firmware 5.11"),
     ],
 )

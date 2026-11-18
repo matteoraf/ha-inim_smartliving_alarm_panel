@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from .errors import ProtocolError, UnsupportedPanelError
+from .errors import ProtocolError, UnsupportedPanelError, UnsupportedReason
 
 SCENARIOS = 30  # on every model
 LABEL_LENGTH = 16
@@ -194,18 +194,86 @@ SMARTLIVING_10100_FW6 = PanelModel(
     experimental=True,
 )
 
-_FW6_MODELS = {"1050": SMARTLIVING_1050_FW6, "10100": SMARTLIVING_10100_FW6}
+SMARTLIVING_505_FW6 = PanelModel(
+    name="SmartLiving 505",
+    areas=5,
+    terminals=10,
+    physical_slots=40,
+    codes=30,
+    keypads=5,
+    readers=10,
+    expanders=4,  # 5 label slots, at most 4 expanders
+    keys=50,
+    timers=10,
+    scenario_record_length=5,
+    zone_record_length=9,
+    code_record_length=54,
+    code_output_mask_length=3,
+    event_ring_size=500,
+    pin_table=0x03132,
+    code_records=0x031F2,
+    zone_records=0x028BD,
+    terminal_records=0x02971,
+    physical_map=0x03DE0,
+    scenario_records=0x03B0A,
+    event_log=0x0EE5C,
+    label_bank=0,
+    area_records=0x030E3,
+    experimental=True,
+)
+
+
+SMARTLIVING_515_FW6 = PanelModel(
+    name="SmartLiving 515",
+    areas=5,
+    terminals=20,
+    physical_slots=70,
+    codes=30,
+    keypads=5,
+    readers=10,
+    expanders=10,
+    keys=50,
+    timers=10,
+    scenario_record_length=5,
+    zone_record_length=9,
+    code_record_length=55,
+    code_output_mask_length=4,
+    event_ring_size=500,
+    pin_table=0x038C7,
+    code_records=0x03987,
+    zone_records=0x02F07,
+    terminal_records=0x0306F,
+    physical_map=0x04595,
+    scenario_records=0x042BF,
+    event_log=0x0EE5C,
+    label_bank=0,
+    area_records=0x03859,
+    experimental=True,
+)
+
+_FW6_MODELS = {
+    "505": SMARTLIVING_505_FW6,
+    "515": SMARTLIVING_515_FW6,
+    "1050": SMARTLIVING_1050_FW6,
+    "10100": SMARTLIVING_10100_FW6,
+}
 
 
 def model_for(info: FirmwareInfo) -> PanelModel:
-    """The model profile for a panel, or UnsupportedPanelError."""
+    """The model profile for a panel, or UnsupportedPanelError.
+
+    An unknown model is refused for its model, before its firmware.
+    """
+    if info.model not in _FW6_MODELS:
+        raise UnsupportedPanelError(
+            f"SmartLiving {info.model} is not supported yet", UnsupportedReason.MODEL
+        )
     if info.major < 6:
         raise UnsupportedPanelError(
-            f"firmware {info.version} is not supported yet (only 6.x is)"
+            f"firmware {info.version} is not supported yet (only 6.x is)",
+            UnsupportedReason.FIRMWARE,
         )
-    if info.model in _FW6_MODELS:
-        return _FW6_MODELS[info.model]
-    raise UnsupportedPanelError(f"SmartLiving {info.model} is not supported yet")
+    return _FW6_MODELS[info.model]
 
 
 # The profile a panel without its own (another model, firmware 5) is handled
