@@ -6,7 +6,7 @@ panel are offered: every area and scenario of the model, and the zone numbers
 whose terminal is programmed as a zone.
 """
 
-from collections.abc import Collection, Iterable, Mapping
+from collections.abc import Callable, Collection, Iterable, Mapping
 import re
 from typing import Any
 
@@ -36,6 +36,7 @@ from .const import (
     KEY_INIT_SCENARIO_NAMES,
     KEY_INIT_SCENARIOS,
     KEY_INIT_SYSTEM_INFO,
+    KEY_INIT_TERMINAL_RECORDS_RAW,
     KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS,
     KEY_INIT_ZONE_CONFIG_INDEX,
     KEY_INIT_ZONE_NAMES,
@@ -48,9 +49,14 @@ from .const import (
 )
 from .legacy import SCENARIO_ACTIONS, zone_exists
 from .protocol.commands import ArmMode
-from .protocol.config import decode_zone_records
-from .protocol.errors import ProtocolError, UnsupportedPanelError
-from .protocol.model import PanelModel, model_for, parse_model_string
+from .protocol.config import (
+    Terminal,
+    ZoneConfig,
+    decode_terminals,
+    decode_zone_records,
+)
+from .protocol.errors import ProtocolError
+from .protocol.model import PanelModel, model_for_or_fallback, parse_model_string
 
 SELECTION_KEYS = (CONF_AREAS, CONF_ZONES, CONF_SCENARIOS)
 
@@ -229,28 +235,56 @@ def mapped_scenarios(options: Mapping[str, Any]) -> dict[str, int]:
 
 
 def stored_model(config: Mapping[str, Any]) -> PanelModel | None:
-    """The model profile of the stored model string; None if not known."""
+    """The layout the stored configuration was read with.
+
+    The model profile of the stored model string, or the fallback profile
+    for a panel without its own (as the panel connection uses); None when
+    no valid model string is stored.
+    """
     raw = (config.get(KEY_INIT_SYSTEM_INFO) or {}).get(KEY_INIT_RAW_HEX)
     try:
-        return model_for(parse_model_string(bytes.fromhex(raw)))
-    except (TypeError, ValueError, ProtocolError, UnsupportedPanelError):
+        return model_for_or_fallback(parse_model_string(bytes.fromhex(raw)))[0]
+    except (TypeError, ValueError, ProtocolError):
         return None
+
+
+def _stored_records[T](
+    config: Mapping[str, Any],
+    key: str,
+    decode: Callable[[bytes, PanelModel], list[T]],
+) -> list[T] | None:
+    model = stored_model(config)
+    raw = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(key)
+    if model is None:
+        return None
+    try:
+        return decode(bytes.fromhex(raw), model)
+    except (TypeError, ValueError, ProtocolError):
+        return None
+
+
+def zone_records(config: Mapping[str, Any]) -> list[ZoneConfig] | None:
+    """The stored zone records (2L, by 0-based zone), decoded.
+
+    None when they or the model string are not stored, or do not fit.
+    """
+    return _stored_records(config, KEY_INIT_ZONE_RECORDS_RAW, decode_zone_records)
+
+
+def terminal_records(config: Mapping[str, Any]) -> list[Terminal] | None:
+    """The stored logical terminal records (L, by 0-based terminal), decoded.
+
+    None when they or the model string are not stored, or do not fit.
+    """
+    return _stored_records(config, KEY_INIT_TERMINAL_RECORDS_RAW, decode_terminals)
 
 
 def zone_option_flags(config: Mapping[str, Any]) -> dict[int, dict[str, bool]]:
     """Each zone's programming options: 1-based zone -> name -> on.
 
-    Decoded from the stored zone records with the stored model's layout;
-    empty when either is missing or they do not fit.
+    Empty when the stored zone records cannot be decoded.
     """
-    model = stored_model(config)
-    raw = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(KEY_INIT_ZONE_RECORDS_RAW)
-    if model is None:
-        return {}
-    try:
-        zones = decode_zone_records(bytes.fromhex(raw), model)
-    except (TypeError, ValueError, ProtocolError):
-        return {}
+    zones = zone_records(config) or []
     return {number: zone.flags for number, zone in enumerate(zones, start=1)}
 
 

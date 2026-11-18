@@ -1,5 +1,6 @@
 """Platform for binary sensor entities for the Inim Alarm integration."""
 
+from datetime import timedelta
 import logging
 from typing import Any
 
@@ -43,8 +44,22 @@ from .const import (
     ZONE_TAMPER_STATES,
 )
 from .legacy import zones_to_create
+from .protocol.config import (
+    Balancing,
+    PanelTime,
+    SensorKind,
+    Terminal,
+    ZoneConfig,
+    ZoneType,
+)
 from .readiness import panel_refuses_not_ready
-from .selection import area_label, scenario_label, selected, zone_option_flags
+from .selection import (
+    area_label,
+    scenario_label,
+    selected,
+    terminal_records,
+    zone_records,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -80,7 +95,9 @@ async def async_setup_entry(
     )
 
     binary_sensors_to_add = []
-    option_flags = zone_option_flags(initial_panel_config)
+    # The zone and terminal records, decoded from the stored configuration
+    records = zone_records(initial_panel_config)
+    terminals = terminal_records(initial_panel_config)
 
     zones = zones_to_create(
         all_zone_names,
@@ -98,7 +115,7 @@ async def async_setup_entry(
                 zone_index,
                 zone_name,
                 zone_config_detail,
-                option_flags.get(zone_index + 1, {}),
+                *_zone_programming(records, terminals, zone_index),
             )
         )
         binary_sensors_to_add.extend(
@@ -211,6 +228,102 @@ class BaseInimBinarySensor(CoordinatorEntity, BinarySensorEntity):
         return bool(self._zone_value(group, key, False))
 
 
+# Attribute values: the enum names in lower case, except where a name is not
+# how one would write it
+_VALUE_KEYS: dict[Any, str] = {ZoneType.H24: "24_hour"}
+
+# Device class from the terminal's programming (a wired zone has no detector
+# type): the sensor kind first, then the balancing
+_KIND_CLASSES = {
+    SensorKind.SHOCK: BinarySensorDeviceClass.VIBRATION,
+    SensorKind.ROLLER_BLIND: BinarySensorDeviceClass.OPENING,
+}
+_BALANCING_CLASSES = {
+    Balancing.NORMALLY_OPEN: BinarySensorDeviceClass.OPENING,
+    Balancing.NORMALLY_CLOSED: BinarySensorDeviceClass.OPENING,
+    Balancing.SINGLE_EOL: BinarySensorDeviceClass.OPENING,
+    Balancing.DOUBLE_EOL: BinarySensorDeviceClass.MOTION,
+}
+
+
+def _value_key(value: Any) -> Any:
+    """An enum member as a stable English key; other values as they are."""
+    if value in _VALUE_KEYS:
+        return _VALUE_KEYS[value]
+    name = getattr(value, "name", None)
+    return name.lower() if isinstance(name, str) else value
+
+
+def _time_text(time: PanelTime) -> str:
+    return f"{time.value} {time.unit}"
+
+
+def _duration_text(duration: timedelta) -> str:
+    """Whole seconds as "20 s", anything else in milliseconds ("300 ms")."""
+    milliseconds = round(duration.total_seconds() * 1000)
+    if milliseconds and milliseconds % 1000 == 0:
+        return f"{milliseconds // 1000} s"
+    return f"{milliseconds} ms"
+
+
+def zone_programming_attributes(
+    zone: ZoneConfig, terminal: Terminal, terminal_index: int, second_zone: bool
+) -> dict[str, Any]:
+    """A zone's programming as attributes: stable English keys and values.
+
+    Byte 6 of the record is shown per sensor kind: the alarm pulse duration of a
+    generic sensor, the sensitivity of a shock sensor, nothing for a roller
+    blind.
+    """
+    kind = terminal.sensor_kind
+    attributes: dict[str, Any] = {
+        "assigned_areas": sorted(zone.areas),
+        "zone_type": _value_key(zone.zone_type),
+        "alarm_cycles": "unlimited" if zone.alarm_cycles is None else zone.alarm_cycles,
+    }
+    if kind is SensorKind.GENERIC:
+        attributes["alarm_pulse_duration"] = _duration_text(zone.alarm_pulse_duration)
+    elif kind is SensorKind.SHOCK:
+        attributes["shock_sensitivity"] = zone.shock_sensitivity
+    attributes |= {
+        "pulse_window_time": _time_text(zone.pulse_window_time),
+        "pulse_count": zone.pulse_count,
+        "balancing": _value_key(terminal.balancing),
+        "sensor_kind": kind.value,
+        "terminal_index": terminal_index,
+        "terminal_type": _value_key(terminal.terminal_type),
+        "second_zone": second_zone,
+        **zone.flags,
+    }
+    return attributes
+
+
+def zone_device_class(terminal: Terminal) -> BinarySensorDeviceClass | None:
+    """A guess from the programming: shock, roller blind, then balancing."""
+    return _KIND_CLASSES.get(terminal.sensor_kind) or _BALANCING_CLASSES.get(
+        terminal.balancing
+    )
+
+
+def _zone_programming(
+    records: list[ZoneConfig] | None,
+    terminals: list[Terminal] | None,
+    zone_index: int,
+) -> tuple[dict[str, Any], BinarySensorDeviceClass | None]:
+    """Attributes and device class of a zone (0-based); empty if unknown."""
+    if not records or not terminals or zone_index >= len(records):
+        return {}, None
+    terminal_index = zone_index % len(terminals)
+    terminal = terminals[terminal_index]
+    attributes = zone_programming_attributes(
+        records[zone_index],
+        terminal,
+        terminal_index,
+        second_zone=zone_index >= len(terminals),
+    )
+    return attributes, zone_device_class(terminal)
+
+
 class InimZoneBinarySensor(BaseInimBinarySensor):
     """Binary sensor for the status of an individual Inim Zone."""
 
@@ -223,29 +336,24 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         zone_index_0_based: int,
         zone_name: str,
         zone_config_detail: dict[str, Any] | None,
-        option_flags: dict[str, bool] | None = None,
+        programming: dict[str, Any] | None = None,
+        device_class: BinarySensorDeviceClass | None = None,
     ) -> None:
-        """Initialize the Inim zone status binary sensor."""
+        """Initialize the Inim zone status binary sensor.
+
+        programming: the zone's programming attributes; device_class: the
+        guess from its terminal (see zone_device_class).
+        """
         super().__init__(coordinator, config_entry, panel_display_name, system_info)
         self._zone_index_0_based = zone_index_0_based
         self._zone_id_1_based = zone_index_0_based + 1
         self._zone_name = zone_name
         self._zone_config_detail = zone_config_detail if zone_config_detail else {}
-        self._option_flags = option_flags or {}
+        self._programming = programming or {}
         self._attr_name = f"Zone {self._zone_id_1_based} ({self._zone_name})"
         self._attr_unique_id = f"{config_entry.entry_id}_zone_{self._zone_id_1_based}"
 
-        # Determine device class based on zone configuration
-        self._attr_device_class = None  # Default to None (no specific device class)
-        if self._zone_config_detail:
-            balancing_type = self._zone_config_detail.get("balancing_type_desc")
-            sensor_type = self._zone_config_detail.get("sensor_type_desc")
-
-            if balancing_type == "Double Balancing" or sensor_type == "Shutter type":
-                self._attr_device_class = BinarySensorDeviceClass.MOTION
-            elif balancing_type in ["Normally Closed", "Normally Open"]:
-                self._attr_device_class = BinarySensorDeviceClass.OPENING
-            # If none of the above, it remains None, which is fine for a generic binary sensor.
+        self._attr_device_class = device_class
 
         self._attr_extra_state_attributes = {}  # Initialize attribute dict
         self._update_state_from_coordinator()  # Initial state and attributes
@@ -284,22 +392,11 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
                 KEY_LIVE_ZONES_EXCLUDED_STATUS, KEY_LIVE_ZONE_TEST_STATUSES_MAP
             ),
         }
-        if self._zone_config_detail:
-            for key, value in self._zone_config_detail.items():
-                if (
-                    key
-                    not in [
-                        "zone_index",
-                        "config_part1_hex",
-                        "config_part2_hex",
-                    ]
-                    and not key.startswith("_raw")
-                    and not key.endswith("_val")
-                ):
-                    attr_key = key.replace("_desc", "")
-                    attrs[attr_key] = value
-        # The zone's programming options, decoded from the stored record
-        attrs.update(self._option_flags)
+        # The physical slot comes from the stored terminal map
+        if "internal_index" in self._zone_config_detail:
+            attrs["internal_index"] = self._zone_config_detail["internal_index"]
+        # The zone's programming, decoded from the stored records
+        attrs.update(self._programming)
         return attrs
 
     @property

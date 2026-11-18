@@ -1,7 +1,8 @@
 """Decoding of the panel configuration: labels and EEPROM records."""
 
 from dataclasses import dataclass
-from enum import IntEnum
+from datetime import timedelta
+from enum import IntEnum, StrEnum
 
 from .commands import ArmMode, encode_pin
 from .errors import ProtocolError
@@ -92,30 +93,87 @@ OUTPUT_TYPES = frozenset(
 )
 
 
+class Balancing(IntEnum):
+    """Balancing of a terminal's input (byte 5 of its record)."""
+
+    NORMALLY_OPEN = 0
+    NORMALLY_CLOSED = 1
+    SINGLE_EOL = 2
+    DOUBLE_EOL = 3
+    DOUBLE_ZONE = 4
+    DOUBLE_ZONE_EOL = 5
+    PERSONALIZED = 6  # analogue thresholds in bytes 0-4
+
+
+class SensorKind(StrEnum):
+    """Kind of sensor on a terminal (byte 6 of its record).
+
+    It decides how bytes 6-8 of the terminal's zone records are read.
+    """
+
+    GENERIC = "generic"
+    ROLLER_BLIND = "roller_blind"
+    SHOCK = "shock"
+
+
+# Terminal record offsets and the sensor kind bits of byte 6
+TERMINAL_BALANCING_OFFSET = 5
+TERMINAL_SENSOR_OFFSET = 6
+TERMINAL_OUTPUT_OPTIONS_OFFSET = 10
+TERMINAL_TYPE_OFFSET = 11
+_ROLLER_BLIND_BIT = 0x80
+_SHOCK_BIT = 0x40
+
+
+def _known[E: IntEnum](enum: type[E], value: int) -> E | int:
+    """The enum member of a value, or the value itself if it has none."""
+    try:
+        return enum(value)
+    except ValueError:
+        return value
+
+
 @dataclass(frozen=True, slots=True)
 class Terminal:
-    """A logical terminal record (12 bytes)."""
+    """A logical terminal record (12 bytes).
 
-    type: int  # a TerminalType value; other values are kept as they are
-    balancing: int  # 0 NO, 1 NC, 2 single EOL, 3 double EOL, 4 double zone, ...
+    Values the enums do not know are kept as numbers.
+    """
+
+    terminal_type: TerminalType | int
+    balancing: Balancing | int
     roller_blind: bool
     shock_sensor: bool
     output_options: int  # byte 10; bit 6 = dimmer
 
     @property
+    def sensor_kind(self) -> SensorKind:
+        """Roller-blind, shock or generic sensor.
+
+        The programming sets one of the two bits. Should both be set, the
+        roller blind is taken, as the installer software reads the byte
+        (bit 7 before bit 6).
+        """
+        if self.roller_blind:
+            return SensorKind.ROLLER_BLIND
+        if self.shock_sensor:
+            return SensorKind.SHOCK
+        return SensorKind.GENERIC
+
+    @property
     def has_zone(self) -> bool:
         """Whether the terminal is (also) a zone."""
-        return self.type in ZONE_TYPES
+        return self.terminal_type in ZONE_TYPES
 
     @property
     def has_second_zone(self) -> bool:
         """Whether the terminal has a second zone at index terminal + L."""
-        return self.type == TerminalType.DOUBLE
+        return self.terminal_type == TerminalType.DOUBLE
 
     @property
     def has_output(self) -> bool:
         """Whether the terminal is (also) an output."""
-        return self.type in OUTPUT_TYPES
+        return self.terminal_type in OUTPUT_TYPES
 
 
 def decode_terminals(data: bytes, model: PanelModel) -> list[Terminal]:
@@ -125,13 +183,14 @@ def decode_terminals(data: bytes, model: PanelModel) -> list[Terminal]:
     terminals = []
     for index in range(model.terminals):
         record = data[index * size : (index + 1) * size]
+        sensor = record[TERMINAL_SENSOR_OFFSET]
         terminals.append(
             Terminal(
-                type=record[11],
-                balancing=record[5],
-                roller_blind=bool(record[6] & 0x80),
-                shock_sensor=bool(record[6] & 0x40),
-                output_options=record[10],
+                terminal_type=_known(TerminalType, record[TERMINAL_TYPE_OFFSET]),
+                balancing=_known(Balancing, record[TERMINAL_BALANCING_OFFSET]),
+                roller_blind=bool(sensor & _ROLLER_BLIND_BIT),
+                shock_sensor=bool(sensor & _SHOCK_BIT),
+                output_options=record[TERMINAL_OUTPUT_OPTIONS_OFFSET],
             )
         )
     return terminals
@@ -151,18 +210,91 @@ class ZoneType(IntEnum):
     SWITCH = 8
     ARM_DISARM = 9
     PATROL = 10
-    EMERGENCY_EXIT_NO_CALL = 11
+    EMERGENCY_EXIT_WITHOUT_CALL = 11
     EMERGENCY_EXIT = 12
+
+
+class TimeUnit(StrEnum):
+    """Unit of a zone time, as the panel's programming shows it."""
+
+    SECONDS = "seconds"
+    MINUTES = "minutes"
+
+
+@dataclass(frozen=True, slots=True)
+class PanelTime:
+    """A zone time: a value and the panel's unit for it."""
+
+    value: int
+    unit: TimeUnit
+
+
+def decode_time(byte: int) -> PanelTime:
+    """A time byte: bits 0-6 the value, bit 7 the unit (set: minutes)."""
+    return PanelTime(byte & 0x7F, TimeUnit.MINUTES if byte & 0x80 else TimeUnit.SECONDS)
+
+
+# Steps of the alarm pulse duration (zone record byte 6, firmware 6): bit 7
+# clear, 15 ms; set, 10 s (the units the installer software offers)
+ALARM_PULSE_DURATION_STEP = timedelta(milliseconds=15)
+ALARM_PULSE_DURATION_LONG_STEP = timedelta(seconds=10)
+
+
+def decode_alarm_pulse_duration(byte: int) -> timedelta:
+    """The alarm pulse duration byte: bits 0-6 a count of steps, bit 7 long."""
+    step = ALARM_PULSE_DURATION_LONG_STEP if byte & 0x80 else ALARM_PULSE_DURATION_STEP
+    return (byte & 0x7F) * step
+
+
+# Zone record offsets
+ZONE_TYPE_OFFSET = 2
+ZONE_OPTIONS_OFFSET = 3
+ZONE_OPTIONS2_OFFSET = 4
+ZONE_CYCLES_OFFSET = 5
+ZONE_TIME_OFFSET = 6  # alarm pulse duration, or the shock sensitivity
+ZONE_WINDOW_OFFSET = 7
+ZONE_PULSES_OFFSET = 8
+# Alarm cycles value meaning "no limit"
+UNLIMITED_ALARM_CYCLES = 15
 
 
 @dataclass(frozen=True, slots=True)
 class ZoneConfig:
-    """A zone record."""
+    """A zone record.
+
+    Byte 6 means the alarm pulse duration for zones of a generic sensor and the
+    inertial sensitivity for shock sensors (unused for roller blinds): the
+    terminal's sensor kind decides which property applies.
+    """
 
     areas: frozenset[int]
-    type: int  # a ZoneType value; other values are kept as they are
+    zone_type: ZoneType | int  # values the enum does not know stay numbers
     options: int  # byte 3
     options2: int  # byte 4
+    cycles: int  # byte 5
+    time: int  # byte 6
+    window: int  # byte 7
+    pulse_count: int  # byte 8: pulses in the window that raise the alarm
+
+    @property
+    def alarm_cycles(self) -> int | None:
+        """How many times the zone can raise an alarm; None for no limit."""
+        return None if self.cycles == UNLIMITED_ALARM_CYCLES else self.cycles
+
+    @property
+    def alarm_pulse_duration(self) -> timedelta:
+        """Alarm pulse duration (zones of a generic sensor)."""
+        return decode_alarm_pulse_duration(self.time)
+
+    @property
+    def shock_sensitivity(self) -> int:
+        """Inertial sensitivity, 0-40 (zones of a shock sensor)."""
+        return self.time
+
+    @property
+    def pulse_window_time(self) -> PanelTime:
+        """Time in which pulses are counted."""
+        return decode_time(self.window)
 
     @property
     def flags(self) -> dict[str, bool]:
@@ -204,11 +336,6 @@ ZONE_OPTION_FLAGS = {
 }
 
 
-# Offsets in a zone record of its two option bytes
-ZONE_OPTIONS_OFFSET = 3
-ZONE_OPTIONS2_OFFSET = 4
-
-
 def zone_flags(options: int, options2: int) -> dict[str, bool]:
     """The named options of a zone record's bytes 3 and 4."""
     value = {ZONE_OPTIONS_OFFSET: options, ZONE_OPTIONS2_OFFSET: options2}
@@ -229,9 +356,13 @@ def decode_zone_records(data: bytes, model: PanelModel) -> list[ZoneConfig]:
         zones.append(
             ZoneConfig(
                 areas=_areas(mask, model),
-                type=record[2],
+                zone_type=_known(ZoneType, record[ZONE_TYPE_OFFSET]),
                 options=record[ZONE_OPTIONS_OFFSET],
                 options2=record[ZONE_OPTIONS2_OFFSET],
+                cycles=record[ZONE_CYCLES_OFFSET],
+                time=record[ZONE_TIME_OFFSET],
+                window=record[ZONE_WINDOW_OFFSET],
+                pulse_count=record[ZONE_PULSES_OFFSET],
             )
         )
     return zones

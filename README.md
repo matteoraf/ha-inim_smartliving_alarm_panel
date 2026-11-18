@@ -27,7 +27,7 @@ Features
         
 *   **Detailed Zone Monitoring**: Every zone of the panel (zones of input, input/output and double terminals, including the second zone of double terminals) is exposed as:
     
-    *   **Binary Sensor Status entities**: With device classes automatically assigned based on zone type. "Double Balancing" and "Shutter" types are assigned the motion device class, while "Normally Closed" or "Normally Open" are assigned the opening class.
+    *   **Binary Sensor Status entities**: On while the zone is in alarm, with a device class guessed from the zone's programming (see the zone sensor below) and the zone's programming as attributes.
         
     *   Extended attributes provide additional configuration parameters for each zone.
     
@@ -181,6 +181,10 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **Zones are checked before arming areas too.** The area switches, the arming mode selects and the `arm_area` action now ask the panel which zones are not ready, as scenarios already did, and by default **refuse to arm** when there are some (before, they armed with zones open). The new option **When zones are not ready** (General settings) can arm anyway with a warning instead; `force: true` does it for one action call. A new action, `activate_scenario`, activates a scenario from automations, and a new event, `inim_smartliving_alarm_zones_not_ready`, lists the zones each time. The integration also reads whether the panel itself refuses arming with zones not ready (new diagnostic sensor *Refuses arming with zones not ready*): at the first start it reads the panel configuration again once by itself (the log says so). Zone sensors show each zone's programming options (`autobypass`, `no_arming_if_not_ready`, `interior` and more) as attributes.
     
+*   **Zone attributes now show the zone's real programming**, read from the panel configuration already stored (nothing is read again). Before, most zone types and balancings showed as *Unknown*, and two times were read wrongly. Some attributes are renamed, so check templates and automations that use them: `activation_type` is now `zone_type`, `balancing_type` is `balancing`, `sensor_type` is `sensor_kind`, `duration_ms` is now `alarm_pulse_duration` (or `shock_sensitivity` for shock sensors), `time` is `pulse_window_time` and `pulses` is `pulse_count`. New: `alarm_cycles`. Values are now lower-case English keys (for example `delayed`, `double_eol`, `input` instead of *Delayed*, *Double Balancing*, *Input*).
+    
+*   **Zone device classes follow the zone's programming.** Single EOL zones are now *opening* (before, no class), shock sensors are *vibration* (before, *opening* or none), and roller-blind sensors are *opening* (before, *motion*). Normally open, normally closed and double EOL zones keep their class. To keep the old class on a zone, set it with **Show as** in the entity's settings.
+    
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -294,7 +298,21 @@ This integration exposes your Inim alarm system's components as various Home Ass
     
     Only zones that exist on the panel get entities: zones of input, input/output and double terminals. Output terminals (for example a siren) and unused terminals have none. Zones 1 to N are the zones of the panel's N terminals (50 on the SmartLiving 1050, 100 on the 10100); a double terminal *n* also has a second zone, numbered N + *n* (51 to 100 on the 1050, 101 to 200 on the 10100).
 
-    *   *binary\_sensor.your\_panel\_name\_zone\_X*: Represents a single zone. It turns on if the zone is alarmed (open). The device class (motion or opening) is automatically assigned based on the zone's configuration on the panel. Extended attributes provide more details about the zone's configuration, including `terminal_type`, `status_text` (`clear`, `alarmed`, `short` or `tamper`) and `test` (zone in test mode). The zone's programming options are attributes too, each `true` or `false`: `interior`, `autobypass` (bypassed by the panel when its areas arm while it is open), `unbypassable`, `chime`, `test_programmed`, `autobypass_no_reinclude` (autobypassed and not re-included when back at rest), `no_arming_if_not_ready` (stops arming in every mode, when the panel refuses arming with zones not ready), `entry_time_2`, `last_exit_zone`, `reinclude_on_disarm`, `hold_up` and `fault_zone`. Options that only apply to wireless zones are not shown.
+    *   *binary\_sensor.your\_panel\_name\_zone\_X*: Represents a single zone. It is on only while the zone is in alarm (open); a short circuit or tamper shows in `status_text` (`clear`, `alarmed`, `short` or `tamper`) and in the zone's tamper sensor. `test` tells whether the zone is in test now.
+        
+        **Device class**: a wired zone does not tell the panel what detector it has, so the device class is a guess from the zone's programming: a shock sensor is *vibration*; a roller-blind sensor, a normally open or normally closed contact and a single EOL balancing are *opening*; a double EOL balancing is *motion*; anything else has no class. If the guess is wrong, change it in Home Assistant: open the entity's settings and pick **Show as**.
+        
+        **Attributes**: the zone's programming as read from the panel, with stable English values:
+        
+        *   `zone_type`: `instant`, `delayed`, `viewable_delayed`, `route`, `24_hour`, `automation`, `arm`, `disarm`, `switch`, `arm_disarm`, `patrol`, `emergency_exit_without_call` or `emergency_exit` (a number if the panel uses a value not listed here).
+        *   `alarm_cycles`: how many times the zone can raise an alarm, or `unlimited`.
+        *   `sensor_kind`: `generic`, `roller_blind` or `shock`, from the terminal's programming. It decides the next attributes:
+            *   `alarm_pulse_duration` (generic sensors only), for example `300 ms` or `20 s` (the panel counts it in steps of 15 ms or of 10 s);
+            *   `shock_sensitivity` (shock sensors only), 0 to 40;
+            *   `pulse_window_time`, the time in which pulses are counted, and `pulse_count`, how many pulses in that time raise the alarm.
+        *   `balancing`: `normally_open`, `normally_closed`, `single_eol`, `double_eol`, `double_zone`, `double_zone_eol` or `personalized`.
+        *   `assigned_areas`, `terminal_index`, `terminal_type` (`input`, `in_out`, `double`, …), `second_zone` (the second zone of a double terminal) and `internal_index`.
+        *   The programming options, each `true` or `false`: `interior`, `autobypass` (bypassed by the panel when its areas arm while it is open), `unbypassable`, `chime`, `test_programmed`, `autobypass_no_reinclude` (autobypassed and not re-included when back at rest), `no_arming_if_not_ready` (stops arming in every mode, when the panel refuses arming with zones not ready), `entry_time_2`, `last_exit_zone`, `reinclude_on_disarm`, `hold_up` and `fault_zone`. Options that only apply to wireless zones are not shown.
 
     *   *binary\_sensor.your\_panel\_name\_zone\_X\_triggered* (named *Zone X Alarm memory*): Turns on if the zone has triggered the system, until the alarm memory is reset. The `tamper_memory` attribute tells whether the zone's terminal has a tamper memory (both zones of a double terminal share it).
 

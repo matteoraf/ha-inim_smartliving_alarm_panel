@@ -36,6 +36,7 @@ from custom_components.inim_smartliving_alarm.protocol.frames import (
     not_ready_area_request,
 )
 from custom_components.inim_smartliving_alarm.protocol.model import (
+    FALLBACK_MODEL,
     SMARTLIVING_1050_FW6,
 )
 from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
@@ -470,6 +471,11 @@ def test_zone_flags_decoded_from_stored_records() -> None:
     # Records that do not fit the model, an unknown model, nothing stored
     config["zones_config"]["raw_hex_part1_full_response"] = records[:-9].hex()
     assert zone_option_flags(config) == {}
-    config["system_info"]["raw_hex"] = b"6.07 00999  ".hex()
+    # A model without its own profile, or firmware 5: the fallback layout,
+    # as the configuration was read with it
+    for model_string in (b"6.07 00515  ", b"5.10 01050  "):
+        config["system_info"]["raw_hex"] = model_string.hex()
+        assert stored_model(config) is FALLBACK_MODEL
+    config["system_info"]["raw_hex"] = b"not a model ".hex()
     assert stored_model(config) is None
     assert zone_option_flags({}) == {}
