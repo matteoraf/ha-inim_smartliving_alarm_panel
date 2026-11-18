@@ -368,6 +368,91 @@ def decode_zone_records(data: bytes, model: PanelModel) -> list[ZoneConfig]:
     return zones
 
 
+# Area record offsets, and the bits of its options byte
+AREA_EXIT_TIME_OFFSET = 0
+AREA_ENTRY_TIME_OFFSET = 1
+AREA_ENTRY_TIME_2_OFFSET = 2
+AREA_PRE_ARM_WARNING_OFFSET = 3  # byte 4 is reserved
+AREA_PATROL_OFFSET = 5
+AREA_OPTIONS_OFFSET = 6
+_AREA_TIMER_MASK = 0x0F
+_AREA_RESET_MEMORY_BIT = 0x20
+_AREA_AUTO_ARM_PARTIAL_BIT = 0x40
+_AREA_CLEAR_CALL_QUEUE_BIT = 0x80
+
+
+@dataclass(frozen=True, slots=True)
+class AreaConfig:
+    """An area record: its delays and options.
+
+    The three times are time bytes (see decode_time); entry time 2 is not
+    used when its byte is 0. The pre-arm warning and patrol times are in
+    minutes.
+    """
+
+    exit_time_byte: int
+    entry_time_byte: int
+    entry_time_2_byte: int
+    pre_arm_warning: int  # minutes
+    patrol: int  # minutes
+    options: int
+
+    @property
+    def exit_time(self) -> PanelTime:
+        """Time to leave after arming."""
+        return decode_time(self.exit_time_byte)
+
+    @property
+    def entry_time(self) -> PanelTime:
+        """Time to disarm after a delayed zone opens."""
+        return decode_time(self.entry_time_byte)
+
+    @property
+    def entry_time_2(self) -> PanelTime | None:
+        """The second entry time (for zones set to use it); None if not used."""
+        return decode_time(self.entry_time_2_byte) if self.entry_time_2_byte else None
+
+    @property
+    def timer_program(self) -> int | None:
+        """The arm/disarm timer program; None for none."""
+        return self.options & _AREA_TIMER_MASK or None
+
+    @property
+    def reset_alarm_memory_on_arming(self) -> bool:
+        """Whether arming resets the alarm memory."""
+        return bool(self.options & _AREA_RESET_MEMORY_BIT)
+
+    @property
+    def auto_arm_partial(self) -> bool:
+        """Whether the area arms itself in partial mode."""
+        return bool(self.options & _AREA_AUTO_ARM_PARTIAL_BIT)
+
+    @property
+    def clear_call_queue_on_disarm(self) -> bool:
+        """Whether disarming clears the queue of phone calls."""
+        return bool(self.options & _AREA_CLEAR_CALL_QUEUE_BIT)
+
+
+def decode_area_records(data: bytes, model: PanelModel) -> list[AreaConfig]:
+    """Decode the A area records."""
+    size = model.area_record_length
+    _check_length(data, model.areas * size, "area records")
+    areas = []
+    for index in range(model.areas):
+        record = data[index * size : (index + 1) * size]
+        areas.append(
+            AreaConfig(
+                exit_time_byte=record[AREA_EXIT_TIME_OFFSET],
+                entry_time_byte=record[AREA_ENTRY_TIME_OFFSET],
+                entry_time_2_byte=record[AREA_ENTRY_TIME_2_OFFSET],
+                pre_arm_warning=record[AREA_PRE_ARM_WARNING_OFFSET],
+                patrol=record[AREA_PATROL_OFFSET],
+                options=record[AREA_OPTIONS_OFFSET],
+            )
+        )
+    return areas
+
+
 @dataclass(frozen=True, slots=True)
 class ScenarioConfig:
     """A scenario record: what it does to each area."""

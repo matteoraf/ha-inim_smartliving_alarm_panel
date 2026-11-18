@@ -202,6 +202,7 @@ class Layout:
     eeprom_zones: int
     eeprom_terminals: int
     eeprom_physical_map: int
+    eeprom_areas: int  # area records, 7 bytes each
     eeprom_scenario_modes: int
     eeprom_events: int
     event_ring_size: int
@@ -271,6 +272,7 @@ LAYOUT_1050 = Layout(
     eeprom_zones=EEPROM_ZONES,
     eeprom_terminals=EEPROM_TERMINALS,
     eeprom_physical_map=EEPROM_PHYSICAL_MAP,
+    eeprom_areas=0x06126,
     eeprom_scenario_modes=EEPROM_SCENARIO_MODES,
     eeprom_events=EEPROM_EVENTS,
     event_ring_size=EVENT_RING_SIZE,
@@ -312,6 +314,7 @@ LAYOUT_10100 = Layout(
     eeprom_zones=0x089C5,
     eeprom_terminals=0x090CD,
     eeprom_physical_map=0x0CF75,
+    eeprom_areas=0x0A36B,
     eeprom_scenario_modes=0x0C81F,
     eeprom_events=0x19204,
     event_ring_size=1000,

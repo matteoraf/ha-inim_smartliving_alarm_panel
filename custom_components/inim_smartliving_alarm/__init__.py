@@ -44,6 +44,7 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
+    KEY_INIT_AREA_RECORDS,
     KEY_INIT_CODES,
     KEY_INIT_GENERAL_OPTIONS,
     KEY_INIT_PERIPHERALS,
@@ -95,6 +96,7 @@ _REQUIRED_CONFIGURATION_KEYS = (
     KEY_INIT_CODES,
     KEY_INIT_PERIPHERALS,
     KEY_INIT_GENERAL_OPTIONS,
+    KEY_INIT_AREA_RECORDS,
 )
 
 # Where the action descriptions from services.yaml are kept (hass.data)

@@ -95,6 +95,8 @@ KEY_INIT_NAMES = "names"
 KEY_INIT_PERIPHERALS = "peripherals"
 # The panel's general options as read: {"raw_hex": ...}
 KEY_INIT_GENERAL_OPTIONS = "general_options"
+# The area records as read: {"raw_hex": ...}
+KEY_INIT_AREA_RECORDS = "area_records"
 KEY_INIT_RAW_HEX = "raw_hex"
 
 KEY_INIT_SYSTEM_INFO = "system_info"

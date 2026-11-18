@@ -159,7 +159,7 @@ def test_generic_attributes() -> None:
         "zone_type": "delayed",
         "alarm_cycles": "unlimited",
         "alarm_pulse_duration": "450 ms",  # 30 x 15 ms
-        "pulse_window_time": "3 minutes",
+        "pulse_window_time": "3 min",
         "pulse_count": 2,
         "balancing": "double_eol",
         "sensor_kind": "generic",
@@ -192,7 +192,7 @@ def test_shock_and_roller_attributes() -> None:
     )
     assert roller["sensor_kind"] == "roller_blind"
     assert "alarm_pulse_duration" not in roller and "shock_sensitivity" not in roller
-    assert roller["pulse_window_time"] == "5 seconds"
+    assert roller["pulse_window_time"] == "5 s"
 
 
 @pytest.mark.parametrize(
@@ -231,7 +231,7 @@ async def test_zone_sensor(hass: HomeAssistant, panel: FakePanel) -> None:
     assert state.attributes["device_class"] == "vibration"
     assert state.attributes["zone_type"] == "24_hour"
     assert state.attributes["shock_sensitivity"] == 20
-    assert state.attributes["pulse_window_time"] == "4 minutes"
+    assert state.attributes["pulse_window_time"] == "4 min"
     assert state.attributes["sensor_kind"] == "shock"
     for old in (
         "activation_type",
