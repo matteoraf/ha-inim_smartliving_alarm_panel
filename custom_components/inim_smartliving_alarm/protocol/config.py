@@ -9,7 +9,6 @@ from .errors import ProtocolError
 from .model import (
     FIXED_OUTPUTS,
     LABEL_LENGTH,
-    PERIPHERALS_LENGTH,
     PanelModel,
 )
 
@@ -497,7 +496,7 @@ def decode_peripherals(data: bytes, model: PanelModel) -> Peripherals:
 
     Bits beyond the model's count of a device kind are ignored.
     """
-    _check_length(data, PERIPHERALS_LENGTH, "peripherals")
+    _check_length(data, model.peripherals_length, "peripherals")
 
     def enabled(start: int, length: int, count: int) -> tuple[int, ...]:
         bitmap = int.from_bytes(data[start : start + length], "little")

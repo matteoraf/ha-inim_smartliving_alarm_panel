@@ -473,7 +473,7 @@ def test_zone_flags_decoded_from_stored_records() -> None:
     assert zone_option_flags(config) == {}
     # A model without its own profile, or firmware 5: the fallback layout,
     # as the configuration was read with it
-    for model_string in (b"6.07 00999  ", b"5.10 01050  "):
+    for model_string in (b"6.07 00999  ", b"5.07 01050  "):
         config["system_info"]["raw_hex"] = model_string.hex()
         assert stored_model(config) is FALLBACK_MODEL
     config["system_info"]["raw_hex"] = b"not a model ".hex()

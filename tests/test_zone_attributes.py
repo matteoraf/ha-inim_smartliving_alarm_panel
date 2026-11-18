@@ -245,7 +245,7 @@ async def test_zone_sensor(hass: HomeAssistant, panel: FakePanel) -> None:
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 
-@pytest.mark.parametrize("model_string", [b"5.10 01050  ", b"6.07 00999  "])
+@pytest.mark.parametrize("model_string", [b"5.07 01050  ", b"6.07 00999  "])
 def test_fallback_model_gives_attributes(model_string: bytes) -> None:
     """A model without its own profile: decoded with the fallback layout.
 

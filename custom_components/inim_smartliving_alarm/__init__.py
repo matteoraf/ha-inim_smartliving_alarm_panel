@@ -48,7 +48,6 @@ from .const import (
     KEY_INIT_CODES,
     KEY_INIT_GENERAL_OPTIONS,
     KEY_INIT_PERIPHERALS,
-    KEY_INIT_TERMINAL_RECORDS_RAW,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
     PLATFORMS,
@@ -83,6 +82,7 @@ from .selection import (
     panel_config,
     scenario_label,
     selected,
+    stored_layout_fits,
     unselected_items,
 )
 from .utils import async_activate_scenario
@@ -435,7 +435,7 @@ def _report_unsupported_panel(
 ) -> None:
     """A repair issue while the panel has no profile of its own.
 
-    Such a panel (firmware 5, another model) set up earlier keeps running
+    Such a panel (firmware 5.0x, another model) set up earlier keeps running
     with the fallback layout, so its names, zones and scenarios may be
     wrong. The issue goes away once the panel is supported.
     """
@@ -472,13 +472,15 @@ async def _reread_configuration_if_outdated(
     Called at every setup, but it only looks at the stored configuration:
     nothing is read from the panel unless it lacks the names of user codes,
     keys and readers, the enabled peripherals or the general options
-    (stored from this version on), or it was stored for
-    another panel model. The panel model is known from the first status
-    read, and the stored terminal records must be L x 12 bytes for it; they
-    differ once for a panel with its own profile (the 10100) set up with an
-    earlier version, which read every panel with the SmartLiving 1050's
-    addresses. After the re-read neither applies. Unique IDs do not change.
-    If the re-read fails, setup goes on with the stored configuration.
+    (stored from this version on), or it was stored with another layout.
+    The panel model is known from the first status read, and the stored
+    terminal records and peripherals must have its lengths; they differ
+    once for a panel that got its own profile (another model, or firmware
+    5.1) after it was set up with an earlier version, which read it with the
+    SmartLiving 1050's firmware 6 addresses. After the re-read neither
+    applies. Unique IDs do not change. If the re-read fails, setup goes on
+    with the stored configuration, and the blocks that do not fit are not
+    decoded.
     """
     try:
         model = api.panel.model
@@ -487,12 +489,10 @@ async def _reread_configuration_if_outdated(
     config = entry.data.get(DATA_INITIAL_PANEL_CONFIG) or {}
     if not config:
         return
-    raw = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(KEY_INIT_TERMINAL_RECORDS_RAW)
-    expected = model.terminals * model.terminal_record_length
-    if isinstance(raw, str) and len(raw) // 2 != expected:
+    if not stored_layout_fits(config, model):
         _LOGGER.warning(
             "%s: the stored panel configuration does not fit the %s (it was "
-            "read for another model); reading it again from the panel",
+            "read with another layout); reading it again from the panel",
             entry.title,
             model.name,
         )

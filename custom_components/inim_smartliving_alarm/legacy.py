@@ -39,10 +39,8 @@ from .protocol.commands import ArmMode
 from .protocol.config import ZONE_TYPES, TerminalType
 from .protocol.errors import ProtocolError, UnsupportedPanelError
 from .protocol.events import (
-    EVENT_RECORD_LENGTH,
     decode_event_pointers,
     decode_timestamp,
-    event_address,
     newest_indexes,
 )
 from .protocol.model import SMARTLIVING_1050_FW6, PanelModel
@@ -264,13 +262,12 @@ class LegacyPanelClient:
         events: list[dict[str, Any]] = []
         for index in newest_indexes(pointers, model, wanted):
             try:
-                data = await self.panel.read_eeprom(
-                    event_address(index, model), EVENT_RECORD_LENGTH
-                )
+                read = await self.panel.read_event_record(index)
             except _ERRORS as err:
                 _LOGGER.info("Stopped reading events at %s: %s", index, err)
                 break
-            event = event_dict(data, model, time_zone)
+            event = event_dict(read.record, model, time_zone)
+            event["raw_hex_data"] = read.raw.hex()  # as the panel stored it
             event["query_index_hex"] = f"{index:04x}"
             event["query_index_val"] = index
             events.append(event)

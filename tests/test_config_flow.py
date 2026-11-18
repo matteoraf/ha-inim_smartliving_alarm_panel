@@ -213,15 +213,15 @@ async def test_firmware_below_5_is_refused(
     assert result["errors"] == {"base": "unsupported_firmware"}
 
 
-async def test_firmware_5_is_refused(
+async def test_firmware_5_0_is_refused(
     hass: HomeAssistant, panel: FakePanel, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """Firmware 5.x cannot be set up: firmware 6 is needed."""
-    panel.state.firmware = "5.11 01050  "
+    """Firmware 5.0x cannot be set up: firmware 5.1 or newer is needed."""
+    panel.state.firmware = "5.07 01050  "
     flow_id = await board_form(hass, "smartlan_si")
     result = await submit(hass, flow_id, si_input(panel))
     assert result["errors"] == {"base": "unsupported_firmware"}
-    assert "firmware 5.11 is not supported yet" in caplog.text
+    assert "firmware 5.07 is not supported (5.1 or newer is needed)" in caplog.text
 
 
 @pytest.mark.parametrize("firmware", ["6.07 00999  ", "5.07 00999  "])

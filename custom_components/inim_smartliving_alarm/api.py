@@ -48,6 +48,11 @@ from .protocol.config import (
     label_address,
     refuses_arming_when_not_ready,
 )
+from .protocol.events import (
+    EVENT_RECORD_LENGTH,
+    event_address,
+    normalized_event_record,
+)
 from .protocol.frames import (
     active_scenario_request,
     not_ready_area_request,
@@ -55,11 +60,8 @@ from .protocol.frames import (
     read_ram,
 )
 from .protocol.model import (
-    GENERAL_OPTIONS_ADDRESS,
     GENERAL_OPTIONS_READ_LENGTH,
     PERIPHERALS_ADDRESS,
-    PERIPHERALS_LENGTH,
-    SETUP_BLOCK_LENGTH,
     FirmwareInfo,
     PanelModel,
     model_for_or_fallback,
@@ -147,6 +149,14 @@ class Labels:
     def names(self) -> list[str]:
         """The labels, decoded with the panel's character set."""
         return decode_labels(self.raw, self.count)
+
+
+@dataclass(frozen=True, slots=True)
+class EventRecord:
+    """One event-log record (9 bytes)."""
+
+    raw: bytes  # as read from the panel
+    record: bytes  # with the event code in firmware 6 numbering
 
 
 @dataclass(frozen=True, slots=True)
@@ -350,11 +360,11 @@ class SmartLivingPanel:
             siren_labels = await labels(reg.LABELS_SIRENS, model.sirens)
             # The enabled peripherals and the general options, in one go
             setup_block = await session.read_eeprom(
-                PERIPHERALS_ADDRESS, SETUP_BLOCK_LENGTH
+                PERIPHERALS_ADDRESS, model.setup_block_length
             )
-            peripherals = setup_block[:PERIPHERALS_LENGTH]
+            peripherals = setup_block[: model.peripherals_length]
             general_options = setup_block[
-                GENERAL_OPTIONS_ADDRESS : GENERAL_OPTIONS_ADDRESS
+                model.general_options_address : model.general_options_address
                 + GENERAL_OPTIONS_READ_LENGTH
             ]
             physical_map = await session.read_eeprom(
@@ -478,6 +488,19 @@ class SmartLivingPanel:
         async with self.transport.session() as session:
             await self._identify(session)
             return await session.read_eeprom(address, length, sensitive=sensitive)
+
+    async def read_event_record(self, index: int) -> EventRecord:
+        """Read the event-log record at a ring index.
+
+        Panels on other firmware number their events differently; the
+        record is also given with the code in firmware 6 numbering.
+        """
+        async with self.transport.session() as session:
+            model = await self._identify(session)
+            raw = await session.read_eeprom(
+                event_address(index, model), EVENT_RECORD_LENGTH
+            )
+        return EventRecord(raw, normalized_event_record(raw, model))
 
     # ---------------------------------------------------------------- commands
 
