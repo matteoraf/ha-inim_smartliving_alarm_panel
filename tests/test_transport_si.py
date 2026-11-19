@@ -345,6 +345,60 @@ async def test_debug_log_of_reads(
     assert "<- 251 bytes, not logged" in caplog.text
 
 
+# ------------------------------------------------- statistics and trace
+
+
+async def test_trace_never_holds_the_pin(transport: SmartLanSiTransport) -> None:
+    """The kept exchanges mask the PIN, keep acks as words and sensitive
+    replies as their length."""
+    await transport.command(arm_areas("1234", {3: ArmMode.AWAY}, SL1050))
+    async with transport.session() as session:
+        await session.read_eeprom(
+            SL1050.pin_table, SL1050.pin_table_length, sensitive=True
+        )
+    trace = list(transport.stats.trace)
+    text = repr(trace)
+    assert "01 02 03 04" not in text
+    assert "010203" not in text
+    command = trace[0]
+    assert "** ** ** ** ** **" in command["request"]
+    assert command["reply"] == "acknowledged"
+    assert trace[1]["reply"] == "00 00"  # the command result
+    assert all(t["reply"].endswith("bytes, not kept") for t in trace[2:])
+
+
+async def test_statistics(
+    transport: SmartLanSiTransport, fake_panel: FakePanel
+) -> None:
+    """Counters, timings, command results and the last errors."""
+    await transport.read(MODEL, 12)
+    await transport.command(arm_areas("1234", {3: ArmMode.AWAY}, SL1050))
+    transport.reply_timeout = 0.1
+    fake_panel.reply_delay = 0.3
+    with pytest.raises(ReplyTimeout):
+        await transport.read(MODEL, 12)
+    stats = transport.stats.as_dict()
+    counters = stats["counters"]
+    assert counters["requests"] == 4
+    assert counters["connects"] == 1
+    assert counters["timeout"] == 1
+    assert stats["command_results"] == {"ok": 1}
+    assert stats["round_trip"]["count"] == 3
+    assert stats["connect"]["count"] == 1
+    assert [e["kind"] for e in stats["last_errors"]] == ["timeout"]
+    assert transport.stats.trace[-1]["error"] == "timeout"
+
+
+async def test_the_trace_keeps_the_last_exchanges(
+    transport: SmartLanSiTransport,
+) -> None:
+    """Only the last 30 exchanges are kept."""
+    for _ in range(35):
+        await transport.read(MODEL, 12)
+    assert len(transport.stats.trace) == 30
+    assert transport.stats.counters["requests"] == 35
+
+
 # ------------------------------------------------------------ priority lock
 
 

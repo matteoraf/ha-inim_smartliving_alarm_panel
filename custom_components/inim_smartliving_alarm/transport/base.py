@@ -12,6 +12,7 @@ replies that may hold PINs are not logged.
 """
 
 import asyncio
+from collections import Counter, deque
 from collections.abc import AsyncIterator
 import contextlib
 from enum import IntEnum
@@ -19,7 +20,7 @@ import heapq
 import itertools
 import logging
 import time
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from ..protocol import registers as reg
 from ..protocol.commands import Command, CommandResult, decode_result
@@ -117,6 +118,91 @@ class PriorityLock:
         self._locked = False
 
 
+TRACE_LENGTH = 30  # exchanges kept for a system report
+ERRORS_KEPT = 5
+
+
+class TransportStats:
+    """Counters, timings and the last exchanges of a transport.
+
+    Kept in memory for a system report, so it never holds a secret: the
+    PIN of a command is masked when the request is recorded, a write's
+    acknowledgement is kept only as right or wrong, and the reply of a
+    sensitive read only as its length.
+    """
+
+    def __init__(self) -> None:
+        """Start from zero."""
+        self.started = time.time()
+        self.counters: Counter[str] = Counter()
+        self.command_results: Counter[str] = Counter()
+        self._round_trips: deque[float] = deque(maxlen=200)  # seconds
+        self._connect_times: deque[float] = deque(maxlen=50)
+        self.errors: deque[dict[str, Any]] = deque(maxlen=ERRORS_KEPT)
+        self.trace: deque[dict[str, Any]] = deque(maxlen=TRACE_LENGTH)
+
+    def exchange(
+        self,
+        request: bytes,
+        reply: bytes | None,
+        seconds: float,
+        *,
+        keep_reply: bool,
+        error: str | None = None,
+    ) -> dict[str, Any]:
+        """Record one exchange; returns its trace entry."""
+        self.counters["requests"] += 1
+        self.counters["bytes_sent"] += len(request)
+        entry: dict[str, Any] = {
+            "time": round(time.time(), 3),
+            "request": describe(request),
+            "ms": round(seconds * 1000, 1),
+        }
+        if reply is not None:
+            self.counters["bytes_received"] += len(reply)
+            self._round_trips.append(seconds)
+            entry["reply"] = (
+                reply.hex(" ") if keep_reply else f"{len(reply)} bytes, not kept"
+            )
+        if error is not None:
+            self.counters[error] += 1
+            entry["error"] = error
+            self.error(error)
+        self.trace.append(entry)
+        return entry
+
+    def connected(self, seconds: float) -> None:
+        """Record a connection opened."""
+        self.counters["connects"] += 1
+        self._connect_times.append(seconds)
+
+    def error(self, kind: str) -> None:
+        """Record an error (kind only: no address, no data)."""
+        self.errors.append({"time": round(time.time(), 3), "kind": kind})
+
+    def as_dict(self) -> dict[str, Any]:
+        """The statistics for a report."""
+
+        def timing(values: deque[float]) -> dict[str, float] | None:
+            if not values:
+                return None
+            return {
+                "count": len(values),
+                "min_ms": round(min(values) * 1000, 1),
+                "avg_ms": round(sum(values) / len(values) * 1000, 1),
+                "max_ms": round(max(values) * 1000, 1),
+            }
+
+        return {
+            "since": round(self.started, 3),
+            "counters": dict(sorted(self.counters.items())),
+            "command_results": dict(sorted(self.command_results.items())),
+            "round_trip": timing(self._round_trips),
+            "connect": timing(self._connect_times),
+            "last_errors": list(self.errors),
+        }
+
+
 class Session:
     """Exclusive use of the connection for one or more requests."""
 
@@ -144,6 +230,7 @@ class Session:
             except ConnectionLost:
                 if attempt == 2:
                     raise
+                self._transport.stats.counters["repeated_reads"] += 1
                 _LOGGER.debug("Connection lost during a read; repeating it")
                 continue
             try:
@@ -151,6 +238,8 @@ class Session:
                     return parse_read_reply(reply, length)
                 return parse_plain_read_reply(reply, length)
             except ProtocolError:
+                self._transport.stats.counters["checksum_errors"] += 1
+                self._transport.stats.error("checksum_error")
                 await self._transport.disconnect()  # do not reuse an out-of-step link
                 raise
         raise AssertionError("unreachable")
@@ -175,13 +264,18 @@ class Session:
         """
         pin = carries_pin(frame)
         reply = await self._transport.exchange(frame, 1, log_reply=not pin)
+        entry = self._transport.stats.trace[-1]
         try:
             check_write_ack(reply, payload)
         except ProtocolError:
+            entry["reply"] = "wrong acknowledgement"
+            self._transport.stats.counters["wrong_acks"] += 1
+            self._transport.stats.error("wrong_ack")
             if pin:
                 _LOGGER.debug("<- wrong acknowledgement")
             await self._transport.disconnect()
             raise
+        entry["reply"] = "acknowledged"
         if pin:
             _LOGGER.debug("<- acknowledged")
 
@@ -190,7 +284,9 @@ class Session:
         await self.write(command.frame, command.payload)
         result = read_ram_frame(reg.COMMAND_RESULT, 1, self._transport.dialect)
         data = await self.read(result, 1)
-        return decode_result(command.kind, data)
+        decoded = decode_result(command.kind, data)
+        self._transport.stats.command_results[decoded.reason or "ok"] += 1
+        return decoded
 
     async def _read_parts(
         self, address: int, length: int, build, sensitive: bool
@@ -238,6 +334,7 @@ class PanelTransport:
         self.reconnect_pause = reconnect_pause
         self.idle_reconnect = idle_reconnect
         self.connections_opened = 0
+        self.stats = TransportStats()
         self._reader: asyncio.StreamReader | None = None
         self._writer: asyncio.StreamWriter | None = None
         self._lock = PriorityLock()
@@ -291,6 +388,7 @@ class PanelTransport:
         debug = _LOGGER.isEnabledFor(logging.DEBUG)
         if debug:
             _LOGGER.debug("-> %s", describe(data))
+        sent = time.monotonic()
         try:
             self._writer.write(self._encode(data))
             await self._writer.drain()
@@ -298,21 +396,32 @@ class PanelTransport:
                 self._read_reply(self._reader, reply_length), self.reply_timeout
             )
         except TimeoutError as err:
+            self._record(data, sent, "timeout")
             await self.disconnect()
             raise ReplyTimeout(f"no reply from {self.host}:{self.port}") from err
         except (OSError, asyncio.IncompleteReadError) as err:
+            self._record(data, sent, "connection_lost")
             await self.disconnect()
             raise ConnectionLost(f"connection to {self.host}:{self.port} lost") from err
         except ProtocolError:  # the framing could not decode the reply
+            self._record(data, sent, "framing_error")
             await self.disconnect()
             raise
         self._last_activity = time.monotonic()
+        self.stats.exchange(
+            data, reply, self._last_activity - sent, keep_reply=log_reply
+        )
         if debug:
             if log_reply:
                 _LOGGER.debug("<- %s", reply.hex(" "))
             else:
                 _LOGGER.debug("<- %d bytes, not logged", len(reply))
         return reply
+
+    def _record(self, data: bytes, sent: float, error: str) -> None:
+        self.stats.exchange(
+            data, None, time.monotonic() - sent, keep_reply=False, error=error
+        )
 
     async def disconnect(self) -> None:
         """Close the connection (lock must be held)."""
@@ -332,6 +441,7 @@ class PanelTransport:
             if self._writer.is_closing() or self._reader.at_eof():
                 await self.disconnect()
             elif idle > self.idle_reconnect:
+                self.stats.counters["idle_replacements"] += 1
                 _LOGGER.debug("Connection idle for %.1f s; replacing it", idle)
                 await self.disconnect()
         if self._writer is None:
@@ -344,12 +454,15 @@ class PanelTransport:
             wait = closed + self.reconnect_pause - time.monotonic()
             if wait > 0:
                 await asyncio.sleep(wait)
+            started = time.monotonic()
             try:
                 self._reader, self._writer = await asyncio.wait_for(
                     asyncio.open_connection(self.host, self.port), self.connect_timeout
                 )
             except OSError as err:  # refused, unreachable or timed out
                 error = err
+                self.stats.counters["connect_failures"] += 1
+                self.stats.error("connect_failure")
                 _last_close[(self.host, self.port)] = time.monotonic()
                 _LOGGER.debug(
                     "Connection attempt %s to %s:%s failed: %r",
@@ -361,6 +474,7 @@ class PanelTransport:
                 continue
             self.connections_opened += 1
             self._last_activity = time.monotonic()
+            self.stats.connected(self._last_activity - started)
             _LOGGER.debug("Connected to %s:%s", self.host, self.port)
             return
         raise ConnectError(f"cannot connect to {self.host}:{self.port}: {error!r}")

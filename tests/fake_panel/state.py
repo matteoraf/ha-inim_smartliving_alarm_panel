@@ -117,6 +117,9 @@ class PanelState:
         default_factory=lambda: [bytes(c.SCENARIO_RECORD_LENGTH)] * c.NUM_SCENARIOS
     )
     labels: dict[int, list[str]] = field(default_factory=dict)
+    # Bytes written over the built EEPROM image, by address (tests plant
+    # phone numbers, key serials or a canary pattern with it)
+    eeprom_extra: dict[int, bytes] = field(default_factory=dict)
     # Enabled devices: kind ("keypads", "readers", ...) -> 0-based numbers
     peripherals: dict[str, list[int]] = field(default_factory=dict)
 
@@ -306,6 +309,8 @@ class PanelState:
         for index, event in enumerate(self.events):
             if event is not None:
                 put(lay.eeprom_events + index * c.EVENT_RECORD_LENGTH, event.to_bytes())
+        for address, data in self.eeprom_extra.items():
+            put(address, data)
         return image
 
     def eeprom_read(self, address: int, length: int) -> bytes:

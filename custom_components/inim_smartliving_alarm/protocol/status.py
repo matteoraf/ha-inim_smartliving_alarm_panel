@@ -255,3 +255,39 @@ def _bits(data: bytes, count: int) -> tuple[bool, ...]:
 def _check_length(data: bytes, length: int, what: str) -> None:
     if len(data) != length:
         raise ProtocolError(f"{what}: expected {length} bytes, got {len(data)}")
+
+
+@dataclass(frozen=True, slots=True)
+class CloudStatus:
+    """The cloud flag byte in EEPROM: two independent flag bits.
+
+    Either of the two low bits set means the cloud connection is
+    configured (both set is the usual state). The other bits have no known
+    meaning: they are kept as they are.
+    """
+
+    raw: int
+    bit_0: bool
+    bit_1: bool
+    other_bits: int  # bits 2-7, as they are
+
+    @property
+    def configured(self) -> bool:
+        """Whether the cloud connection is configured."""
+        return self.bit_0 or self.bit_1
+
+
+def decode_cloud_status(data: bytes) -> CloudStatus:
+    """Decode the 1-byte cloud flag.
+
+    The copy in the faults register reads 0 while the cloud mode is on, so
+    this flag is read from EEPROM.
+    """
+    _check_length(data, 1, "cloud flag")
+    value = data[0]
+    return CloudStatus(
+        raw=value,
+        bit_0=bool(value & 0x01),
+        bit_1=bool(value & 0x02),
+        other_bits=value & 0xFC,
+    )

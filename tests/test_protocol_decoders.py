@@ -408,3 +408,26 @@ def test_event_fields() -> None:
 
     reset = decode_event_record(bytes.fromhex("caa15f2f7800ffff8d"), SL1050)
     assert (reset.agent, reset.location, reset.code) == (None, None, 13)
+
+
+@pytest.mark.parametrize(
+    ("raw", "configured", "bits", "other"),
+    [
+        (0x00, False, (False, False), 0),
+        (0x01, True, (True, False), 0),
+        (0x02, True, (False, True), 0),
+        (0x03, True, (True, True), 0),
+        (0x80, False, (False, False), 0x80),
+    ],
+)
+def test_cloud_status_flags(raw: int, configured: bool, bits, other: int) -> None:
+    """Either low bit means configured; the other bits are kept as they are."""
+    from custom_components.inim_smartliving_alarm.protocol.status import (
+        decode_cloud_status,
+    )
+
+    flags = decode_cloud_status(bytes((raw,)))
+    assert flags.configured is configured
+    assert (flags.bit_0, flags.bit_1) == bits
+    assert flags.other_bits == other
+    assert flags.raw == raw

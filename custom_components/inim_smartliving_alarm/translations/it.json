@@ -351,6 +351,14 @@
             "armed_partial": "Inserita parziale",
             "armed_instant": "Inserita istantanea"
           }
+        },
+        "diagnostics_level": {
+          "name": "Livello diagnostica",
+          "state": {
+            "redacted": "Ridotto",
+            "full": "Completo",
+            "confidential": "Completo riservato"
+          }
         }
       },
       "sensor": {

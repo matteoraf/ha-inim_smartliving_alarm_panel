@@ -378,7 +378,7 @@ async def search(
 
     async def fake_discover() -> list:
         return await discovery.discover(
-            0.3, target="127.0.0.1", si_ports=si_ports, g_ports=g_ports
+            1.0, target="127.0.0.1", si_ports=si_ports, g_ports=g_ports
         )
 
     result = await hass.config_entries.flow.async_init(

@@ -5,12 +5,14 @@ from typing import Any
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .attribute_values import minutes_text, time_text
+from .attribute_values import area_settings_attributes
 from .const import (
     AREA_MODE_DISARMED,
     AREA_MODE_INSTANT,
@@ -31,8 +33,9 @@ from .const import (
 )
 from .legacy import LegacyPanelClient
 from .protocol.commands import ArmMode
-from .protocol.config import AreaConfig
+from .protocol.masking import Level
 from .readiness import async_arm
+from .report_state import async_set_level, level_signal, report_state
 from .selection import area_label, area_records, selected
 
 _LOGGER = logging.getLogger(__name__)
@@ -62,7 +65,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up one arming-mode select per imported area."""
+    """Set up one arming-mode select per imported area, and the diagnostics level."""
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     api_client: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
 
@@ -84,23 +87,9 @@ async def async_setup_entry(
         )
         for area in selected(entry.options, initial_panel_config, CONF_AREAS)
     )
-
-
-def area_settings_attributes(area: AreaConfig) -> dict[str, Any]:
-    """An area's delays and options as attributes (stable English values)."""
-    return {
-        "exit_time": time_text(area.exit_time),
-        "entry_time": time_text(area.entry_time),
-        "entry_time_2": "not used"
-        if area.entry_time_2 is None
-        else time_text(area.entry_time_2),
-        "pre_arm_warning_time": minutes_text(area.pre_arm_warning),
-        "patrol_time": minutes_text(area.patrol),
-        "timer_program": "none" if area.timer_program is None else area.timer_program,
-        "reset_alarm_memory_on_arming": area.reset_alarm_memory_on_arming,
-        "auto_arm_partial": area.auto_arm_partial,
-        "clear_call_queue_on_disarm": area.clear_call_queue_on_disarm,
-    }
+    async_add_entities(
+        [InimDiagnosticsLevelSelect(entry, panel_display_name, system_info)]
+    )
 
 
 class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
@@ -174,3 +163,52 @@ class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
         self._attr_current_option = option  # until the next update says otherwise
         self.async_write_ha_state()
         await self.coordinator.async_request_refresh()
+
+
+class InimDiagnosticsLevelSelect(SelectEntity):
+    """How much the next diagnostics download (the system report) shows.
+
+    Kept in memory only: Redacted after every restart, and again after a
+    report at a Full level has been downloaded in both forms.
+    """
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "diagnostics_level"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+    _attr_options = [str(level) for level in Level]
+    _attr_should_poll = False
+
+    def __init__(
+        self,
+        config_entry: ConfigEntry,
+        panel_display_name: str,
+        system_info: dict[str, Any],
+    ) -> None:
+        """Initialize the select of one entry."""
+        self._entry_id = config_entry.entry_id
+        self._attr_unique_id = f"{config_entry.entry_id}_diagnostics_level"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, config_entry.entry_id)},
+            name=panel_display_name,
+            manufacturer="Inim Electronics",
+            model=system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
+            sw_version=system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+        )
+
+    @property
+    def current_option(self) -> str:
+        """The level of the next report."""
+        return str(report_state(self.hass, self._entry_id).level)
+
+    async def async_added_to_hass(self) -> None:
+        """Follow changes made by the diagnostics download."""
+        self.async_on_remove(
+            async_dispatcher_connect(
+                self.hass, level_signal(self._entry_id), self.async_write_ha_state
+            )
+        )
+
+    async def async_select_option(self, option: str) -> None:
+        """Choose the level of the next report."""
+        async_set_level(self.hass, self._entry_id, Level(option))

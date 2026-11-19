@@ -1505,6 +1505,13 @@
     "state": "disarmed"
   },
   {
+    "platform": "select",
+    "unique_id": "_diagnostics_level",
+    "original_name": "Diagnostics level",
+    "device_class": null,
+    "state": null
+  },
+  {
     "platform": "sensor",
     "unique_id": "_active_scenario_name",
     "original_name": "Active Scenario Name",

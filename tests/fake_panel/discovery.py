@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import asyncio
 import ipaddress
+import random
+import socket
 
 from .server import TRANSPORT_G, FakePanel
 
@@ -38,6 +40,31 @@ def g_reply(panel: FakePanel, panel_name: str) -> bytes:
     """The SmartLAN/G reply: panel firmware and model from its model string."""
     firmware, model = panel.state.firmware.split()[:2]
     return f"{firmware}|{model}|{panel_name}|{BOARD_FIRMWARE}|{panel.port}".encode()
+
+
+# Every UDP port the tests use comes from here, the fake boards' listening
+# ports too. The ports are below the range the system hands out to sockets
+# bound to port 0, so no other program or socket takes one between the
+# check and the bind; each is free on every address (the searches listen
+# on all of them) and handed out once per session, so two fake boards never
+# share a port and answer each other's searches.
+_PORT_RANGE = range(20000, 30000)
+_next_port = random.randrange(_PORT_RANGE.start, _PORT_RANGE.stop)
+
+
+def free_udp_port() -> int:
+    """A UDP port free on every address, never the same one twice in a session."""
+    global _next_port  # noqa: PLW0603 - the session's port counter
+    for _ in range(len(_PORT_RANGE)):
+        port = _next_port
+        _next_port = port + 1 if port + 1 < _PORT_RANGE.stop else _PORT_RANGE.start
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            try:
+                sock.bind(("0.0.0.0", port))
+            except OSError:
+                continue  # in use by another program
+        return port
+    raise RuntimeError("no free UDP port for the tests")
 
 
 class _Responder(asyncio.DatagramProtocol):
@@ -83,8 +110,9 @@ class DiscoveryResponder:
         return si_reply(self.panel.host, self.panel.port)
 
     async def start(self, host: str = "127.0.0.1", port: int = 0) -> None:
-        """Listen for probes; port 0 picks a free port."""
+        """Listen for probes; port 0 takes a free port from free_udp_port()."""
         loop = asyncio.get_running_loop()
+        port = port or free_udp_port()
         self._transport, _ = await loop.create_datagram_endpoint(
             lambda: _Responder(self), local_addr=(host, port)
         )
