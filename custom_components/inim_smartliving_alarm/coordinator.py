@@ -14,9 +14,14 @@ from .const import (
     CONF_EVENT_LOG_SIZE,
     DEFAULT_EVENT_LOG_SIZE,
     KEY_LATEST_EVENT_INDEX_VAL,
+    KEY_LIVE_OUTPUT_LEVELS,
     KEY_PROCESSED_EVENTS,
 )
 from .legacy import LegacyPanelClient
+from .outputs import is_dimmer
+from .protocol.errors import ProtocolError
+from .selection import imported_outputs, panel_config
+from .transport.base import TransportError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -77,6 +82,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             current_data.update(
                 status_data
             )  # Add status data to the coordinator's data
+            current_data[KEY_LIVE_OUTPUT_LEVELS] = await self._read_dimmer_levels()
 
             # --- Fetch Compact Events ---
             event_fetch_count_config = self.config_entry.options.get(
@@ -182,3 +188,24 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             raise UpdateFailed(
                 f"Error communicating with API for {self.panel_host_port}: {err}"
             ) from err
+
+    async def _read_dimmer_levels(self) -> dict[int, int | None]:
+        """The levels of the imported dimmers, if the panel reports them.
+
+        Only imported dimmers are read; a failed read leaves them unknown
+        for this poll.
+        """
+        dimmers = [
+            item.terminal
+            for item in imported_outputs(
+                self.config_entry.options, panel_config(self.config_entry.data)
+            )
+            if is_dimmer(item) and item.address is not None
+        ]
+        if not dimmers:
+            return {}
+        try:
+            return await self.api_client.panel.read_output_levels(dimmers)
+        except (TransportError, ProtocolError, ValueError) as err:
+            _LOGGER.debug("(%s) Dimmer levels not read: %s", self.name, err)
+            return {}

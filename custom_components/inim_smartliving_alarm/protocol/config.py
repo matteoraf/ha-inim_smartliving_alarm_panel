@@ -92,6 +92,122 @@ OUTPUT_TYPES = frozenset(
 )
 
 
+# Output terminals the output command switches (on/off or a 0-100 level)
+SWITCHED_OUTPUT_TYPES = frozenset(
+    (TerminalType.OUTPUT, TerminalType.IN_OUT, TerminalType.OUT_DIMMING)
+)
+
+
+class OutputKind(StrEnum):
+    """How an output is switched."""
+
+    ON_OFF = "on_off"
+    MONOSTABLE = "monostable"  # switches itself off after its time
+    DIMMER = "dimmer"  # a level 0-100
+
+
+# Output options (terminal record byte 10, fixed-output record byte 1)
+OUTPUT_OPTION_BITS = {
+    "normally_closed": 0,
+    "monostable": 1,
+    "buzzer": 2,
+    "flashing": 3,
+    "keep_on_restoral": 4,
+    "toggle": 5,
+    "dimmer": 6,
+    "relay_use": 7,
+}
+FIXED_OUTPUT_RECORD_LENGTH = 2  # monostable time, options
+
+
+@dataclass(frozen=True, slots=True)
+class OutputConfig:
+    """An output's programming: monostable time and options (raw bytes)."""
+
+    time: int
+    options: int
+    dimmer_type: bool = False  # a terminal of the dimmer output type
+
+    @property
+    def kind(self) -> OutputKind:
+        """Dimmer, monostable or plain on/off."""
+        if self.dimmer_type or self.flags["dimmer"]:
+            return OutputKind.DIMMER
+        if self.flags["monostable"]:
+            return OutputKind.MONOSTABLE
+        return OutputKind.ON_OFF
+
+    @property
+    def flags(self) -> dict[str, bool]:
+        """The output options by name."""
+        return {
+            name: bool(self.options >> bit & 1)
+            for name, bit in OUTPUT_OPTION_BITS.items()
+        }
+
+    @property
+    def monostable_time(self) -> "PanelTime | None":
+        """How long a monostable output stays on; None for other kinds."""
+        if self.kind is not OutputKind.MONOSTABLE:
+            return None
+        return decode_time(self.time)
+
+
+def terminal_output_number(terminal: int, model: PanelModel) -> int:
+    """Output number of a logical terminal (0-based), in the panel's own
+    numbering: terminals 1-L, then O1-O3 as L+1 to L+3.
+    """
+    if not 0 <= terminal < model.terminals:
+        raise ValueError(f"terminal out of range: {terminal}")
+    return terminal + 1
+
+
+def fixed_output_number(fixed: int, model: PanelModel) -> int:
+    """Output number of a fixed output (1-3 for O1-O3)."""
+    if not 1 <= fixed <= FIXED_OUTPUTS:
+        raise ValueError(f"fixed output out of range: {fixed}")
+    return model.terminals + fixed
+
+
+def output_address(number: int, physical_map: PhysicalMap, model: PanelModel) -> int:
+    """The output command's OUTPUT byte for an output number.
+
+    0-2 always mean O1-O3, so a terminal output is addressed by a physical
+    slot of 3 or more; one wired only to slots 0-2 cannot be switched
+    (ValueError), nor can a terminal not in any slot.
+    """
+    if model.terminals < number <= model.terminals + FIXED_OUTPUTS:
+        return number - model.terminals - 1
+    if not 1 <= number <= model.terminals:
+        raise ValueError(f"output number out of range: {number}")
+    for slot, terminal in enumerate(physical_map.terminal_by_slot):
+        if slot >= FIXED_OUTPUTS and terminal == number - 1:
+            return slot
+    raise ValueError(f"terminal {number} is not in a physical slot of 3 or more")
+
+
+HOME_AUTOMATION_BIT = 0x01  # of an extra output options byte
+
+
+def decode_home_automation(data: bytes, model: PanelModel) -> tuple[bool, ...]:
+    """Which outputs the installer marked as home automation outputs.
+
+    From the extra output options (L + 3 bytes): terminals 0 to L-1, then
+    O1-O3.
+    """
+    _check_length(data, model.terminals + FIXED_OUTPUTS, "extra output options")
+    return tuple(bool(byte & HOME_AUTOMATION_BIT) for byte in data)
+
+
+def decode_fixed_outputs(data: bytes) -> list[OutputConfig]:
+    """Decode the records of the fixed outputs O1-O3 (2 bytes each)."""
+    _check_length(data, FIXED_OUTPUTS * FIXED_OUTPUT_RECORD_LENGTH, "fixed outputs")
+    return [
+        OutputConfig(time=data[2 * index], options=data[2 * index + 1])
+        for index in range(FIXED_OUTPUTS)
+    ]
+
+
 class Balancing(IntEnum):
     """Balancing of a terminal's input (byte 5 of its record)."""
 
@@ -118,6 +234,7 @@ class SensorKind(StrEnum):
 # Terminal record offsets and the sensor kind bits of byte 6
 TERMINAL_BALANCING_OFFSET = 5
 TERMINAL_SENSOR_OFFSET = 6
+TERMINAL_OUTPUT_TIME_OFFSET = 9
 TERMINAL_OUTPUT_OPTIONS_OFFSET = 10
 TERMINAL_TYPE_OFFSET = 11
 _ROLLER_BLIND_BIT = 0x80
@@ -144,6 +261,7 @@ class Terminal:
     roller_blind: bool
     shock_sensor: bool
     output_options: int  # byte 10; bit 6 = dimmer
+    output_time: int = 0  # byte 9: monostable time (bits 0-6 value, bit 7 unit)
 
     @property
     def sensor_kind(self) -> SensorKind:
@@ -174,6 +292,19 @@ class Terminal:
         """Whether the terminal is (also) an output."""
         return self.terminal_type in OUTPUT_TYPES
 
+    @property
+    def output(self) -> "OutputConfig | None":
+        """The terminal's output programming, if it is an output that can be
+        switched (on/off, monostable or dimmer; not DAC or analogue).
+        """
+        if self.terminal_type not in SWITCHED_OUTPUT_TYPES:
+            return None
+        return OutputConfig(
+            time=self.output_time,
+            options=self.output_options,
+            dimmer_type=self.terminal_type == TerminalType.OUT_DIMMING,
+        )
+
 
 def decode_terminals(data: bytes, model: PanelModel) -> list[Terminal]:
     """Decode the L logical terminal records."""
@@ -190,6 +321,7 @@ def decode_terminals(data: bytes, model: PanelModel) -> list[Terminal]:
                 roller_blind=bool(sensor & _ROLLER_BLIND_BIT),
                 shock_sensor=bool(sensor & _SHOCK_BIT),
                 output_options=record[TERMINAL_OUTPUT_OPTIONS_OFFSET],
+                output_time=record[TERMINAL_OUTPUT_TIME_OFFSET],
             )
         )
     return terminals
@@ -550,19 +682,40 @@ class UserCode:
         return bool(self.options & 0x20)
 
 
-def decode_code_record(record: bytes, model: PanelModel) -> UserCode:
-    """Decode one user code record."""
+CODE_OUTPUT_MASK_OFFSET = 50
+
+
+def code_output_mask(record: bytes, model: PanelModel) -> bytes:
+    """The output mask of a user code record, raw (see decode_output_mask)."""
     _check_length(record, model.code_record_length, "code record")
-    mask_length = model.code_output_mask_length
-    output_mask = record[50 : 50 + mask_length]
-    fixed = frozenset(n + 1 for n in range(FIXED_OUTPUTS) if output_mask[0] >> n & 1)
+    return record[
+        CODE_OUTPUT_MASK_OFFSET : CODE_OUTPUT_MASK_OFFSET
+        + model.code_output_mask_length
+    ]
+
+
+def decode_output_mask(
+    mask: bytes, model: PanelModel
+) -> tuple[frozenset[int], frozenset[int]]:
+    """(logical terminals 0-based, fixed outputs 1-3) a user code may drive.
+
+    Byte 0 bits 0-2 are O1-O3; then one bit per logical terminal.
+    """
+    _check_length(mask, model.code_output_mask_length, "output mask")
+    fixed = frozenset(n + 1 for n in range(FIXED_OUTPUTS) if mask[0] >> n & 1)
     terminals = frozenset(
         8 * k + b
-        for k, byte in enumerate(output_mask[1:])
+        for k, byte in enumerate(mask[1:])
         for b in range(8)
         if byte >> b & 1 and 8 * k + b < model.terminals
     )
-    type_offset = 50 + mask_length
+    return terminals, fixed
+
+
+def decode_code_record(record: bytes, model: PanelModel) -> UserCode:
+    """Decode one user code record."""
+    terminals, fixed = decode_output_mask(code_output_mask(record, model), model)
+    type_offset = CODE_OUTPUT_MASK_OFFSET + model.code_output_mask_length
     return UserCode(
         areas=_areas(int.from_bytes(record[0:2], "little"), model),
         options=record[48],

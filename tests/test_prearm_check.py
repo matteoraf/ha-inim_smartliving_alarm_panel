@@ -10,7 +10,6 @@ from unittest.mock import patch
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
-from homeassistant.helpers.service import async_get_all_descriptions
 import pytest
 from pytest_homeassistant_custom_component.common import async_capture_events
 
@@ -45,6 +44,7 @@ from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
 
 from .fake_panel import FakePanel, const as c
 from .test_init_baseline import AREA_3_SWITCH, call, entity_id_for
+from .test_item_selection import SERVICES, live_options
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
@@ -339,14 +339,13 @@ async def test_activate_scenario_lists_imported(
         entry, options={**entry.options, "scenarios": [1, 3]}
     )
     await hass.async_block_till_done()
-    descriptions = await async_get_all_descriptions(hass)
-    fields = descriptions[DOMAIN]["activate_scenario"]["fields"]
-    assert fields["scenario"]["selector"]["select"]["options"] == [
+    assert live_options(hass, "activate_scenario", "scenario") == [
         {"value": "1", "label": "Scenario 1"},
         {"value": "3", "label": "Scenario 3"},
     ]
-    assert "force" in fields
-    assert "force" in descriptions[DOMAIN]["arm_area"]["fields"]
+    live_options(hass, "arm_area", "areas")  # the rest as in services.yaml
+    assert "force" in SERVICES["activate_scenario"]["fields"]
+    assert "force" in SERVICES["arm_area"]["fields"]
 
 
 async def test_option_in_general_settings(

@@ -7,6 +7,7 @@ PLATFORMS = [
     "alarm_control_panel",
     "binary_sensor",
     "button",
+    "light",
     "select",
     "sensor",
     "switch",
@@ -28,6 +29,7 @@ CONF_PANEL_NAME = "panel_name"
 CONF_AREAS = "areas"
 CONF_ZONES = "zones"
 CONF_SCENARIOS = "scenarios"
+CONF_OUTPUTS = "outputs"  # output numbers: terminals 1-L, then O1-O3
 # Counts stored by versions before the lists ("the first N"); migrated to them
 CONF_LIMIT_AREAS = "limit_areas"
 CONF_LIMIT_ZONES = "limit_zones"
@@ -96,6 +98,14 @@ KEY_INIT_PERIPHERALS = "peripherals"
 KEY_INIT_GENERAL_OPTIONS = "general_options"
 # The area records as read: {"raw_hex": ...}
 KEY_INIT_AREA_RECORDS = "area_records"
+# Outputs, as read: O1-O3 records and labels, the physical-to-logical
+# terminal map, and the output mask of the PIN's user code ({"raw_hex": ...})
+KEY_INIT_FIXED_OUTPUT_RECORDS = "fixed_output_records"
+KEY_INIT_FIXED_OUTPUT_LABELS = "fixed_output_labels"
+KEY_INIT_PHYSICAL_MAP = "physical_map"
+KEY_INIT_USER_CODE_OUTPUTS = "user_code_outputs"
+# Extra output options (bit 0: home automation output); empty where unknown
+KEY_INIT_EXTRA_OUTPUT_OPTIONS = "extra_output_options"
 KEY_INIT_RAW_HEX = "raw_hex"
 
 KEY_INIT_SYSTEM_INFO = "system_info"
@@ -144,6 +154,8 @@ KEY_INIT_AREA_NAMES = "names"  # List of area names (str)
 KEY_LIVE_ACTIVE_SCENARIO = "active_scenario"  # Dict with current active scenario info
 KEY_LIVE_ACTIVE_SCENARIO_NUMBER = "active_scenario_number"  # 0-indexed int
 KEY_LIVE_PANEL_PROGRAMMING = "panel_programming"  # bool; None when not read
+# Imported dimmers' levels: logical terminal (0-based) -> 0-100 or None
+KEY_LIVE_OUTPUT_LEVELS = "output_levels"
 
 KEY_LIVE_AREAS_STATUS = "areas_status"  # Dict with current area statuses
 KEY_LIVE_AREA_STATUSES_MAP = (

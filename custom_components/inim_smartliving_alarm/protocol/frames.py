@@ -140,6 +140,22 @@ def not_ready_area_request(area: int, mode: int, model: PanelModel) -> bytes:
     )
 
 
+def output_detail_request(code: int, terminal: int, model: PanelModel) -> bytes:
+    """Ask for an output terminal's detail (type, level, ...), firmware 6.
+
+    The user code's index (0-based) goes in num_dev and the logical
+    terminal (0-based) in the length field; the panel answers only for
+    outputs the code may drive. The reply is 8 bytes.
+    """
+    if not model.output_detail:
+        raise ValueError(f"the {model.name} has no output detail")
+    if not 0 <= code < model.codes:
+        raise ValueError(f"user code out of range: {code}")
+    if not 0 <= terminal < model.terminals:
+        raise ValueError(f"terminal out of range: {terminal}")
+    return header(OP_READ, code, DEVICE_RAM, reg.OUTPUT_DETAIL, terminal)
+
+
 def not_ready_request(scenario: int, model: PanelModel) -> bytes:
     """Ask which zones would prevent activating a scenario (0-based).
 

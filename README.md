@@ -45,6 +45,8 @@ Features
         
     *   A dedicated sensor also displays the name of the single, currently active scenario on the panel.
         
+*   **Outputs**: the panel's terminal outputs and its fixed outputs O1-O3 that your user code may switch, as **switch** entities (on/off and monostable outputs) and **light** entities with brightness (dimmers), named from the panel. Only the outputs the installer marked as home automation outputs are proposed (see [Outputs](#outputs)).
+        
 *   **Configurable Event Log**:
     
     *   A sensor entity provides a log of recent panel events, with the names programmed on the panel: who did it (user code or key) and where (keypad or reader).
@@ -164,11 +166,11 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **The alarm panel shows Triggered only while an area is in alarm.** Before, it stayed Triggered until the alarm memory was reset; now it returns to its armed or disarmed state when the alarm ends, and the *Alarm memory* sensors keep the memory. Automations that relied on Triggered lasting until the reset should use the *Alarm memory* sensors instead.
     
-*   **Zones follow the panel's terminal types.** Output terminals (for example a siren) and unused terminals no longer get zone entities, and the second zones of double terminals (51 to 100 on the 1050) can be added: tick them in the options under **Areas, zones and scenarios** (existing installations keep the zones they had). Entities that earlier versions created for terminals that are not zones are **not deleted automatically**: they stay as unavailable entities, and the log lists them at every start (*"these entities belong to terminals that are not zones on the panel"*). Delete them in **Settings** -> **Devices & services** -> **Entities**.
+*   **Zones follow the panel's terminal types.** Output terminals (for example a siren) and unused terminals no longer get zone entities, and the second zones of double terminals (51 to 100 on the 1050) can be added: tick them in the options under **Areas, zones, scenarios and outputs** (existing installations keep the zones they had). Entities that earlier versions created for terminals that are not zones are **not deleted automatically**: they stay as unavailable entities, and the log lists them at every start (*"these entities belong to terminals that are not zones on the panel"*). Delete them in **Settings** -> **Devices & services** -> **Entities**.
     
 *   **"Zone X Triggered" is now called "Zone X Alarm memory"** (same entity ID). Zones in short circuit or tamper are no longer shown as unknown: a new *Zone X Tamper* sensor turns on, and the zone's `status_text` says `short` or `tamper`. Such zones are also listed when they prevent a scenario from being activated.
     
-*   **SmartLiving 10100 (experimental):** a 10100 now uses its own memory layout. Earlier versions read it as if it were a 1050, so its names and zones were wrong: at the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs of areas and zones stay the same; areas 11 to 15 and zones above 50 can be ticked in the options under **Areas, zones and scenarios**.
+*   **SmartLiving 10100 (experimental):** a 10100 now uses its own memory layout. Earlier versions read it as if it were a 1050, so its names and zones were wrong: at the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs of areas and zones stay the same; areas 11 to 15 and zones above 50 can be ticked in the options under **Areas, zones, scenarios and outputs**.
     
 *   **Event log:** event times are now shown in Home Assistant's time zone, with daylight saving time (before, always UTC+1), and new events keep appearing after the panel's event log wraps around. The event log sensor's state is now the newest event's position in the panel's log (0 to 999) instead of a memory address: automations that only trigger on a change keep working, but compare the new numbers if you used the value itself.
     
@@ -182,11 +184,11 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **Programming mode is now detected.** While the panel is being programmed from a keypad, it ignores commands, and earlier versions reported such a command as carried out. Now no command is sent while the panel is in programming mode: the action fails with a message instead, and setup, **Reconfigure** and **Re-read panel configuration** wait until programming has ended. A new diagnostic sensor, *Programming mode*, shows it. The `reason` of the `inim_smartliving_alarm_scenario_activation_failed` event can now also be `panel_programming`.
     
-*   **You now pick the areas, zones and scenarios to import from lists**, by name, instead of giving how many of each. Your configuration entry is updated once more (version 1.4): the counts you had become the same items (for example, 7 areas become areas 1 to 7), so your entities do not change. A scenario used by an alarm panel mode beyond your scenario count is added, so that the mode keeps working. The options now open a menu: **Areas, zones and scenarios** or **General settings**. Unticking an item there **removes its entities**; ticking it again brings them back with the same entity IDs. Entities left over from areas, zones or scenarios above your old counts are removed at the first start.
+*   **You now pick the areas, zones and scenarios to import from lists**, by name, instead of giving how many of each. Your configuration entry is updated once more (version 1.4): the counts you had become the same items (for example, 7 areas become areas 1 to 7), so your entities do not change. A scenario used by an alarm panel mode beyond your scenario count is added, so that the mode keeps working. The options now open a menu: **Areas, zones, scenarios and outputs** or **General settings**. Unticking an item there **removes its entities**; ticking it again brings them back with the same entity IDs. Entities left over from areas, zones or scenarios above your old counts are removed at the first start.
     
 *   **The `arm_area` action lists the imported areas only, by name**, and refuses areas that are not imported. The alarm panel's modes can be mapped only to imported scenarios.
     
-*   **The event log shows the names programmed on the panel**: who caused an event (the user code's or key's name, instead of *User 3* or *Key 5*) and where (the keypad's or reader's name). Commands sent remotely, from the app, the cloud, Home Assistant or the installer software, show *Remote* (before, *Mobile App*). The **Reader names** option is removed: reader names now come from the panel, and names typed in that option are no longer used. Your configuration entry is updated once more (version 1.5), and at the first start the integration reads the panel configuration again by itself to get the names (the log says so). A new diagnostic sensor, *Peripherals*, lists the keypads, readers, expanders and sirens enabled on the panel, and so does the **Areas, zones and scenarios** step.
+*   **The event log shows the names programmed on the panel**: who caused an event (the user code's or key's name, instead of *User 3* or *Key 5*) and where (the keypad's or reader's name). Commands sent remotely, from the app, the cloud, Home Assistant or the installer software, show *Remote* (before, *Mobile App*). The **Reader names** option is removed: reader names now come from the panel, and names typed in that option are no longer used. Your configuration entry is updated once more (version 1.5), and at the first start the integration reads the panel configuration again by itself to get the names (the log says so). A new diagnostic sensor, *Peripherals*, lists the keypads, readers, expanders and sirens enabled on the panel, and so does the **Areas, zones, scenarios and outputs** step.
     
 *   **Changing the PIN in the options works again**, and the PIN is no longer shown. The **New PIN Code** field in **General settings** is now empty: leave it empty to keep the current PIN, or enter a new one, which is checked with the panel as at setup. Before, the field showed the current PIN in clear text and any new PIN was refused. The PIN (and, for SmartLAN/G, the board password) is now a password field at setup and in **Reconfigure**, where it is no longer filled in: leave it empty to keep the current one. A new diagnostic sensor, *User code*, names the user code the PIN belongs to, and **General settings** says it too.
     
@@ -210,6 +212,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
 
 *   **Firmware 5.0x and other models cannot be set up any more**: a new setup of a panel on firmware older than 5.1, or of a SmartLiving model without its own layout, is refused with a message. A panel of such a model, or one on firmware 5.0x, that is already set up keeps working as before and shows a repair notice, as its data may be wrong.
     
+*   **Outputs are new**: terminal outputs and the fixed outputs O1 to O3 can be switched, and dimmers dimmed, from Home Assistant. At the first start the integration reads the panel configuration again once by itself to get the outputs' programming and names (the log says so). No output is imported until you save the options under **Areas, zones, scenarios and outputs**, where the outputs the installer marked as home automation outputs are ticked for you. Please try a harmless output first.
+
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -240,7 +244,7 @@ After installation and restarting Home Assistant:
         
 6.  Click **Submit**. The integration connects to your panel, checks it and reads its configuration. The setup is refused, with a message, if the panel cannot be reached, if the PIN does not match any user code of the panel, if the panel's firmware is older than 5.1, or if the panel is a SmartLiving model without its own layout (see the supported models above).
     
-7.  If successful, choose the **areas, zones and scenarios** to import, in three sections of checkboxes (each can be folded). Each one you tick gets its entities; they are listed with their number and the name programmed on the panel:
+7.  If successful, choose the **areas, zones, scenarios and outputs** to import, in sections of checkboxes (each can be folded). Each one you tick gets its entities; they are listed with their number and the name programmed on the panel:
     
     *   **Areas**: every area of the panel (5 on a SmartLiving 505 or 515, 10 on a 1050, 15 on a 10100).
         
@@ -248,7 +252,9 @@ After installation and restarting Home Assistant:
         
     *   **Scenarios**: every scenario of the panel (30).
         
-    The setup ticks what the panel shows in use: the zones that belong to an area, the areas of those zones, and the scenarios that change at least one area. Tick or untick anything you like.
+    *   **Outputs**: the outputs your user code may switch, with their kind (on/off, monostable with its time, or dimmer); the section is shown only if there are some. **Only the outputs the installer marked as home automation outputs are ticked** (firmware 6): an output can drive a siren, a lock or a gate, so tick only the ones you mean to switch from Home Assistant (see [Outputs](#outputs)).
+        
+    The setup ticks what the panel shows in use: the zones that belong to an area, the areas of those zones, and the scenarios that change at least one area, and the outputs the installer marked as home automation outputs. Tick or untick anything you like.
 
     The same step lists, for reference, the keypads, readers, expanders and sirens enabled on the panel, by name.
     
@@ -268,7 +274,7 @@ After installation and restarting Home Assistant:
 9.  Click **Submit** to complete the setup.
     
 
-You can change all of this later: on the Devices & Services page, open the integration and click **CONFIGURE**, then choose **Areas, zones and scenarios**, **Area switches arm mode per area** (the mode each area's switch arms in, if not the general one) or **General settings** (everything else, including the PIN: leave **New PIN Code** empty to keep the current PIN; a new PIN is checked with the panel as at setup. The step names the user code the current PIN belongs to and the areas it controls). Unticking an area, zone or scenario removes its entities, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs. A scenario that an alarm panel mode uses cannot be unticked: change the mode's scenario in the general settings first.
+You can change all of this later: on the Devices & Services page, open the integration and click **CONFIGURE**, then choose **Areas, zones, scenarios and outputs**, **Area switches arm mode per area** (the mode each area's switch arms in, if not the general one) or **General settings** (everything else, including the PIN: leave **New PIN Code** empty to keep the current PIN; a new PIN is checked with the panel as at setup. The step names the user code the current PIN belongs to and the areas it controls). Unticking an area, zone or scenario removes its entities, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs. A scenario that an alarm panel mode uses cannot be unticked: change the mode's scenario in the general settings first.
 
 ### Changing the connection details (Reconfigure)
 
@@ -298,7 +304,7 @@ data:
   config_entry_id: <the panel's config entry ID>
 ```
 
-The integration then reloads with the new configuration. Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel. The areas, zones and scenarios you import are not changed either: a zone wired later or a new scenario is listed, unticked, in the options under **Areas, zones and scenarios**. If the panel cannot be reached, or it is in programming mode, an error is shown and the stored configuration is kept: in programming mode, try again when programming has ended.
+The integration then reloads with the new configuration. Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel. The areas, zones and scenarios you import are not changed either: a zone wired later or a new scenario is listed, unticked, in the options under **Areas, zones, scenarios and outputs**. If the panel cannot be reached, or it is in programming mode, an error is shown and the stored configuration is kept: in programming mode, try again when programming has ended.
 
 Entities Provided
 -----------------
@@ -361,6 +367,14 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
     *   *sensor.your\_panel\_name\_firmware\_version* & *sensor.your\_panel\_name\_system\_type*: Provide static information about your alarm panel.
         
+*   **Outputs** (only the ones you tick; see [Outputs](#outputs) below):
+    
+    *   *switch.your\_panel\_name\_output\_name*: An on/off or monostable output. It is on while the panel shows the output active (read at every poll). A monostable output switches itself off after its time; the switch shows it off at the next poll.
+        
+    *   *light.your\_panel\_name\_output\_name*: A dimmer output, with brightness. On firmware 6 the level is read from the panel at every poll and after each change; on firmware 5.1 the panel does not report it, so the brightness is the last one set from Home Assistant.
+        
+    *   Both are named with the output's name on the panel (*Output n* or *O1* to *O3* without one). Attributes: `output_number`, `kind` (`on_off`, `monostable` or `dimmer`), `terminal_index` or `fixed_output` (1 to 3), `monostable_time` (for example `30 s`), `home_automation` (`true` if the installer marked it as a home automation output; not shown on firmware 5.1) and the output's options `normally_closed`, `flashing`, `buzzer`, `keep_on_restoral`, `toggle` and `relay_use` (`true` or `false`).
+        
 *   **Maintenance**:
     
     *   *button.your\_panel\_name\_reread\_panel\_configuration*: Reads the panel configuration again and reloads the integration (see [Re-reading the panel configuration](#re-reading-the-panel-configuration)). Shown in the *Configuration* section of the device page.
@@ -378,6 +392,20 @@ _(Replace your\_panel\_name, with actual value based on your setup)._
 
 Usage Examples
 --------------
+
+### Outputs
+
+> [!WARNING]
+> An output switches whatever is wired to it: a siren, a lock, a gate, heating. Switching it from Home Assistant, or from an automation, acts on the real device. Before ticking an output, check what it drives; when you first try the integration's outputs, use one that is harmless to switch.
+
+*   **What is offered**: outputs programmed on the panel as on/off, monostable or dimmer outputs (terminal outputs and O1 to O3) that your user code may switch. Analogue outputs are not offered. A terminal output on one of the panel's first three terminal positions cannot be switched remotely (the panel reserves those numbers for O1 to O3), so it is not listed.
+    
+*   **What is ticked for you**: only the outputs the installer marked as *home automation* outputs in the panel's programming (firmware 6; on firmware 5.1 the integration cannot read this mark, so nothing is ticked). The panel cannot tell what an output drives, so check them, and pick any other outputs yourself, in the setup or later in the options under **Areas, zones, scenarios and outputs**. The first time an existing installation shows the outputs in the options, the home automation outputs are ticked there too; after you save, your choice is kept.
+    
+*   **Nothing is switched by itself**: no output is switched at setup, at start, at a reload or when Home Assistant restores its state.
+    
+*   **When the panel refuses**: an output your user code may not switch, or one locked while its areas are armed, gives an error with the reason (see [When the panel refuses a command](#when-the-panel-refuses-a-command)). While the panel is in programming mode, no command is sent.
+    
 
 ### Basic Alarm Control
 
@@ -455,12 +483,16 @@ These are known and will be fixed in the coming versions:
     
 *   Panels on firmware 5.0x or of another model that were set up with an earlier version keep running with the 1050's firmware 6 layout, so their names, zones, scenarios and event log may be wrong and their areas' delays are not shown. A repair notice says so. New setups of such panels are refused.
 
+*   Dimmer levels are read from the panel on firmware 6 only. On firmware 5.1 a dimmer's brightness is the last one set from Home Assistant, so a level changed at a keypad is not shown.
+
+*   Analogue outputs are not offered, and a terminal output on one of the panel's first three terminal positions cannot be switched remotely.
+
 *   Support for firmware 5.1 is experimental and limited: it has not been tested on a real panel on firmware 5.1; the panel's state flags (such as programming mode) and the results of commands are assumed to work as on firmware 6; the free events that only firmware 5.1 has (free events 1 to 11) are shown as unknown events in the event log; and video sensors are not supported.
     
 
 ### When the panel refuses a command
 
-Arming, disarming, bypassing a zone, activating a scenario and resetting the alarm memory fail with a message when they are not carried out. The message says which of three things happened:
+Arming, disarming, bypassing a zone, activating a scenario, resetting the alarm memory and switching an output fail with a message when they are not carried out. The message says which of three things happened:
 
 *   **The integration did not send the command**:
     
@@ -477,7 +509,9 @@ Arming, disarming, bypassing a zone, activating a scenario and resetting the ala
     | The panel does not allow arming while zones are not ready | Close or bypass the open zones of the area, then arm again. |
     | The zone cannot be bypassed / belongs to no area | The zone's programming on the panel does not allow it. |
     | Already in the requested state | Nothing to do: the zone or area was already as requested. |
-    | Its terminal is out of range / not connected / not in use | The zone's terminal has changed on the panel: use **Re-read panel configuration**. |
+    | Its terminal is out of range / not connected / not in use | The zone's or output's terminal has changed on the panel: use **Re-read panel configuration**. |
+    | The output is not enabled | Your user code may not switch that output: enable it for the code on the panel, or untick the output. |
+    | The output is locked while its areas are armed | The panel does not let the output change while its areas are armed: disarm them first. |
     | The panel refused the command (result code N) | The panel gave no reason, or one this integration does not know yet. |
     
 *   **The command could not be completed**: the panel could not be reached, or its answer could not be read. See *Cannot Connect* below; try again once the connection is back.
@@ -545,7 +579,7 @@ Troubleshooting
         
 *   **Incorrect Number of Entities**:
     
-    *   Check the integration's options under **Areas, zones and scenarios**: only ticked items get entities.
+    *   Check the integration's options under **Areas, zones, scenarios and outputs**: only ticked items get entities.
         
     *   A zone is listed only if its terminal is programmed as a zone on the panel. If you changed the panel's programming, use **Re-read panel configuration** first.
         

@@ -7,14 +7,17 @@ whose terminal is programmed as a zone.
 """
 
 from collections.abc import Callable, Collection, Iterable, Mapping
+from dataclasses import dataclass
 import re
 from typing import Any
 
+from .attribute_values import time_text
 from .const import (
     CONF_AREAS,
     CONF_LIMIT_AREAS,
     CONF_LIMIT_SCENARIOS,
     CONF_LIMIT_ZONES,
+    CONF_OUTPUTS,
     CONF_SCENARIO_ARM_AWAY,
     CONF_SCENARIO_ARM_HOME,
     CONF_SCENARIO_ARM_NIGHT,
@@ -29,7 +32,11 @@ from .const import (
     KEY_INIT_AREA_NAMES,
     KEY_INIT_AREA_RECORDS,
     KEY_INIT_AREAS,
+    KEY_INIT_EXTRA_OUTPUT_OPTIONS,
+    KEY_INIT_FIXED_OUTPUT_LABELS,
+    KEY_INIT_FIXED_OUTPUT_RECORDS,
     KEY_INIT_PERIPHERALS,
+    KEY_INIT_PHYSICAL_MAP,
     KEY_INIT_RAW_HEX,
     KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS,
     KEY_INIT_SCENARIO_ACTIVATION_INDEX,
@@ -39,6 +46,7 @@ from .const import (
     KEY_INIT_SCENARIOS,
     KEY_INIT_SYSTEM_INFO,
     KEY_INIT_TERMINAL_RECORDS_RAW,
+    KEY_INIT_USER_CODE_OUTPUTS,
     KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS,
     KEY_INIT_ZONE_CONFIG_INDEX,
     KEY_INIT_ZONE_NAMES,
@@ -53,16 +61,30 @@ from .legacy import SCENARIO_ACTIONS, zone_exists
 from .protocol.commands import ArmMode
 from .protocol.config import (
     AreaConfig,
+    OutputConfig,
     Terminal,
     ZoneConfig,
     decode_area_records,
+    decode_fixed_outputs,
+    decode_home_automation,
+    decode_labels,
+    decode_output_mask,
+    decode_physical_map,
     decode_terminals,
     decode_zone_records,
+    fixed_output_number,
+    output_address,
+    terminal_output_number,
 )
 from .protocol.errors import ProtocolError
-from .protocol.model import PanelModel, model_for_or_fallback, parse_model_string
+from .protocol.model import (
+    FIXED_OUTPUTS,
+    PanelModel,
+    model_for_or_fallback,
+    parse_model_string,
+)
 
-SELECTION_KEYS = (CONF_AREAS, CONF_ZONES, CONF_SCENARIOS)
+SELECTION_KEYS = (CONF_AREAS, CONF_ZONES, CONF_SCENARIOS, CONF_OUTPUTS)
 
 # Alarm panel modes mapped to a scenario (option key -> stored 0-based index)
 SCENARIO_MAPPING_KEYS = (
@@ -86,7 +108,11 @@ _ITEM_UNIQUE_IDS: dict[str, tuple[tuple[re.Pattern[str], bool], ...]] = {
         (re.compile(r"_scenario_button_(\d+)"), True),
         (re.compile(r"_scenario_(\d+)_active_bs"), True),
     ),
+    # Terminal outputs by 1-based terminal = output number; fixed outputs
+    # are handled in item_of_unique_id (their number depends on the model)
+    CONF_OUTPUTS: ((re.compile(r"_terminal_output_(\d+)"), False),),
 }
+_FIXED_OUTPUT_UNIQUE_ID = re.compile(r"_fixed_output_(\d)")
 
 
 # ------------------------------------------------------------ panel config
@@ -168,10 +194,30 @@ def available_scenarios(config: Mapping[str, Any]) -> list[int]:
     return list(range(1, len(scenario_names(config)) + 1))
 
 
+def available_outputs(config: Mapping[str, Any]) -> list[int]:
+    """The outputs that can be switched with the user code: output numbers.
+
+    Programmed as a switched output, in a physical slot the output command
+    can address, and in the user code's output mask. None without the
+    stored mask (a configuration from an earlier version).
+    """
+    allowed = stored_output_mask(config)
+    if allowed is None:
+        return []
+    terminals, fixed = allowed
+    return [
+        item.number
+        for item in output_items(config)
+        if item.address is not None
+        and (item.terminal in terminals or item.fixed in fixed)
+    ]
+
+
 AVAILABLE = {
     CONF_AREAS: available_areas,
     CONF_ZONES: available_zones,
     CONF_SCENARIOS: available_scenarios,
+    CONF_OUTPUTS: available_outputs,
 }
 
 
@@ -184,12 +230,13 @@ def selected(
     """The selected items of one kind that are on the panel, in order.
 
     An entry without a stored selection (it should not happen once the
-    entry is migrated) gets every item.
+    entry is migrated) gets every item, except outputs: none of them until
+    the user ticks them.
     """
     available = AVAILABLE[key](config)
     stored = options.get(key)
     if stored is None:
-        return available
+        return [] if key == CONF_OUTPUTS else available
     chosen = {int(number) for number in stored}
     return [number for number in available if number in chosen]
 
@@ -225,6 +272,9 @@ def suggested_selection(config: Mapping[str, Any]) -> dict[str, list[int]]:
         CONF_SCENARIOS: [
             number for number in available_scenarios(config) if number in scenarios
         ],
+        # The panel cannot tell what an output drives (a siren, a lock, ...):
+        # only those the installer marked as home automation are proposed
+        CONF_OUTPUTS: home_automation_outputs(config),
     }
 
 
@@ -337,6 +387,172 @@ def terminal_records(config: Mapping[str, Any]) -> list[Terminal] | None:
     None when they or the model string are not stored, or do not fit.
     """
     return _stored_records(config, KEY_INIT_TERMINAL_RECORDS_RAW, decode_terminals)
+
+
+# ----------------------------------------------------------------- outputs
+
+
+@dataclass(frozen=True, slots=True)
+class OutputItem:
+    """An output of the panel, from the stored configuration."""
+
+    number: int  # the panel's output numbering: terminals 1-L, then O1-O3
+    terminal: int | None  # logical terminal (0-based) of a terminal output
+    fixed: int | None  # 1-3 for O1-O3
+    name: str  # the panel's label; empty if it has none
+    config: OutputConfig
+    address: int | None  # the output command's OUTPUT byte; None: cannot
+    # Marked as a home automation output by the installer; None: not known
+    home_automation: bool | None = None
+
+    @property
+    def unique_suffix(self) -> str:
+        """The end of the unique ID of the output's entity."""
+        if self.fixed is not None:
+            return f"fixed_output_{self.fixed}"
+        return f"terminal_output_{self.number}"
+
+
+def _raw(config: Mapping[str, Any], key: str) -> bytes | None:
+    try:
+        return bytes.fromhex((config.get(key) or {})[KEY_INIT_RAW_HEX])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def output_items(config: Mapping[str, Any]) -> list[OutputItem]:
+    """Every switched output programmed on the panel, terminals then O1-O3.
+
+    Empty when the stored configuration lacks the outputs' data or was read
+    with another layout.
+    """
+    model = stored_model(config)
+    terminals = terminal_records(config)
+    physical = _raw(config, KEY_INIT_PHYSICAL_MAP)
+    fixed_raw = _raw(config, KEY_INIT_FIXED_OUTPUT_RECORDS)
+    labels_raw = _raw(config, KEY_INIT_FIXED_OUTPUT_LABELS)
+    if None in (model, terminals, physical, fixed_raw, labels_raw):
+        return []
+    try:
+        physical_map = decode_physical_map(physical, model)
+        fixed_configs = decode_fixed_outputs(fixed_raw)
+        fixed_names = decode_labels(labels_raw, FIXED_OUTPUTS)
+    except ProtocolError:
+        return []
+    flags: tuple[bool, ...] | None = None
+    if extra := _raw(config, KEY_INIT_EXTRA_OUTPUT_OPTIONS):  # empty: unknown
+        try:
+            flags = decode_home_automation(extra, model)
+        except ProtocolError:
+            flags = None
+
+    def home_automation(index: int) -> bool | None:
+        return None if flags is None else flags[index]
+
+    def address(number: int) -> int | None:
+        try:
+            return output_address(number, physical_map, model)
+        except ValueError:
+            return None
+
+    names = zone_names(config)
+    items = []
+    for index, terminal in enumerate(terminals):
+        output = terminal.output
+        if output is None:
+            continue
+        number = terminal_output_number(index, model)
+        items.append(
+            OutputItem(
+                number=number,
+                terminal=index,
+                fixed=None,
+                name=names[index] if index < len(names) else "",
+                config=output,
+                address=address(number),
+                home_automation=home_automation(index),
+            )
+        )
+    for fixed, output in enumerate(fixed_configs, start=1):
+        number = fixed_output_number(fixed, model)
+        items.append(
+            OutputItem(
+                number=number,
+                terminal=None,
+                fixed=fixed,
+                name=fixed_names[fixed - 1],
+                config=output,
+                address=address(number),
+                home_automation=home_automation(model.terminals + fixed - 1),
+            )
+        )
+    return items
+
+
+def stored_output_mask(
+    config: Mapping[str, Any],
+) -> tuple[frozenset[int], frozenset[int]] | None:
+    """(terminals 0-based, fixed outputs 1-3) the stored user code may drive.
+
+    None when the mask is not stored; empty sets when the PIN matched no
+    user code.
+    """
+    model = stored_model(config)
+    raw = _raw(config, KEY_INIT_USER_CODE_OUTPUTS)
+    if model is None or raw is None:
+        return None
+    if not raw:
+        return frozenset(), frozenset()
+    try:
+        return decode_output_mask(raw, model)
+    except ProtocolError:
+        return None
+
+
+def imported_outputs(
+    options: Mapping[str, Any], config: Mapping[str, Any]
+) -> list[OutputItem]:
+    """The outputs the user imported."""
+    chosen = set(selected(options, config, CONF_OUTPUTS))
+    return [item for item in output_items(config) if item.number in chosen]
+
+
+def home_automation_outputs(config: Mapping[str, Any]) -> list[int]:
+    """The offered outputs the installer marked as home automation outputs."""
+    offered = set(available_outputs(config))
+    return [
+        item.number
+        for item in output_items(config)
+        if item.home_automation and item.number in offered
+    ]
+
+
+def outputs_shown(options: Mapping[str, Any], config: Mapping[str, Any]) -> list[int]:
+    """The outputs ticked in the options form.
+
+    What the user saved; the first time (no outputs saved yet), the ones
+    the installer marked as home automation outputs.
+    """
+    if CONF_OUTPUTS not in options:
+        return home_automation_outputs(config)
+    return selected(options, config, CONF_OUTPUTS)
+
+
+def output_label(config: Mapping[str, Any], number: int) -> str:
+    """How an output is listed: "O2 - Garage (monostable 30 s)"."""
+    for item in output_items(config):
+        if item.number == number:
+            break
+    else:
+        return f"Output {number}"
+    title = f"O{item.fixed}" if item.fixed is not None else str(item.number)
+    name = f"{title} - {item.name}" if item.name else title
+    detail = item.config.kind.value.replace("_", "/")
+    if (time := item.config.monostable_time) is not None:
+        detail += f" {time_text(time)}"
+    if item.home_automation:
+        detail += ", home automation"
+    return f"{name} ({detail})"
 
 
 def zone_option_flags(config: Mapping[str, Any]) -> dict[int, dict[str, bool]]:
@@ -453,17 +669,28 @@ def migrated_selection(settings: Mapping[str, Any]) -> dict[str, list[int]]:
             range(1, count(CONF_LIMIT_ZONES, DEFAULT_LIMIT_ZONES, MAX_LIMIT_ZONES) + 1)
         ),
         CONF_SCENARIOS: sorted(scenarios),
+        CONF_OUTPUTS: [],
     }
 
 
 # ---------------------------------------------------------------- entities
 
 
-def item_of_unique_id(entry_id: str, unique_id: str) -> tuple[str, int] | None:
-    """(kind, 1-based number) of an area, zone or scenario entity, else None."""
+def item_of_unique_id(
+    entry_id: str, unique_id: str, terminals: int | None = None
+) -> tuple[str, int] | None:
+    """(kind, number) of an area, zone, scenario or output entity, else None.
+
+    A fixed output's number depends on the model's terminals (L): without
+    them, it is not recognised.
+    """
     suffix = unique_id.removeprefix(entry_id)
     if suffix == unique_id:
         return None
+    if match := _FIXED_OUTPUT_UNIQUE_ID.fullmatch(suffix):
+        if terminals is None:
+            return None
+        return CONF_OUTPUTS, terminals + int(match.group(1))
     for key, patterns in _ITEM_UNIQUE_IDS.items():
         for pattern, zero_based in patterns:
             if match := pattern.fullmatch(suffix):
