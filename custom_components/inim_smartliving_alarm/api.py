@@ -13,8 +13,10 @@ never logged or kept.
 
 import asyncio
 from collections.abc import Callable, Iterable, Mapping
-from dataclasses import dataclass
+import contextlib
+from dataclasses import dataclass, field
 import logging
+import time
 
 from .protocol import registers as reg
 from .protocol.commands import (
@@ -52,6 +54,7 @@ from .protocol.config import (
     label_address,
     refuses_arming_when_not_ready,
 )
+from .protocol.errors import ProtocolError
 from .protocol.events import (
     EVENT_RECORD_LENGTH,
     event_address,
@@ -62,17 +65,22 @@ from .protocol.frames import (
     not_ready_area_request,
     not_ready_request,
     output_detail_request,
+    read_eeprom as read_eeprom_frame,
     read_ram,
+    split,
 )
+from .protocol.masking import Privacy
 from .protocol.model import (
     FIXED_OUTPUTS,
     GENERAL_OPTIONS_READ_LENGTH,
     PERIPHERALS_ADDRESS,
+    SCENARIOS,
     FirmwareInfo,
     PanelModel,
     model_for_or_fallback,
     parse_model_string,
 )
+from .protocol.report_layout import ReportBlock, ReportTable, Space, table_for
 from .protocol.status import (
     OUTPUT_DETAIL_LENGTH,
     AreaStatus,
@@ -89,7 +97,7 @@ from .protocol.status import (
     decode_zone_memory,
     decode_zone_states,
 )
-from .transport.base import PanelTransport, Priority, Session
+from .transport.base import PanelTransport, Priority, Session, TransportError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -209,6 +217,111 @@ class PanelConfiguration:
     user_output_mask: bytes
     # Extra output options (L + 3 bytes); empty where the address is not known
     extra_output_options: bytes
+
+
+@dataclass(slots=True)
+class BlockRead:
+    """One block of a report table, as read (or why it was not)."""
+
+    block: ReportBlock
+    data: bytes | None = None
+    address: int | None = None  # where it was read; for labels pointer + bank
+    error: str | None = None  # the read failed: the error's kind
+    not_read: str | None = None  # left out on purpose: why
+
+
+@dataclass(slots=True)
+class ReportReads:
+    """What a system report read from the panel, block by block."""
+
+    firmware: FirmwareInfo
+    model_string: bytes
+    model: PanelModel  # the profile in use (sizes basic mode)
+    table: ReportTable
+    reads: list[BlockRead] = field(default_factory=list)
+    # The profile in use is a fallback for a model or firmware without one
+    fallback: bool = False
+    # "before" or "after" when the panel was in programming mode
+    programming_mode: str | None = None
+    seconds: float = 0.0
+    requests: int = 0
+
+
+# A system report reads in short sessions, so that a command waits for at
+# most one of them, and stops after a time budget
+REPORT_SESSION_REQUESTS = 10
+REPORT_TIME_BUDGET = 120.0
+
+
+class _ReportReader:
+    """Reads a report's blocks in short sessions at poll priority."""
+
+    def __init__(
+        self,
+        panel: "SmartLivingPanel",
+        reads: ReportReads,
+        session_size: int,
+        time_budget: float,
+        reads_panel_state: bool,
+    ) -> None:
+        self.panel = panel
+        self.reads_panel_state = reads_panel_state
+        self.reads = reads
+        self.session_size = session_size
+        self.deadline = time.monotonic() + time_budget
+        self._session: Session | None = None
+        self._stack: contextlib.AsyncExitStack | None = None
+        self._count = 0
+        self.unreachable = False
+
+    @property
+    def out_of_time(self) -> bool:
+        return time.monotonic() > self.deadline
+
+    async def _next_session(self) -> Session:
+        if self._session is not None and self._count < self.session_size:
+            return self._session
+        await self.close()
+        self._stack = contextlib.AsyncExitStack()
+        self._session = await self._stack.enter_async_context(
+            self.panel.transport.session(Priority.POLL)
+        )
+        self._count = 0
+        return self._session
+
+    async def close(self) -> None:
+        """Release the current session, if any."""
+        if self._stack is not None:
+            stack, self._stack, self._session = self._stack, None, None
+            await stack.aclose()
+
+    async def request(self, frame: bytes, length: int, *, sensitive: bool) -> bytes:
+        session = await self._next_session()
+        self._count += 1
+        self.reads.requests += 1
+        return await session.read(frame, length, sensitive=sensitive)
+
+    async def read(
+        self, space: Space, address: int, length: int, *, sensitive: bool
+    ) -> bytes:
+        """Read a block in parts, one request each."""
+        dialect = self.panel.transport.dialect
+        data = b""
+        for part_address, part_length in split(address, length, dialect):
+            if space is Space.EEPROM:
+                frame = read_eeprom_frame(part_address, part_length, dialect)
+            else:
+                frame = read_ram(part_address, part_length, dialect)
+            data += await self.request(frame, part_length, sensitive=sensitive)
+        return data
+
+    async def programming(self) -> bool:
+        if not self.reads_panel_state:
+            return False
+        faults = await self.read(
+            Space.RAM, reg.FAULTS, reg.FAULTS_LENGTH, sensitive=False
+        )
+        return _panel_state(faults).programming
 
 
 @dataclass(frozen=True, slots=True)
@@ -535,6 +648,142 @@ class SmartLivingPanel:
             )
         return EventRecord(raw, normalized_event_record(raw, model))
 
+    # ---------------------------------------------------------- system report
+
+    async def read_report(
+        self,
+        *,
+        session_size: int = REPORT_SESSION_REQUESTS,
+        time_budget: float = REPORT_TIME_BUDGET,
+    ) -> ReportReads:
+        """Read the blocks of the panel's report table.
+
+        Only the blocks of the table that fits the panel's own model and
+        firmware are read (identification and status registers only, when
+        none fits). The reads go in sessions of a few requests at poll
+        priority, so commands are not held up; blocks not read within the
+        time budget, or while the panel is in programming mode, are marked
+        as such. A failed block is marked with its error and the next one
+        is tried; once the panel cannot be reached, the rest are left out.
+        """
+        started = time.monotonic()
+        firmware, model_string, model, known = await self._report_identification()
+        table = table_for(firmware, model)
+        reads = ReportReads(firmware, model_string, model, table, fallback=not known)
+        reader = _ReportReader(self, reads, session_size, time_budget, known)
+        blocks = _report_order(table)
+        try:
+            if await self._report_guard(reader, reads, "before"):
+                blocks = [b for b in blocks if b.space not in _PROGRAMMING]
+            pointers: bytes | None = None
+            for block in blocks:
+                read = BlockRead(block)
+                reads.reads.append(read)
+                if reader.unreachable:
+                    read.not_read = "panel not reachable"
+                    continue
+                if reader.out_of_time:
+                    read.not_read = "time limit"
+                    continue
+                try:
+                    await self._read_report_block(reader, table, read, pointers)
+                except (TransportError, ProtocolError) as err:
+                    read.data = None
+                    read.error = _error_kind(err)
+                    if read.error == "connect_error":
+                        reader.unreachable = True
+                if block.name == "label_pointers":
+                    pointers = read.data
+            if reads.programming_mode is None and not reader.unreachable:
+                await self._report_guard(reader, reads, "after")
+        finally:
+            await reader.close()
+        # The programming, left out because the panel was in programming mode
+        present = {read.block.name for read in reads.reads}
+        reads.reads += [
+            BlockRead(b, not_read="programming mode")
+            for b in table.blocks
+            if b.name not in present
+        ]
+        reads.seconds = round(time.monotonic() - started, 3)
+        return reads
+
+    async def _report_identification(
+        self,
+    ) -> tuple[FirmwareInfo, bytes, PanelModel, bool]:
+        """The model as identified, or read now without the PIN table.
+
+        The last item tells whether the model has a profile of its own (its
+        state flags, and so programming mode, can be read).
+        """
+        if self._model is not None:
+            return (
+                self.firmware,
+                self._model_string,
+                self._model,
+                self.reads_panel_state,
+            )
+        async with self.transport.session() as session:
+            data = await session.read_ram(reg.MODEL_STRING, reg.MODEL_STRING_LENGTH)
+        firmware = parse_model_string(data)
+        model, unsupported = model_for_or_fallback(firmware, self._fallback_model)
+        return firmware, data, model, unsupported is None
+
+    async def _report_guard(
+        self, reader: _ReportReader, reads: ReportReads, when: str
+    ) -> bool:
+        """Note programming mode; True if the panel is in it."""
+        try:
+            if await reader.programming():
+                reads.programming_mode = when
+                return True
+        except (TransportError, ProtocolError) as err:
+            if _error_kind(err) == "connect_error":
+                reader.unreachable = True
+        return False
+
+    async def _read_report_block(
+        self,
+        reader: _ReportReader,
+        table: ReportTable,
+        read: BlockRead,
+        pointers: bytes | None,
+    ) -> None:
+        block = read.block
+        sensitive = block.privacy is not Privacy.PUBLIC
+        if block.space is Space.QUERY:
+            parts = [
+                await reader.request(
+                    not_ready_request(scenario, reader.reads.model),
+                    block.length,
+                    sensitive=False,
+                )
+                for scenario in range(SCENARIOS)
+            ]
+            read.data, read.address = b"".join(parts), block.address
+            return
+        if block.space is Space.LABELS:
+            offset = block.address - reg.LABELS_AREAS
+            if pointers is not None and 0 <= offset + 2 <= len(pointers):
+                pointer = pointers[offset : offset + 2]
+            else:
+                pointer = await reader.read(
+                    Space.RAM, block.address, 2, sensitive=False
+                )
+            address = int.from_bytes(pointer, "little") + table.label_bank
+            read.address = address
+            if not table.labels_fit(address, block.length):
+                read.not_read = "outside the label area"
+                return
+            read.data = await reader.read(
+                Space.EEPROM, address, block.length, sensitive=True
+            )
+            return
+        read.address = block.address
+        read.data = await reader.read(
+            block.space, block.address, block.length, sensitive=sensitive
+        )
+
     # ---------------------------------------------------------------- commands
 
     async def arm_areas(
@@ -660,6 +909,30 @@ class SmartLivingPanel:
         faults = await session.read_ram(reg.FAULTS, reg.FAULTS_LENGTH)
         if _panel_state(faults).programming:
             raise ProgrammingModeError(sent=sent)
+
+
+# Blocks of the programming, not read while the panel is in programming mode
+_PROGRAMMING = (Space.EEPROM, Space.LABELS)
+
+
+def _report_order(table: ReportTable) -> list[ReportBlock]:
+    """Registers first, then EEPROM by address with the event log last, then
+    labels (the label pointers come with the registers)."""
+    registers = [b for b in table.blocks if b.space in (Space.RAM, Space.QUERY)]
+    eeprom = sorted(
+        (b for b in table.blocks if b.space is Space.EEPROM),
+        key=lambda b: (b.name == "event_log", b.address),
+    )
+    labels = [b for b in table.blocks if b.space is Space.LABELS]
+    return registers + eeprom + labels
+
+
+def _error_kind(err: Exception) -> str:
+    """An error's kind for a report: no address, no data."""
+    name = type(err).__name__
+    return "".join(
+        "_" + c.lower() if c.isupper() and i else c.lower() for i, c in enumerate(name)
+    )
 
 
 def _panel_state(faults: bytes) -> PanelState:

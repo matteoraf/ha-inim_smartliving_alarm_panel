@@ -14,7 +14,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .attribute_values import duration_text, time_text, value_key
+from .attribute_values import zone_programming_attributes
 from .const import (
     CONF_AREAS,
     CONF_PANEL_NAME,
@@ -238,38 +238,6 @@ _BALANCING_CLASSES = {
     Balancing.SINGLE_EOL: BinarySensorDeviceClass.OPENING,
     Balancing.DOUBLE_EOL: BinarySensorDeviceClass.MOTION,
 }
-
-
-def zone_programming_attributes(
-    zone: ZoneConfig, terminal: Terminal, terminal_index: int, second_zone: bool
-) -> dict[str, Any]:
-    """A zone's programming as attributes: stable English keys and values.
-
-    Byte 6 of the record is shown per sensor kind: the alarm pulse duration of a
-    generic sensor, the sensitivity of a shock sensor, nothing for a roller
-    blind.
-    """
-    kind = terminal.sensor_kind
-    attributes: dict[str, Any] = {
-        "assigned_areas": sorted(zone.areas),
-        "zone_type": value_key(zone.zone_type),
-        "alarm_cycles": "unlimited" if zone.alarm_cycles is None else zone.alarm_cycles,
-    }
-    if kind is SensorKind.GENERIC:
-        attributes["alarm_pulse_duration"] = duration_text(zone.alarm_pulse_duration)
-    elif kind is SensorKind.SHOCK:
-        attributes["shock_sensitivity"] = zone.shock_sensitivity
-    attributes |= {
-        "pulse_window_time": time_text(zone.pulse_window_time),
-        "pulse_count": zone.pulse_count,
-        "balancing": value_key(terminal.balancing),
-        "sensor_kind": kind.value,
-        "terminal_index": terminal_index,
-        "terminal_type": value_key(terminal.terminal_type),
-        "second_zone": second_zone,
-        **zone.flags,
-    }
-    return attributes
 
 
 def zone_device_class(terminal: Terminal) -> BinarySensorDeviceClass | None:

@@ -214,6 +214,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **Outputs are new**: terminal outputs and the fixed outputs O1 to O3 can be switched, and dimmers dimmed, from Home Assistant. At the first start the integration reads the panel configuration again once by itself to get the outputs' programming and names (the log says so). No output is imported until you save the options under **Areas, zones, scenarios and outputs**, where the outputs the installer marked as home automation outputs are ticked for you. Please try a harmless output first.
 
+*   **System reports are new**: downloading the integration's diagnostics now gives a system report for bug reports, at the level chosen with the new *Diagnostics level* select (disabled by default). See [Sharing a system report](#sharing-a-system-report).
+
 *   Not changed yet: see [Known limitations](#known-limitations).
     
 
@@ -388,6 +390,8 @@ This integration exposes your Inim alarm system's components as various Home Ass
     *   *binary\_sensor.your\_panel\_name\_programming\_mode* (named *Programming mode*): On while the panel is in programming mode (being programmed from a keypad, or reloading its configuration). Commands are not sent then. Shown in the *Diagnostic* section of the device page. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5.0x).
         
 
+    *   *select.your\_panel\_name\_diagnostics\_level* (named *Diagnostics level*): How much the next diagnostics download shows: *Redacted*, *Full* or *Full confidential* (see [Sharing a system report](#sharing-a-system-report)). Disabled by default; it goes back to *Redacted* after each restart and after a Full report has been downloaded. Shown in the *Diagnostic* section of the device page.
+
 _(Replace your\_panel\_name, with actual value based on your setup)._
 
 Usage Examples
@@ -521,9 +525,35 @@ Arming, disarming, bypassing a zone, activating a scenario, resetting the alarm 
 
 Scenario activations that fail also show a persistent notification and fire the `inim_smartliving_alarm_scenario_activation_failed` event, as before.
 
+Sharing a system report
+-----------------------
+
+When you report a problem, a system report tells what the integration knows about your panel: model and firmware, board, the panel's programming as read from it, status, the event log, the integration's options and entities, and connection statistics. Download it from **Settings** -> **Devices & services** -> *Inim SmartLiving* -> the three dots of your panel -> **Download diagnostics** (the panel's device page has the same entry). It takes about 40 seconds on SmartLAN/SI; commands are not held up meanwhile.
+
+The *Diagnostics level* select (enable it on the device page, in the *Diagnostic* section) chooses how much the report shows:
+
+| Level | What it contains |
+|---|---|
+| **Redacted** (default) | Everything public: the programming, status, events with their times, statistics. Names are cut to their first 3 characters, the serial number to its last 4 digits, the board's MAC address to its last 2 bytes; addresses, PINs, phone numbers, key serials and passwords are left out. Safe to post. |
+| **Full** | Also the names, the serial number and the network addresses. PINs, phone numbers, key serials and passwords are still left out. |
+| **Full confidential** | Everything, including the PINs, phone numbers, key serials and the board's passwords. |
+
+At **Redacted** one download gives a plain file you can attach to a GitHub issue as it is.
+
+At **Full** and **Full confidential** you get two files from the same reading of the panel:
+
+1.  The first download is **encrypted**: only the maintainer can read it. It also holds the Redacted view in clear. **Attach this file to your GitHub issue**; it is the only file to share.
+2.  Download diagnostics once more within 10 minutes to get a **readable copy** of the same report (it holds `PRIVATE COPY`), to check what you are sharing. **Do not share it**: keep it private and delete it when you no longer need it. A notification reminds you of this after the first download. Both files get the same name, so your browser saves the second one with a number added (for example `(1)`): attach the first one, which holds `encrypted` and `redacted_view`, never the one that holds `PRIVATE COPY`.
+
+Then the level goes back to *Redacted*. Nothing is stored: the report is held in memory only until the second download, for 10 minutes at most.
+
+The board's own details (its network settings and firmware) are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys. If GitHub refuses the file, zip it first.
+
 Troubleshooting
 ---------------
 
+*   **Reporting a problem**: attach a system report to the GitHub issue (see [Sharing a system report](#sharing-a-system-report)), and if you can a debug log (see below).
+    
 *   **Cannot** Connect / **Connection Timed Out**:
     
     *   Verify the IP address and Port for your SmartLAN module are correct.

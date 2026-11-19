@@ -82,6 +82,7 @@ RAM_LABELS_SCENARIOS = 0x4024
 RAM_LABELS_TIMERS = 0x4026
 RAM_LABELS_OUTPUTS = 0x4028
 RAM_LABELS_SIRENS = 0x402E
+RAM_LABELS_VIDEO_SENSORS = 0x403A  # firmware 6
 LABEL_BANK = 0x10000
 
 # Status read lengths
@@ -314,6 +315,7 @@ LAYOUT_1050 = Layout(
         RAM_LABELS_TIMERS: (0x1630, 10),
         RAM_LABELS_OUTPUTS: (0x16D0, 3),
         RAM_LABELS_SIRENS: (0x1700, 10),
+        RAM_LABELS_VIDEO_SENSORS: (0x17A0, 10),
     },
 )
 
@@ -357,13 +359,26 @@ LAYOUT_10100 = Layout(
             RAM_LABELS_TIMERS: 20,
             RAM_LABELS_OUTPUTS: 3,
             RAM_LABELS_SIRENS: 10,
+            RAM_LABELS_VIDEO_SENSORS: 10,
         }
     ),
 )
 
 
-def _small_labels(areas: int, zones: int, expanders: int) -> dict[int, tuple[int, int]]:
-    """Labels of a 505 or 515: in bank 0, after the other programming."""
+# Where each layout keeps its labels (bank 0 on the 505 and 515, and on
+# every model on firmware 5.1): the start of the panel's label area
+LABELS_505_515_FW6 = 0x072A0
+LABELS_FW51 = 0x08100
+
+
+def _small_labels(
+    areas: int, zones: int, expanders: int, start: int = LABELS_505_515_FW6
+) -> dict[int, tuple[int, int]]:
+    """Labels of a 505 or 515: in bank 0, in the panel's label area.
+
+    Firmware 6 adds the video sensors' labels.
+    """
+    video = {RAM_LABELS_VIDEO_SENSORS: 10} if start == LABELS_505_515_FW6 else {}
     return _packed_labels(
         {
             RAM_LABELS_AREAS: areas,
@@ -378,8 +393,9 @@ def _small_labels(areas: int, zones: int, expanders: int) -> dict[int, tuple[int
             RAM_LABELS_TIMERS: 10,
             RAM_LABELS_OUTPUTS: 3,
             RAM_LABELS_SIRENS: 10,
+            **video,
         },
-        start=0x8000,
+        start=start,
     )
 
 
@@ -465,8 +481,9 @@ LAYOUT_1050_FW51 = replace(
     eeprom_events=0x0EE5C,
     event_ring_size=500,
     labels={
-        register: (0x8000 + offset, count)
+        register: (LABELS_FW51 + offset, count)
         for register, (offset, count) in LAYOUT_1050.labels.items()
+        if register != RAM_LABELS_VIDEO_SENSORS
     },
     label_bank=0,
     eeprom_fixed_outputs=0x04AF6,
@@ -484,5 +501,6 @@ LAYOUT_505_FW51 = replace(
     eeprom_scenario_modes=0x033B3,
     eeprom_events=0x0EE5C,
     eeprom_fixed_outputs=0x022A6,
+    labels=_small_labels(areas=5, zones=20, expanders=5, start=LABELS_FW51),
     **_FW51,
 )

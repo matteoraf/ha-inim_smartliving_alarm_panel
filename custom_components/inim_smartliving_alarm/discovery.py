@@ -19,6 +19,7 @@ from dataclasses import dataclass
 import logging
 
 from .const import BOARD_SMARTLAN_G, BOARD_SMARTLAN_SI
+from .protocol.smartlan import decode_si_reply
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,8 +33,6 @@ SI_REPLY_PORT = 5001
 G_PROBE = b"hello_smartlang\x00"
 G_PROBE_PORT = 7000
 G_REPLY_PORT = 7001
-
-_SI_REPLY_MIN_LENGTH = 25
 
 
 class DiscoveryError(Exception):
@@ -55,13 +54,11 @@ class DiscoveredBoard:
 
 def parse_si_reply(data: bytes, host: str) -> DiscoveredBoard | None:
     """A SmartLAN/SI FIND reply, or None if it is not one."""
-    if len(data) < _SI_REPLY_MIN_LENGTH or not data.startswith(b"IMIN"):
+    reply = decode_si_reply(data)
+    if reply is None:
         return None
     return DiscoveredBoard(
-        BOARD_SMARTLAN_SI,
-        host,
-        port=int.from_bytes(data[23:25], "big") or None,
-        mac=data[4:10].hex(":"),
+        BOARD_SMARTLAN_SI, host, port=reply.port or None, mac=reply.mac.hex(":")
     )
 
 
@@ -141,3 +138,57 @@ async def discover(
         for transport in sockets:
             transport.close()
     return sorted(found.values(), key=lambda board: (board.host, board.board))
+
+
+class _OneReply(asyncio.DatagramProtocol):
+    """Keeps the first datagram from one host."""
+
+    def __init__(self, host: str, reply: asyncio.Future[bytes]) -> None:
+        self._host = host
+        self._reply = reply
+
+    def datagram_received(self, data: bytes, addr: tuple[str, int]) -> None:
+        if addr[0] == self._host and not self._reply.done():
+            self._reply.set_result(data)
+
+
+async def async_board_reply(
+    host: str,
+    board: str,
+    scan_time: float = SCAN_TIME,
+    *,
+    target: str = BROADCAST,
+    si_ports: tuple[int, int] = (SI_PROBE_PORT, SI_REPLY_PORT),
+    g_ports: tuple[int, int] = (G_PROBE_PORT, G_REPLY_PORT),
+) -> bytes | None:
+    """The discovery reply of the board at host, raw; None if none came.
+
+    The probe is broadcast, as for a search (the boards answer broadcasts),
+    and only the reply whose source is host is kept; boards on another
+    subnet do not answer. For a system report only: a SmartLAN/SI reply
+    holds the board's credentials when they are set, so it is never logged
+    or stored.
+    """
+    loop = asyncio.get_running_loop()
+    if board == BOARD_SMARTLAN_G:
+        (probe_port, reply_port), probe = g_ports, G_PROBE
+    else:
+        (probe_port, reply_port), probe = si_ports, SI_PROBE
+    reply: asyncio.Future[bytes] = loop.create_future()
+    try:
+        transport, _ = await loop.create_datagram_endpoint(
+            lambda: _OneReply(host, reply),
+            local_addr=("0.0.0.0", reply_port),
+            allow_broadcast=True,
+        )
+    except OSError as err:
+        _LOGGER.debug("Cannot listen on UDP port %s: %s", reply_port, err)
+        return None
+    try:
+        transport.sendto(probe, (target, probe_port))
+        async with asyncio.timeout(scan_time):
+            return await reply
+    except TimeoutError:
+        return None
+    finally:
+        transport.close()

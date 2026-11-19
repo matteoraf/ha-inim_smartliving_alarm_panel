@@ -11,25 +11,19 @@ import pytest
 from custom_components.inim_smartliving_alarm.discovery import (
     DiscoveredBoard,
     DiscoveryError,
+    async_board_reply,
     discover,
     parse_g_reply,
     parse_si_reply,
 )
 
 from .fake_panel import FakePanel
-from .fake_panel.discovery import DiscoveryResponder, si_reply
+from .fake_panel.discovery import DiscoveryResponder, free_udp_port, si_reply
 from .fake_panel.server import TRANSPORT_G
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
-SCAN = 0.3
-
-
-def free_udp_port() -> int:
-    """A UDP port nothing listens on (at the time of the call)."""
-    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-        sock.bind(("127.0.0.1", 0))
-        return sock.getsockname()[1]
+SCAN = 1.0  # time for the fake boards to answer, with slack for slow runners
 
 
 @pytest.fixture
@@ -140,3 +134,50 @@ async def test_no_reply_port(boards) -> None:
         busy_g.bind(("0.0.0.0", g.reply_port))
         with pytest.raises(DiscoveryError):
             await discover(SCAN, **ports(si, g))
+
+
+# ------------------------------------------------------ one board's reply
+
+
+async def test_board_reply_of_one_board(boards) -> None:
+    """The probe goes to the target (broadcast by default); the reply of the
+    entry's own board is kept raw."""
+    si, g = boards
+    reply = await async_board_reply(
+        "127.0.0.1",
+        "smartlan_si",
+        1.0,
+        target="127.0.0.1",
+        si_ports=(si.port, si.reply_port),
+    )
+    assert reply == si_reply(si.panel.host, si.panel.port)
+    assert si.probes == [b"FIND"]
+    reply = await async_board_reply(
+        "127.0.0.1",
+        "smartlan_g",
+        1.0,
+        target="127.0.0.1",
+        g_ports=(g.port, g.reply_port),
+    )
+    assert reply is not None
+    assert reply.split(b"|")[2] == b"Casa al mare"
+
+
+async def test_board_reply_from_another_host_is_ignored(boards) -> None:
+    """Another board answering the broadcast is not kept."""
+    si, _g = boards
+    reply = await async_board_reply(
+        "127.0.0.2",
+        "smartlan_si",
+        0.3,
+        target="127.0.0.1",
+        si_ports=(si.port, si.reply_port),
+    )
+    assert reply is None
+
+
+def test_free_ports_are_distinct() -> None:
+    """The helper never hands out a port twice, nor a real reply port."""
+    ports = [free_udp_port() for _ in range(50)]
+    assert len(set(ports)) == len(ports)
+    assert not {5001, 7001} & set(ports)

@@ -351,6 +351,14 @@
             "armed_partial": "Armed partial",
             "armed_instant": "Armed instant"
           }
+        },
+        "diagnostics_level": {
+          "name": "Diagnostics level",
+          "state": {
+            "redacted": "Redacted",
+            "full": "Full",
+            "confidential": "Full confidential"
+          }
         }
       },
       "sensor": {

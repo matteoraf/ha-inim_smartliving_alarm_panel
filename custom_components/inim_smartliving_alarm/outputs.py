@@ -15,7 +15,7 @@ from homeassistant.core import callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .attribute_values import time_text
+from .attribute_values import output_attributes
 from .const import (
     DOMAIN,
     KEY_INIT_SYSTEM_INFO_TYPE,
@@ -46,34 +46,6 @@ def output_image(
     except (TypeError, ValueError, ProtocolError, RuntimeError):
         return None
     return memory.outputs, memory.fixed_outputs
-
-
-def output_attributes(item: OutputItem) -> dict[str, Any]:
-    """An output's programming as attributes (stable English keys)."""
-    config = item.config
-    attributes: dict[str, Any] = {
-        "output_number": item.number,
-        "kind": config.kind.value,
-    }
-    if item.fixed is not None:
-        attributes["fixed_output"] = item.fixed
-    else:
-        attributes["terminal_index"] = item.terminal
-    if (time := config.monostable_time) is not None:
-        attributes["monostable_time"] = time_text(time)
-    if item.home_automation is not None:  # not known on every firmware
-        attributes["home_automation"] = item.home_automation
-    flags = config.flags
-    for name in (
-        "normally_closed",
-        "flashing",
-        "buzzer",
-        "keep_on_restoral",
-        "toggle",
-        "relay_use",
-    ):
-        attributes[name] = flags[name]
-    return attributes
 
 
 class InimOutputEntity(CoordinatorEntity):
