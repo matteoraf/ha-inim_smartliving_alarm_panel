@@ -46,8 +46,13 @@ from .const import (
     DOMAIN,
     KEY_INIT_AREA_RECORDS,
     KEY_INIT_CODES,
+    KEY_INIT_EXTRA_OUTPUT_OPTIONS,
+    KEY_INIT_FIXED_OUTPUT_LABELS,
+    KEY_INIT_FIXED_OUTPUT_RECORDS,
     KEY_INIT_GENERAL_OPTIONS,
     KEY_INIT_PERIPHERALS,
+    KEY_INIT_PHYSICAL_MAP,
+    KEY_INIT_USER_CODE_OUTPUTS,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
     PLATFORMS,
@@ -83,6 +88,7 @@ from .selection import (
     scenario_label,
     selected,
     stored_layout_fits,
+    stored_model,
     unselected_items,
 )
 from .utils import async_activate_scenario
@@ -99,6 +105,11 @@ _REQUIRED_CONFIGURATION_KEYS = (
     KEY_INIT_PERIPHERALS,
     KEY_INIT_GENERAL_OPTIONS,
     KEY_INIT_AREA_RECORDS,
+    KEY_INIT_FIXED_OUTPUT_RECORDS,
+    KEY_INIT_FIXED_OUTPUT_LABELS,
+    KEY_INIT_PHYSICAL_MAP,
+    KEY_INIT_USER_CODE_OUTPUTS,
+    KEY_INIT_EXTRA_OUTPUT_OPTIONS,
 )
 
 # Where the action descriptions from services.yaml are kept (hass.data)
@@ -409,18 +420,21 @@ def _remove_entities_not_imported(hass: HomeAssistant, entry: ConfigEntry) -> No
     Only items on the panel that the user left out: entities of zone numbers
     that are not zones are left to the warning below.
     """
-    unselected = unselected_items(entry.options, panel_config(entry.data))
+    config = panel_config(entry.data)
+    unselected = unselected_items(entry.options, config)
+    model = stored_model(config)
+    terminals = model.terminals if model is not None else None
     registry = er.async_get(hass)
     removed = []
     for entity in er.async_entries_for_config_entry(registry, entry.entry_id):
-        item = item_of_unique_id(entry.entry_id, entity.unique_id)
+        item = item_of_unique_id(entry.entry_id, entity.unique_id, terminals)
         if item is not None and item[1] in unselected[item[0]]:
             registry.async_remove(entity.entity_id)
             removed.append(entity.entity_id)
     if removed:
         _LOGGER.info(
-            "%s: removed the entities of areas, zones and scenarios that are not "
-            "imported: %s",
+            "%s: removed the entities of areas, zones, scenarios and outputs "
+            "that are not imported: %s",
             entry.title,
             ", ".join(sorted(removed)),
         )
@@ -498,9 +512,8 @@ async def _reread_configuration_if_outdated(
         )
     elif any(key not in config for key in _REQUIRED_CONFIGURATION_KEYS):
         _LOGGER.info(
-            "%s: reading the panel configuration again for the names of user "
-            "codes, keys and readers, the enabled peripherals and whether the "
-            "panel refuses arming with zones not ready",
+            "%s: reading the panel configuration again for what this version "
+            "adds to it (such as the outputs' programming and names)",
             entry.title,
         )
     else:

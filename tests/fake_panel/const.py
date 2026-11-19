@@ -135,6 +135,7 @@ TERMINAL_OUTPUT = 1
 TERMINAL_IN_OUT = 2
 TERMINAL_DOUBLE = 3
 TERMINAL_NULL = 4
+TERMINAL_OUT_DIMMING = 5
 
 # Area arming nibbles
 MODE_NONE = 0
@@ -160,6 +161,7 @@ RESULT_SLOT_NOT_CONNECTED = 4
 RESULT_NULL_TERMINAL = 5
 RESULT_NOT_ENABLED = 6  # zone cannot be bypassed / output not enabled
 RESULT_DOUBLE_ZONE = 8
+RESULT_OUTPUT_LOCKED = 7  # output: its areas are armed
 
 # Event codes (bits 0-6 of the last byte of a 9-byte event record)
 EVENT_ZONE_ALARM = 0
@@ -223,6 +225,10 @@ class Layout:
     peripherals_length: int = 22
     general_options_address: int = EEPROM_GENERAL_OPTIONS
     firmware_51: bool = False  # firmware 5.1 event numbering
+    # O1-O3 records (monostable time, options), 2 bytes each
+    eeprom_fixed_outputs: int = 0x05A2C
+    # Extra output options, L + 3 bytes (bit 0: home automation); firmware 6
+    eeprom_extra_output_options: int | None = 0x08C7D
 
     @property
     def zones(self) -> int:
@@ -335,6 +341,8 @@ LAYOUT_10100 = Layout(
     eeprom_scenario_modes=0x0C81F,
     eeprom_events=0x19204,
     event_ring_size=1000,
+    eeprom_fixed_outputs=0x0957D,
+    eeprom_extra_output_options=0x0E7B9,
     labels=_packed_labels(
         {
             RAM_LABELS_AREAS: 15,
@@ -401,6 +409,8 @@ LAYOUT_505 = Layout(
     event_ring_size=500,
     labels=_small_labels(areas=5, zones=20, expanders=5),
     label_bank=0,
+    eeprom_fixed_outputs=0x029E9,
+    eeprom_extra_output_options=0x04CCE,
 )
 
 # SmartLiving 515, firmware 6.x
@@ -429,6 +439,8 @@ LAYOUT_515 = Layout(
     event_ring_size=500,
     labels=_small_labels(areas=5, zones=40, expanders=10),
     label_bank=0,
+    eeprom_fixed_outputs=0x0315F,
+    eeprom_extra_output_options=0x054BF,
 )
 
 
@@ -438,6 +450,7 @@ _FW51 = {
     "peripherals_length": 20,
     "general_options_address": 0x00015,
     "firmware_51": True,
+    "eeprom_extra_output_options": None,  # not known on firmware 5.1
 }
 
 LAYOUT_1050_FW51 = replace(
@@ -456,6 +469,7 @@ LAYOUT_1050_FW51 = replace(
         for register, (offset, count) in LAYOUT_1050.labels.items()
     },
     label_bank=0,
+    eeprom_fixed_outputs=0x04AF6,
     **_FW51,
 )
 
@@ -469,5 +483,6 @@ LAYOUT_505_FW51 = replace(
     eeprom_areas=0x0298C,
     eeprom_scenario_modes=0x033B3,
     eeprom_events=0x0EE5C,
+    eeprom_fixed_outputs=0x022A6,
     **_FW51,
 )

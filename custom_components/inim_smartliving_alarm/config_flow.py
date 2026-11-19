@@ -34,6 +34,7 @@ from .const import (
     CONF_EVENT_LOG_SIZE,
     CONF_FOUND_BOARD,
     CONF_HOST,
+    CONF_OUTPUTS,
     CONF_PANEL_NAME,
     CONF_PASSWORD,
     CONF_PIN,
@@ -79,6 +80,8 @@ from .selection import (
     area_names,
     mapped_scenarios,
     numbers,
+    output_label,
+    outputs_shown,
     scenario_label,
     scenario_names,
     selected,
@@ -221,36 +224,43 @@ _ITEM_FORMS = {
 }
 
 
+def _item_label(config: Mapping[str, Any], key: str, number: int) -> str:
+    """How an item is listed: its number and the panel's label."""
+    if key == CONF_OUTPUTS:
+        return output_label(config, number)
+    names_of, kind = _ITEM_FORMS[key]
+    names = names_of(config)
+    if number <= len(names) and names[number - 1]:
+        return f"{number} - {names[number - 1]}"
+    return f"{kind} {number}"
+
+
 def _items_schema(
     config: Mapping[str, Any], chosen: Mapping[str, list[int]]
 ) -> vol.Schema:
-    """The areas, zones and scenarios of the panel to tick, with their labels.
+    """The areas, zones, scenarios and outputs of the panel to tick.
 
     One collapsible section of checkboxes per kind, so that what is left
-    out stays in view.
+    out stays in view; the outputs' section only when there are outputs
+    the user code can switch.
     """
     fields: dict[Any, Any] = {}
     for key in SELECTION_KEYS:
-        names_of, kind = _ITEM_FORMS[key]
-        names = names_of(config)
         options = [
-            SelectOptionDict(
-                value=str(number),
-                label=(
-                    f"{number} - {names[number - 1]}"
-                    if number <= len(names) and names[number - 1]
-                    else f"{kind} {number}"
-                ),
-            )
+            SelectOptionDict(value=str(number), label=_item_label(config, key, number))
             for number in AVAILABLE[key](config)
         ]
+        if key == CONF_OUTPUTS and not options:
+            continue
         checkboxes = SelectSelector(
             SelectSelectorConfig(
                 options=options, multiple=True, mode=SelectSelectorMode.LIST
             )
         )
         suggested = [str(number) for number in chosen[key]]
-        fields[vol.Required(key)] = section(
+        # Outputs came later: a form sent without their section ticks none
+        marker = vol.Optional if key == CONF_OUTPUTS else vol.Required
+        fields[marker(key)] = section(
             vol.Schema(
                 {
                     vol.Optional(
@@ -758,7 +768,12 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
         current = (
             _chosen_items(user_input)
             if user_input is not None
-            else {key: selected(options, config, key) for key in SELECTION_KEYS}
+            else {
+                key: outputs_shown(options, config)
+                if key == CONF_OUTPUTS
+                else selected(options, config, key)
+                for key in SELECTION_KEYS
+            }
         )
         return self.async_show_form(
             step_id="items",
@@ -784,7 +799,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
             new_pin = user_input.get(CONF_PIN) or ""
             if new_pin and new_pin != entry.data.get(CONF_PIN):
                 try:
-                    await _validate_for_entry(
+                    new_config = await _validate_for_entry(
                         self.hass, entry, {**entry.data, CONF_PIN: new_pin}
                     )
                 except ConnectionError:
@@ -800,6 +815,8 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                     errors[CONF_PIN] = "unknown"
                 else:
                     data[CONF_PIN] = new_pin
+                    # read with the new PIN: its user code's output mask
+                    data[DATA_INITIAL_PANEL_CONFIG] = new_config
 
             if not errors:
                 updated_options: dict[str, Any] = {}

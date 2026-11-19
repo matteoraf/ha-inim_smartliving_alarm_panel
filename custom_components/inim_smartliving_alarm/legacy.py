@@ -397,6 +397,11 @@ def configuration_dict(config: PanelConfiguration) -> dict[str, Any]:
         "peripherals": _peripherals(config),
         "general_options": {"raw_hex": config.general_options_raw.hex()},
         "area_records": {"raw_hex": config.area_records_raw.hex()},
+        "fixed_output_records": {"raw_hex": config.fixed_output_records.hex()},
+        "fixed_output_labels": {"raw_hex": config.fixed_output_labels.raw.hex()},
+        "physical_map": {"raw_hex": config.physical_map_raw.hex()},
+        "user_code_outputs": {"raw_hex": config.user_output_mask.hex()},
+        "extra_output_options": {"raw_hex": config.extra_output_options.hex()},
     }
 
 

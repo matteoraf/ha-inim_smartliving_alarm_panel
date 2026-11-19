@@ -12,7 +12,7 @@ never logged or kept.
 """
 
 import asyncio
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 import logging
 
@@ -26,9 +26,11 @@ from .protocol.commands import (
     bypass_zone,
     encode_pin,
     reset_alarm_memory,
+    set_output,
 )
 from .protocol.config import (
     AreaConfig,
+    OutputConfig,
     Peripherals,
     PhysicalMap,
     ScenarioConfig,
@@ -36,8 +38,10 @@ from .protocol.config import (
     UserCode,
     ZoneConfig,
     area_mask,
+    code_output_mask,
     decode_area_records,
     decode_code_record,
+    decode_fixed_outputs,
     decode_labels,
     decode_peripherals,
     decode_physical_map,
@@ -57,9 +61,11 @@ from .protocol.frames import (
     active_scenario_request,
     not_ready_area_request,
     not_ready_request,
+    output_detail_request,
     read_ram,
 )
 from .protocol.model import (
+    FIXED_OUTPUTS,
     GENERAL_OPTIONS_READ_LENGTH,
     PERIPHERALS_ADDRESS,
     FirmwareInfo,
@@ -68,6 +74,7 @@ from .protocol.model import (
     parse_model_string,
 )
 from .protocol.status import (
+    OUTPUT_DETAIL_LENGTH,
     AreaStatus,
     PanelState,
     ZoneInclusion,
@@ -76,6 +83,7 @@ from .protocol.status import (
     decode_active_scenario,
     decode_area_status,
     decode_not_ready_zones,
+    decode_output_level,
     decode_panel_state,
     decode_zone_inclusion,
     decode_zone_memory,
@@ -194,6 +202,13 @@ class PanelConfiguration:
     scenario_records: bytes
     area_records: tuple[AreaConfig, ...]
     area_records_raw: bytes
+    fixed_output_labels: Labels  # O1-O3
+    fixed_outputs: tuple[OutputConfig, ...]  # O1-O3
+    fixed_output_records: bytes
+    # The output mask of the PIN's user code (empty if the PIN matches none)
+    user_output_mask: bytes
+    # Extra output options (L + 3 bytes); empty where the address is not known
+    extra_output_options: bytes
 
 
 @dataclass(frozen=True, slots=True)
@@ -247,6 +262,7 @@ class SmartLivingPanel:
         # The user code the PIN belongs to: its 0-based number and record
         self.user_code_index: int | None = None
         self.user_code: UserCode | None = None
+        self._user_output_mask = b""
         # The state flags are read only from models with a profile: other
         # firmware may lay out the faults register differently
         self.reads_panel_state = False
@@ -317,6 +333,7 @@ class SmartLivingPanel:
             )
             code = decode_code_record(record, model)
             areas = code.areas
+            self._user_output_mask = code_output_mask(record, model)
         self._firmware, self._model = firmware, model
         self._model_string = data
         self._user_areas = areas
@@ -358,6 +375,7 @@ class SmartLivingPanel:
             expander_labels = await labels(reg.LABELS_EXPANDERS, model.expanders)
             timer_labels = await labels(reg.LABELS_TIMERS, model.timers)
             siren_labels = await labels(reg.LABELS_SIRENS, model.sirens)
+            fixed_output_labels = await labels(reg.LABELS_FIXED_OUTPUTS, FIXED_OUTPUTS)
             # The enabled peripherals and the general options, in one go
             setup_block = await session.read_eeprom(
                 PERIPHERALS_ADDRESS, model.setup_block_length
@@ -381,6 +399,16 @@ class SmartLivingPanel:
             )
             areas = await session.read_eeprom(
                 model.area_records, model.areas * model.area_record_length
+            )
+            fixed_outputs = await session.read_eeprom(
+                model.fixed_output_records, 2 * FIXED_OUTPUTS
+            )
+            extra_output_options = (
+                b""
+                if model.extra_output_options is None
+                else await session.read_eeprom(
+                    model.extra_output_options, model.terminals + FIXED_OUTPUTS
+                )
             )
             await self._check_not_programming(session)
         return PanelConfiguration(
@@ -413,6 +441,11 @@ class SmartLivingPanel:
             scenario_records=scenarios,
             area_records=tuple(decode_area_records(areas, model)),
             area_records_raw=areas,
+            fixed_output_labels=fixed_output_labels,
+            fixed_outputs=tuple(decode_fixed_outputs(fixed_outputs)),
+            fixed_output_records=fixed_outputs,
+            user_output_mask=self._user_output_mask,
+            extra_output_options=extra_output_options,
         )
 
     # ------------------------------------------------------------------ status
@@ -540,6 +573,41 @@ class SmartLivingPanel:
                 self._pin, slot, model, bypass=bypass, second_zone=second_zone
             )
         )
+
+    async def set_output(self, output: int, value: int) -> CommandResult:
+        """Switch an output: 0/1 off/on, 0-100 for a dimmer.
+
+        output is the command's OUTPUT byte (see protocol.config.output_address).
+        """
+        return await self._command(
+            lambda model: set_output(self._pin, output, value, model)
+        )
+
+    async def read_output_levels(
+        self, terminals: Iterable[int]
+    ) -> dict[int, int | None]:
+        """The level (0-100) of dimmer output terminals (0-based).
+
+        Empty when the panel cannot tell (no output detail on its firmware,
+        or the PIN matches no user code); None for a terminal it gave no
+        detail for.
+        """
+        wanted = sorted(set(terminals))
+        if not wanted:
+            return {}
+        async with self.transport.session() as session:
+            model = await self._identify(session)
+            code = self.user_code_index
+            if not model.output_detail or code is None:
+                return {}
+            levels: dict[int, int | None] = {}
+            for terminal in wanted:
+                reply = await session.read(
+                    output_detail_request(code, terminal, model),
+                    OUTPUT_DETAIL_LENGTH,
+                )
+                levels[terminal] = decode_output_level(reply)
+        return levels
 
     async def activate_scenario(
         self,

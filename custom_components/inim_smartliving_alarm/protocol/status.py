@@ -206,6 +206,25 @@ def decode_not_ready_zones(data: bytes, model: PanelModel) -> frozenset[int]:
     return frozenset(zone for zone, set_ in enumerate(bits) if set_)
 
 
+OUTPUT_DETAIL_LENGTH = 8
+_OUTPUT_LEVEL_OFFSET = 6
+_NO_DETAIL = 0xFF  # the panel's fill when it gives no detail
+
+
+def decode_output_level(data: bytes) -> int | None:
+    """A dimmer output's level (0-100 %) from its output detail reply.
+
+    None when the panel gave no detail (the reply is left filled with 0xFF:
+    an output the user code may not drive, or out of range) or the level is
+    not a percentage.
+    """
+    _check_length(data, OUTPUT_DETAIL_LENGTH, "output detail")
+    if all(byte == _NO_DETAIL for byte in data):
+        return None
+    level = data[_OUTPUT_LEVEL_OFFSET] & 0x7F
+    return level if level <= 100 else None
+
+
 def decode_panel_state(data: bytes) -> PanelState:
     """Decode the panel state flags (2 bytes)."""
     _check_length(data, 2, "panel state")

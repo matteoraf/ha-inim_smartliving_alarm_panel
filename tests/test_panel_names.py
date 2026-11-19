@@ -179,7 +179,7 @@ async def test_old_configuration_is_read_again_once(
     with caplog.at_level(logging.INFO):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
-    assert "for the names of user codes" in caplog.text
+    assert "for what this version adds to it" in caplog.text
     config = entry.data[DATA_INITIAL_PANEL_CONFIG]
     assert config["code_names"]["names"][0] == "Master"
     assert config["peripherals"]["keypads"] == [1, 2]
@@ -188,7 +188,7 @@ async def test_old_configuration_is_read_again_once(
     caplog.clear()
     assert await hass.config_entries.async_reload(entry.entry_id)
     await hass.async_block_till_done()
-    assert "for the names of user codes" not in caplog.text
+    assert "for what this version adds to it" not in caplog.text
     await unload_all(hass)
 
 

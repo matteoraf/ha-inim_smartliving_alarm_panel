@@ -134,6 +134,14 @@ class PanelState:
     zone_memory: list[bool] = field(default_factory=lambda: [False] * c.NUM_ZONES)
     outputs: dict[int, int] = field(default_factory=dict)  # logical terminal -> value
     fixed_outputs: list[bool] = field(default_factory=lambda: [False] * 3)
+    # Output programming: O1-O3 records (monostable time, options; 2 bytes
+    # each) and, by 0-based terminal, bytes 9-10 of a terminal record
+    fixed_output_records: bytes = bytes(6)
+    output_programming: dict[int, tuple[int, int]] = field(default_factory=dict)
+    # The panel refuses output commands as if their areas were armed
+    outputs_locked: bool = False
+    # Outputs marked as home automation: terminal (0-based), or L + 0-2 for O1-O3
+    home_automation: set[int] = field(default_factory=set)
     active_scenario: int | None = None
     # Fault flags and supply voltage (13.8 V): bytes 0-3 of the faults register,
     # which ends with the panel state flags
@@ -269,11 +277,21 @@ class PanelState:
             record = self.zone_records.get(index, record)
             put(lay.eeprom_zones + index * c.ZONE_RECORD_LENGTH, record)
         for index, terminal_type in enumerate(self.terminal_types):
-            record = self.terminal_records.get(
-                index, bytes(c.TERMINAL_TYPE_OFFSET) + bytes((terminal_type,))
-            )
+            built = bytearray(c.TERMINAL_RECORD_LENGTH)
+            built[9:11] = bytes(self.output_programming.get(index, (0, 0)))
+            built[c.TERMINAL_TYPE_OFFSET] = terminal_type
+            record = self.terminal_records.get(index, bytes(built))
             put(lay.eeprom_terminals + index * c.TERMINAL_RECORD_LENGTH, record)
         put(lay.eeprom_physical_map, bytes(self.physical_map))
+        put(lay.eeprom_fixed_outputs, self.fixed_output_records)
+        if lay.eeprom_extra_output_options is not None:
+            put(
+                lay.eeprom_extra_output_options,
+                bytes(
+                    int(index in self.home_automation)
+                    for index in range(lay.terminals + 3)
+                ),
+            )
         for index in range(lay.areas):
             record = self.area_records.get(index, AREA_RECORD)
             put(lay.eeprom_areas + index * len(AREA_RECORD), record)
@@ -373,9 +391,36 @@ class PanelState:
         return c.NO_SCENARIO
 
     def output_detail(self, pin_index: int, terminal: int) -> bytes:
-        """Reply of RAM 0x1FFD: type, two 16-bit values, phase, level, status."""
+        """Reply of RAM 0x1FFD: type, two 16-bit values, phase, level, status.
+
+        Left filled with 0xFF for an output the code may not drive, or a
+        terminal that is no output, as the panel does.
+        """
+        if (
+            pin_index >= self.layout.codes
+            or terminal >= self.layout.terminals
+            or self.terminal_types[terminal] not in _SWITCHED_OUTPUTS
+            or not self._may_drive(pin_index, terminal)
+        ):
+            return b"\xff" * 8
         value = self.outputs.get(terminal, 0)
-        return bytes((5, 0, 0, 0, 0, 0, value & 0x7F, 1 if value else 0))
+        kind = 7 if self._is_dimmer(terminal) else 5
+        return bytes((kind, 0, 0, 0, 0, 0, value & 0x7F, 1 if value else 0))
+
+    def _output_mask(self, code: int) -> bytes:
+        start = c.CODE_OUTPUT_MASK_OFFSET
+        return self.code_records[code][
+            start : start + self.layout.code_output_mask_length
+        ]
+
+    def _may_drive(self, code: int, terminal: int) -> bool:
+        return bool(self._output_mask(code)[1 + terminal // 8] >> terminal % 8 & 1)
+
+    def _is_dimmer(self, terminal: int) -> bool:
+        options = self.output_programming.get(terminal, (0, 0))[1]
+        return self.terminal_types[terminal] == c.TERMINAL_OUT_DIMMING or bool(
+            options & 0x40
+        )
 
     def event_text(self, index: int) -> bytes:
         """Reply of RAM 0x1FFF: an event with its texts already resolved."""
@@ -537,23 +582,42 @@ class PanelState:
         return c.RESULT_OK
 
     def execute_output(self, payload: bytes) -> int:
-        """Register 0x2007: PIN + physical slot + value."""
+        """Register 0x2007: PIN + OUTPUT + value.
+
+        OUTPUT 0-2 are always O1-O3; 3 or more is a physical slot. The code's
+        output mask, "already in the requested state" and the lock are
+        checked in this order, as the firmware does.
+        """
         code = self._code_index(payload[0:6])
         if code is None:
             return c.RESULT_INVALID_CODE
-        slot, value = payload[6], payload[7]
-        if slot >= self.layout.physical_slots:
+        output, value = payload[6], payload[7]
+        if output < 3:
+            if not self._output_mask(code)[0] >> output & 1:
+                return c.RESULT_NOT_ENABLED
+            if self.fixed_outputs[output] == (value > 0):
+                return c.RESULT_ALREADY_IN_STATE
+            if self.outputs_locked:
+                return c.RESULT_OUTPUT_LOCKED
+            self.fixed_outputs[output] = value > 0
+            return c.RESULT_OK
+        if output >= self.layout.physical_slots:
             return c.RESULT_SLOT_OUT_OF_RANGE
-        terminal = self.physical_map[slot]
+        terminal = self.physical_map[output]
         if terminal == 0xFF:
             return c.RESULT_SLOT_NOT_CONNECTED
-        if self.terminal_types[terminal] not in (c.TERMINAL_OUTPUT, c.TERMINAL_IN_OUT):
+        if self.terminal_types[terminal] == c.TERMINAL_NULL:
+            return c.RESULT_NULL_TERMINAL
+        if self.terminal_types[terminal] not in _SWITCHED_OUTPUTS:
             return c.RESULT_NOT_ENABLED
-        mask = self.code_records[code][c.CODE_OUTPUT_MASK_OFFSET + 1 + terminal // 8]
-        if not mask >> (terminal % 8) & 1:
+        if not self._may_drive(code, terminal):
             return c.RESULT_NOT_ENABLED
+        if not self._is_dimmer(terminal):
+            value = 1 if value else 0
         if self.outputs.get(terminal, 0) == value:
             return c.RESULT_ALREADY_IN_STATE
+        if self.outputs_locked:
+            return c.RESULT_OUTPUT_LOCKED
         self.outputs[terminal] = value
         return c.RESULT_OK
 
@@ -604,6 +668,9 @@ class PanelState:
     def area_numbers(self, mask: int) -> list[int]:
         """1-based area numbers of a mask."""
         return _mask_bits(mask, self.layout.areas)
+
+
+_SWITCHED_OUTPUTS = (c.TERMINAL_OUTPUT, c.TERMINAL_IN_OUT, c.TERMINAL_OUT_DIMMING)
 
 
 def _fw51_event(code: int) -> int:

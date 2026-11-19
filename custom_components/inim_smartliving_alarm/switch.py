@@ -42,9 +42,10 @@ from .const import (
 )
 from .errors import async_send_command
 from .legacy import LegacyPanelClient, zones_to_create
+from .outputs import InimOutputEntity, is_dimmer
 from .protocol.commands import ArmMode
 from .readiness import async_arm
-from .selection import area_label, selected
+from .selection import area_label, imported_outputs, selected
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -146,6 +147,20 @@ async def async_setup_entry(
                 second_zone=bool(zone_detail.get("second_zone")),
             )
         )
+
+    # --- Outputs switched on and off (dimmers are lights) ---
+    for item in imported_outputs(entry.options, initial_panel_config):
+        if item.address is not None and not is_dimmer(item):
+            switches_to_add.append(
+                InimOutputSwitch(
+                    coordinator,
+                    api_client,
+                    entry,
+                    panel_display_name,
+                    system_info,
+                    item,
+                )
+            )
 
     if switches_to_add:
         async_add_entities(switches_to_add)
@@ -401,3 +416,19 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
             "zone_name": self._zone_name,
             "internal_index": self._zone_internal_index,
         }
+
+
+class InimOutputSwitch(InimOutputEntity, SwitchEntity):
+    """An on/off or monostable output of the panel.
+
+    A monostable output switches itself off after its time; the next poll
+    shows it off.
+    """
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Switch the output on."""
+        await self._async_switch(1)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Switch the output off."""
+        await self._async_switch(0)

@@ -1,10 +1,14 @@
 """The areas, zones and scenarios to import: setup, options, upgrade, arm_area."""
 
+import copy
+from pathlib import Path
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers.service import async_get_all_descriptions
+from homeassistant.helpers.service import async_get_cached_service_description
+from homeassistant.util.yaml import load_yaml_dict
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -41,15 +45,33 @@ async def change_items(hass: HomeAssistant, entry: ConfigEntry, **chosen) -> dic
     return result
 
 
+SERVICES = load_yaml_dict(
+    str(Path(__file__).parent.parent / "custom_components" / DOMAIN / "services.yaml")
+)
+
+
+def live_options(hass: HomeAssistant, service: str, field: str) -> list[dict]:
+    """The options an action's select field offers now.
+
+    The whole description must be the one in services.yaml, with only that
+    list filled in while the integration runs.
+    """
+    description = async_get_cached_service_description(hass, DOMAIN, service)
+    assert description is not None
+    options = description["fields"][field]["selector"]["select"]["options"]
+    expected = copy.deepcopy(SERVICES[service])
+    expected["fields"][field]["selector"]["select"]["options"] = options
+    assert description == {
+        "name": expected["name"],
+        "description": expected["description"],
+        "fields": expected["fields"],
+    }
+    return options
+
+
 def area_choices(hass: HomeAssistant) -> list[dict[str, str]]:
     """The areas the arm_area action offers."""
-    return hass.data["inim_test_descriptions"][DOMAIN]["arm_area"]["fields"]["areas"][
-        "selector"
-    ]["select"]["options"]
-
-
-async def load_descriptions(hass: HomeAssistant) -> None:
-    hass.data["inim_test_descriptions"] = await async_get_all_descriptions(hass)
+    return live_options(hass, "arm_area", "areas")
 
 
 # ------------------------------------------------------------------ setup
@@ -297,7 +319,6 @@ async def test_arm_area_lists_the_imported_areas(
     """The action offers the imported areas by name; none once unloaded."""
     panel.state.labels[c.RAM_LABELS_AREAS][0] = "Ingresso"
     entry = await add_entry(hass, panel, areas=[1, 3])
-    await load_descriptions(hass)
     assert area_choices(hass) == [
         {"value": "1", "label": "Ingresso"},
         {"value": "3", "label": "Area 3"},
@@ -309,11 +330,9 @@ async def test_arm_area_lists_the_imported_areas(
 
     # Changing the options updates the list
     await change_items(hass, entry, areas=[2])
-    await load_descriptions(hass)
     assert area_choices(hass) == [{"value": "2", "label": "Area 2"}]
 
     await unload_all(hass)
-    await load_descriptions(hass)
     assert area_choices(hass) == []
 
 
@@ -327,7 +346,6 @@ async def test_arm_area_lists_the_areas_of_each_panel(
     try:
         await add_entry(hass, panel, areas=[1, 2], name="Home")
         await add_entry(hass, other, areas=[2], name="Work")
-        await load_descriptions(hass)
         assert area_choices(hass) == [
             {"value": "1", "label": "Area 1 (Home)"},
             {"value": "2", "label": "Area 2 (Home), Office (Work)"},

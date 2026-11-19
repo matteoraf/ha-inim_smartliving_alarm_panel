@@ -83,6 +83,7 @@ class PanelModel:
     event_log: int
     label_bank: int  # added to the label pointers read from RAM
     area_records: int  # A x 7 bytes: delays and options of each area
+    fixed_output_records: int  # O1-O3, 2 bytes each: monostable time, options
     # Profile not yet confirmed on a real panel
     experimental: bool = False
     sirens: int = 10  # siren labels, on every model
@@ -93,6 +94,11 @@ class PanelModel:
     # Firmware 6 code of each of the panel's event codes (None: no such
     # code on firmware 6); None when the panel numbers them as firmware 6
     event_codes: tuple[int | None, ...] | None = None
+    # The panel answers the output detail request (dimmer level); firmware 6
+    output_detail: bool = True
+    # Extra output options, L + 3 bytes (terminals, then O1-O3; bit 0 = home
+    # automation output); None where the address is not known
+    extra_output_options: int | None = None
 
     scenarios = SCENARIOS
     terminal_record_length = 12
@@ -184,6 +190,8 @@ SMARTLIVING_1050_FW6 = PanelModel(
     event_log=0x19204,
     label_bank=0x10000,
     area_records=0x06126,
+    fixed_output_records=0x05A2C,
+    extra_output_options=0x08C7D,
 )
 
 
@@ -212,6 +220,8 @@ SMARTLIVING_10100_FW6 = PanelModel(
     event_log=0x19204,
     label_bank=0x10000,
     area_records=0x0A36B,
+    fixed_output_records=0x0957D,
+    extra_output_options=0x0E7B9,
     experimental=True,
 )
 
@@ -240,6 +250,8 @@ SMARTLIVING_505_FW6 = PanelModel(
     event_log=0x0EE5C,
     label_bank=0,
     area_records=0x030E3,
+    fixed_output_records=0x029E9,
+    extra_output_options=0x04CCE,
     experimental=True,
 )
 
@@ -269,6 +281,8 @@ SMARTLIVING_515_FW6 = PanelModel(
     event_log=0x0EE5C,
     label_bank=0,
     area_records=0x03859,
+    fixed_output_records=0x0315F,
+    extra_output_options=0x054BF,
     experimental=True,
 )
 
@@ -286,6 +300,8 @@ _FW51 = {
     "peripherals_length": 20,
     "general_options_address": 0x00015,
     "event_codes": FW51_EVENT_CODES,
+    "output_detail": False,
+    "extra_output_options": None,
     "experimental": True,
 }
 
@@ -300,6 +316,7 @@ SMARTLIVING_505_FW51 = replace(
     scenario_records=0x033B3,
     event_log=0x0EE5C,
     area_records=0x0298C,
+    fixed_output_records=0x022A6,
     **_FW51,
 )
 
@@ -314,6 +331,7 @@ SMARTLIVING_515_FW51 = replace(
     scenario_records=0x03A50,
     event_log=0x0EE5C,
     area_records=0x02FEA,
+    fixed_output_records=0x02904,
     **_FW51,
 )
 
@@ -330,6 +348,7 @@ SMARTLIVING_1050_FW51 = replace(
     event_ring_size=500,
     label_bank=0,
     area_records=0x051DC,
+    fixed_output_records=0x04AF6,
     **_FW51,
 )
 
@@ -344,6 +363,7 @@ SMARTLIVING_10100_FW51 = replace(
     scenario_records=0x0AF16,
     event_log=0x19004,
     area_records=0x08A62,
+    fixed_output_records=0x07C9C,
     **_FW51,
 )
 

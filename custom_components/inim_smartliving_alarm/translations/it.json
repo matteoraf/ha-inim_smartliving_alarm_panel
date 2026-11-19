@@ -59,8 +59,8 @@
           }
         },
         "items": {
-          "title": "Aree, zone e scenari",
-          "description": "Scegli cosa importare da {panel_name}. Ogni voce selezionata ha le sue entità. Proposte: le zone che appartengono a un'area, le aree di quelle zone e gli scenari che cambiano un'area. Potrai cambiarle in seguito nelle opzioni dell'integrazione.\n\n**Trovati sulla centrale**\n- Tastiere: {keypads}\n- Lettori: {readers}\n- Espansioni: {expanders}\n- Sirene: {sirens}",
+          "title": "Aree, zone, scenari e uscite",
+          "description": "Scegli cosa importare da {panel_name}. Ogni voce selezionata ha le sue entità. Proposte: le zone che appartengono a un'area, le aree di quelle zone e gli scenari che cambiano un'area; le uscite che l'installatore ha indicato come domotiche. Potrai cambiarle in seguito nelle opzioni dell'integrazione.\n\n**Trovati sulla centrale**\n- Tastiere: {keypads}\n- Lettori: {readers}\n- Espansioni: {expanders}\n- Sirene: {sirens}",
           "sections": {
             "areas": {
               "name": "Aree",
@@ -81,6 +81,13 @@
               "description": "Gli scenari della centrale.",
               "data": {
                 "scenarios": "Scenari da importare"
+              }
+            },
+            "outputs": {
+              "name": "Uscite",
+              "description": "Le uscite che il tuo codice utente può comandare: le uscite su terminale e le uscite fisse O1-O3. Sono selezionate per te solo le uscite che l'installatore ha indicato come uscite domotiche: un'uscita può comandare una sirena, una serratura o un cancello, quindi seleziona solo quelle che vuoi comandare da Home Assistant. Un'uscita su una delle prime tre posizioni dei terminali della centrale non si può comandare a distanza e non è elencata.",
+              "data": {
+                "outputs": "Uscite da importare"
               }
             }
           }
@@ -139,13 +146,13 @@
           "title": "Opzioni Inim SmartLiving",
           "description": "Scegli cosa modificare.",
           "menu_options": {
-            "items": "Aree, zone e scenari",
+            "items": "Aree, zone, scenari e uscite",
             "area_switches": "Modalità di inserimento per area",
             "general": "Impostazioni generali"
           }
         },
         "items": {
-          "title": "Aree, zone e scenari",
+          "title": "Aree, zone, scenari e uscite",
           "description": "Scegli cosa importare. Le entità delle voci deselezionate vengono rimosse; selezionandole di nuovo tornano. Le zone collegate in seguito e i nuovi scenari non vengono selezionati da soli: selezionali qui dopo aver riletto la configurazione della centrale.\n\n**Trovati sulla centrale**\n- Tastiere: {keypads}\n- Lettori: {readers}\n- Espansioni: {expanders}\n- Sirene: {sirens}",
           "sections": {
             "areas": {
@@ -167,6 +174,13 @@
               "description": "Gli scenari della centrale.",
               "data": {
                 "scenarios": "Scenari da importare"
+              }
+            },
+            "outputs": {
+              "name": "Uscite",
+              "description": "Le uscite che il tuo codice utente può comandare: le uscite su terminale e le uscite fisse O1-O3. Sono selezionate per te solo le uscite che l'installatore ha indicato come uscite domotiche: un'uscita può comandare una sirena, una serratura o un cancello, quindi seleziona solo quelle che vuoi comandare da Home Assistant. Un'uscita su una delle prime tre posizioni dei terminali della centrale non si può comandare a distanza e non è elencata.",
+              "data": {
+                "outputs": "Uscite da importare"
               }
             }
           }
@@ -345,6 +359,22 @@
         },
         "user_code": {
           "name": "Codice utente"
+        }
+      },
+      "switch": {
+        "terminal_output": {
+          "name": "Uscita {number}"
+        },
+        "fixed_output": {
+          "name": "O{number}"
+        }
+      },
+      "light": {
+        "terminal_output": {
+          "name": "Uscita {number}"
+        },
+        "fixed_output": {
+          "name": "O{number}"
         }
       }
     },

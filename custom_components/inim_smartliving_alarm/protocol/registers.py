@@ -30,6 +30,7 @@ STOP_SIRENS_OR_CALLS = 0x200B
 # Registers whose request fields carry parameters (see frames.py)
 NOT_READY_ZONES = 0x1FF9
 ACTIVE_SCENARIO = 0x1FFB
+OUTPUT_DETAIL = 0x1FFD  # 8 bytes per output terminal (firmware 6)
 EVENT_POINTERS = 0x1FFE  # 4 bytes: head, tail (u16 LE each)
 EVENT_POINTERS_LENGTH = 4
 
