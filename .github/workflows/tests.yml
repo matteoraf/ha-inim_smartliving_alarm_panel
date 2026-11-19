@@ -21,9 +21,9 @@ jobs:
       - name: Install ruff
         run: pip install "$(grep '^ruff==' requirements_test.txt)"
       - name: Ruff check
-        run: ruff check tests custom_components
+        run: ruff check tests custom_components scripts
       - name: Ruff format
-        run: ruff format --check tests custom_components
+        run: ruff format --check tests custom_components scripts
 
   pytest:
     name: Pytest (Home Assistant ${{ matrix.home-assistant }})

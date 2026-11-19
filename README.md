@@ -549,6 +549,15 @@ Then the level goes back to *Redacted*. Nothing is stored: the report is held in
 
 The board's own details (its network settings and firmware) are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys. If GitHub refuses the file, zip it first.
 
+### Reading a report
+
+The repository has a small viewer for reports, `scripts/inim_report.py` (Python 3.13 or newer; nothing to install for reading). Download the repository from GitHub, then:
+
+*   `python3 scripts/inim_report.py show REPORT.json` shows a report: a summary first, then areas, zones, scenarios, devices, outputs, status, events and the connection. Add `--html report.html` for one page to open in a browser.
+*   `python3 scripts/inim_report.py check REPORT.json` says whether a file is the one to attach (the Redacted report, or the encrypted one) or the private copy, which you should not share.
+
+The maintainer reads an encrypted report with `show REPORT.json --decrypt` (add `--html report.html` for the page); it needs the maintainer's key. It reads the files only: it connects to nothing. You can view your own Redacted report and your readable copy with it; the encrypted file shows its Redacted view.
+
 Troubleshooting
 ---------------
 
