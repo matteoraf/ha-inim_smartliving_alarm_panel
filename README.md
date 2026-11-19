@@ -216,7 +216,7 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
 
 *   **System reports are new**: downloading the integration's diagnostics now gives a system report for bug reports, at the level chosen with the new *Diagnostics level* select (disabled by default). See [Sharing a system report](#sharing-a-system-report).
 
-*   Not changed yet: see [Known limitations](#known-limitations).
+*   Limits of this version: see [Known limitations](#known-limitations).
     
 
 Configuration
@@ -481,19 +481,19 @@ You'll find yaml samples for UI components in the repo.
 Known limitations
 -----------------
 
-These are known and will be fixed in the coming versions:
+Known limitations of this version:
 
 *   On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example `switch.home_home_area_3`); existing installations keep their IDs.
     
 *   Panels on firmware 5.0x or of another model that were set up with an earlier version keep running with the 1050's firmware 6 layout, so their names, zones, scenarios and event log may be wrong and their areas' delays are not shown. A repair notice says so. New setups of such panels are refused.
 
-*   Dimmer levels are read from the panel on firmware 6 only. On firmware 5.1 a dimmer's brightness is the last one set from Home Assistant, so a level changed at a keypad is not shown.
+*   Dimmer levels are read from the panel on firmware 6 only: firmware 5.1 does not report them. On firmware 5.1 a dimmer's brightness is the last one set from Home Assistant, so a level changed at a keypad is not shown.
 
 *   Switching outputs has been tested only on unused outputs: when you first try it, use an output that is harmless to switch, and please report how it works.
 
-*   Analogue outputs are not offered, and a terminal output on one of the panel's first three terminal positions cannot be switched remotely.
+*   Analogue outputs are not offered. A terminal output on one of the panel's first three terminal positions cannot be switched remotely: the panel's output command cannot address those positions.
 
-*   Support for firmware 5.1 is experimental and limited: it has not been tested on a real panel on firmware 5.1; the panel's state flags (such as programming mode) and the results of commands are assumed to work as on firmware 6; the free events that only firmware 5.1 has (free events 1 to 11) are shown as unknown events in the event log; and video sensors are not supported.
+*   Support for firmware 5.1 is experimental and limited: it has not been tested on a real panel on firmware 5.1; the panel's state flags (such as programming mode) and the results of commands are assumed to work as on firmware 6; the free events that only firmware 5.1 has (free events 1 to 11) are shown as unknown events in the event log; and firmware 5.1 has no video sensors.
     
 
 ### When the panel refuses a command
