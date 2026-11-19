@@ -144,7 +144,7 @@ Versions such as `0.4.0a1` (preview) or `0.4.0b1` (beta) are published as GitHub
 *   **Manual**: download the `inim_smartliving_alarm` folder from the pre-release on GitHub.
     
 
-**Take a Home Assistant backup before installing a preview** (**Settings** -> **System** -> **Backups**). A preview updates your configuration entry to a newer format that the stable 0.3.x versions do not fully understand: installed over it, 0.3.x creates entities again for 10 areas, 50 zones and 30 scenarios (including those you had not imported), and it cannot connect to SmartLAN/G boards. To go back to a stable version, restore that backup; this also undoes any other change made in Home Assistant since the backup.
+**Take a Home Assistant backup before installing a preview** (**Settings** -> **System** -> **Backups**). A preview updates your configuration entry to a newer format that the stable 0.3.x versions do not fully understand: installed over it, 0.3.x creates entities again for 10 areas, 50 zones and 30 scenarios (including those you had not imported), cannot connect to SmartLAN/G boards, and leaves the entities only the previews have (such as the arming mode selects, the outputs and the diagnostic sensors) as unavailable entities. To go back to a stable version, restore that backup; this also undoes any other change made in Home Assistant since the backup.
 
 Please report problems with a preview in a GitHub issue, with your panel model, firmware version and board type (SmartLAN/SI or SmartLAN/G).
 
@@ -484,6 +484,8 @@ These are known and will be fixed in the coming versions:
 *   Panels on firmware 5.0x or of another model that were set up with an earlier version keep running with the 1050's firmware 6 layout, so their names, zones, scenarios and event log may be wrong and their areas' delays are not shown. A repair notice says so. New setups of such panels are refused.
 
 *   Dimmer levels are read from the panel on firmware 6 only. On firmware 5.1 a dimmer's brightness is the last one set from Home Assistant, so a level changed at a keypad is not shown.
+
+*   Switching outputs has been tested only on unused outputs: when you first try it, use an output that is harmless to switch, and please report how it works.
 
 *   Analogue outputs are not offered, and a terminal output on one of the panel's first three terminal positions cannot be switched remotely.
 
