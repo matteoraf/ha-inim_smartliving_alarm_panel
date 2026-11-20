@@ -407,6 +407,14 @@ class PanelTransport:
             self._record(data, sent, "framing_error")
             await self.disconnect()
             raise
+        except asyncio.CancelledError:
+            # The reply may still come: a later request on this connection
+            # would read it as its own, so the connection goes, without
+            # waiting while being cancelled.
+            self._record(data, sent, "cancelled")
+            _LOGGER.debug("Request cancelled; closing the connection")
+            self._drop()
+            raise
         self._last_activity = time.monotonic()
         self.stats.exchange(
             data, reply, self._last_activity - sent, keep_reply=log_reply
@@ -425,14 +433,25 @@ class PanelTransport:
 
     async def disconnect(self) -> None:
         """Close the connection (lock must be held)."""
-        writer, self._reader, self._writer = self._writer, None, None
+        writer = self._drop()
         if writer is None:
             return
-        writer.close()
         with contextlib.suppress(OSError):
             await writer.wait_closed()
         _last_close[(self.host, self.port)] = time.monotonic()
+
+    def _drop(self) -> asyncio.StreamWriter | None:
+        """Close the connection without waiting for it (lock must be held).
+
+        Returns the closed writer, None if there was no connection.
+        """
+        writer, self._reader, self._writer = self._writer, None, None
+        if writer is None:
+            return None
+        writer.close()
+        _last_close[(self.host, self.port)] = time.monotonic()
         _LOGGER.debug("Disconnected from %s:%s", self.host, self.port)
+        return writer
 
     async def _ensure_connected(self) -> None:
         if self._writer is not None:
