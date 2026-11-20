@@ -42,7 +42,12 @@ from .protocol.errors import ProtocolError
 from .protocol.masking import Level
 from .protocol.model import FALLBACK_MODEL
 from .report_crypto import encrypt
-from .report_state import Snapshot, async_set_level, report_state
+from .report_state import (
+    Snapshot,
+    async_set_level,
+    current_report_state,
+    report_state,
+)
 from .system_report import EntryFacts, ReportInput, build_report, report_text
 from .transport.base import PanelTransport, TransportError
 from .transport.smartlan_g import SmartLanGTransport
@@ -115,6 +120,10 @@ async def async_get_config_entry_diagnostics(
     envelope = await hass.async_add_executor_job(
         lambda: encrypt(report_text(full), report_id=report_id, level=str(level))
     )
+    if current_report_state(hass, entry.entry_id) is not state:
+        # The entry was unloaded during the reads: its level was dropped,
+        # so this download gets the Redacted report and nothing waits
+        return redacted
     state.snapshot = Snapshot(report_id, level, full, _now() + SNAPSHOT_LIFETIME)
 
     @callback
@@ -124,7 +133,6 @@ async def async_get_config_entry_diagnostics(
             async_set_level(hass, entry.entry_id, Level.REDACTED)
 
     state.expire_later(async_call_later(hass, SNAPSHOT_LIFETIME, expire))
-    entry.async_on_unload(state.cancel_expiry)
     _notify(hass, entry)
     return {
         "report_version": full["report_version"],

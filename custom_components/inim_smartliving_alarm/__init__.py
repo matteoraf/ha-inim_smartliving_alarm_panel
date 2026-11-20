@@ -79,6 +79,7 @@ from .protocol.commands import ArmMode
 from .protocol.errors import UnsupportedPanelError
 from .protocol.model import model_for
 from .readiness import async_arm
+from .report_state import async_drop_report_state
 from .selection import (
     area_label,
     is_disarm_scenario,
@@ -346,6 +347,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Listen for option updates (e.g., if user changes polling interval via UI)
     entry.async_on_unload(entry.add_update_listener(update_listener))
+    # The diagnostics level and any report waiting for its readable download
+    # do not outlive the entry: a reload starts at Redacted
+    entry.async_on_unload(lambda: async_drop_report_state(hass, entry.entry_id))
 
     _LOGGER.info("Inim Alarm integration for %s set up successfully.", entry.title)
     return True
