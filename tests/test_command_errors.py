@@ -1,12 +1,14 @@
 """Commands that are not carried out raise clear errors in Home Assistant."""
 
 from typing import Any
+from unittest.mock import patch
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Event, HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 import pytest
 
+from custom_components.inim_smartliving_alarm import utils
 from custom_components.inim_smartliving_alarm.const import (
     CONF_SCENARIO_DISARM,
     DOMAIN,
@@ -22,6 +24,10 @@ from custom_components.inim_smartliving_alarm.protocol.commands import (
     CommandKind,
     CommandResult,
     decode_result,
+)
+from custom_components.inim_smartliving_alarm.selection import (
+    panel_config,
+    zone_names,
 )
 
 from .fake_panel import FakePanel, const as c
@@ -239,7 +245,54 @@ async def test_scenario_not_ready_is_not_sent(
     assert len(events) == 1
     assert events[0]["reason"] == "zones_blocked"
     assert events[0]["panel_result"] is None
-    assert events[0]["blocking_zones"][0]["zone_id"] == 1
+    zone = events[0]["blocking_zones"][0]
+    assert zone["zone_id"] == 1
+    assert zone["status"] == "not_ready"
+    assert zone["areas"]
+    # The plain label; the message has it with the number
+    assert err.value.translation_placeholders["zones"] == zone_label(
+        1, [zone["zone_name"]]
+    )
+
+
+async def test_scenario_not_ready_lists_the_panel_zones(
+    hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel
+) -> None:
+    """The notification and the event list the zones the panel reported.
+
+    The panel also counts zones at rest as not ready (delayed zones, for
+    example): they are listed as in the error message.
+    """
+    events = failed_events(hass)
+    panel.state.zone_states[0] = c.ZONE_ALARM  # zone 1, area 1
+    panel.state.extra_not_ready = {2}  # zone 3, area 1, at rest
+    await refresh(hass, entry)
+
+    with (
+        patch.object(utils.persistent_notification, "async_create") as note,
+        pytest.raises(ZonesNotReadyError) as err,
+    ):
+        await call(hass, entry, "alarm_control_panel", "alarm_arm_away", ALARM_PANEL)
+    await hass.async_block_till_done()
+    assert err.value.zones == (1, 3)
+    labels = err.value.translation_placeholders["zones"].split(", ")
+    assert len(labels) == 2
+
+    assert len(events) == 1
+    event = events[0]
+    assert event["reason"] == "zones_blocked"
+    assert [z["zone_id"] for z in event["blocking_zones"]] == [1, 3]
+    assert [z["status"] for z in event["blocking_zones"]] == ["not_ready"] * 2
+    assert all(z["areas"] for z in event["blocking_zones"])
+    # The plain labels; the message has them with their numbers
+    names = zone_names(panel_config(entry.data))
+    assert [z["zone_name"] for z in event["blocking_zones"]] == [names[0], names[2]]
+    assert [zone_label(zone, names) for zone in (1, 3)] == labels
+
+    message = note.call_args.args[1]
+    assert message == event["message"]
+    listed = [line.split(". ", 1)[1] for line in message.splitlines()[1:]]
+    assert [line.split("' in ")[0].strip("'") for line in listed] == labels
 
 
 async def test_scenario_refused_by_the_panel(

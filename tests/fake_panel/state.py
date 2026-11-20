@@ -155,6 +155,9 @@ class PanelState:
     # accepted, as a real 1050 does; True refuses it with the "open zones"
     # result, as a panel programmed not to allow arming with zones not ready
     block_arming_when_not_ready: bool = False
+    # Zones (0-based) reported as not ready although at rest, as a real panel
+    # reports delayed zones
+    extra_not_ready: set[int] = field(default_factory=set)
     # Programming mode: shown in the panel state flags; commands are ignored
     # and the result register keeps the previous result, as on a real panel
     in_programming: bool = False
@@ -374,7 +377,14 @@ class PanelState:
         else:  # one area, 0-based, in the mode of bits 5-6 (not used here)
             areas = [(selector & 0x1F) + 1]
         bits = [
-            any(self._zone_open_in_area(zone, area) for area in areas)
+            any(
+                self._zone_open_in_area(zone, area)
+                or (
+                    zone in self.extra_not_ready
+                    and bool(self.zone_areas[zone] >> (area - 1) & 1)
+                )
+                for area in areas
+            )
             for zone in range(self.layout.zones)
         ]
         return _bitmap(bits, length)

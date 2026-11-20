@@ -30,6 +30,8 @@ from .errors import (
     CommandRefusedError,
     InimCommandError,
     PanelProgrammingError,
+    ZonesNotReadyError,
+    zone_label,
 )
 from .legacy import LegacyPanelClient, zone_exists
 from .readiness import async_arm
@@ -113,6 +115,45 @@ async def async_activate_scenario(
         await coordinator.async_request_refresh()
 
 
+def _scenario_zone_areas(
+    initial_panel_config: dict[str, Any], zone: int, scenario_areas: list[int]
+) -> list[str]:
+    """Names of a zone's (1-based) areas that the scenario arms, as programmed."""
+    zones_config = initial_panel_config.get(KEY_INIT_ZONES_CONFIG, {}).get(
+        KEY_INIT_ZONES_CONFIG_DETAILED, []
+    )
+    area_names = initial_panel_config.get(KEY_INIT_AREAS, {}).get(
+        KEY_INIT_AREA_NAMES, []
+    )
+    zone_config = next(
+        (zc for zc in zones_config if zc.get(KEY_INIT_ZONE_CONFIG_INDEX) == zone - 1),
+        None,
+    )
+    names = []
+    for area_id in (zone_config or {}).get(KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS, []):
+        if area_id in scenario_areas:
+            name = f"Area {area_id}"
+            if 0 < area_id <= len(area_names):
+                name = area_names[area_id - 1] or name
+            names.append(name)
+    return names
+
+
+def _blocking_zone_line(zone_name: str, area_names: list[str]) -> str:
+    areas = ", ".join(area_names) if area_names else "relevant area(s)"
+    return f"'{zone_name}' in {areas}"
+
+
+def _blocked_notification(scenario_name: str, lines: list[str]) -> tuple[str, str]:
+    """Title and message of a scenario blocked by zones, one line per zone."""
+    listed = "\n".join(f"{i + 1}. {line}" for i, line in enumerate(lines))
+    return (
+        f"Inim Alarm - Scenario '{scenario_name}' Blocked",
+        f"Cannot activate {scenario_name}. "
+        f"The following zones are preventing activation:\n{listed}",
+    )
+
+
 async def async_handle_scenario_activation_failure(
     hass: HomeAssistant,
     coordinator: DataUpdateCoordinator | None,
@@ -171,6 +212,30 @@ async def async_handle_scenario_activation_failure(
         event_reason = "command_failed" if panel_result is None else panel_result
         notification_message = str(error)
         notification_id_suffix = f"activation_failed_{scenario_idx_to_activate}"
+    elif isinstance(error, ZonesNotReadyError) and error.zones:
+        # The zones the panel reported as not ready, as in the error message
+        config = initial_panel_config or {}
+        scenario_areas = scenario_armed_areas(config, scenario_idx_to_activate + 1)
+        names = zone_labels(config)
+        lines = []
+        for zone in error.zones:
+            area_names = _scenario_zone_areas(config, zone, scenario_areas)
+            lines.append(_blocking_zone_line(zone_label(zone, names), area_names))
+            plain = names[zone - 1] if 0 < zone <= len(names) else ""
+            blocking_zones_event_data.append(
+                {
+                    "zone_id": zone,
+                    "zone_name": plain or f"Zone {zone}",
+                    "status": "not_ready",
+                    "areas": area_names,
+                }
+            )
+        event_reason = "zones_blocked"
+        notification_title, notification_message = _blocked_notification(
+            base_scenario_name_for_msg, lines
+        )
+        notification_id_suffix = f"activation_blocked_{scenario_idx_to_activate}"
+        _LOGGER.info("%s: %s", entity_name, notification_message)
     elif (
         not is_disarm_scenario
         and coordinator
@@ -219,9 +284,6 @@ async def async_handle_scenario_activation_failure(
             all_zones_config_detailed_list = initial_panel_config.get(
                 KEY_INIT_ZONES_CONFIG, {}
             ).get(KEY_INIT_ZONES_CONFIG_DETAILED, [])
-            all_area_names_list = initial_panel_config.get(KEY_INIT_AREAS, {}).get(
-                KEY_INIT_AREA_NAMES, []
-            )
             live_zone_statuses_map = coordinator.data.get(
                 KEY_LIVE_ZONES_STATUS, {}
             ).get(KEY_LIVE_ZONE_STATUSES_MAP, {})
@@ -254,20 +316,13 @@ async def async_handle_scenario_activation_failure(
                             for area_id in assigned_areas
                         )
                         if is_relevant:
-                            area_names_parts = []
-                            for area_id in assigned_areas:
-                                if area_id in areas_controlled_by_scenario:
-                                    an = f"Area {area_id}"
-                                    if 0 < area_id <= len(all_area_names_list):
-                                        an = all_area_names_list[area_id - 1] or an
-                                    area_names_parts.append(an)
-                            areas_str = (
-                                ", ".join(area_names_parts)
-                                if area_names_parts
-                                else "relevant area(s)"
+                            area_names_parts = _scenario_zone_areas(
+                                initial_panel_config,
+                                zone_id_1_based,
+                                areas_controlled_by_scenario,
                             )
                             problematic_zones_messages.append(
-                                f"'{zone_name}' in {areas_str}"
+                                _blocking_zone_line(zone_name, area_names_parts)
                             )
                             # Add structured data for the event bus payload
                             blocking_zones_event_data.append(
@@ -281,19 +336,8 @@ async def async_handle_scenario_activation_failure(
 
             if problematic_zones_messages:
                 event_reason = "zones_blocked"
-                notification_title = (
-                    f"Inim Alarm - Scenario '{target_scenario_name}' Blocked"
-                )
-                # Format zones as an ordered list
-                ordered_zones_list_str = "\n".join(
-                    [
-                        f"{i + 1}. {msg}"
-                        for i, msg in enumerate(problematic_zones_messages)
-                    ]
-                )
-                notification_message = (
-                    f"Cannot activate {target_scenario_name}. "
-                    f"The following zones are preventing activation:\n{ordered_zones_list_str}"
+                notification_title, notification_message = _blocked_notification(
+                    target_scenario_name, problematic_zones_messages
                 )
                 notification_id_suffix = (
                     f"activation_blocked_{scenario_idx_to_activate}"
