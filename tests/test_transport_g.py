@@ -226,6 +226,33 @@ async def test_one_connection_for_everything(
     assert g_panel.protocol_errors == []
 
 
+async def test_cancelled_read_closes_the_connection(
+    transport: SmartLanGTransport, g_panel: FakePanel
+) -> None:
+    """The reply of a cancelled read is never taken for the next one's.
+
+    The board sends no checksum, so nothing else would tell them apart.
+    """
+    other = read_ram(reg.AREA_STATUS, 12)
+    expected = await transport.read(other, 12)
+    assert expected != b"6.07 01050  "
+    # The late reply is still on its way on the first connection
+    g_panel.single_client = False
+    g_panel.reply_delay = 0.2
+    task = asyncio.create_task(transport.read(MODEL, 12))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert not transport.connected
+
+    g_panel.reply_delay = 0.0
+    assert await transport.read(other, 12) == expected
+    assert transport.connections_opened == 2
+    assert transport.stats.counters["cancelled"] == 1
+    assert transport.stats.trace[-2]["error"] == "cancelled"
+
+
 async def test_long_reads_use_2000_byte_parts(
     transport: SmartLanGTransport, g_panel: FakePanel
 ) -> None:

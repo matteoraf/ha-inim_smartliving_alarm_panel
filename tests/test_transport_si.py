@@ -399,6 +399,30 @@ async def test_the_trace_keeps_the_last_exchanges(
     assert transport.stats.counters["requests"] == 35
 
 
+async def test_cancelled_read_closes_the_connection(
+    transport: SmartLanSiTransport, fake_panel: FakePanel
+) -> None:
+    """The reply of a cancelled read is never taken for the next one's."""
+    other = read_ram(reg.AREA_STATUS, 12)
+    expected = await transport.read(other, 12)
+    assert expected != b"6.07 01050  "
+    # The late reply is still on its way on the first connection
+    fake_panel.single_client = False
+    fake_panel.reply_delay = 0.2
+    task = asyncio.create_task(transport.read(MODEL, 12))
+    await asyncio.sleep(0.05)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert not transport.connected
+
+    fake_panel.reply_delay = 0.0
+    assert await transport.read(other, 12) == expected
+    assert transport.connections_opened == 2
+    assert transport.stats.counters["cancelled"] == 1
+    assert transport.stats.trace[-2]["error"] == "cancelled"
+
+
 # ------------------------------------------------------------ priority lock
 
 
