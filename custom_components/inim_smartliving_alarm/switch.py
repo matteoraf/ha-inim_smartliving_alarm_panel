@@ -25,13 +25,9 @@ from .const import (
     DEFAULT_AREA_SWITCHES_ARM_MODE,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_AREA_NAMES,
-    KEY_INIT_AREAS,
     KEY_INIT_SYSTEM_INFO,
     KEY_INIT_SYSTEM_INFO_TYPE,
     KEY_INIT_SYSTEM_INFO_VERSION,
-    KEY_INIT_ZONE_NAMES,
-    KEY_INIT_ZONES,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
     KEY_LIVE_AREA_MODES_MAP,
@@ -45,7 +41,13 @@ from .legacy import LegacyPanelClient, zones_to_create
 from .outputs import InimOutputEntity, is_dimmer
 from .protocol.commands import ArmMode
 from .readiness import async_arm
-from .selection import area_label, imported_outputs, selected
+from .selection import (
+    area_label,
+    area_names,
+    imported_outputs,
+    selected,
+    zone_names,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -77,8 +79,7 @@ async def async_setup_entry(
     switches_to_add = []
 
     # --- Setup Area Switches ---
-    area_data = initial_panel_config.get(KEY_INIT_AREAS, {})
-    all_area_names = area_data.get(KEY_INIT_AREA_NAMES, []) if area_data else []
+    all_area_names = area_names(initial_panel_config)
 
     if not all_area_names:
         _LOGGER.warning(
@@ -105,10 +106,7 @@ async def async_setup_entry(
         )
 
     # --- Setup Zone Enabled Switches ---
-    zone_names_data = initial_panel_config.get(KEY_INIT_ZONES, {})
-    all_zone_names = (
-        zone_names_data.get(KEY_INIT_ZONE_NAMES, []) if zone_names_data else []
-    )
+    all_zone_names = zone_names(initial_panel_config)
 
     zones_config = initial_panel_config.get(KEY_INIT_ZONES_CONFIG, {})
     zones_config_detailed = (

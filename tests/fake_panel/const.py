@@ -17,6 +17,8 @@ NUM_SCENARIOS = 30
 NUM_KEYPADS = 10
 EVENT_RING_SIZE = 1000  # event log ring on the 1050 with firmware 6.x
 LABEL_LENGTH = 16
+# Some of the panel's label characters outside ASCII, as the panel encodes them
+LABEL_CHARACTERS = {"É": 0x8A, "é": 0x8C, "à": 0x94, "è": 0x98, "ù": 0x9E, "ä": 0xAA}
 MAX_READ_LENGTH = 250  # longest single read on SmartLAN/SI
 MAX_READ_LENGTH_G = 2000  # longest single read on SmartLAN/G
 

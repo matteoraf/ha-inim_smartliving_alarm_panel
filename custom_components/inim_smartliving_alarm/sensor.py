@@ -20,21 +20,13 @@ from .const import (
     DEFAULT_EVENT_LOG_SIZE,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_AREA_NAMES,
-    KEY_INIT_AREAS,
     KEY_INIT_CODES,
-    KEY_INIT_KEYBOARD_NAMES,
-    KEY_INIT_KEYBOARDS,
     KEY_INIT_KEYS,
     KEY_INIT_NAMES,
     KEY_INIT_READERS,
-    KEY_INIT_SCENARIO_NAMES,
-    KEY_INIT_SCENARIOS,
     KEY_INIT_SYSTEM_INFO,
     KEY_INIT_SYSTEM_INFO_TYPE,
     KEY_INIT_SYSTEM_INFO_VERSION,
-    KEY_INIT_ZONE_NAMES,
-    KEY_INIT_ZONES,
     KEY_LATEST_EVENT_INDEX_VAL,
     KEY_LIVE_ACTIVE_SCENARIO,
     KEY_LIVE_ACTIVE_SCENARIO_NUMBER,
@@ -43,6 +35,7 @@ from .const import (
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
 from .peripherals import enabled_peripherals
+from .selection import area_names, keypad_names, scenario_names, zone_names
 from .user_code import UserCodeInfo, user_code_info
 
 _LOGGER = logging.getLogger(__name__)
@@ -65,17 +58,14 @@ async def async_setup_entry(
     # Get user-defined panel name
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
-    scenario_data = initial_panel_config.get(KEY_INIT_SCENARIOS, {})
-    scenario_names = (
-        scenario_data.get(KEY_INIT_SCENARIO_NAMES, []) if scenario_data else []
-    )
+    all_scenario_names = scenario_names(initial_panel_config)
 
     sensors_to_add = []
 
     # Sensor for the name of the single active Inim scenario
     sensors_to_add.append(
         ActiveInimScenarioNameSensor(
-            coordinator, entry, panel_display_name, system_info, scenario_names
+            coordinator, entry, panel_display_name, system_info, all_scenario_names
         )
     )
 
@@ -438,15 +428,9 @@ class InimEventLogSensor(BaseInimSensorEntity):
             "description": raw_api_event.get("action_description", "Unknown Event"),
         }
 
-        all_scenario_names: list[str] = self._initial_panel_config.get(
-            KEY_INIT_SCENARIOS, {}
-        ).get(KEY_INIT_SCENARIO_NAMES, [])
-        all_area_names: list[str] = self._initial_panel_config.get(
-            KEY_INIT_AREAS, {}
-        ).get(KEY_INIT_AREA_NAMES, [])
-        all_zone_names: list[str] = self._initial_panel_config.get(
-            KEY_INIT_ZONES, {}
-        ).get(KEY_INIT_ZONE_NAMES, [])
+        all_scenario_names = scenario_names(self._initial_panel_config)
+        all_area_names = area_names(self._initial_panel_config)
+        all_zone_names = zone_names(self._initial_panel_config)
 
         if "scenario_number_0_indexed" in raw_api_event:
             idx = raw_api_event["scenario_number_0_indexed"]
@@ -593,9 +577,7 @@ class _EventNames:
         def names(key: str) -> list[str]:
             return (config.get(key) or {}).get(KEY_INIT_NAMES) or []
 
-        self._keypads = (config.get(KEY_INIT_KEYBOARDS) or {}).get(
-            KEY_INIT_KEYBOARD_NAMES
-        ) or []
+        self._keypads = keypad_names(config)
         self._codes = names(KEY_INIT_CODES)
         self._keys = names(KEY_INIT_KEYS)
         self._readers = names(KEY_INIT_READERS)

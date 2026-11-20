@@ -129,6 +129,7 @@ KEY_INIT_SCENARIO_ACTIVATION_RAW = "raw_activation_hex"
 
 KEY_INIT_ZONES = "zones"  # Dict containing list of zone names
 KEY_INIT_ZONE_NAMES = "zone_names"  # List of zone names (str)
+KEY_INIT_ZONE_LABELS_RAW = "raw_hex_full"  # in zones: the zone labels as read, hex
 
 KEY_INIT_ZONES_CONFIG = "zones_config"  # Dict containing detailed zone configurations
 KEY_INIT_ZONES_CONFIG_DETAILED = (

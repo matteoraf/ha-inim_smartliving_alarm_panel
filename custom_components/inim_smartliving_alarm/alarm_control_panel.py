@@ -28,8 +28,6 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_AREA_NAMES,
-    KEY_INIT_AREAS,
     KEY_INIT_SYSTEM_INFO,
     KEY_LIVE_ACTIVE_SCENARIO,
     KEY_LIVE_ACTIVE_SCENARIO_NUMBER,
@@ -41,6 +39,7 @@ from .const import (
 )
 from .errors import InimCommandError, async_send_command
 from .legacy import LegacyPanelClient
+from .selection import area_names
 from .utils import async_activate_scenario
 
 _LOGGER = logging.getLogger(__name__)
@@ -436,9 +435,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
     async def async_alarm_reset(self, area_id: int) -> None:
         """Reset the alarm memory of one area; raise an error if not done."""
         _LOGGER.info("%s: Attempting to reset alarm for area %d", self.name, area_id)
-        names = self._initial_panel_config.get(KEY_INIT_AREAS, {}).get(
-            KEY_INIT_AREA_NAMES, []
-        )
+        names = area_names(self._initial_panel_config)
         area_name = (
             names[area_id - 1] if 0 < area_id <= len(names) else ""
         ) or f"Area {area_id}"
