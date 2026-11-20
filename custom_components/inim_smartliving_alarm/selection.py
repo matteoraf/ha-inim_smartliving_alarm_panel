@@ -8,6 +8,7 @@ whose terminal is programmed as a zone.
 
 from collections.abc import Callable, Collection, Iterable, Mapping
 from dataclasses import dataclass
+from functools import lru_cache
 import re
 from typing import Any
 
@@ -35,6 +36,8 @@ from .const import (
     KEY_INIT_EXTRA_OUTPUT_OPTIONS,
     KEY_INIT_FIXED_OUTPUT_LABELS,
     KEY_INIT_FIXED_OUTPUT_RECORDS,
+    KEY_INIT_KEYBOARD_NAMES,
+    KEY_INIT_KEYBOARDS,
     KEY_INIT_PERIPHERALS,
     KEY_INIT_PHYSICAL_MAP,
     KEY_INIT_RAW_HEX,
@@ -49,6 +52,7 @@ from .const import (
     KEY_INIT_USER_CODE_OUTPUTS,
     KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS,
     KEY_INIT_ZONE_CONFIG_INDEX,
+    KEY_INIT_ZONE_LABELS_RAW,
     KEY_INIT_ZONE_NAMES,
     KEY_INIT_ZONE_RECORDS_RAW,
     KEY_INIT_ZONES,
@@ -79,6 +83,7 @@ from .protocol.config import (
 from .protocol.errors import ProtocolError
 from .protocol.model import (
     FIXED_OUTPUTS,
+    LABEL_LENGTH,
     PanelModel,
     model_for_or_fallback,
     parse_model_string,
@@ -123,19 +128,57 @@ def panel_config(entry_data: Mapping[str, Any]) -> Mapping[str, Any]:
     return entry_data.get(DATA_INITIAL_PANEL_CONFIG) or {}
 
 
+@lru_cache(maxsize=32)
+def _decoded_labels(raw_hex: str, count: int) -> tuple[str, ...] | None:
+    """The first count labels of a stored label table; None if unreadable."""
+    try:
+        data = bytes.fromhex(raw_hex)
+    except ValueError:
+        return None
+    if len(data) < count * LABEL_LENGTH:
+        return None
+    return tuple(decode_labels(data[: count * LABEL_LENGTH], count))
+
+
+def _labels(config: Mapping[str, Any], table: str, names: str, raw: str) -> list[str]:
+    """A label table, decoded with the panel's charset from the stored bytes.
+
+    As many labels as the stored list has; that list itself when the bytes
+    are missing or cannot be read (an entry saved before they were kept).
+    """
+    stored = config.get(table) or {}
+    listed = stored.get(names) or []
+    raw_hex = stored.get(raw)
+    if not listed or not isinstance(raw_hex, str):
+        return listed
+    decoded = _decoded_labels(raw_hex, len(listed))
+    return listed if decoded is None else list(decoded)
+
+
 def area_names(config: Mapping[str, Any]) -> list[str]:
     """The area labels, one per area of the model."""
-    return (config.get(KEY_INIT_AREAS) or {}).get(KEY_INIT_AREA_NAMES) or []
+    return _labels(config, KEY_INIT_AREAS, KEY_INIT_AREA_NAMES, KEY_INIT_RAW_HEX)
 
 
 def zone_names(config: Mapping[str, Any]) -> list[str]:
     """The zone labels, one per zone number."""
-    return (config.get(KEY_INIT_ZONES) or {}).get(KEY_INIT_ZONE_NAMES) or []
+    return _labels(
+        config, KEY_INIT_ZONES, KEY_INIT_ZONE_NAMES, KEY_INIT_ZONE_LABELS_RAW
+    )
 
 
 def scenario_names(config: Mapping[str, Any]) -> list[str]:
     """The scenario labels, one per scenario of the model."""
-    return (config.get(KEY_INIT_SCENARIOS) or {}).get(KEY_INIT_SCENARIO_NAMES) or []
+    return _labels(
+        config, KEY_INIT_SCENARIOS, KEY_INIT_SCENARIO_NAMES, KEY_INIT_RAW_HEX
+    )
+
+
+def keypad_names(config: Mapping[str, Any]) -> list[str]:
+    """The keypad labels, one per keypad of the model."""
+    return _labels(
+        config, KEY_INIT_KEYBOARDS, KEY_INIT_KEYBOARD_NAMES, KEY_INIT_RAW_HEX
+    )
 
 
 def zone_details(config: Mapping[str, Any]) -> list[dict[str, Any]]:

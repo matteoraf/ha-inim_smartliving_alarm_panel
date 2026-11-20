@@ -21,7 +21,13 @@ def encode_pin(pin: str | None) -> bytes:
 
 
 def _label(text: str) -> bytes:
-    return text.encode("ascii")[: c.LABEL_LENGTH].ljust(c.LABEL_LENGTH, b" ")
+    encoded = b"".join(
+        bytes((c.LABEL_CHARACTERS[char],))
+        if char in c.LABEL_CHARACTERS
+        else char.encode("ascii")
+        for char in text
+    )
+    return encoded[: c.LABEL_LENGTH].ljust(c.LABEL_LENGTH, b" ")
 
 
 def _bitmap(bits: list[bool], length: int, pad: bool = False) -> bytes:

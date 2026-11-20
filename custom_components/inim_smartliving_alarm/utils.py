@@ -11,14 +11,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import (
     DOMAIN,
-    KEY_INIT_AREA_NAMES,
-    KEY_INIT_AREAS,
-    KEY_INIT_SCENARIO_NAMES,
-    KEY_INIT_SCENARIOS,
     KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS,
     KEY_INIT_ZONE_CONFIG_INDEX,
-    KEY_INIT_ZONE_NAMES,
-    KEY_INIT_ZONES,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
     KEY_LIVE_ZONE_STATUSES_MAP,
@@ -35,18 +29,19 @@ from .errors import (
 )
 from .legacy import LegacyPanelClient, zone_exists
 from .readiness import async_arm
-from .selection import scenario_armed_areas
+from .selection import (
+    area_names,
+    scenario_armed_areas,
+    scenario_names,
+    zone_names,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def scenario_label(initial_panel_config: dict[str, Any], index: int) -> str:
     """A scenario's (0-based) label from the panel configuration."""
-    names = (
-        (initial_panel_config or {})
-        .get(KEY_INIT_SCENARIOS, {})
-        .get(KEY_INIT_SCENARIO_NAMES, [])
-    )
+    names = scenario_names(initial_panel_config or {})
     if 0 <= index < len(names) and names[index]:
         return names[index]
     return f"Scenario {index + 1}"
@@ -54,11 +49,7 @@ def scenario_label(initial_panel_config: dict[str, Any], index: int) -> str:
 
 def zone_labels(initial_panel_config: dict[str, Any]) -> list[str]:
     """The zone labels from the panel configuration, by zone number - 1."""
-    return (
-        (initial_panel_config or {})
-        .get(KEY_INIT_ZONES, {})
-        .get(KEY_INIT_ZONE_NAMES, [])
-    )
+    return zone_names(initial_panel_config or {})
 
 
 async def async_activate_scenario(
@@ -122,9 +113,7 @@ def _scenario_zone_areas(
     zones_config = initial_panel_config.get(KEY_INIT_ZONES_CONFIG, {}).get(
         KEY_INIT_ZONES_CONFIG_DETAILED, []
     )
-    area_names = initial_panel_config.get(KEY_INIT_AREAS, {}).get(
-        KEY_INIT_AREA_NAMES, []
-    )
+    names_of_areas = area_names(initial_panel_config)
     zone_config = next(
         (zc for zc in zones_config if zc.get(KEY_INIT_ZONE_CONFIG_INDEX) == zone - 1),
         None,
@@ -133,14 +122,14 @@ def _scenario_zone_areas(
     for area_id in (zone_config or {}).get(KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS, []):
         if area_id in scenario_areas:
             name = f"Area {area_id}"
-            if 0 < area_id <= len(area_names):
-                name = area_names[area_id - 1] or name
+            if 0 < area_id <= len(names_of_areas):
+                name = names_of_areas[area_id - 1] or name
             names.append(name)
     return names
 
 
-def _blocking_zone_line(zone_name: str, area_names: list[str]) -> str:
-    areas = ", ".join(area_names) if area_names else "relevant area(s)"
+def _blocking_zone_line(zone_name: str, zone_areas: list[str]) -> str:
+    areas = ", ".join(zone_areas) if zone_areas else "relevant area(s)"
     return f"'{zone_name}' in {areas}"
 
 
@@ -219,15 +208,15 @@ async def async_handle_scenario_activation_failure(
         names = zone_labels(config)
         lines = []
         for zone in error.zones:
-            area_names = _scenario_zone_areas(config, zone, scenario_areas)
-            lines.append(_blocking_zone_line(zone_label(zone, names), area_names))
+            zone_areas = _scenario_zone_areas(config, zone, scenario_areas)
+            lines.append(_blocking_zone_line(zone_label(zone, names), zone_areas))
             plain = names[zone - 1] if 0 < zone <= len(names) else ""
             blocking_zones_event_data.append(
                 {
                     "zone_id": zone,
                     "zone_name": plain or f"Zone {zone}",
                     "status": "not_ready",
-                    "areas": area_names,
+                    "areas": zone_areas,
                 }
             )
         event_reason = "zones_blocked"
@@ -242,9 +231,7 @@ async def async_handle_scenario_activation_failure(
         and coordinator.data
         and initial_panel_config
     ):
-        all_scenario_names_list = initial_panel_config.get(KEY_INIT_SCENARIOS, {}).get(
-            KEY_INIT_SCENARIO_NAMES, []
-        )
+        all_scenario_names_list = scenario_names(initial_panel_config)
 
         target_scenario_name = f"Scenario {scenario_idx_to_activate + 1}"  # Default
         if 0 <= scenario_idx_to_activate < len(all_scenario_names_list):
@@ -278,9 +265,7 @@ async def async_handle_scenario_activation_failure(
             )
             event_reason = "no_areas_identified"
         else:
-            all_zone_names_list = initial_panel_config.get(KEY_INIT_ZONES, {}).get(
-                KEY_INIT_ZONE_NAMES, []
-            )
+            all_zone_names_list = zone_names(initial_panel_config)
             all_zones_config_detailed_list = initial_panel_config.get(
                 KEY_INIT_ZONES_CONFIG, {}
             ).get(KEY_INIT_ZONES_CONFIG_DETAILED, [])

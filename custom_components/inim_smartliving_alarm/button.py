@@ -19,8 +19,6 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_SCENARIO_NAMES,
-    KEY_INIT_SCENARIOS,
     KEY_INIT_SYSTEM_INFO,
     KEY_INIT_SYSTEM_INFO_TYPE,
     KEY_INIT_SYSTEM_INFO_VERSION,
@@ -31,6 +29,7 @@ from .selection import (
     is_disarm_scenario,
     scenario_actions,
     scenario_label,
+    scenario_names,
     selected,
 )
 from .utils import async_activate_scenario
@@ -56,10 +55,7 @@ async def async_setup_entry(
 
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
     system_info = initial_panel_config.get(KEY_INIT_SYSTEM_INFO, {})
-    scenario_data = initial_panel_config.get(KEY_INIT_SCENARIOS, {})
-    all_scenario_names = (
-        scenario_data.get(KEY_INIT_SCENARIO_NAMES, []) if scenario_data else []
-    )
+    all_scenario_names = scenario_names(initial_panel_config)
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
     async_add_entities(

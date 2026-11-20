@@ -7,7 +7,7 @@ so it also works while the panel cannot be reached. No Home Assistant
 imports.
 """
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 
 from .attribute_values import (
@@ -19,8 +19,6 @@ from .const import (
     KEY_INIT_CODES,
     KEY_INIT_EXPANDERS,
     KEY_INIT_GENERAL_OPTIONS,
-    KEY_INIT_KEYBOARD_NAMES,
-    KEY_INIT_KEYBOARDS,
     KEY_INIT_KEYS,
     KEY_INIT_NAMES,
     KEY_INIT_RAW_HEX,
@@ -34,6 +32,7 @@ from .protocol.errors import ProtocolError
 from .selection import (
     area_names,
     area_records,
+    keypad_names,
     output_items,
     scenario_actions,
     scenario_names,
@@ -43,20 +42,22 @@ from .selection import (
     zone_records,
 )
 
-# Name tables of the other objects: view key, stored table, its names key
-_NAME_TABLES = (
-    ("codes", KEY_INIT_CODES, KEY_INIT_NAMES),
-    ("keypads", KEY_INIT_KEYBOARDS, KEY_INIT_KEYBOARD_NAMES),
-    ("readers", KEY_INIT_READERS, KEY_INIT_NAMES),
-    ("expanders", KEY_INIT_EXPANDERS, KEY_INIT_NAMES),
-    ("keys", KEY_INIT_KEYS, KEY_INIT_NAMES),
-    ("timers", KEY_INIT_TIMERS, KEY_INIT_NAMES),
-    ("sirens", KEY_INIT_SIRENS, KEY_INIT_NAMES),
+
+def _stored_names(table: str) -> Callable[[Mapping[str, Any]], list[str]]:
+    """The names of a stored table, as stored."""
+    return lambda config: list((config.get(table) or {}).get(KEY_INIT_NAMES) or [])
+
+
+# Name tables of the other objects: view key, how to get the names
+_NAME_TABLES: tuple[tuple[str, Callable[[Mapping[str, Any]], list[str]]], ...] = (
+    ("codes", _stored_names(KEY_INIT_CODES)),
+    ("keypads", keypad_names),
+    ("readers", _stored_names(KEY_INIT_READERS)),
+    ("expanders", _stored_names(KEY_INIT_EXPANDERS)),
+    ("keys", _stored_names(KEY_INIT_KEYS)),
+    ("timers", _stored_names(KEY_INIT_TIMERS)),
+    ("sirens", _stored_names(KEY_INIT_SIRENS)),
 )
-
-
-def _names(config: Mapping[str, Any], table: str, key: str) -> list[str]:
-    return list((config.get(table) or {}).get(key) or [])
 
 
 def _refuses_not_ready(config: Mapping[str, Any]) -> bool | None:
@@ -125,9 +126,9 @@ def configuration_view(config: Mapping[str, Any]) -> dict[str, Any]:
         ],
         "enabled_devices": enabled_peripherals(config),
     }
-    for key, table, names_key in _NAME_TABLES:
+    for key, names in _NAME_TABLES:
         view[key] = [
             {"number": number, "label": label}
-            for number, label in enumerate(_names(config, table, names_key), start=1)
+            for number, label in enumerate(names(config), start=1)
         ]
     return view

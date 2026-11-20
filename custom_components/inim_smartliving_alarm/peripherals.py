@@ -15,6 +15,7 @@ from .const import (
     KEY_INIT_READERS,
     KEY_INIT_SIRENS,
 )
+from .selection import keypad_names
 
 # Kind -> (its name table in the stored configuration, name when it has none)
 PERIPHERAL_KINDS: dict[str, tuple[str, str]] = {
@@ -32,7 +33,11 @@ def enabled_peripherals(config: Mapping[str, Any]) -> dict[str, list[str]] | Non
         return None
     found = {}
     for kind, (table, fallback) in PERIPHERAL_KINDS.items():
-        names = (config.get(table) or {}).get(KEY_INIT_NAMES) or []
+        names = (
+            keypad_names(config)
+            if table == KEY_INIT_KEYBOARDS
+            else (config.get(table) or {}).get(KEY_INIT_NAMES) or []
+        )
         found[kind] = [
             (names[number - 1] if number <= len(names) else "")
             or f"{fallback} {number}"

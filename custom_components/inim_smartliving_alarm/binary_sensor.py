@@ -24,8 +24,6 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_ZONE_NAMES,
-    KEY_INIT_ZONES,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
     KEY_LIVE_ALARM_AREAS_LIST,
@@ -56,6 +54,7 @@ from .selection import (
     scenario_label,
     selected,
     terminal_records,
+    zone_names,
     zone_records,
 )
 
@@ -82,8 +81,7 @@ async def async_setup_entry(
     # Get user-defined panel name
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
-    zone_data = initial_panel_config.get(KEY_INIT_ZONES, {})
-    all_zone_names = zone_data.get(KEY_INIT_ZONE_NAMES, []) if zone_data else []
+    all_zone_names = zone_names(initial_panel_config)
 
     zone_configurations_data = initial_panel_config.get(KEY_INIT_ZONES_CONFIG, {})
     detailed_zone_configs = (
