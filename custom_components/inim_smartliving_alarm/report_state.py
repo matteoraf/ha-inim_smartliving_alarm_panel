@@ -67,6 +67,24 @@ def report_state(hass: HomeAssistant, entry_id: str) -> ReportState:
     return states.setdefault(entry_id, ReportState())
 
 
+def current_report_state(hass: HomeAssistant, entry_id: str) -> ReportState | None:
+    """The entry's report state if it has one; never creates it."""
+    states: dict[str, ReportState] = hass.data.get(f"{DOMAIN}_{DATA_REPORT_STATE}", {})
+    return states.get(entry_id)
+
+
+@callback
+def async_drop_report_state(hass: HomeAssistant, entry_id: str) -> None:
+    """Forget the entry's level and snapshot, and stop the expiry timer.
+
+    Called when the entry is unloaded: the next setup starts at Redacted.
+    """
+    states: dict[str, ReportState] = hass.data.get(f"{DOMAIN}_{DATA_REPORT_STATE}", {})
+    state = states.pop(entry_id, None)
+    if state is not None:
+        state.cancel_expiry()
+
+
 @callback
 def async_set_level(hass: HomeAssistant, entry_id: str, level: Level) -> None:
     """Choose the level of the next report; leaving Full drops the snapshot."""
