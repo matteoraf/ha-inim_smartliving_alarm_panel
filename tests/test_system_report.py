@@ -284,6 +284,11 @@ async def test_smartlan_g_redacted(make_report) -> None:
     for forbidden in (G_USERNAME, G_PASSWORD, G_PANEL_NAME, PIN):
         assert forbidden not in text, forbidden
     assert report["blocks"]
+    firmware, model, name, board_firmware, port = report["board"]["reply"]["fields"]
+    assert (firmware, model) == ("6.07", "01050")
+    assert name == G_PANEL_NAME[:3] + "…"
+    assert board_firmware
+    assert port.isdigit()
 
 
 @pytest.mark.xfail(

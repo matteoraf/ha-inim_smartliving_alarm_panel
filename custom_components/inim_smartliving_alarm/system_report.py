@@ -47,7 +47,13 @@ from .protocol.masking import (
     whole,
 )
 from .protocol.report_layout import Space
-from .protocol.smartlan import SI_REPLY_FIELDS, decode_si_reply
+from .protocol.smartlan import (
+    G_REPLY_FIELDS,
+    MAC_HIDDEN,
+    SI_REPLY_FIELDS,
+    decode_si_reply,
+    split_g_reply,
+)
 from .protocol.status import (
     decode_active_scenario,
     decode_area_status,
@@ -313,7 +319,7 @@ def _si_reply_fields(raw: bytes, level: Level) -> dict[str, Any] | None:
     result: dict[str, Any] = {
         "mac": reply.mac.hex(":")
         if personal
-        else "xx:xx:xx:xx:" + reply.mac[4:].hex(":"),
+        else "xx:" * MAC_HIDDEN.length + reply.mac_shown.hex(":"),
         "type": reply.config_type,
         "port": reply.port,
         "board_firmware": reply.firmware,
@@ -353,9 +359,10 @@ def _board(data: ReportInput) -> dict[str, Any]:
         )
         return section
     if entry.board == BOARD_SMARTLAN_G:
-        parts = reply.decode("ascii", "replace").strip("\x00\r\n ").split("|")
-        if len(parts) >= 3:
-            parts[2] = _label_text(parts[2], level)
+        parts = split_g_reply(reply)
+        for index, (_name, privacy) in enumerate(G_REPLY_FIELDS[: len(parts)]):
+            if privacy is Privacy.PERSONAL:
+                parts[index] = _label_text(parts[index], level)
         section["reply"] = {"fields": parts}
         return section
     masked, ranges = mask(reply, SI_REPLY_FIELDS, level)

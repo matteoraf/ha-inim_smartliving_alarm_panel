@@ -112,11 +112,14 @@ async def async_get_config_entry_diagnostics(
     level = state.level
     report_id = secrets.token_hex(8)
     data = await _async_report_input(hass, entry, report_id, Level.REDACTED)
-    redacted = _finish(build_report(data))
+    # Building a report takes tenths of a second: not in the event loop
+    redacted = _finish(await hass.async_add_executor_job(build_report, data))
     if level is Level.REDACTED:
         return redacted
 
-    full = _finish(build_report(_at_level(data, level)))
+    full = _finish(
+        await hass.async_add_executor_job(build_report, _at_level(data, level))
+    )
     envelope = await hass.async_add_executor_job(
         lambda: encrypt(report_text(full), report_id=report_id, level=str(level))
     )

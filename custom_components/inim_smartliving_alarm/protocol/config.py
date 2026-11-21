@@ -593,6 +593,20 @@ class ScenarioConfig:
     output: int  # 0 none, 1..L logical terminal + 1, L+1..L+3 O1-O3, F+ siren
 
 
+def scenario_record_modes(record: bytes, areas: int) -> dict[int, int]:
+    """The mode nibble of each area (1-based) in a scenario record.
+
+    One nibble per area, area 1 in the low nibble of the first byte. Every
+    value is kept, also KEEP and values without a meaning; areas past the
+    end of a short record are left out.
+    """
+    return {
+        area: record[(area - 1) // 2] >> (4 * ((area - 1) % 2)) & 0x0F
+        for area in range(1, areas + 1)
+        if (area - 1) // 2 < len(record)
+    }
+
+
 def decode_scenario_records(data: bytes, model: PanelModel) -> list[ScenarioConfig]:
     """Decode the 30 scenario records."""
     size = model.scenario_record_length
@@ -600,12 +614,11 @@ def decode_scenario_records(data: bytes, model: PanelModel) -> list[ScenarioConf
     scenarios = []
     for index in range(model.scenarios):
         record = data[index * size : (index + 1) * size]
-        modes = {}
-        for area in range(1, model.areas + 1):
-            byte = record[(area - 1) // 2]
-            value = byte >> 4 if area % 2 == 0 else byte & 0x0F
-            if value in ArmMode and value != ArmMode.KEEP:
-                modes[area] = ArmMode(value)
+        modes = {
+            area: ArmMode(value)
+            for area, value in scenario_record_modes(record, model.areas).items()
+            if value in ArmMode and value != ArmMode.KEEP
+        }
         scenarios.append(ScenarioConfig(modes, icon=record[-2], output=record[-1]))
     return scenarios
 

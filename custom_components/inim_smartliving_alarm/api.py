@@ -31,6 +31,7 @@ from .protocol.commands import (
     set_output,
 )
 from .protocol.config import (
+    FIXED_OUTPUT_RECORD_LENGTH,
     AreaConfig,
     OutputConfig,
     Peripherals,
@@ -73,6 +74,7 @@ from .protocol.masking import Privacy
 from .protocol.model import (
     FIXED_OUTPUTS,
     GENERAL_OPTIONS_READ_LENGTH,
+    LABEL_LENGTH,
     PERIPHERALS_ADDRESS,
     SCENARIOS,
     FirmwareInfo,
@@ -101,7 +103,6 @@ from .transport.base import PanelTransport, Priority, Session, TransportError
 
 _LOGGER = logging.getLogger(__name__)
 
-LABEL_LENGTH = 16
 # After accepting a command the panel needs a moment before its status shows
 # the change (measured on a 1050: still old after 88 ms, new after 218 ms)
 COMMAND_SETTLE = 0.5
@@ -514,7 +515,7 @@ class SmartLivingPanel:
                 model.area_records, model.areas * model.area_record_length
             )
             fixed_outputs = await session.read_eeprom(
-                model.fixed_output_records, 2 * FIXED_OUTPUTS
+                model.fixed_output_records, FIXED_OUTPUTS * FIXED_OUTPUT_RECORD_LENGTH
             )
             extra_output_options = (
                 b""

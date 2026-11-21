@@ -122,8 +122,7 @@ class InimOutputEntity(CoordinatorEntity):
     async def _async_switch(self, value: int) -> None:
         """Send the output command; "already in that state" is no error."""
         address = self._item.address
-        if address is None:  # not offered, so not imported; kept for safety
-            raise ValueError(f"{self._target} cannot be switched")
+        assert address is not None  # outputs without an address are not offered
         _LOGGER.info("Switching %s to %s", self._target, value)
         try:
             await async_send_command(

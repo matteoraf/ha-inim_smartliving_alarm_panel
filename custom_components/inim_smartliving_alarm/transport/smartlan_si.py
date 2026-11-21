@@ -9,8 +9,6 @@ import asyncio
 from ..protocol.frames import SMARTLAN_SI
 from .base import PanelTransport
 
-DEFAULT_PORT = 5004
-
 
 class SmartLanSiTransport(PanelTransport):
     """Plain frames over TCP."""

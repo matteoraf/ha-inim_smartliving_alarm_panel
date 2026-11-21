@@ -1,16 +1,23 @@
-"""What a SmartLAN/SI board says about itself when found on the network.
+"""What a SmartLAN board says about itself when found on the network.
 
-Its reply to FIND (163 bytes, 190 with the status tail of board firmware
-5.05) starts with IMIN and the board's MAC address, then the board's stored
-configuration. Besides the addresses it holds the dynamic-DNS credentials
-and the LAN password when they are set, so it is never logged or stored;
-each field's privacy is listed with it.
+SmartLAN/SI: its reply to FIND (163 bytes, 190 with the status tail of
+board firmware 5.05) starts with IMIN and the board's MAC address, then the
+board's stored configuration. Besides the addresses it holds the dynamic-DNS
+credentials and the LAN password when they are set, so it is never logged
+or stored; each field's privacy is listed with it.
+
+SmartLAN/G: its reply is the text "firmware|model|panel name|board
+firmware|port", or "err" when it has no panel information.
 """
 
 from dataclasses import dataclass
 import ipaddress
 
 from .masking import Fields, Privacy
+
+# The two kinds of board, as an entry stores them
+BOARD_SMARTLAN_SI = "smartlan_si"
+BOARD_SMARTLAN_G = "smartlan_g"
 
 SI_REPLY_MAGIC = b"IMIN"
 SI_REPLY_MIN_LENGTH = 25  # up to the TCP port
@@ -79,6 +86,11 @@ class SiReply:
     lan_password_enabled: bool | None = None
     lan_password: str | None = None
 
+    @property
+    def mac_shown(self) -> bytes:
+        """The MAC address bytes that are not personal."""
+        return self.mac[MAC_HIDDEN.offset + MAC_HIDDEN.length - MAC.offset :]
+
 
 def _raw(data: bytes, field: SiField) -> bytes | None:
     end = field.offset + field.length
@@ -115,4 +127,50 @@ def decode_si_reply(data: bytes) -> SiReply | None:
         ddns_password=_text(data, DDNS_PASSWORD),
         lan_password_enabled=None if enabled is None else bool(enabled[0]),
         lan_password=_text(data, LAN_PASSWORD),
+    )
+
+
+# ------------------------------------------------------------------ SmartLAN/G
+
+G_REPLY_ERROR = "err"  # the board has no panel information
+# The reply's fields in order, each with its privacy
+G_REPLY_FIELDS: tuple[tuple[str, Privacy], ...] = (
+    ("firmware", Privacy.PUBLIC),
+    ("model", Privacy.PUBLIC),
+    ("panel_name", Privacy.PERSONAL),
+    ("board_firmware", Privacy.PUBLIC),
+    ("port", Privacy.PUBLIC),
+)
+
+
+@dataclass(frozen=True, slots=True)
+class GReply:
+    """The decoded reply; empty fields are None."""
+
+    firmware: str | None
+    model: str | None
+    panel_name: str | None
+    board_firmware: str | None
+    port: int | None
+
+
+def split_g_reply(data: bytes) -> list[str]:
+    """The reply's text fields, as sent."""
+    return data.decode("ascii", errors="replace").strip("\x00\r\n ").split("|")
+
+
+def decode_g_reply(data: bytes) -> GReply | None:
+    """A reply with every field, or None if it is not one (or "err")."""
+    parts = split_g_reply(data)
+    if len(parts) < len(G_REPLY_FIELDS):
+        return None
+    firmware, model, name, board_firmware, port = (
+        part.strip() for part in parts[: len(G_REPLY_FIELDS)]
+    )
+    return GReply(
+        firmware=firmware or None,
+        model=model or None,
+        panel_name=name or None,
+        board_firmware=board_firmware or None,
+        port=int(port) if port.isdigit() else None,
     )

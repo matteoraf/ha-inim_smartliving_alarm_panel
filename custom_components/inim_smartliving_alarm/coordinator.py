@@ -6,7 +6,6 @@ from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
@@ -171,15 +170,8 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
             return current_data
 
-        except ConfigEntryAuthFailed as auth_err:
-            _LOGGER.error("(%s) Authentication failed: %s", self.name, auth_err)
-            raise ConfigEntryAuthFailed(
-                f"Authentication failed: {auth_err}"
-            ) from auth_err
-        except UpdateFailed as uf_err:
-            _LOGGER.warning(
-                "(%s) UpdateFailed during data fetch: %s", self.name, uf_err
-            )
+        except UpdateFailed:
+            # Home Assistant logs the first failure and the recovery
             raise
         except Exception as err:
             _LOGGER.error(

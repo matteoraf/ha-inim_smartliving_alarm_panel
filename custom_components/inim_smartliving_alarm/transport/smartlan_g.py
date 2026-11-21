@@ -28,10 +28,6 @@ from ..protocol.errors import DecryptionError
 from ..protocol.frames import SMARTLAN_G
 from .base import PanelTransport
 
-# The port is a board setting without a factory default; the vendor's
-# installer software proposes 5004
-DEFAULT_PORT = 5004
-
 BLOCK_SIZE = 16
 
 
