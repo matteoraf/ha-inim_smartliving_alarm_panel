@@ -17,11 +17,13 @@ from custom_components.inim_smartliving_alarm.protocol.masking import Level
 from custom_components.inim_smartliving_alarm.protocol.model import SMARTLIVING_1050_FW6
 from custom_components.inim_smartliving_alarm.protocol.report_layout import Space
 from custom_components.inim_smartliving_alarm.system_report import (
+    CredentialRule,
     EntryFacts,
     Forbidden,
     ReportInput,
     _forbidden,
     build_report,
+    credential_rule,
     report_text,
     self_check,
 )
@@ -33,7 +35,14 @@ from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
-from .fake_panel import FakePanel, PanelState, panel_505, panel_1050, panel_10100
+from .fake_panel import (
+    FakePanel,
+    PanelState,
+    const as c,
+    panel_505,
+    panel_1050,
+    panel_10100,
+)
 from .fake_panel.discovery import g_reply, si_reply
 from .fake_panel.server import TRANSPORT_G
 
@@ -100,19 +109,20 @@ async def make_report() -> AsyncGenerator:
         *,
         board: str = BOARD_SMARTLAN_SI,
         username: str = G_USERNAME,
+        password: str = G_PASSWORD,
     ) -> tuple[dict, PanelState]:
         state = planted_state(state or panel_1050())
         transport: PanelTransport
         if board == BOARD_SMARTLAN_G:
             fake = FakePanel(
-                state, transport=TRANSPORT_G, username=username, password=G_PASSWORD
+                state, transport=TRANSPORT_G, username=username, password=password
             )
             await fake.start()
             transport = SmartLanGTransport(
                 fake.host,
                 fake.port,
                 username=username,
-                password=G_PASSWORD,
+                password=password,
                 reconnect_pause=0.01,
             )
         else:
@@ -153,7 +163,7 @@ async def make_report() -> AsyncGenerator:
             ],
             pin=PIN,
             username=username if board == BOARD_SMARTLAN_G else None,
-            password=G_PASSWORD if board == BOARD_SMARTLAN_G else None,
+            password=password if board == BOARD_SMARTLAN_G else None,
         )
         board_reply = (
             g_reply(fake, G_PANEL_NAME)
@@ -291,17 +301,131 @@ async def test_smartlan_g_redacted(make_report) -> None:
     assert port.isdigit()
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="a one-character SmartLAN/G user name matches almost any text, so "
-    "the privacy check leaves out nearly every block at Redacted",
-)
 async def test_smartlan_g_short_user_name(make_report) -> None:
-    """A short user name does not empty the Redacted report."""
+    """A one-character user name does not empty the Redacted report."""
     report, _state = await make_report(
         Level.REDACTED, board=BOARD_SMARTLAN_G, username="a"
     )
-    assert [e for e in report["errors"] if e.get("error") == "self-check"] == []
+    assert self_checked(report) == []
+    assert not [b for b in report["blocks"] if b.get("withheld") == "self-check"]
+
+
+def self_checked(report: dict) -> list[str]:
+    """Where the privacy check withheld something."""
+    return [e["where"] for e in report["errors"] if e.get("error") == "self-check"]
+
+
+def with_zone_labels(*labels: str) -> PanelState:
+    """The fake 1050 with these labels on zones 2, 3, ..."""
+    state = panel_1050()
+    for zone, text in enumerate(labels, start=1):
+        state.labels[c.RAM_LABELS_ZONES][zone] = text
+    return state
+
+
+@pytest.mark.parametrize("level", [Level.REDACTED, Level.FULL])
+@pytest.mark.parametrize("password", ["a", "ab", "12", "1234"])
+async def test_smartlan_g_short_or_digit_password(
+    make_report, level: Level, password: str
+) -> None:
+    """A short or digits-only password does not empty the report.
+
+    "ab" is also a byte in the hex rows, and "12" is in the board firmware
+    (6.12) and in the label "Zone 12": none of them is the password itself.
+    """
+    report, _state = await make_report(level, board=BOARD_SMARTLAN_G, password=password)
+    assert self_checked(report) == []
+
+
+@pytest.mark.parametrize(
+    ("level", "credentials", "label"),
+    [
+        (Level.REDACTED, {"username": "a"}, "a"),  # a short name as a label
+        (Level.FULL, {"password": "ab"}, "ab"),
+        (Level.FULL, {"password": "12"}, "12"),
+        (Level.FULL, {"password": "1234"}, "1234"),  # digits only, on its own
+        (Level.FULL, {"password": "admin"}, "xadminx"),  # 4+: inside a word too
+    ],
+)
+async def test_smartlan_g_credential_in_a_label_is_withheld(
+    make_report, level: Level, credentials: dict, label: str
+) -> None:
+    """A credential that does turn up in the report's text is still withheld."""
+    report, _state = await make_report(
+        level, with_zone_labels(label), board=BOARD_SMARTLAN_G, **credentials
+    )
+    assert "configuration" in self_checked(report)
+    assert label not in text_of(report["configuration"])
+
+
+async def test_smartlan_g_user_name_that_the_report_uses(make_report) -> None:
+    """A user name equal to a word of the report itself: it errs on the safe side.
+
+    "eeprom" is how the report names a memory, so the check withholds what
+    holds it. A known limit: the report is then mostly empty, but the name
+    is never shown as a value of its own.
+    """
+    report, _state = await make_report(
+        Level.REDACTED, board=BOARD_SMARTLAN_G, username="eeprom"
+    )
+    assert self_checked(report)
+
+
+@pytest.mark.parametrize(
+    ("text", "rule"),
+    [
+        ("a", CredentialRule.VALUE),
+        ("12", CredentialRule.VALUE),
+        ("p@s", CredentialRule.VALUE),
+        ("1234", CredentialRule.DIGITS),
+        ("admin", CredentialRule.ANYWHERE),
+        ("p@ss!", CredentialRule.ANYWHERE),
+        ("１２３４", CredentialRule.ANYWHERE),  # not ASCII digits
+    ],
+)
+def test_credential_rule(text: str, rule: CredentialRule) -> None:
+    """1-3 characters: whole values; digits only: numbers; others: anywhere."""
+    assert credential_rule(text) is rule
+
+
+@pytest.mark.parametrize(
+    ("password", "value", "found"),
+    [
+        ("ab", "ab", True),
+        ("ab", " ab ", True),  # surrounding spaces do not count
+        ("ab", "100a0: ab 12", False),  # a hex row
+        ("ab", "abc", False),
+        ("12", "Zone 12", False),
+        ("12", "6.12", False),
+        ("1234", "pin 1234", True),
+        ("1234", "01234: 00 01", False),  # a hex row
+        ("1234", "12345", False),
+        ("admin", "xadminx", True),
+        ("Admin", "admin", False),  # case-sensitive, as before
+    ],
+)
+def test_where_a_password_is_found(password: str, value: str, found: bool) -> None:
+    """Each kind of credential is found where it can be told from other text."""
+    facts = EntryFacts(
+        title="t",
+        entry_version="1.5",
+        integration_version="0.4.0",
+        board=BOARD_SMARTLAN_G,
+        host="",
+        port=5004,
+        options={},
+        stored_config={},
+        entities=[],
+        password=password,
+    )
+    data = ReportInput(
+        report_id="r",
+        created="2026-11-20T10:00:00+01:00",
+        level=Level.FULL,
+        entry=facts,
+        reads=None,
+    )
+    assert _forbidden(data).found_in({"value": value}) is found
 
 
 async def test_smartlan_g_full(make_report) -> None:
