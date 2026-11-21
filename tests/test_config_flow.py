@@ -1,6 +1,7 @@
 """Setup flow: board choice, panel checks and the config entry version."""
 
 from collections.abc import AsyncGenerator
+import logging
 from typing import Any
 from unittest.mock import patch
 
@@ -354,6 +355,30 @@ async def test_migration_adds_the_board(hass: HomeAssistant) -> None:
         "pin": "1234",
         "board": "smartlan_si",
     }
+
+
+async def test_migrated_entry_without_configuration_sets_up(
+    hass: HomeAssistant, panel: FakePanel, caplog: pytest.LogCaptureFixture
+) -> None:
+    """An entry from before 1.2 has no stored configuration: it still loads."""
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        version=1,
+        minor_version=1,
+        data={"host": panel.host, "port": panel.port, "pin": "1234"},
+    )
+    entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+    assert entry.minor_version == 5
+    errors = [
+        record.getMessage()
+        for record in caplog.records
+        if record.levelno >= logging.ERROR and record.name.startswith("custom_")
+    ]
+    assert errors == []
+    await unload_all(hass)
 
 
 async def test_newer_major_version_is_not_loaded(hass: HomeAssistant) -> None:

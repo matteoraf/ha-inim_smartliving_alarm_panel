@@ -38,6 +38,7 @@ from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
+from .conftest import wait_until
 from .fake_panel import FakePanel
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
@@ -155,11 +156,14 @@ async def test_commands_go_ahead_of_waiting_polls(
     transport: SmartLanSiTransport, fake_panel: FakePanel
 ) -> None:
     """A command waiting with polls is sent before them."""
-    fake_panel.reply_delay = 0.05
+    fake_panel.reply_delay = 0.5
     first = asyncio.create_task(transport.read(MODEL, 12))
-    await asyncio.sleep(0.01)  # the first poll holds the connection
+    # The first poll holds the connection while the others queue up
+    await wait_until(lambda: len(fake_panel.requests) == 1)
     polls = [asyncio.create_task(transport.read(AREAS, 16)) for _ in range(2)]
-    await asyncio.sleep(0.01)
+    for _ in range(3):
+        await asyncio.sleep(0)  # each poll reaches the lock
+    assert len(fake_panel.requests) == 1
     command = asyncio.create_task(
         transport.command(arm_areas("1234", {3: ArmMode.AWAY}, SL1050))
     )
@@ -177,12 +181,10 @@ async def test_commands_go_ahead_of_waiting_polls(
 
 async def test_idle_connection_is_replaced(fake_panel: FakePanel) -> None:
     """A connection idle for too long is replaced before the next request."""
-    link = SmartLanSiTransport(
-        fake_panel.host, fake_panel.port, idle_reconnect=0.1, reconnect_pause=0.01
-    )
+    link = SmartLanSiTransport(fake_panel.host, fake_panel.port, idle_reconnect=0.1)
     await link.read(MODEL, 12)
-    await asyncio.sleep(0.2)
-    await link.read(MODEL, 12)
+    await asyncio.sleep(0.2)  # longer than idle_reconnect
+    await link.read(MODEL, 12)  # after the default pause, the old one is gone
     await link.close()
     assert link.connections_opened == 2
     assert fake_panel.rejected_connections == 0
@@ -284,7 +286,7 @@ async def test_reply_timeout(
         await transport.read(MODEL, 12)
     assert not transport.connected
     fake_panel.reply_delay = 0
-    await asyncio.sleep(0.4)  # let the fake finish with the old connection
+    await wait_until(lambda: not fake_panel.has_client)  # done with the old one
     assert await transport.read(MODEL, 12) == b"6.07 01050  "
 
 
@@ -296,21 +298,19 @@ async def test_bad_checksum(
     with pytest.raises(ChecksumError):
         await transport.read(MODEL, 12)
     assert not transport.connected
+    await wait_until(lambda: not fake_panel.has_client)  # done with the old one
     assert await transport.read(MODEL, 12) == b"6.07 01050  "
 
 
-async def test_unreachable_panel(scripted: ScriptedServer) -> None:
+async def test_unreachable_panel(refused_port: int) -> None:
     """Without a listener the connection attempts fail with ConnectError."""
-    port = scripted.port
-    await scripted.stop()
     link = SmartLanSiTransport(
-        "127.0.0.1", port, connect_attempts=2, reconnect_pause=0.05
+        "127.0.0.1", refused_port, connect_attempts=2, reconnect_pause=0.05
     )
     started = time.monotonic()
     with pytest.raises(ConnectError):
         await link.read(MODEL, 12)
     assert time.monotonic() - started >= 0.05
-    await scripted.start()  # for the fixture's teardown
 
 
 # ------------------------------------------------------------------ logging

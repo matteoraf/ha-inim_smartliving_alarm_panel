@@ -22,6 +22,7 @@ from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
+from .conftest import wait_until
 from .fake_panel import (
     TRANSPORT_G,
     FakePanel,
@@ -222,11 +223,14 @@ async def test_sessions_are_short() -> None:
         SmartLanSiTransport(fake.host, fake.port, reconnect_pause=0.01), "1234"
     )
     await panel.identify()
+    before = len(fake.requests)
     report = asyncio.create_task(panel.read_report(session_size=10))
-    await asyncio.sleep(0.15)
+    await wait_until(lambda: len(fake.requests) > before)  # the report is reading
+    assert not report.done()
     count = len(fake.requests)
     await panel.read_ram(reg.MODEL_STRING, 12)  # a POLL read stands in line
     waited = len(fake.requests) - count
+    assert not report.done()
     reads = await report
     await panel.close()
     await fake.stop()
@@ -234,7 +238,7 @@ async def test_sessions_are_short() -> None:
     assert waited <= 10 + 1
 
 
-async def test_unreachable_panel_raises(run_report) -> None:
+async def test_unreachable_panel_raises(run_report, refused_port: int) -> None:
     """With no panel at all the report cannot identify it."""
     from custom_components.inim_smartliving_alarm.transport.base import (
         TransportError,
@@ -242,7 +246,11 @@ async def test_unreachable_panel_raises(run_report) -> None:
 
     panel = SmartLivingPanel(
         SmartLanSiTransport(
-            "127.0.0.1", 9, connect_attempts=1, connect_timeout=0.5, reconnect_pause=0
+            "127.0.0.1",
+            refused_port,
+            connect_attempts=1,
+            connect_timeout=0.5,
+            reconnect_pause=0,
         ),
         "1234",
     )

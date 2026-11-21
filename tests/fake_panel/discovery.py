@@ -46,7 +46,7 @@ def g_reply(panel: FakePanel, panel_name: str) -> bytes:
 # ports too. The ports are below the range the system hands out to sockets
 # bound to port 0, so no other program or socket takes one between the
 # check and the bind; each is free on every address (the searches listen
-# on all of them) and handed out once per session, so two fake boards never
+# on all of them) and handed out once per test process, so two fake boards never
 # share a port and answer each other's searches.
 _PORT_RANGE = range(20000, 30000)
 _next_port = random.randrange(_PORT_RANGE.start, _PORT_RANGE.stop)

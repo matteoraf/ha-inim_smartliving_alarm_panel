@@ -1,5 +1,6 @@
 """Commands that are not carried out raise clear errors in Home Assistant."""
 
+import logging
 from typing import Any
 from unittest.mock import patch
 
@@ -24,12 +25,14 @@ from custom_components.inim_smartliving_alarm.protocol.commands import (
     CommandKind,
     CommandResult,
     decode_result,
+    encode_pin,
 )
 from custom_components.inim_smartliving_alarm.selection import (
     panel_config,
     zone_names,
 )
 
+from .conftest import add_entry
 from .fake_panel import FakePanel, const as c
 from .test_init_baseline import (
     ALARM_PANEL,
@@ -83,6 +86,7 @@ def failed_events(hass: HomeAssistant) -> list[dict[str, Any]]:
         (CommandKind.BYPASS, 6, "cannot_be_bypassed"),
         (CommandKind.BYPASS, 7, "no_areas"),
         (CommandKind.BYPASS, 8, "double_zone_error"),
+        (CommandKind.BYPASS, 9, "unknown"),
         (CommandKind.OUTPUT, 6, "output_not_enabled"),
         (CommandKind.OUTPUT, 7, "areas_armed"),
         (CommandKind.SCENARIO, 2, "refused"),
@@ -357,3 +361,25 @@ async def test_errors_are_home_assistant_errors() -> None:
     """Automations and the UI see every command error as a failed action."""
     for error in (CommandRefusedError, ZonesNotReadyError, CommandFailedError):
         assert issubclass(error, HomeAssistantError)
+
+
+# --------------------------------------------------------------- PIN in logs
+
+
+async def test_debug_logs_never_hold_the_pin(
+    hass: HomeAssistant, panel: FakePanel, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Setup and commands, every logger at debug: the PIN never shows."""
+    pin = "918273"
+    panel.state.pins[0] = pin
+    caplog.set_level(logging.DEBUG)
+    entry = await add_entry(hass, panel, pin=pin)
+    await call(hass, entry, "alarm_control_panel", "alarm_arm_away", ALARM_PANEL)
+    await call(hass, entry, "switch", "turn_off", ZONE_36_SWITCH)
+    await hass.async_block_till_done()
+
+    text = caplog.text
+    assert "| ** ** ** ** ** **" in text  # command frames were logged, masked
+    for secret in (pin, encode_pin(pin).hex(" "), encode_pin(pin).hex()):
+        assert secret not in text, secret
+    assert await hass.config_entries.async_unload(entry.entry_id)

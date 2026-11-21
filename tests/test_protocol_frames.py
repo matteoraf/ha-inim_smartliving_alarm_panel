@@ -9,12 +9,10 @@ import pytest
 from custom_components.inim_smartliving_alarm.protocol import registers as reg
 from custom_components.inim_smartliving_alarm.protocol.commands import (
     ArmMode,
-    CommandKind,
     activate_scenario,
     arm_areas,
     bypass_zone,
     clear_call_queue,
-    decode_result,
     encode_pin,
     reset_alarm_memory,
     set_output,
@@ -367,26 +365,27 @@ def test_pin_encoding() -> None:
             encode_pin(pin)
 
 
-@pytest.mark.parametrize(
-    ("kind", "code", "reason"),
-    [
-        (CommandKind.ARM, 0x00, None),
-        (CommandKind.ARM, 0x02, "open_zones"),
-        (CommandKind.ARM, 0x03, "code_not_enabled"),
-        (CommandKind.ARM, 0xFF, "invalid_code"),
-        (CommandKind.RESET, 0x02, "code_not_enabled"),
-        (CommandKind.BYPASS, 0x02, "already_in_state"),
-        (CommandKind.BYPASS, 0x06, "cannot_be_bypassed"),
-        (CommandKind.OUTPUT, 0x07, "areas_armed"),
-        (CommandKind.SCENARIO, 0x02, "refused"),
-        (CommandKind.BYPASS, 0x09, "unknown"),
-    ],
-)
-def test_command_results(kind: CommandKind, code: int, reason: str | None) -> None:
-    """Result codes mean different things for each command type."""
-    result = decode_result(kind, bytes((code,)))
-    assert result.reason == reason
-    assert result.ok is (code == 0)
+PIN = "918273"
+BUILDERS = {
+    "arm_areas": lambda model: arm_areas(PIN, {1: ArmMode.AWAY}, model),
+    "reset_alarm_memory": lambda model: reset_alarm_memory(PIN, [1], model),
+    "bypass_zone": lambda model: bypass_zone(PIN, 3, model, bypass=True),
+    "set_output": lambda model: set_output(PIN, 1, 1, model),
+    "activate_scenario": lambda model: activate_scenario(PIN, 2, model),
+    "stop_sirens": lambda _model: stop_sirens(PIN),
+    "clear_call_queue": lambda _model: clear_call_queue(PIN),
+}
+
+
+@pytest.mark.parametrize("builder", sorted(BUILDERS))
+def test_every_command_is_logged_without_its_pin(builder: str) -> None:
+    """Each command builder's frame is a PIN-carrying frame, shown masked."""
+    frame = BUILDERS[builder](SL1050).frame
+    assert carries_pin(frame)
+    text = describe(frame)
+    assert "| ** ** ** ** ** **" in text
+    assert encode_pin(PIN).hex(" ") not in text
+    assert encode_pin(PIN).hex() not in text.replace(" ", "")
 
 
 def test_describe_masks_the_pin() -> None:

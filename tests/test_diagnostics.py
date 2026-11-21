@@ -5,6 +5,7 @@ from datetime import timedelta
 import json
 import logging
 import re
+from unittest.mock import patch
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
@@ -93,8 +94,15 @@ async def test_full_downloads_encrypted_then_readable(
 ) -> None:
     """Encrypted first (with the Redacted view), then the same report readable."""
     async_set_level(hass, entry.entry_id, Level.FULL)
-    first = await async_get_config_entry_diagnostics(hass, entry)
+    with patch.object(diagnostics.persistent_notification, "async_create") as note:
+        first = await async_get_config_entry_diagnostics(hass, entry)
     assert first["level"] == "full"
+    note.assert_called_once()
+    assert note.call_args.kwargs["title"] == "Inim system report ready"
+    assert (
+        note.call_args.kwargs["notification_id"]
+        == f"{DOMAIN}_{entry.entry_id}_system_report"
+    )
     assert first["redacted_view"]["level"] == "redacted"
     assert first["redacted_view"]["report_id"] == first["report_id"]
     plain = json.loads(
@@ -106,8 +114,6 @@ async def test_full_downloads_encrypted_then_readable(
         )
     )
     assert plain["level"] == "full"
-    notifications = hass.data.get("persistent_notification") or {}
-    assert notifications is not None
 
     second = await async_get_config_entry_diagnostics(hass, entry)
     assert PRIVATE_COPY in second
@@ -120,6 +126,28 @@ async def test_full_downloads_encrypted_then_readable(
     third = await async_get_config_entry_diagnostics(hass, entry)
     assert third["level"] == "redacted"
     assert PRIVATE_COPY not in third
+
+
+async def test_the_notification_in_italian(
+    hass: HomeAssistant, entry: ConfigEntry, private_key: bytes, clock
+) -> None:
+    """With Home Assistant in Italian, the notification is in Italian."""
+    hass.config.language = "it"
+    async_set_level(hass, entry.entry_id, Level.FULL)
+    with patch.object(diagnostics.persistent_notification, "async_create") as note:
+        await async_get_config_entry_diagnostics(hass, entry)
+    note.assert_called_once()
+    assert note.call_args.kwargs["title"] == "Report di sistema Inim pronto"
+    assert "cifrato" in note.call_args.args[1]
+
+
+async def test_redacted_sends_no_notification(
+    hass: HomeAssistant, entry: ConfigEntry
+) -> None:
+    """A plain report needs no second download, so nothing is announced."""
+    with patch.object(diagnostics.persistent_notification, "async_create") as note:
+        await async_get_config_entry_diagnostics(hass, entry)
+    note.assert_not_called()
 
 
 async def test_the_readable_copy_expires(
@@ -282,10 +310,20 @@ async def test_the_select_follows_the_level(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> None:
     """The select (disabled by default) offers the three levels, Redacted first."""
-    state = report_state(hass, entry.entry_id)
-    assert state.level is Level.REDACTED
-    async_set_level(hass, entry.entry_id, Level.FULL)
+    select = await enable_level_select(hass, entry)
+    state = hass.states.get(select)
+    assert state.attributes["options"] == ["redacted", "full", "confidential"]
+    assert state.state == "redacted"
+    assert report_state(hass, entry.entry_id).level is Level.REDACTED
+
+    await hass.services.async_call(
+        "select",
+        "select_option",
+        {"entity_id": select, "option": "full"},
+        blocking=True,
+    )
     assert report_state(hass, entry.entry_id).level is Level.FULL
+    assert hass.states.get(select).state == "full"
 
 
 async def test_report_while_the_entry_is_not_loaded(

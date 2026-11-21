@@ -165,7 +165,7 @@ def test_only_the_1050_fw6_layout_is_verified() -> None:
 def test_cloud_reads(model: str) -> None:
     """Firmware 6 reads the 1-byte cloud flag and the last cloud result only.
 
-    The 8 bytes before the flag are never read, by any block.
+    The bytes next to the flag are never read, by any block.
     """
     table = TABLES[(model, "6")]
     flag = table.block("cloud_enabled")

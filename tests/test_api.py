@@ -229,14 +229,16 @@ async def test_connection_held_after_an_accepted_command(
     assert status.areas.modes[3] == AreaMode.AWAY
     assert time.monotonic() - accepted >= 0.3 - 0.05  # settle, then the reads
 
-    # A refused command does not hold the connection
+    # A refused command does not hold the connection: with a settle time
+    # far longer than the limit, holding it would time out
     fake_panel.reply_delay = 0
     fake_panel.state.zone_states[0] = c.ZONE_ALARM  # zone 1, area 1
     fake_panel.state.block_arming_when_not_ready = True
-    started = time.monotonic()
-    refused = await panel.arm_areas({1: ArmMode.AWAY})
-    assert not refused.ok
-    assert time.monotonic() - started < 0.3
+    panel.command_settle = 30
+    async with asyncio.timeout(5):
+        refused = await panel.arm_areas({1: ArmMode.AWAY})
+        assert not refused.ok
+        await panel.read_status()
 
 
 async def test_scenario_not_ready(make_panel, fake_panel: FakePanel) -> None:

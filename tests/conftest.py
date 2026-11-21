@@ -1,6 +1,8 @@
 """Shared fixtures for the Inim SmartLiving Alarm tests."""
 
-from collections.abc import AsyncGenerator, Iterable
+import asyncio
+from collections.abc import AsyncGenerator, Callable, Iterable, Iterator
+import socket
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
@@ -10,6 +12,9 @@ import pytest
 
 from custom_components.inim_smartliving_alarm import api
 from custom_components.inim_smartliving_alarm.const import DOMAIN
+from custom_components.inim_smartliving_alarm.transport import (
+    base as transport_base,
+)
 
 from .fake_panel import FakePanel
 
@@ -54,6 +59,31 @@ async def panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
     await fake.stop()
 
 
+@pytest.fixture(autouse=True)
+def fresh_reconnect_pauses(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Each test starts without the pauses earlier tests' connections left."""
+    monkeypatch.setattr(transport_base, "_last_close", {})
+
+
+async def wait_until(condition: Callable[[], bool], seconds: float = 2.0) -> None:
+    """Wait until a condition holds; fail after that many seconds."""
+    async with asyncio.timeout(seconds):
+        while not condition():  # noqa: ASYNC110 - the fake's state has no event
+            await asyncio.sleep(0.005)
+
+
+@pytest.fixture
+def refused_port() -> Iterator[int]:
+    """A local TCP port that refuses connections for the whole test.
+
+    The socket stays bound without listening, so a connection is refused
+    and no other socket can take the port meanwhile.
+    """
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        yield sock.getsockname()[1]
+
+
 ALL = range(1, 1000)  # every item the form offers
 
 
@@ -65,6 +95,7 @@ async def add_entry(
     zones: Iterable[int] | None = range(1, 51),
     scenarios: Iterable[int] | None = ALL,
     name: str = "Test Panel",
+    pin: str = "1234",
 ) -> ConfigEntry:
     """Add the integration through the config flow and wait until it is loaded.
 
@@ -87,7 +118,7 @@ async def add_entry(
         {
             "host": panel.host,
             "port": panel.port,
-            "pin": "1234",
+            "pin": pin,
             "panel_name": name,
         },
     )

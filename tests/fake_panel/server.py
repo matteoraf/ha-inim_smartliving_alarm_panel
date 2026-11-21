@@ -89,6 +89,9 @@ class FakePanel:
         # Pause between fragments, so that reads see partial replies
         self.fragment_delay = 0.02
         self.reply_delay = 0.0
+        # Close every new connection at once, as an unreachable board would
+        # leave the integration without a working one
+        self.refuse_connections = False
         self.drop_after_requests: int | None = None
         self.corrupt_replies = 0
         # SmartLAN/G only: send read replies with the panel's checksum, as
@@ -115,6 +118,16 @@ class FakePanel:
             await self._server.wait_closed()
 
     @property
+    def has_client(self) -> bool:
+        """Whether a client connection is still being served."""
+        return self._client is not None
+
+    def drop_client(self) -> None:
+        """Close the current client's connection, as a board restarting would."""
+        if self._client is not None:
+            self._client.close()
+
+    @property
     def host(self) -> str:
         """Address the panel listens on."""
         assert self._server is not None
@@ -131,7 +144,7 @@ class FakePanel:
     async def _handle_client(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
     ) -> None:
-        if self.single_client and self._client is not None:
+        if self.refuse_connections or (self.single_client and self._client is not None):
             self.rejected_connections += 1
             writer.close()
             return

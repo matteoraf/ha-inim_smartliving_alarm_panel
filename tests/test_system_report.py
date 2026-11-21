@@ -7,7 +7,10 @@ import re
 import pytest
 
 from custom_components.inim_smartliving_alarm.api import SmartLivingPanel
-from custom_components.inim_smartliving_alarm.const import BOARD_SMARTLAN_SI
+from custom_components.inim_smartliving_alarm.const import (
+    BOARD_SMARTLAN_G,
+    BOARD_SMARTLAN_SI,
+)
 from custom_components.inim_smartliving_alarm.legacy import configuration_dict
 from custom_components.inim_smartliving_alarm.protocol.commands import encode_pin
 from custom_components.inim_smartliving_alarm.protocol.masking import Level
@@ -22,12 +25,17 @@ from custom_components.inim_smartliving_alarm.system_report import (
     report_text,
     self_check,
 )
+from custom_components.inim_smartliving_alarm.transport.base import PanelTransport
+from custom_components.inim_smartliving_alarm.transport.smartlan_g import (
+    SmartLanGTransport,
+)
 from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
 from .fake_panel import FakePanel, PanelState, panel_505, panel_1050, panel_10100
-from .fake_panel.discovery import si_reply
+from .fake_panel.discovery import g_reply, si_reply
+from .fake_panel.server import TRANSPORT_G
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
@@ -40,6 +48,9 @@ DDNS_USER = b"ddns-user-xyz"
 DDNS_PASSWORD = b"ddns-pass-xyz"
 LAN_PASSWORD = b"lanpw123"
 LABELS = ("Kitchen window", "Tast Zona Giorno", "Master")
+G_USERNAME = "installer-xyz"
+G_PASSWORD = "g-secret-xyz"
+G_PANEL_NAME = "Villa Rossi panel"
 
 
 def planted_state(state: PanelState) -> PanelState:
@@ -84,16 +95,31 @@ async def make_report() -> AsyncGenerator:
     started: list[tuple[FakePanel, SmartLivingPanel]] = []
 
     async def make(
-        level: Level, state: PanelState | None = None
+        level: Level,
+        state: PanelState | None = None,
+        *,
+        board: str = BOARD_SMARTLAN_SI,
+        username: str = G_USERNAME,
     ) -> tuple[dict, PanelState]:
         state = planted_state(state or panel_1050())
-        fake = FakePanel(state)
-        await fake.start()
-        panel = SmartLivingPanel(
-            SmartLanSiTransport(fake.host, fake.port, reconnect_pause=0.01),
-            PIN,
-            fallback_model=SMARTLIVING_1050_FW6,
-        )
+        transport: PanelTransport
+        if board == BOARD_SMARTLAN_G:
+            fake = FakePanel(
+                state, transport=TRANSPORT_G, username=username, password=G_PASSWORD
+            )
+            await fake.start()
+            transport = SmartLanGTransport(
+                fake.host,
+                fake.port,
+                username=username,
+                password=G_PASSWORD,
+                reconnect_pause=0.01,
+            )
+        else:
+            fake = FakePanel(state)
+            await fake.start()
+            transport = SmartLanSiTransport(fake.host, fake.port, reconnect_pause=0.01)
+        panel = SmartLivingPanel(transport, PIN, fallback_model=SMARTLIVING_1050_FW6)
         started.append((fake, panel))
         config = configuration_dict(await panel.read_configuration())
         table = (await panel.read_report()).table
@@ -111,7 +137,7 @@ async def make_report() -> AsyncGenerator:
             title="Villa Rossi alarm",
             entry_version="1.5",
             integration_version="0.4.0",
-            board=BOARD_SMARTLAN_SI,
+            board=board,
             host="192.168.77.93",
             port=5004,
             options={"scan_interval": 5},
@@ -126,6 +152,13 @@ async def make_report() -> AsyncGenerator:
                 }
             ],
             pin=PIN,
+            username=username if board == BOARD_SMARTLAN_G else None,
+            password=G_PASSWORD if board == BOARD_SMARTLAN_G else None,
+        )
+        board_reply = (
+            g_reply(fake, G_PANEL_NAME)
+            if board == BOARD_SMARTLAN_G
+            else si_reply_with_credentials("192.168.77.93", 5004)
         )
         report = build_report(
             ReportInput(
@@ -134,7 +167,7 @@ async def make_report() -> AsyncGenerator:
                 level=level,
                 entry=facts,
                 reads=reads,
-                board_reply=si_reply_with_credentials("192.168.77.93", 5004),
+                board_reply=board_reply,
                 transport_stats=panel.transport.stats.as_dict(),
                 trace=list(panel.transport.stats.trace),
                 user_code={"found": True, "number": 1},
@@ -232,6 +265,7 @@ async def test_full_has_names_but_no_secrets(make_report) -> None:
         hex_spaced(PHONE[:8]),
         hex_spaced(KEY_SERIAL),
         DDNS_PASSWORD.decode(),
+        LAN_PASSWORD.decode(),
         hex_spaced(DDNS_PASSWORD[:6]),
         hex_spaced(LAN_PASSWORD[:6]),
         hex_spaced(CANARY[:8]),
@@ -239,6 +273,40 @@ async def test_full_has_names_but_no_secrets(make_report) -> None:
         assert forbidden not in text, forbidden
     blocks = {b["name"]: b for b in report["blocks"]}
     assert blocks["pin_table"]["withheld"] == "secret"
+
+
+async def test_smartlan_g_redacted(make_report) -> None:
+    """SmartLAN/G, Redacted: no user name, password or panel name."""
+    report, _state = await make_report(Level.REDACTED, board=BOARD_SMARTLAN_G)
+    text = text_of(report)
+    assert report["level"] == "redacted"
+    assert [e for e in report["errors"] if e.get("error") == "self-check"] == []
+    for forbidden in (G_USERNAME, G_PASSWORD, G_PANEL_NAME, PIN):
+        assert forbidden not in text, forbidden
+    assert report["blocks"]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="a one-character SmartLAN/G user name matches almost any text, so "
+    "the privacy check leaves out nearly every block at Redacted",
+)
+async def test_smartlan_g_short_user_name(make_report) -> None:
+    """A short user name does not empty the Redacted report."""
+    report, _state = await make_report(
+        Level.REDACTED, board=BOARD_SMARTLAN_G, username="a"
+    )
+    assert [e for e in report["errors"] if e.get("error") == "self-check"] == []
+
+
+async def test_smartlan_g_full(make_report) -> None:
+    """SmartLAN/G, Full: the panel name, never the password or the PIN."""
+    report, _state = await make_report(Level.FULL, board=BOARD_SMARTLAN_G)
+    text = text_of(report)
+    assert [e for e in report["errors"] if e.get("error") == "self-check"] == []
+    assert G_PANEL_NAME in text
+    for forbidden in (G_PASSWORD, PIN, hex_spaced(encode_pin(PIN))):
+        assert forbidden not in text, forbidden
 
 
 async def test_confidential_has_the_secrets(make_report) -> None:
