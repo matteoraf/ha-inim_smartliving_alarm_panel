@@ -1,0 +1,103 @@
+name: Beta report
+description: Report a problem, or how a 0.4 beta works on your panel.
+title: "[Beta] "
+labels: ["beta v0.4"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for testing a beta. One report per problem, please. How to install a beta and how to go back: see the pinned issue.
+
+        **Do not paste PINs, user codes, key codes or the board's user name and password into this form.** In the integration's debug log the PIN is masked, and the board's user name and password are never logged.
+  - type: input
+    id: version
+    attributes:
+      label: Integration version
+      description: On the integration's page in the Marketplace or HACS.
+      placeholder: 0.4.0b1
+    validations:
+      required: true
+  - type: input
+    id: homeassistant
+    attributes:
+      label: Home Assistant version
+      description: Settings -> About.
+      placeholder: "2026.11.2"
+    validations:
+      required: true
+  - type: dropdown
+    id: model
+    attributes:
+      label: Panel model
+      options:
+        - SmartLiving 505
+        - SmartLiving 515
+        - SmartLiving 1050
+        - SmartLiving 10100
+        - Other (say which below)
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Panel firmware
+      description: As shown on the panel's device page in Home Assistant, or by the installer software.
+      placeholder: "6.07"
+    validations:
+      required: true
+  - type: dropdown
+    id: board
+    attributes:
+      label: Board
+      options:
+        - SmartLAN/SI
+        - SmartLAN/G
+        - Other (say which below)
+    validations:
+      required: true
+  - type: dropdown
+    id: installed_over
+    attributes:
+      label: Installed over
+      options:
+        - 0.3.x
+        - An earlier 0.4 preview or beta
+        - Nothing (a new setup)
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened
+      description: What you did and what you saw, step by step.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Debug log
+      description: |
+        Add these lines to `configuration.yaml`, restart Home Assistant and repeat the problem. Then paste the log lines of this integration (Settings -> System -> Logs). Remove the lines again afterwards.
+
+        ```yaml
+        logger:
+          logs:
+            custom_components.inim_smartliving_alarm: debug
+        ```
+      render: text
+  - type: textarea
+    id: report
+    attributes:
+      label: System report
+      description: Download the integration's diagnostics and drag the file here. Attach the Redacted report (the default) or the encrypted file of a Full report as it is, never the readable copy. See [Sharing a system report](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/blob/next/README.md#sharing-a-system-report) in the 0.4 README.
+  - type: checkboxes
+    id: secrets
+    attributes:
+      label: Before you submit
+      options:
+        - label: What I pasted or attached holds no PIN, user code, key code or board password.
+          required: true
