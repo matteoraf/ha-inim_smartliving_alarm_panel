@@ -6,9 +6,9 @@ HKDF-SHA256, then ChaCha20-Poly1305. The report is compressed before it is
 encrypted. The report's ID, level and the key ID are authenticated with it,
 so none of them can be changed without the decryption failing.
 
-The private key is kept by the maintainer only; when it changes, a new
-release carries the new public key, and the key ID tells which one a file
-was encrypted to.
+Only the matching private key decrypts a report. When the key pair changes,
+a new release carries the new public key, and the key ID tells which one a
+file was encrypted to.
 """
 
 import base64

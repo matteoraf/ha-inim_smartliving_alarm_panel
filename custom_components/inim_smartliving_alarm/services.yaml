@@ -1,37 +1,26 @@
+# Names and descriptions are in strings.json and the translations
 alarm_reset:
-  name: Alarm Reset
-  description: "Resets every area of the Inim panel that has an alarm or tamper memory."
   target:
     entity:
       - integration: inim_smartliving_alarm
         domain: alarm_control_panel
 
 reread_panel_configuration:
-  name: Re-read panel configuration
-  description: "Reads the configuration of the Inim panel again (names, zone setup, scenarios) and reloads the integration. Options are kept."
   fields:
     config_entry_id:
-      name: Panel
-      description: "The Inim SmartLiving panel whose configuration is read again."
       required: true
       selector:
         config_entry:
           integration: inim_smartliving_alarm
 
 arm_area:
-  name: Arm area
-  description: "Arms or disarms one or more areas of an Inim panel in a single command. Before arming, the panel is asked which zones are not ready; then the integration's \"When zones are not ready\" option applies: the command is refused, or sent with a warning."
   fields:
     config_entry_id:
-      name: Panel
-      description: "The Inim SmartLiving panel."
       required: true
       selector:
         config_entry:
           integration: inim_smartliving_alarm
     areas:
-      name: Areas
-      description: "The areas imported from the panel, listed by their names. In YAML, the area numbers as on the panel."
       required: true
       example: "[1, 3]"
       selector:
@@ -41,41 +30,28 @@ arm_area:
           # loaded panels
           options: []
     mode:
-      name: Mode
-      description: "How to arm the areas, or disarm them."
       required: true
       selector:
         select:
+          translation_key: arm_area_mode
           options:
-            - label: Armed total
-              value: total
-            - label: Armed partial
-              value: partial
-            - label: Armed instant
-              value: instant
-            - label: Disarmed
-              value: disarm
+            - total
+            - partial
+            - instant
+            - disarm
     force:
-      name: Arm anyway
-      description: "Arm even if zones are not ready, with a warning. The panel can still refuse, if it is set not to allow arming with zones not ready."
       default: false
       selector:
         boolean:
 
 activate_scenario:
-  name: Activate scenario
-  description: "Activates one scenario of an Inim panel. The panel is asked first which zones are not ready for it; then the integration's \"When zones are not ready\" option applies: the scenario is refused, or activated with a warning."
   fields:
     config_entry_id:
-      name: Panel
-      description: "The Inim SmartLiving panel."
       required: true
       selector:
         config_entry:
           integration: inim_smartliving_alarm
     scenario:
-      name: Scenario
-      description: "The scenarios imported from the panel, listed by their names. In YAML, the scenario number as on the panel."
       required: true
       example: "2"
       selector:
@@ -84,8 +60,6 @@ activate_scenario:
           # the loaded panels
           options: []
     force:
-      name: Activate anyway
-      description: "Activate even if zones are not ready, with a warning. The panel can still refuse, if it is set not to allow arming with zones not ready."
       default: false
       selector:
         boolean:

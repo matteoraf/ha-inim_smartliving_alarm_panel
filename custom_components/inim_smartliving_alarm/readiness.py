@@ -33,6 +33,7 @@ from .errors import (
     async_send_command,
     zone_label,
 )
+from .notifications import Texts, async_texts
 from .protocol.commands import CommandResult
 from .protocol.config import refuses_arming_when_not_ready
 from .protocol.errors import ProtocolError
@@ -110,10 +111,11 @@ async def async_arm(
         zones = sorted(zone + 1 for zone in check.zones)
         _LOGGER.warning("%s: armed with zones not ready: %s", target, zones)
         _fire(hass, entry, target, zones, ACTION_ARMED_ANYWAY, config)
+        texts = await async_texts(hass)
         persistent_notification.async_create(
             hass,
-            _warning(target, zones, names, panel_refuses_not_ready(config)),
-            title=f"Inim Alarm - {target} armed with zones not ready",
+            _warning(texts, target, zones, names, panel_refuses_not_ready(config)),
+            title=texts("notification_armed_not_ready_title", target=target),
             notification_id=f"{entry.entry_id}_armed_not_ready",
         )
 
@@ -143,15 +145,20 @@ def _fire(
 
 
 def _warning(
-    target: str, zones: list[int], names: list[str], panel_refuses: bool | None
+    texts: Texts,
+    target: str,
+    zones: list[int],
+    names: list[str],
+    panel_refuses: bool | None,
 ) -> str:
     listed = "\n".join(f"- {zone_label(zone, names)}" for zone in zones)
-    text = f"{target} was armed although these zones are not ready:\n{listed}\n\n"
-    if panel_refuses is False:
-        text += (
-            "The panel is set to arm with zones not ready, so they can trigger "
-            "an alarm."
-        )
-    else:
-        text += "They can trigger an alarm unless they are closed or bypassed."
-    return text
+    ending = (
+        "notification_armed_not_ready_panel_allows"
+        if panel_refuses is False
+        else "notification_armed_not_ready_can_trigger"
+    )
+    return (
+        texts("notification_armed_not_ready_message", target=target, zones=listed)
+        + "\n\n"
+        + texts(ending)
+    )

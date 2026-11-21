@@ -167,6 +167,7 @@ class InimScenarioActivationButton(ButtonEntity):
             self._scenario_index_0_based,
             action_name,
             is_disarm_scenario=is_disarm,
+            action_key="activate_scenario",
         )
 
     @property

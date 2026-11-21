@@ -304,10 +304,85 @@
         "message": "{title} is not loaded, so the command cannot be sent."
       },
       "area_not_imported": {
-        "message": "Areas {areas} are not imported from {title}. Import them in the integration's options, under Areas, zones and scenarios."
+        "message": "Areas {areas} are not imported from {title}. Import them in the integration's options, under Areas, zones, scenarios and outputs."
       },
       "scenario_not_imported": {
-        "message": "Scenario {scenario} is not imported from {title}. Import it in the integration's options, under Areas, zones and scenarios."
+        "message": "Scenario {scenario} is not imported from {title}. Import it in the integration's options, under Areas, zones, scenarios and outputs."
+      },
+      "notification_system_report_title": {
+        "message": "Inim system report ready"
+      },
+      "notification_system_report_message": {
+        "message": "The file you just downloaded is encrypted: attach it to your GitHub issue. Download diagnostics once more within 10 minutes to get a readable copy of the same report, to check what you are sharing. Keep that copy private: it contains names, the serial number and addresses (Full), or also PINs, phone numbers and passwords (Full confidential). Delete it when you no longer need it. The level goes back to Redacted afterwards."
+      },
+      "notification_armed_not_ready_title": {
+        "message": "Inim Alarm - {target} armed with zones not ready"
+      },
+      "notification_armed_not_ready_message": {
+        "message": "{target} was armed although these zones are not ready:\n{zones}"
+      },
+      "notification_armed_not_ready_panel_allows": {
+        "message": "The panel is set to arm with zones not ready, so they can trigger an alarm."
+      },
+      "notification_armed_not_ready_can_trigger": {
+        "message": "They can trigger an alarm unless they are closed or bypassed."
+      },
+      "notification_scenario_blocked_title": {
+        "message": "Inim Alarm - Scenario {scenario} Blocked"
+      },
+      "notification_scenario_blocked_message": {
+        "message": "Cannot activate {scenario}. The following zones are preventing activation:\n{zones}"
+      },
+      "notification_blocking_zone_line": {
+        "message": "{zone} in {areas}"
+      },
+      "notification_relevant_areas": {
+        "message": "relevant area(s)"
+      },
+      "notification_scenario_failed_title": {
+        "message": "Inim Alarm - {scenario} Failed"
+      },
+      "notification_scenario_failed_message": {
+        "message": "Failed to {action} for {entity}. Check panel for details."
+      },
+      "notification_scenario_failed_no_areas": {
+        "message": "Failed to activate {scenario} for {entity}. Check panel for details (no specific areas identified or details missing)."
+      },
+      "notification_scenario_failed_unknown_zones": {
+        "message": "Failed to activate {scenario} for {entity}. No specific zones found in problematic state. Check panel."
+      },
+      "notification_scenario_failed_no_data": {
+        "message": "Failed to {action} for {entity}. Reason undetermined (data unavailable)."
+      },
+      "notification_scenario_failed_disarm": {
+        "message": "Failed to {action} ({scenario}) for {entity}. Check panel."
+      },
+      "notification_action_arm_away": {
+        "message": "arm away"
+      },
+      "notification_action_arm_home": {
+        "message": "arm home"
+      },
+      "notification_action_arm_night": {
+        "message": "arm night"
+      },
+      "notification_action_arm_vacation": {
+        "message": "arm vacation"
+      },
+      "notification_action_disarm": {
+        "message": "disarm"
+      },
+      "notification_action_activate_scenario": {
+        "message": "activate scenario {scenario}"
+      },
+      "choice_none": {
+        "message": "None (Do Not Assign)"
+      },
+      "choice_scenario": {
+        "message": "Scenario {number}: {name}"
+      },
+      "choice_unnamed_scenario": {
+        "message": "Unnamed Scenario {number}"
       }
     },
     "selector": {
@@ -330,6 +405,14 @@
         "options": {
           "refuse": "Refuse",
           "warn": "Arm anyway and warn"
+        }
+      },
+      "arm_area_mode": {
+        "options": {
+          "total": "Armed total",
+          "partial": "Armed partial",
+          "instant": "Armed instant",
+          "disarm": "Disarmed"
         }
       }
     },
@@ -383,6 +466,62 @@
         },
         "fixed_output": {
           "name": "O{number}"
+        }
+      }
+    },
+    "services": {
+      "alarm_reset": {
+        "name": "Alarm Reset",
+        "description": "Resets every area of the Inim panel that has an alarm or tamper memory."
+      },
+      "reread_panel_configuration": {
+        "name": "Re-read panel configuration",
+        "description": "Reads the configuration of the Inim panel again (names, zone setup, scenarios) and reloads the integration. Options are kept.",
+        "fields": {
+          "config_entry_id": {
+            "name": "Panel",
+            "description": "The Inim SmartLiving panel whose configuration is read again."
+          }
+        }
+      },
+      "arm_area": {
+        "name": "Arm area",
+        "description": "Arms or disarms one or more areas of an Inim panel in a single command. Before arming, the panel is asked which zones are not ready; then the integration's \"When zones are not ready\" option applies: the command is refused, or sent with a warning.",
+        "fields": {
+          "config_entry_id": {
+            "name": "Panel",
+            "description": "The Inim SmartLiving panel."
+          },
+          "areas": {
+            "name": "Areas",
+            "description": "The areas imported from the panel, listed by their names. In YAML, the area numbers as on the panel."
+          },
+          "mode": {
+            "name": "Mode",
+            "description": "How to arm the areas, or disarm them."
+          },
+          "force": {
+            "name": "Arm anyway",
+            "description": "Arm even if zones are not ready, with a warning. The panel can still refuse, if it is set not to allow arming with zones not ready."
+          }
+        }
+      },
+      "activate_scenario": {
+        "name": "Activate scenario",
+        "description": "Activates one scenario of an Inim panel. The panel is asked first which zones are not ready for it; then the integration's \"When zones are not ready\" option applies: the scenario is refused, or activated with a warning.",
+        "fields": {
+          "config_entry_id": {
+            "name": "Panel",
+            "description": "The Inim SmartLiving panel."
+          },
+          "scenario": {
+            "name": "Scenario",
+            "description": "The scenarios imported from the panel, listed by their names. In YAML, the scenario number as on the panel."
+          },
+          "force": {
+            "name": "Activate anyway",
+            "description": "Activate even if zones are not ready, with a warning. The panel can still refuse, if it is set not to allow arming with zones not ready."
+          }
         }
       }
     },
