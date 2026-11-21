@@ -337,6 +337,8 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
             scenario_idx_to_activate,
             action_name,
             is_disarm_scenario=scenario_mapping_key == CONF_SCENARIO_DISARM,
+            # "arm away" -> arm_away: its text in the translations
+            action_key=action_name.replace(" ", "_"),
         )
 
     async def async_alarm_disarm(self, code: str | None = None) -> None:

@@ -61,9 +61,10 @@ def live_options(hass: HomeAssistant, service: str, field: str) -> list[dict]:
     options = description["fields"][field]["selector"]["select"]["options"]
     expected = copy.deepcopy(SERVICES[service])
     expected["fields"][field]["selector"]["select"]["options"] = options
+    # Names and descriptions are translated (strings.json), not in services.yaml
     assert description == {
-        "name": expected["name"],
-        "description": expected["description"],
+        "name": expected.get("name", ""),
+        "description": expected.get("description", ""),
         "fields": expected["fields"],
     }
     return options

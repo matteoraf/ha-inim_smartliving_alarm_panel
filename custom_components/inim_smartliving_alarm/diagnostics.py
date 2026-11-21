@@ -38,6 +38,7 @@ from .const import (
     DOMAIN,
 )
 from .discovery import async_board_reply
+from .notifications import async_texts
 from .protocol.errors import ProtocolError
 from .protocol.masking import Level
 from .protocol.model import FALLBACK_MODEL
@@ -70,30 +71,6 @@ _REDACT = {CONF_PIN, CONF_PASSWORD, CONF_USERNAME, CONF_HOST}
 def _now() -> float:
     """Seconds on a monotonic clock (replaceable in tests)."""
     return time.monotonic()
-
-
-_NOTIFICATION = {
-    "en": (
-        "Inim system report ready",
-        "The file you just downloaded is encrypted: attach it to your GitHub "
-        "issue. Download diagnostics once more within 10 minutes to get a "
-        "readable copy of the same report, to check what you are sharing. "
-        "Keep that copy private: it contains names, the serial number and "
-        "addresses (Full), or also PINs, phone numbers and passwords (Full "
-        "confidential). Delete it when you no longer need it. The level goes "
-        "back to Redacted afterwards.",
-    ),
-    "it": (
-        "Report di sistema Inim pronto",
-        "Il file appena scaricato è cifrato: allegalo alla tua issue su "
-        "GitHub. Scarica di nuovo la diagnostica entro 10 minuti per avere "
-        "una copia leggibile dello stesso report, per controllare cosa "
-        "condividi. Tieni privata questa copia: contiene nomi, numero di "
-        "serie e indirizzi (Completo), oppure anche PIN, numeri di telefono e "
-        "password (Completo riservato). Eliminala quando non ti serve più. Il "
-        "livello torna poi a Ridotto.",
-    ),
-}
 
 
 async def async_get_config_entry_diagnostics(
@@ -136,7 +113,7 @@ async def async_get_config_entry_diagnostics(
             async_set_level(hass, entry.entry_id, Level.REDACTED)
 
     state.expire_later(async_call_later(hass, SNAPSHOT_LIFETIME, expire))
-    _notify(hass, entry)
+    await _async_notify(hass, entry)
     return {
         "report_version": full["report_version"],
         "report_id": report_id,
@@ -176,13 +153,12 @@ def _finish(report: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
-def _notify(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    language = "it" if (hass.config.language or "").startswith("it") else "en"
-    title, message = _NOTIFICATION[language]
+async def _async_notify(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    texts = await async_texts(hass)
     persistent_notification.async_create(
         hass,
-        message,
-        title=title,
+        texts("notification_system_report_message"),
+        title=texts("notification_system_report_title"),
         notification_id=f"{DOMAIN}_{entry.entry_id}_system_report",
     )
 

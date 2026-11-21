@@ -61,7 +61,7 @@ Features
     
     *   Sensors for the panel's firmware version and system type.
         
-    *   A diagnostic sensor showing when the panel is in programming mode. Commands wait until programming has ended (see [When the panel refuses a command](#when-the-panel-refuses-a-command)).
+    *   A diagnostic sensor showing when the panel is in programming mode. No command is sent then: the action fails with a message (see [When the panel refuses a command](#when-the-panel-refuses-a-command)).
         
 *   **Maintenance without re-adding the integration**:
     
@@ -172,7 +172,7 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **SmartLiving 10100 (experimental):** a 10100 now uses its own memory layout. Earlier versions read it as if it were a 1050, so its names and zones were wrong: at the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs of areas and zones stay the same; areas 11 to 15 and zones above 50 can be ticked in the options under **Areas, zones, scenarios and outputs**.
     
-*   **Event log:** event times are now shown in Home Assistant's time zone, with daylight saving time (before, always UTC+1), and new events keep appearing after the panel's event log wraps around. The event log sensor's state is now the newest event's position in the panel's log (0 to 999) instead of a memory address: automations that only trigger on a change keep working, but compare the new numbers if you used the value itself.
+*   **Event log:** event times are now shown in Home Assistant's time zone, with daylight saving time (before, always UTC+1), and new events keep appearing after the panel's event log wraps around. The event log sensor's state is now the newest event's position in the panel's log (0 to 999, or 0 to 499 on panels that keep 500 events: the SmartLiving 505 and 515, and the 1050 on firmware 5.1) instead of a memory address: automations that only trigger on a change keep working, but compare the new numbers if you used the value itself.
     
 *   Your configuration entry is updated once more (version 1.3): the zone list is completed from the panel data already stored, without contacting the panel. If that data is incomplete, a warning asks you to use **Re-read panel configuration**.
     
@@ -182,11 +182,13 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
     
 *   **New: an arming mode select per area** (*Area X arming mode*: disarmed, total, partial or instant) and the **`arm_area` action**, which arms or disarms several areas in one command (see [Arming areas from automations](#arming-areas-from-automations)).
     
-*   **Programming mode is now detected.** While the panel is being programmed from a keypad, it ignores commands, and earlier versions reported such a command as carried out. Now no command is sent while the panel is in programming mode: the action fails with a message instead, and setup, **Reconfigure** and **Re-read panel configuration** wait until programming has ended. A new diagnostic sensor, *Programming mode*, shows it. The `reason` of the `inim_smartliving_alarm_scenario_activation_failed` event can now also be `panel_programming`.
+*   **Programming mode is now detected.** While the panel is being programmed from a keypad, it ignores commands, and earlier versions reported such a command as carried out. Now no command is sent while the panel is in programming mode: the action fails with a message instead, and setup, **Reconfigure** and **Re-read panel configuration** are refused with a message: try again when programming has ended. A new diagnostic sensor, *Programming mode*, shows it. The `reason` of the `inim_smartliving_alarm_scenario_activation_failed` event can now also be `panel_programming`.
     
 *   **A scenario stopped by zones not ready lists the zones the panel reported.** The persistent notification and the `blocking_zones` of the `inim_smartliving_alarm_scenario_activation_failed` event now list the same zones as the error message, including zones at rest that the panel counts as not ready (delayed zones, for example), each with `status` `not_ready`. Before, they listed only the zones in alarm or tamper, and could say that no zones were found.
     
 *   **Names with accented letters now show them in full.** Area, zone, scenario and keypad names programmed with letters such as à, è, é or ù lost them before; they are now read with the panel's own character set, like the names of user codes, keys and other devices. The names come from the panel data already stored, so nothing is read again. Entity IDs do not change, and names you changed in Home Assistant stay as you set them.
+    
+*   **More of the integration is translated.** The notifications (a scenario blocked or failed, an area armed with zones not ready), the scenario choices of the alarm panel's modes in the options, and the names and fields of the actions now follow Home Assistant's language (English or Italian). The `message` of the `inim_smartliving_alarm_scenario_activation_failed` event stays in English. The `alarm_reset` action on a panel whose integration is not loaded now fails with a message, instead of doing nothing.
     
 *   **You now pick the areas, zones and scenarios to import from lists**, by name, instead of giving how many of each. Your configuration entry is updated once more (version 1.4): the counts you had become the same items (for example, 7 areas become areas 1 to 7), so your entities do not change. A scenario used by an alarm panel mode beyond your scenario count is added, so that the mode keeps working. The options now open a menu: **Areas, zones, scenarios and outputs** or **General settings**. Unticking an item there **removes its entities**; ticking it again brings them back with the same entity IDs. Entities left over from areas, zones or scenarios above your old counts are removed at the first start.
     
@@ -317,11 +319,11 @@ Entities Provided
 
 This integration exposes your Inim alarm system's components as various Home Assistant entities. The entity IDs are programmatically generated based on the panel name and the names of your areas, zones, and scenarios fetched from the panel.
 
-*   **alarm\_control\_panel.your\_panel\_name**: The main entity to arm and disarm the system. Its actions (Arm Home, Arm Away, etc.) are linked to the scenarios you mapped during setup. It shows *Triggered* while any area is in alarm.
+*   **alarm\_control\_panel.your\_panel\_name**: The main entity to arm and disarm the system. Its actions (Arm Home, Arm Away, etc.) are linked to the scenarios you mapped during setup. It shows *Triggered* while any area is in alarm. A scenario active on the panel that is not mapped to a mode shows as *Armed custom bypass*. Without a mapped Disarm scenario, the state is unknown when no mapping matches.
     
 *   **Areas**:
     
-    *   *switch.your\_panel\_name\_area\_X*: Allows direct arming (on) and disarming (off) of an individual area. It is on when the area is armed in any mode (total, partial or instant); turning it on arms in the area's own mode set under **Area switches arm mode per area**, else in the mode of the **Area switches default arm mode** option (total by default). Attributes: `status_text` (`armed`, `disarmed` or `unknown`) and `arming_mode` (`total`, `partial`, `instant`, `disarmed` or `unknown`).
+    *   *switch.your\_panel\_name\_area\_X*: Allows direct arming (on) and disarming (off) of an individual area. It is on when the area is armed in any mode (total, partial or instant); turning it on arms in the area's own mode set under **Area switches arm mode per area**, else in the mode of the **Area switches default arm mode** option (total by default). Attributes: `status_text` (`armed`, `disarmed` or `unknown`; `Unknown` when there is no status for the area) and `arming_mode` (`total`, `partial`, `instant`, `disarmed` or `unknown`).
         
     *   *select.your\_panel\_name\_area\_X\_arming\_mode* (named *Area X arming mode*): The area's arming mode: *Disarmed*, *Armed total*, *Armed partial* or *Armed instant* (unknown while the panel reports none of these). Choosing a mode arms the area in that mode or disarms it; if the panel refuses, an error says why. Attributes: `area_id` and `area_name`.
         
@@ -343,12 +345,13 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
         **Attributes**: the zone's programming as read from the panel, with stable English values:
         
+        *   `zone_id` and `zone_name`: the zone's number and name.
         *   `zone_type`: `instant`, `delayed`, `viewable_delayed`, `route`, `24_hour`, `automation`, `arm`, `disarm`, `switch`, `arm_disarm`, `patrol`, `emergency_exit_without_call` or `emergency_exit` (a number if the panel uses a value not listed here).
         *   `alarm_cycles`: how many times the zone can raise an alarm, or `unlimited`.
         *   `sensor_kind`: `generic`, `roller_blind` or `shock`, from the terminal's programming. It decides the next attributes:
             *   `alarm_pulse_duration` (generic sensors only), for example `300 ms` or `20 s` (the panel counts it in steps of 15 ms or of 10 s);
-            *   `shock_sensitivity` (shock sensors only), 0 to 40;
-            *   `pulse_window_time`, the time in which pulses are counted (for example `30 s` or `1 min`), and `pulse_count`, how many pulses in that time raise the alarm.
+            *   `shock_sensitivity` (shock sensors only), 0 to 40.
+        *   `pulse_window_time`, the time in which pulses are counted (for example `30 s` or `1 min`), and `pulse_count`, how many pulses in that time raise the alarm.
         *   `balancing`: `normally_open`, `normally_closed`, `single_eol`, `double_eol`, `double_zone`, `double_zone_eol` or `personalized`.
         *   `assigned_areas`, `terminal_index`, `terminal_type` (`input`, `in_out`, `double`, …), `second_zone` (the second zone of a double terminal) and `internal_index`.
         *   The programming options, each `true` or `false`: `interior`, `autobypass` (bypassed by the panel when its areas arm while it is open), `unbypassable`, `chime`, `test_programmed`, `autobypass_no_reinclude` (autobypassed and not re-included when back at rest), `no_arming_if_not_ready` (stops arming in every mode, when the panel refuses arming with zones not ready), `entry_time_2`, `last_exit_zone`, `reinclude_on_disarm`, `hold_up` and `fault_zone`. Options that only apply to wireless zones are not shown.
@@ -361,15 +364,15 @@ This integration exposes your Inim alarm system's components as various Home Ass
         
 *   **Scenarios**:
     
-    *   *button.your\_panel\_name\_scenario\_X*: Allows direct activation of a specific scenario. If the activation fails (a zone not ready, or the panel refuses it), an error and a persistent notification with the reason appear in Home Assistant. The `area_actions_details` attribute tells what the scenario does to each area: `keep`, `total`, `partial`, `instant` or `disarm`.
+    *   *button.your\_panel\_name\_scenario\_X*: Allows direct activation of a specific scenario. If the activation fails (a zone not ready, or the panel refuses it), an error and a persistent notification with the reason appear in Home Assistant. The `area_actions_details` attribute tells what the scenario does to each area: `keep`, `total`, `partial`, `instant` or `disarm`. X is the scenario number minus 1 (scenario 1 is `scenario_0`), unlike area and zone numbers and the `scenario` field of `activate_scenario`.
         
-    *   *binary\_sensor.your\_panel\_name\_scenario\_X\_active*: A binary sensor that is 'on' if that specific scenario is currently the active one on the panel.
+    *   *binary\_sensor.your\_panel\_name\_scenario\_X\_active*: A binary sensor that is 'on' if that specific scenario is currently the active one on the panel (X as for the buttons: the scenario number minus 1).
         
 *   **Sensors**:
     
-    *   *sensor.your\_panel\_name\_event\_log*: The state is the position of the newest event in the panel's event log (0 to 999; it starts again from 0 when the log wraps around), so it changes with every new event. The attributes contain a human-readable log of recent events: `authorized_by` is the name of the user code or key, `device` the name of the keypad or reader (*Remote* for commands from the app, the cloud, Home Assistant or the installer software). Event times are the panel's clock read in Home Assistant's time zone, with daylight saving time.
+    *   *sensor.your\_panel\_name\_event\_log*: The state is the position of the newest event in the panel's event log (0 to 999, or 0 to 499 on panels that keep 500 events: the SmartLiving 505 and 515, and the 1050 on firmware 5.1; it starts again from 0 when the log wraps around), so it changes with every new event. The attributes contain a human-readable log of recent events: `authorized_by` is the name of the user code or key, `device` the name of the keypad or reader (*Remote* for commands from the app, the cloud, Home Assistant or the installer software). Event times are the panel's clock read in Home Assistant's time zone, with daylight saving time.
         
-    *   *sensor.your\_panel\_name\_active\_scenario*: A text sensor that displays the name of the currently active scenario.
+    *   *sensor.your\_panel\_name\_active\_scenario*: The active scenario's name followed by its index (0-based), for example `Night (Index 2)`; the attribute `active_scenario_index` gives the index alone.
         
     *   *sensor.your\_panel\_name\_firmware\_version* & *sensor.your\_panel\_name\_system\_type*: Provide static information about your alarm panel.
         
@@ -394,7 +397,7 @@ This integration exposes your Inim alarm system's components as various Home Ass
     *   *binary\_sensor.your\_panel\_name\_programming\_mode* (named *Programming mode*): On while the panel is in programming mode (being programmed from a keypad, or reloading its configuration). Commands are not sent then. Shown in the *Diagnostic* section of the device page. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5.0x).
         
 
-    *   *select.your\_panel\_name\_diagnostics\_level* (named *Diagnostics level*): How much the next diagnostics download shows: *Redacted*, *Full* or *Full confidential* (see [Sharing a system report](#sharing-a-system-report)). Disabled by default; it goes back to *Redacted* after each restart and after a Full report has been downloaded. Shown in the *Diagnostic* section of the device page.
+    *   *select.your\_panel\_name\_diagnostics\_level* (named *Diagnostics level*): How much the next diagnostics download shows: *Redacted*, *Full* or *Full confidential* (see [Sharing a system report](#sharing-a-system-report)). Disabled by default; it goes back to *Redacted* when the integration restarts or reloads, after the readable copy of a Full report has been downloaded, and 10 minutes after a Full report's first download. Shown in the *Diagnostic* section of the device page.
 
 _(Replace your\_panel\_name, with actual value based on your setup)._
 
@@ -432,7 +435,7 @@ data:
 
 ### Resetting the alarm memory
 
-After an alarm, the panel keeps the alarm memory of the areas involved until it is reset (the *Area X Alarm memory* sensors show it). The action `inim_smartliving_alarm.alarm_reset` resets every area that has an alarm or tamper memory, on the targeted panel:
+After an alarm, the panel keeps the alarm memory of the areas involved until it is reset (the *Area X Alarm memory* sensors show it). The action `inim_smartliving_alarm.alarm_reset` resets every area that has an alarm or tamper memory, on the targeted panel (if that panel's integration is not loaded, the action fails with a message):
 
 ```yaml
 action: inim_smartliving_alarm.alarm_reset
@@ -469,7 +472,7 @@ Before it arms an area (switch, arming mode select, `arm_area` action) or activa
 
 `force: true` on the `arm_area` and `activate_scenario` actions arms anyway for that call, whatever the option says.
 
-Either way the `inim_smartliving_alarm_zones_not_ready` event fires, for example to announce the open zones: `target` (the area or scenario name), `action` (`refused`, `armed_anyway`, or `refused_by_panel` when it was sent anyway and the panel itself refused it), `zones` (each with `zone_id` and `zone_name`) and `panel_refuses_not_ready`.
+Either way the `inim_smartliving_alarm_zones_not_ready` event fires, for example to announce the open zones: `config_entry_id` (the panel), `target` (the area or scenario name), `action` (`refused`, `armed_anyway`, or `refused_by_panel` when it was sent anyway and the panel itself refused it), `zones` (each with `zone_id` and `zone_name`) and `panel_refuses_not_ready`.
 
 The panel itself can also be set by the installer not to allow arming with zones not ready. The integration reads that setting with the panel configuration and shows it in the *Refuses arming with zones not ready* sensor (and as `panel_refuses_not_ready` in the event: `true`, `false`, or `null` before the configuration was read again). When it is on, the panel refuses such a command even when you arm anyway or use `force`: the integration still sends it, the message says the panel refused it, and the event's `action` is `refused_by_panel`. The panel's own rule depends on each zone's programming (for example, delayed zones do not stop total arming, and zones with `no_arming_if_not_ready` stop every mode), so it may let through zones the integration lists. When the setting is off, the panel arms whatever the zones' programming says.
 
@@ -518,16 +521,18 @@ Arming, disarming, bypassing a zone, activating a scenario, resetting the alarm 
     | The PIN is not enabled for it | The user code does not control that area: enable it on the panel or use another code. |
     | The panel does not allow arming while zones are not ready | Close or bypass the open zones of the area, then arm again. |
     | The zone cannot be bypassed / belongs to no area | The zone's programming on the panel does not allow it. |
+    | Double zone error | The zone's programming on the panel does not allow it. |
     | Already in the requested state | Nothing to do: the zone or area was already as requested. |
     | Its terminal is out of range / not connected / not in use | The zone's or output's terminal has changed on the panel: use **Re-read panel configuration**. |
     | The output is not enabled | Your user code may not switch that output: enable it for the code on the panel, or untick the output. |
     | The output is locked while its areas are armed | The panel does not let the output change while its areas are armed: disarm them first. |
-    | The panel refused the command (result code N) | The panel gave no reason, or one this integration does not know yet. |
+    | The panel refused the command | The panel gave no reason. |
+    | The panel refused the command (result code N) | The panel gave a reason this integration does not know yet. |
     
 *   **The command could not be completed**: the panel could not be reached, or its answer could not be read. See *Cannot Connect* below; try again once the connection is back.
     
 
-Scenario activations that fail also show a persistent notification and fire the `inim_smartliving_alarm_scenario_activation_failed` event, as before.
+Scenario activations that fail also show a persistent notification and fire the `inim_smartliving_alarm_scenario_activation_failed` event, as before. The event has `reason`, `panel_result`, `blocking_zones` (each with `zone_id`, `zone_name`, `status` and `areas`) and `message` (always in English, whatever Home Assistant's language). The `reason` is `zones_blocked`, `no_areas_identified`, `unknown_zones_error`, `no_data_available`, `disarm_failed`, `unknown`, `panel_programming`, `command_failed`, or the reason the panel gave (for example `invalid_code`).
 
 Sharing a system report
 -----------------------
@@ -546,7 +551,7 @@ At **Redacted** one download gives a plain file you can attach to a GitHub issue
 
 At **Full** and **Full confidential** you get two files from the same reading of the panel:
 
-1.  The first download is **encrypted**: only the maintainer can read it. It also holds the Redacted view in clear. **Attach this file to your GitHub issue**; it is the only file to share.
+1.  The first download is **encrypted** to the maintainer's key: only the matching private key decrypts it. It also holds the Redacted view in clear. **Attach this file to your GitHub issue**; it is the only file to share.
 2.  Download diagnostics once more within 10 minutes to get a **readable copy** of the same report (it holds `PRIVATE COPY`), to check what you are sharing. **Do not share it**: keep it private and delete it when you no longer need it. A notification reminds you of this after the first download. Both files get the same name, so your browser saves the second one with a number added (for example `(1)`): attach the first one, which holds `encrypted` and `redacted_view`, never the one that holds `PRIVATE COPY`.
 
 Then the level goes back to *Redacted*. Nothing is stored: the report is held in memory only until the second download, for 10 minutes at most.
@@ -557,10 +562,10 @@ The board's own details (its network settings and firmware) are included only wh
 
 The repository has a small viewer for reports, `scripts/inim_report.py` (Python 3.13 or newer; nothing to install for reading). Download the repository from GitHub, then:
 
-*   `python3 scripts/inim_report.py show REPORT.json` shows a report: a summary first, then areas, zones, scenarios, devices, outputs, status, events and the connection. Add `--html report.html` for one page to open in a browser.
+*   `python3 scripts/inim_report.py show REPORT.json` shows a report: a summary and the findings first, then areas, zones, scenarios, codes, devices, outputs, the areas' state now, status, events, the integration's options and the connection. Add `--html report.html` for one page to open in a browser.
 *   `python3 scripts/inim_report.py check REPORT.json` says whether a file is the one to attach (the Redacted report, or the encrypted one) or the private copy, which you should not share.
 
-The maintainer reads an encrypted report with `show REPORT.json --decrypt` (add `--html report.html` for the page); it needs the maintainer's key. It reads the files only: it connects to nothing. You can view your own Redacted report and your readable copy with it; the encrypted file shows its Redacted view.
+An encrypted report is read with `show REPORT.json --decrypt` (add `--html report.html` for the page); it needs the matching private key and the Python package `cryptography`. It reads the files only: it connects to nothing. You can view your own Redacted report and your readable copy with it; the encrypted file shows its Redacted view.
 
 Troubleshooting
 ---------------

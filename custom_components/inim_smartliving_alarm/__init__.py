@@ -261,6 +261,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             number - 1,
             f"activate scenario '{label}'",
             is_disarm_scenario=is_disarm_scenario(config, number),
+            action_key="activate_scenario",
             force=call.data[ATTR_FORCE_ARM],
         )
 

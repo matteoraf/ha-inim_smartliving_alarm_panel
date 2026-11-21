@@ -64,6 +64,7 @@ from .const import (
 )
 from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .legacy import create_client
+from .notifications import Texts, async_texts
 from .panel_config import async_fetch_panel_configuration
 from .peripherals import peripheral_placeholders
 from .protocol.errors import (
@@ -281,16 +282,17 @@ def _chosen_items(user_input: Mapping[str, Any]) -> dict[str, list[int]]:
 
 
 def _scenario_choices(
-    config: Mapping[str, Any], scenarios: list[int]
+    config: Mapping[str, Any], scenarios: list[int], texts: Texts
 ) -> dict[str, str]:
     """The scenarios a mode can be mapped to: the imported ones (0-based keys)."""
-    choices = {"none": "None (Do Not Assign)"}
+    names = scenario_names(config)
+    choices = {"none": texts("choice_none")}
     for number in scenarios:
-        choices[str(number - 1)] = f"Scenario {number}: " + (
-            scenario_names(config)[number - 1]
-            if number <= len(scenario_names(config))
-            and scenario_names(config)[number - 1]
-            else f"Unnamed Scenario {number}"
+        name = names[number - 1] if number <= len(names) else ""
+        choices[str(number - 1)] = texts(
+            "choice_scenario",
+            number=number,
+            name=name or texts("choice_unnamed_scenario", number=number),
         )
     return choices
 
@@ -496,7 +498,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Modes can be mapped to the imported scenarios only
         scenario_choices = _scenario_choices(
-            initial_config_data, selection[CONF_SCENARIOS]
+            initial_config_data, selection[CONF_SCENARIOS], await async_texts(self.hass)
         )
 
         if user_input is not None:
@@ -868,6 +870,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
             selected(
                 self.config_entry.options, self.initial_panel_config, CONF_SCENARIOS
             ),
+            await async_texts(self.hass),
         )
 
         # Shown again after a refused PIN: keep what was chosen, not the PIN

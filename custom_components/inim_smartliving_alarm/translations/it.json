@@ -304,10 +304,85 @@
         "message": "{title} non è caricata, quindi il comando non può essere inviato."
       },
       "area_not_imported": {
-        "message": "Le aree {areas} non sono importate da {title}. Importale nelle opzioni dell'integrazione, in Aree, zone e scenari."
+        "message": "Le aree {areas} non sono importate da {title}. Importale nelle opzioni dell'integrazione, in Aree, zone, scenari e uscite."
       },
       "scenario_not_imported": {
-        "message": "Lo scenario {scenario} non è importato da {title}. Importalo nelle opzioni dell'integrazione, in Aree, zone e scenari."
+        "message": "Lo scenario {scenario} non è importato da {title}. Importalo nelle opzioni dell'integrazione, in Aree, zone, scenari e uscite."
+      },
+      "notification_system_report_title": {
+        "message": "Report di sistema Inim pronto"
+      },
+      "notification_system_report_message": {
+        "message": "Il file appena scaricato è cifrato: allegalo alla tua issue su GitHub. Scarica di nuovo la diagnostica entro 10 minuti per avere una copia leggibile dello stesso report, per controllare cosa condividi. Tieni privata questa copia: contiene nomi, numero di serie e indirizzi (Completo), oppure anche PIN, numeri di telefono e password (Completo riservato). Eliminala quando non ti serve più. Il livello torna poi a Ridotto."
+      },
+      "notification_armed_not_ready_title": {
+        "message": "Inim Alarm - {target} inserito con zone non pronte"
+      },
+      "notification_armed_not_ready_message": {
+        "message": "{target} è stato inserito anche se queste zone non sono pronte:\n{zones}"
+      },
+      "notification_armed_not_ready_panel_allows": {
+        "message": "La centrale è impostata per inserire anche con zone non pronte, quindi può scattare un allarme."
+      },
+      "notification_armed_not_ready_can_trigger": {
+        "message": "Possono far scattare un allarme se non vengono chiuse o escluse."
+      },
+      "notification_scenario_blocked_title": {
+        "message": "Inim Alarm - Scenario {scenario} bloccato"
+      },
+      "notification_scenario_blocked_message": {
+        "message": "Impossibile attivare {scenario}. Queste zone ne impediscono l'attivazione:\n{zones}"
+      },
+      "notification_blocking_zone_line": {
+        "message": "{zone} in {areas}"
+      },
+      "notification_relevant_areas": {
+        "message": "aree interessate"
+      },
+      "notification_scenario_failed_title": {
+        "message": "Inim Alarm - Attivazione {scenario} non riuscita"
+      },
+      "notification_scenario_failed_message": {
+        "message": "Impossibile {action} per {entity}. Controlla la centrale per i dettagli."
+      },
+      "notification_scenario_failed_no_areas": {
+        "message": "Impossibile attivare {scenario} per {entity}. Controlla la centrale per i dettagli (nessuna area individuata o dettagli mancanti)."
+      },
+      "notification_scenario_failed_unknown_zones": {
+        "message": "Impossibile attivare {scenario} per {entity}. Nessuna zona trovata in uno stato che lo impedisca. Controlla la centrale."
+      },
+      "notification_scenario_failed_no_data": {
+        "message": "Impossibile {action} per {entity}. Motivo non determinato (dati non disponibili)."
+      },
+      "notification_scenario_failed_disarm": {
+        "message": "Impossibile {action} ({scenario}) per {entity}. Controlla la centrale."
+      },
+      "notification_action_arm_away": {
+        "message": "inserire fuori casa"
+      },
+      "notification_action_arm_home": {
+        "message": "inserire in casa"
+      },
+      "notification_action_arm_night": {
+        "message": "inserire notte"
+      },
+      "notification_action_arm_vacation": {
+        "message": "inserire in vacanza"
+      },
+      "notification_action_disarm": {
+        "message": "disinserire"
+      },
+      "notification_action_activate_scenario": {
+        "message": "attivare lo scenario {scenario}"
+      },
+      "choice_none": {
+        "message": "Nessuno (non assegnare)"
+      },
+      "choice_scenario": {
+        "message": "Scenario {number}: {name}"
+      },
+      "choice_unnamed_scenario": {
+        "message": "Scenario {number} senza nome"
       }
     },
     "selector": {
@@ -315,7 +390,7 @@
         "options": {
           "total": "Totale",
           "partial": "Parziale",
-          "instant": "Istantaneo"
+          "instant": "Immediato"
         }
       },
       "area_switch_arm_mode_by_area": {
@@ -323,13 +398,21 @@
           "default": "Usa la predefinita",
           "total": "Totale",
           "partial": "Parziale",
-          "instant": "Istantaneo"
+          "instant": "Immediato"
         }
       },
       "zones_not_ready": {
         "options": {
           "refuse": "Rifiuta",
           "warn": "Inserisci comunque e avvisa"
+        }
+      },
+      "arm_area_mode": {
+        "options": {
+          "total": "Inserita totale",
+          "partial": "Inserita parziale",
+          "instant": "Inserita immediata",
+          "disarm": "Disinserita"
         }
       }
     },
@@ -349,7 +432,7 @@
             "disarmed": "Disinserita",
             "armed_total": "Inserita totale",
             "armed_partial": "Inserita parziale",
-            "armed_instant": "Inserita istantanea"
+            "armed_instant": "Inserita immediata"
           }
         },
         "diagnostics_level": {
@@ -383,6 +466,62 @@
         },
         "fixed_output": {
           "name": "O{number}"
+        }
+      }
+    },
+    "services": {
+      "alarm_reset": {
+        "name": "Reset allarme",
+        "description": "Azzera ogni area della centrale Inim che ha una memoria di allarme o di manomissione."
+      },
+      "reread_panel_configuration": {
+        "name": "Rileggi configurazione della centrale",
+        "description": "Rilegge la configurazione della centrale Inim (nomi, impostazioni delle zone, scenari) e ricarica l'integrazione. Le opzioni vengono mantenute.",
+        "fields": {
+          "config_entry_id": {
+            "name": "Centrale",
+            "description": "La centrale Inim SmartLiving di cui rileggere la configurazione."
+          }
+        }
+      },
+      "arm_area": {
+        "name": "Inserisci area",
+        "description": "Inserisce o disinserisce una o più aree di una centrale Inim con un solo comando. Prima dell'inserimento, alla centrale viene chiesto quali zone non sono pronte; poi si applica l'opzione dell'integrazione \"Quando le zone non sono pronte\": il comando viene rifiutato, oppure inviato con un avviso.",
+        "fields": {
+          "config_entry_id": {
+            "name": "Centrale",
+            "description": "La centrale Inim SmartLiving."
+          },
+          "areas": {
+            "name": "Aree",
+            "description": "Le aree importate dalla centrale, elencate per nome. In YAML, i numeri delle aree come sulla centrale."
+          },
+          "mode": {
+            "name": "Modalità",
+            "description": "Come inserire le aree, oppure disinserirle."
+          },
+          "force": {
+            "name": "Inserisci comunque",
+            "description": "Inserisci anche con zone non pronte, con un avviso. La centrale può comunque rifiutare, se è impostata per non consentire l'inserimento con zone non pronte."
+          }
+        }
+      },
+      "activate_scenario": {
+        "name": "Attiva scenario",
+        "description": "Attiva uno scenario di una centrale Inim. Prima alla centrale viene chiesto quali zone non sono pronte per lo scenario; poi si applica l'opzione dell'integrazione \"Quando le zone non sono pronte\": lo scenario viene rifiutato, oppure attivato con un avviso.",
+        "fields": {
+          "config_entry_id": {
+            "name": "Centrale",
+            "description": "La centrale Inim SmartLiving."
+          },
+          "scenario": {
+            "name": "Scenario",
+            "description": "Gli scenari importati dalla centrale, elencati per nome. In YAML, il numero dello scenario come sulla centrale."
+          },
+          "force": {
+            "name": "Attiva comunque",
+            "description": "Attiva anche con zone non pronte, con un avviso. La centrale può comunque rifiutare, se è impostata per non consentire l'inserimento con zone non pronte."
+          }
         }
       }
     },

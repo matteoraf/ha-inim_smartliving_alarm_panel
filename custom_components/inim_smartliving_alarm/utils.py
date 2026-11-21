@@ -28,6 +28,7 @@ from .errors import (
     zone_label,
 )
 from .legacy import LegacyPanelClient, zone_exists
+from .notifications import ENGLISH, Texts, async_texts
 from .readiness import async_arm
 from .selection import (
     area_names,
@@ -53,6 +54,7 @@ async def async_activate_scenario(
     *,
     is_disarm_scenario: bool,
     force: bool = False,
+    action_key: str | None = None,
 ) -> None:
     """Activate a scenario (0-based), checking first that zones are ready.
 
@@ -82,6 +84,7 @@ async def async_activate_scenario(
             action_name,
             is_disarm_scenario,
             error=err,
+            action_key=action_key,
         )
         raise
     _LOGGER.info(
@@ -116,18 +119,39 @@ def _scenario_zone_areas(
     return names
 
 
-def _blocking_zone_line(zone_name: str, zone_areas: list[str]) -> str:
-    areas = ", ".join(zone_areas) if zone_areas else "relevant area(s)"
-    return f"'{zone_name}' in {areas}"
+def _quoted(text: str) -> str:
+    """A name in quotes, as the notifications show it.
+
+    The quotes are part of the value: a translation may not put them around
+    a placeholder.
+    """
+    return f"'{text}'"
 
 
-def _blocked_notification(scenario_name: str, lines: list[str]) -> tuple[str, str]:
+def _blocking_zone_line(texts: Texts, zone_name: str, zone_areas: list[str]) -> str:
+    areas = (
+        ", ".join(zone_areas) if zone_areas else texts("notification_relevant_areas")
+    )
+    return texts(
+        "notification_blocking_zone_line", zone=_quoted(zone_name), areas=areas
+    )
+
+
+def _blocked_texts(
+    texts: Texts, scenario_name: str, zones: list[tuple[str, list[str]]]
+) -> tuple[str, str]:
     """Title and message of a scenario blocked by zones, one line per zone."""
-    listed = "\n".join(f"{i + 1}. {line}" for i, line in enumerate(lines))
+    listed = "\n".join(
+        f"{i + 1}. {_blocking_zone_line(texts, name, areas)}"
+        for i, (name, areas) in enumerate(zones)
+    )
     return (
-        f"Inim Alarm - Scenario '{scenario_name}' Blocked",
-        f"Cannot activate {scenario_name}. "
-        f"The following zones are preventing activation:\n{listed}",
+        texts("notification_scenario_blocked_title", scenario=_quoted(scenario_name)),
+        texts(
+            "notification_scenario_blocked_message",
+            scenario=scenario_name,
+            zones=listed,
+        ),
     )
 
 
@@ -141,13 +165,16 @@ async def async_handle_scenario_activation_failure(
     action_name: str,
     is_disarm_scenario: bool,
     error: InimCommandError | None = None,
+    action_key: str | None = None,
 ) -> None:
     """Handles the failure of a scenario activation, providing detailed notifications and emitting an event.
 
     error is what stopped the activation. When the panel refused the command
     for a reason other than zones (wrong PIN, PIN not enabled, ...) or the
     command could not be sent, the notification gives that reason instead
-    of looking for zones in the way.
+    of looking for zones in the way. The notification is in Home Assistant's
+    language; the event's message stays in English. action_key names
+    action_name's text in the translations (e.g. arm_away).
     """
 
     _LOGGER.error(
@@ -163,12 +190,27 @@ async def async_handle_scenario_activation_failure(
         initial_panel_config or {}, scenario_idx_to_activate + 1
     )
 
-    notification_title = (
-        f"Inim Alarm - '{base_scenario_name_for_msg}' Failed"  # Default title
-    )
-    notification_message = (
-        f"Failed to {action_name} for '{entity_name}'. Check panel for details."
-    )
+    def action(texts: Texts) -> str:
+        if action_key is None:
+            return action_name
+        return texts.action(
+            action_key, action_name, scenario=_quoted(base_scenario_name_for_msg)
+        )
+
+    def failed_title(texts: Texts, scenario: str = base_scenario_name_for_msg) -> str:
+        return texts("notification_scenario_failed_title", scenario=_quoted(scenario))
+
+    # Title and message in a language (Texts): set below for each case
+    def compose(texts: Texts) -> tuple[str, str]:
+        return (
+            failed_title(texts),
+            texts(
+                "notification_scenario_failed_message",
+                action=action(texts),
+                entity=_quoted(entity_name),
+            ),
+        )
+
     notification_id_suffix = f"action_failed_generic_{scenario_idx_to_activate}"
 
     # Set up default variables for the HA Event bus payload
@@ -179,7 +221,10 @@ async def async_handle_scenario_activation_failure(
 
     if isinstance(error, PanelProgrammingError):
         event_reason = "panel_programming"
-        notification_message = str(error)
+
+        def compose(texts: Texts) -> tuple[str, str]:
+            return failed_title(texts), texts.error(error)
+
         notification_id_suffix = f"activation_failed_{scenario_idx_to_activate}"
     elif isinstance(error, CommandFailedError) or panel_result not in {
         None,
@@ -187,17 +232,21 @@ async def async_handle_scenario_activation_failure(
         "open_zones",
     }:
         event_reason = "command_failed" if panel_result is None else panel_result
-        notification_message = str(error)
+        failure = error
+
+        def compose(texts: Texts) -> tuple[str, str]:
+            return failed_title(texts), texts.error(failure)
+
         notification_id_suffix = f"activation_failed_{scenario_idx_to_activate}"
     elif isinstance(error, ZonesNotReadyError) and error.zones:
         # The zones the panel reported as not ready, as in the error message
         config = initial_panel_config or {}
         scenario_areas = scenario_armed_areas(config, scenario_idx_to_activate + 1)
         names = zone_names(config)
-        lines = []
+        blocking: list[tuple[str, list[str]]] = []
         for zone in error.zones:
             zone_areas = _scenario_zone_areas(config, zone, scenario_areas)
-            lines.append(_blocking_zone_line(zone_label(zone, names), zone_areas))
+            blocking.append((zone_label(zone, names), zone_areas))
             plain = names[zone - 1] if 0 < zone <= len(names) else ""
             blocking_zones_event_data.append(
                 {
@@ -208,11 +257,11 @@ async def async_handle_scenario_activation_failure(
                 }
             )
         event_reason = "zones_blocked"
-        notification_title, notification_message = _blocked_notification(
-            base_scenario_name_for_msg, lines
-        )
+
+        def compose(texts: Texts) -> tuple[str, str]:
+            return _blocked_texts(texts, base_scenario_name_for_msg, blocking)
+
         notification_id_suffix = f"activation_blocked_{scenario_idx_to_activate}"
-        _LOGGER.info("%s: %s", entity_name, notification_message)
     elif (
         not is_disarm_scenario
         and coordinator
@@ -243,11 +292,17 @@ async def async_handle_scenario_activation_failure(
                 target_scenario_name,
                 scenario_idx_to_activate,
             )
-            notification_title = f"Inim Alarm - '{target_scenario_name}' Failed"
-            notification_message = (
-                f"Failed to activate {target_scenario_name} for '{entity_name}'. "
-                "Check panel for details (no specific areas identified or details missing)."
-            )
+
+            def compose(texts: Texts) -> tuple[str, str]:
+                return (
+                    failed_title(texts, target_scenario_name),
+                    texts(
+                        "notification_scenario_failed_no_areas",
+                        scenario=target_scenario_name,
+                        entity=_quoted(entity_name),
+                    ),
+                )
+
             notification_id_suffix = (
                 f"activation_failed_no_areas_{scenario_idx_to_activate}"
             )
@@ -261,7 +316,7 @@ async def async_handle_scenario_activation_failure(
                 KEY_LIVE_ZONES_STATUS, {}
             ).get(KEY_LIVE_ZONE_STATUSES_MAP, {})
 
-            problematic_zones_messages = []
+            problematic_zones: list[tuple[str, list[str]]] = []
             for zone_idx_0_based, zone_name_from_list in enumerate(all_zone_names_list):
                 zone_id_1_based = zone_idx_0_based + 1
                 # Use the name from the list, or create a default if it's empty/None
@@ -294,9 +349,7 @@ async def async_handle_scenario_activation_failure(
                                 zone_id_1_based,
                                 areas_controlled_by_scenario,
                             )
-                            problematic_zones_messages.append(
-                                _blocking_zone_line(zone_name, area_names_parts)
-                            )
+                            problematic_zones.append((zone_name, area_names_parts))
                             # Add structured data for the event bus payload
                             blocking_zones_event_data.append(
                                 {
@@ -307,22 +360,30 @@ async def async_handle_scenario_activation_failure(
                                 }
                             )
 
-            if problematic_zones_messages:
+            if problematic_zones:
                 event_reason = "zones_blocked"
-                notification_title, notification_message = _blocked_notification(
-                    target_scenario_name, problematic_zones_messages
-                )
+
+                def compose(texts: Texts) -> tuple[str, str]:
+                    return _blocked_texts(
+                        texts, target_scenario_name, problematic_zones
+                    )
+
                 notification_id_suffix = (
                     f"activation_blocked_{scenario_idx_to_activate}"
                 )
-                _LOGGER.info("%s: %s", entity_name, notification_message)
             else:
                 event_reason = "unknown_zones_error"
-                notification_title = f"Inim Alarm - '{target_scenario_name}' Failed"
-                notification_message = (
-                    f"Failed to activate {target_scenario_name} for '{entity_name}'. "
-                    "No specific zones found in problematic state. Check panel."
-                )
+
+                def compose(texts: Texts) -> tuple[str, str]:
+                    return (
+                        failed_title(texts, target_scenario_name),
+                        texts(
+                            "notification_scenario_failed_unknown_zones",
+                            scenario=target_scenario_name,
+                            entity=_quoted(entity_name),
+                        ),
+                    )
+
                 notification_id_suffix = (
                     f"activation_failed_unknown_zones_{scenario_idx_to_activate}"
                 )
@@ -334,8 +395,17 @@ async def async_handle_scenario_activation_failure(
 
     elif not is_disarm_scenario:
         event_reason = "no_data_available"
-        notification_title = f"Inim Alarm - '{base_scenario_name_for_msg}' Failed"
-        notification_message = f"Failed to {action_name} for '{entity_name}'. Reason undetermined (data unavailable)."
+
+        def compose(texts: Texts) -> tuple[str, str]:
+            return (
+                failed_title(texts),
+                texts(
+                    "notification_scenario_failed_no_data",
+                    action=action(texts),
+                    entity=_quoted(entity_name),
+                ),
+            )
+
         notification_id_suffix = f"activation_failed_no_data_{scenario_idx_to_activate}"
         _LOGGER.warning(
             "%s: Data unavailable to determine cause of %s failure",
@@ -344,8 +414,23 @@ async def async_handle_scenario_activation_failure(
         )
     else:  # Disarm scenario failed or other generic failure
         event_reason = "disarm_failed"
-        # Title already includes base_scenario_name_for_msg from default initialization
-        notification_message = f"Failed to {action_name} ({base_scenario_name_for_msg}) for '{entity_name}'. Check panel."
+
+        def compose(texts: Texts) -> tuple[str, str]:
+            return (
+                failed_title(texts),
+                texts(
+                    "notification_scenario_failed_disarm",
+                    action=action(texts),
+                    scenario=base_scenario_name_for_msg,
+                    entity=_quoted(entity_name),
+                ),
+            )
+
+    # The notification in Home Assistant's language, the event in English
+    notification_title, notification_message = compose(await async_texts(hass))
+    _english_title, english_message = compose(await async_texts(hass, ENGLISH))
+    if event_reason == "zones_blocked":
+        _LOGGER.info("%s: %s", entity_name, english_message)
 
     # 1. Trigger the Persistent Notification in the UI
     persistent_notification.async_create(
@@ -365,7 +450,7 @@ async def async_handle_scenario_activation_failure(
         "reason": event_reason,
         "panel_result": panel_result,
         "blocking_zones": blocking_zones_event_data,
-        "message": notification_message,
+        "message": english_message,
     }
     hass.bus.async_fire(f"{DOMAIN}_scenario_activation_failed", event_data)
 
