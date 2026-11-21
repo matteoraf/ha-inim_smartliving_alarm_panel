@@ -110,7 +110,13 @@ Prerequisites
 Installation
 ------------
 
+<!-- ha-marketplace:exclude-start -->
+
 The integration is installed as a custom repository; it needs Home Assistant 2026.1 or later.
+
+[![Open your Home Assistant instance and open this repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=matteoraf&repository=ha-inim_smartliving_alarm_panel&category=integration)
+
+The button opens this repository in your Home Assistant: in the Marketplace on 2026.11 or later, in HACS on earlier versions (HACS must be installed). Download **Inim Smartliving Alarm** there and restart Home Assistant. Or add it yourself:
 
 **Home Assistant 2026.11 or later (Marketplace):**
 
@@ -134,6 +140,7 @@ The integration is installed as a custom repository; it needs Home Assistant 202
     
 2.  Restart Home Assistant.
     
+<!-- ha-marketplace:exclude-end -->
 
 ### Preview versions
 
