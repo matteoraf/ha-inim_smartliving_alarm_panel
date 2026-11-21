@@ -1,5 +1,4 @@
 {
   "name": "Inim Smartliving Alarm",
-  "homeassistant": "2026.1.0",
-  "render_readme": true
+  "homeassistant": "2026.1.0"
 }

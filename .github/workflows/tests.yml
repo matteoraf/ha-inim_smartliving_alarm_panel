@@ -3,19 +3,21 @@ name: Tests
 on:
   push:
     branches: [main, next]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.14"
       - name: Install ruff
@@ -28,6 +30,8 @@ jobs:
   pytest:
     name: Pytest (Home Assistant ${{ matrix.home-assistant }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -39,8 +43,8 @@ jobs:
             python-version: "3.14"
             requirements: requirements_test.txt
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -49,3 +53,23 @@ jobs:
         run: pip install -r ${{ matrix.requirements }}
       - name: Run tests
         run: pytest -q
+
+  version:
+    name: Tag matches the manifest version
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Compare the tag with the manifest version
+        env:
+          TAG: ${{ github.ref_name }}
+          MANIFEST: custom_components/inim_smartliving_alarm/manifest.json
+        run: |
+          version="$(python3 -c 'import json, sys; print(json.load(open(sys.argv[1]))["version"])' "$MANIFEST")"
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error file=$MANIFEST::The tag is $TAG but the manifest version is $version: the tag must be v followed by the manifest version."
+            exit 1
+          fi
+          echo "The tag $TAG matches the manifest version $version."

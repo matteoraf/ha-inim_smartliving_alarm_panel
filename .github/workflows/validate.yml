@@ -5,25 +5,27 @@ on:
     branches: [main, next]
   pull_request:
   schedule:
-    - cron: "0 3 * * 1"
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   hassfest:
     name: Hassfest
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: home-assistant/actions/hassfest@master
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: home-assistant/actions/hassfest@07f46fd2e19967768b5fd3000f91f857452b767c # 2026.11.0
 
   hacs:
     name: HACS
     runs-on: ubuntu-latest
     steps:
+      # Not pinned: hacs/action has no current release to pin to, and its
+      # checks run from a Docker image that follows main either way.
       - uses: hacs/action@main
         with:
           category: integration
-          ignore: brands
