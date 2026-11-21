@@ -2,7 +2,7 @@ name: Tests
 
 on:
   push:
-    branches: [main, next]
+    branches: [main, next, "release/**"]
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
