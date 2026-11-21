@@ -11,5 +11,5 @@
     "issue_tracker": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/issues",
     "loggers": ["custom_components.inim_smartliving_alarm"],
     "requirements": [],
-    "version": "0.4.0.dev0"
+    "version": "0.4.0b1"
 }

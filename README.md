@@ -4,7 +4,7 @@ Home Assistant Integration for Inim SmartLiving Alarm Systems
 > [!WARNING]
 > This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
 > 
-> I could only test this with SmartLiving 1050 on firmware 6. The SmartLiving 505, 515 and 10100, and all four models on firmware 5.1, are supported experimentally, without a test on a real panel. Contributors are welcome.
+> SmartLiving 1050 on firmware 6 has been tested and confirmed by multiple users. SmartLiving 10100 with a SmartLAN/G board has been tested by one user. The SmartLiving 505, 515 and all four models on firmware 5.1, are supported experimentally. Contributors are welcome.
 
 This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI or SmartLAN/G network interface (SmartLAN/G support is experimental). It enables monitoring and control of your alarm system directly from Home Assistant.
 
@@ -146,14 +146,16 @@ The button opens this repository in your Home Assistant: in the Marketplace on 2
 
 Versions such as `0.4.0a1` (preview) or `0.4.0b1` (beta) are published as GitHub *pre-releases*. They are offered only to users who ask for them:
 
-*   **Marketplace or HACS**: turn on the repository's **Pre-release** switch to be offered pre-releases, or use **Redownload** on the integration's page and pick the version.
+*   **Marketplace** (Home Assistant 2026.11 or later): on the integration's page in the Marketplace, open the menu (⋮) and choose **Include pre-releases** to be offered pre-releases, or **Install another version** and pick the version.
+    
+*   **HACS** (Home Assistant 2026.1 to 2026.10): turn on the repository's **Pre-release** switch (it is disabled by default: enable it first), or use **Redownload** on the integration's page and pick the version.
     
 *   **Manual**: download the `inim_smartliving_alarm` folder from the pre-release on GitHub.
     
 
-**Take a Home Assistant backup before installing a preview** (**Settings** -> **System** -> **Backups**). A preview updates your configuration entry to a newer format that the stable 0.3.x versions do not fully understand: installed over it, 0.3.x creates entities again for 10 areas, 50 zones and 30 scenarios (including those you had not imported), cannot connect to SmartLAN/G boards, and leaves the entities only the previews have (such as the arming mode selects, the outputs and the diagnostic sensors) as unavailable entities. To go back to a stable version, restore that backup; this also undoes any other change made in Home Assistant since the backup.
+**Take a Home Assistant backup before installing a preview or a beta** (**Settings** -> **System** -> **Backups**). A preview or a beta updates your configuration entry to a newer format that the stable 0.3.x versions do not fully understand: installed over it, 0.3.x creates entities again for 10 areas, 50 zones and 30 scenarios (including those you had not imported), cannot connect to SmartLAN/G boards, and leaves the entities only 0.4 has (such as the arming mode selects, the outputs and the diagnostic sensors) as unavailable entities. To go back to a stable version, restore that backup; this also undoes any other change made in Home Assistant since the backup.
 
-Please report problems with a preview in a GitHub issue, with your panel model, firmware version and board type (SmartLAN/SI or SmartLAN/G).
+Please report problems with a preview or a beta with the [Beta report](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/issues/new?template=beta_report.yml) form, which asks for your panel model, firmware version and board type (SmartLAN/SI or SmartLAN/G).
 
 ### Upgrading from 0.3.x
 
@@ -501,6 +503,8 @@ Known limitations of this version:
 
 *   On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example `switch.home_home_area_3`); existing installations keep their IDs.
     
+*   The event log names the most common events: alarms, arming, disarming and resets, zone bypasses, scenarios, programming, valid codes and keys, and failed calls. Other events show as *Unknown Action* with their code.
+
 *   Panels on firmware 5.0x or of another model that were set up with an earlier version keep running with the 1050's firmware 6 layout, so their names, zones, scenarios and event log may be wrong and their areas' delays are not shown. A repair notice says so. New setups of such panels are refused.
 
 *   Dimmer levels are read from the panel on firmware 6 only: firmware 5.1 does not report them. On firmware 5.1 a dimmer's brightness is the last one set from Home Assistant, so a level changed at a keypad is not shown.
