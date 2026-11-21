@@ -1,9 +1,7 @@
 """Behaviour of the integration's panel client against the fake SmartLiving 1050.
 
 These tests describe the dictionaries the entities receive (legacy.py, on
-top of the asynchronous API). Tests marked xfail describe known
-limitations; they are strict, so fixing one makes the test pass and pytest
-reports it until the marker is removed.
+top of the asynchronous API).
 """
 
 from collections.abc import AsyncGenerator, Awaitable, Callable
@@ -324,7 +322,7 @@ async def test_new_event_after_command(
     assert event["timestamp_iso"] == "2026-11-12T08:30:15+01:00"
 
 
-# ------------------------------------------------------- known limitations
+# ------------------------------------------------------------- edge cases
 
 
 async def test_fragmented_replies(

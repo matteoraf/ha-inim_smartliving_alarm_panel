@@ -5,7 +5,6 @@ end with exactly one reload of the entry.
 """
 
 from collections.abc import AsyncGenerator, Iterator
-import socket
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -51,13 +50,6 @@ def setups(entry: ConfigEntry) -> Iterator[AsyncMock]:
         integration, "async_setup_entry", wraps=integration.async_setup_entry
     ) as mock:
         yield mock
-
-
-def closed_port() -> int:
-    """A local TCP port nothing listens on."""
-    with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
-        return sock.getsockname()[1]
 
 
 def entity_ids(hass: HomeAssistant, entry: ConfigEntry) -> dict[str, str]:
@@ -153,13 +145,17 @@ async def test_reconfigure_moves_entry_to_new_address(
 
 
 async def test_reconfigure_cannot_connect(
-    hass: HomeAssistant, entry: ConfigEntry, panel: FakePanel, setups: AsyncMock
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    panel: FakePanel,
+    setups: AsyncMock,
+    refused_port: int,
 ) -> None:
     """An unreachable address shows an error and changes nothing."""
     data = dict(entry.data)
 
     result = await reconfigure(
-        hass, entry, {"host": "127.0.0.1", "port": closed_port(), "pin": "1234"}
+        hass, entry, {"host": "127.0.0.1", "port": refused_port, "pin": "1234"}
     )
 
     assert result["type"] is FlowResultType.FORM

@@ -192,6 +192,62 @@ async def test_old_configuration_is_read_again_once(
     await unload_all(hass)
 
 
+# The stored blocks an entry needs; one missing makes the first start read the
+# configuration again. Listed here, not taken from the code, so that a block
+# dropped from the code's list fails its case.
+REQUIRED_BLOCKS = (
+    "code_names",
+    "peripherals",
+    "general_options",
+    "area_records",
+    "fixed_output_records",
+    "fixed_output_labels",
+    "physical_map",
+    "user_code_outputs",
+    "extra_output_options",
+)
+
+
+@pytest.mark.parametrize("missing", REQUIRED_BLOCKS)
+async def test_each_required_block_is_read_again_once(
+    hass: HomeAssistant,
+    panel: FakePanel,
+    caplog: pytest.LogCaptureFixture,
+    missing: str,
+) -> None:
+    """Any one required block missing: one re-read at the first start only."""
+    stored = await stored_configuration(panel)
+    del stored[missing]
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        version=1,
+        minor_version=5,
+        title="Old",
+        data={
+            "host": panel.host,
+            "port": panel.port,
+            "pin": "1234",
+            "board": "smartlan_si",
+            "panel_name": "Old",
+            DATA_INITIAL_PANEL_CONFIG: stored,
+        },
+        options={"areas": [1], "zones": [1], "scenarios": [1]},
+    )
+    entry.add_to_hass(hass)
+    with caplog.at_level(logging.INFO):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+    assert caplog.text.count("panel configuration read again") == 1
+    assert missing in entry.data[DATA_INITIAL_PANEL_CONFIG]
+
+    caplog.clear()
+    with caplog.at_level(logging.INFO):
+        assert await hass.config_entries.async_reload(entry.entry_id)
+        await hass.async_block_till_done()
+    assert "panel configuration read again" not in caplog.text
+    await unload_all(hass)
+
+
 async def test_reader_names_option_is_dropped(hass: HomeAssistant) -> None:
     """1.5: the reader names typed in the options are no longer used."""
     entry = MockConfigEntry(

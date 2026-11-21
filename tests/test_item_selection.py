@@ -290,24 +290,38 @@ async def test_upgrade_keeps_the_entities(
 
 
 @pytest.mark.parametrize(
-    ("options", "areas", "zones", "scenarios"),
+    ("data", "options", "areas", "zones", "scenarios"),
     [
-        ({}, 15, 200, 30),  # no counts stored: everything
-        ({"limit_areas": 16, "limit_zones": 250}, 15, 200, 30),  # above today's
+        ({}, {}, 15, 200, 30),  # no counts stored: everything
+        ({}, {"limit_areas": 16, "limit_zones": 250}, 15, 200, 30),  # above today's
+        ({"limit_zones": 50}, {}, 15, 50, 30),  # a count kept in the entry data
+        ({"limit_zones": 50}, {"limit_zones": 20}, 15, 20, 30),  # options win
     ],
 )
 async def test_upgrade_without_or_with_large_counts(
-    hass: HomeAssistant, options: dict, areas: int, zones: int, scenarios: int
+    hass: HomeAssistant,
+    data: dict,
+    options: dict,
+    areas: int,
+    zones: int,
+    scenarios: int,
 ) -> None:
-    """Missing counts mean everything; counts above the maximum are capped."""
+    """Missing counts mean everything; counts above the maximum are capped.
+
+    A count kept in the entry data is used unless the options have one, and
+    no count is left in either.
+    """
     entry = MockConfigEntry(
-        domain=DOMAIN, version=1, minor_version=3, data={}, options=options
+        domain=DOMAIN, version=1, minor_version=3, data=data, options=options
     )
     entry.add_to_hass(hass)
     assert await async_migrate_entry(hass, entry)
     assert entry.options["areas"] == list(range(1, areas + 1))
     assert entry.options["zones"] == list(range(1, zones + 1))
     assert entry.options["scenarios"] == list(range(1, scenarios + 1))
+    limits = {"limit_areas", "limit_zones", "limit_scenarios"}
+    assert not limits & set(entry.data)
+    assert not limits & set(entry.options)
 
 
 # --------------------------------------------------------------- arm_area

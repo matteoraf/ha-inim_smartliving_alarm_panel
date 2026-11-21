@@ -219,6 +219,22 @@ async def test_hex(reports: dict[str, Path]) -> None:
     assert run("hex", str(reports["redacted"]), "no_such_block")[0] == 2
 
 
+async def test_hex_all(reports: dict[str, Path]) -> None:
+    """--all shows every block of the report, in its order."""
+    report = json.loads(reports["redacted"].read_text())["data"]
+    names = [block["name"] for block in report["blocks"]]
+    code, text = run("hex", str(reports["redacted"]), "--all")
+    assert code == 0
+    # Each block starts with an unindented header: its name first
+    headers = [
+        line.split(", ")[0]
+        for line in text.splitlines()
+        if line and not line.startswith(" ")
+    ]
+    assert headers == names
+    assert run("hex", str(reports["redacted"]))[0] == 2  # neither names nor --all
+
+
 # ------------------------------------------------------------------ diff
 
 
@@ -239,6 +255,49 @@ async def test_diff(reports: dict[str, Path], tmp_path: Path) -> None:
     assert code == 1
     assert "zone_records: 1 bytes differ" in text
     assert "^^" in text
+
+
+def _first_value(data: dict) -> list:
+    """The path of the first number or text in a nested dict or list."""
+    items = data.items() if isinstance(data, dict) else enumerate(data)
+    for key, value in items:
+        if isinstance(value, (dict, list)) and value:
+            if (path := _first_value(value)) is not None:
+                return [key, *path]
+        elif isinstance(value, (int, str)) and not isinstance(value, bool):
+            return [key]
+    return None
+
+
+def _change(data: dict, path: list) -> None:
+    *parents, last = path
+    for key in parents:
+        data = data[key]
+    data[last] = data[last] + 1 if isinstance(data[last], int) else f"{data[last]}!"
+
+
+async def test_diff_by_part(reports: dict[str, Path], tmp_path: Path) -> None:
+    """--blocks, --config and --status each compare their part only."""
+    path = reports["full"]
+    report = json.loads(path.read_text())["data"]
+    changed = copy.deepcopy(report)
+    _change(changed["configuration"], _first_value(changed["configuration"]))
+    _change(changed["status"], _first_value(changed["status"]))
+    other = str(save(tmp_path / "c.json", changed))
+
+    code, text = run("diff", str(path), other, "--config")
+    assert code == 1
+    assert "configuration." in text
+    assert "status." not in text
+
+    code, text = run("diff", str(path), other, "--status")
+    assert code == 1
+    assert "status." in text
+    assert "configuration." not in text
+
+    code, text = run("diff", str(path), other, "--blocks")
+    assert code == 0  # no raw byte changed
+    assert "No differences" in text
 
 
 def test_diff_skips_what_one_side_hides(tmp_path: Path) -> None:

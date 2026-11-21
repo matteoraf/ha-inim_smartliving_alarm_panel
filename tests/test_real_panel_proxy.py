@@ -9,7 +9,6 @@ import asyncio
 from collections.abc import AsyncGenerator, Awaitable, Callable
 import json
 from pathlib import Path
-import socket
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -105,13 +104,6 @@ async def raw_exchange(proxy: PanelProxy, request: bytes) -> bytes:
     finally:
         writer.close()
         await writer.wait_closed()
-
-
-def closed_port() -> int:
-    """A local TCP port nothing listens on."""
-    with socket.socket() as sock:
-        sock.bind(("127.0.0.1", 0))
-        return sock.getsockname()[1]
 
 
 def writes(panel: FakePanel) -> list[int]:
@@ -350,10 +342,12 @@ async def test_connect_attempts_that_hang_are_retried(
     assert proxy.errors == []
 
 
-async def test_unreachable_panel_gives_up_after_the_deadline() -> None:
+async def test_unreachable_panel_gives_up_after_the_deadline(
+    refused_port: int,
+) -> None:
     """Without an answer before the deadline the client connection is closed."""
     proxy = PanelProxy(
-        "127.0.0.1", closed_port(), connect_deadline=0.5, reconnect_pause=0.1
+        "127.0.0.1", refused_port, connect_deadline=0.5, reconnect_pause=0.1
     )
     await proxy.start()
     try:
