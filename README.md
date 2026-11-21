@@ -222,6 +222,8 @@ Version 0.4 reworks how the integration talks to the panel; your entity IDs and 
 
 *   **System reports are new**: downloading the integration's diagnostics now gives a system report for bug reports, at the level chosen with the new *Diagnostics level* select (disabled by default). See [Sharing a system report](#sharing-a-system-report).
 
+*   **The integration has its own icon**, shown on Home Assistant 2026.3 or later; earlier versions show none, as before.
+
 *   Limits of this version: see [Known limitations](#known-limitations).
     
 
