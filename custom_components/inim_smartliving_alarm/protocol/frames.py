@@ -182,9 +182,9 @@ def parse_read_reply(reply: bytes, length: int) -> bytes:
         raise ProtocolError(f"expected {length + 1} bytes, got {len(reply)}")
     data = reply[:-1]
     if checksum(data) != reply[-1]:
-        raise ChecksumError(
-            f"checksum {reply[-1]:#04x} does not match {checksum(data):#04x}"
-        )
+        # No values in the message: over a sensitive read they say something
+        # about its data, and the message can reach the log
+        raise ChecksumError("reply checksum does not match its data")
     return data
 
 

@@ -11,7 +11,8 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import StrEnum
 
-LABEL_LENGTH = 16
+from .model import LABEL_LENGTH
+
 LABEL_SHOWN = 3  # characters of a label kept at the Redacted level
 ROW_LENGTH = 16  # bytes per hex row
 

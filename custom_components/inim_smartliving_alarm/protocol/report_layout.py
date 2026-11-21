@@ -1,8 +1,8 @@
 """The blocks a system report reads, and which table fits a panel.
 
 A report reads only the blocks of its panel's table: each block names its
-memory, address, length and privacy. The tables themselves are generated
-(report_blocks.py). A panel whose model or firmware has no table is read in
+memory, address, length and privacy. The tables themselves are in
+report_blocks.py. A panel whose model or firmware has no table is read in
 basic mode: its identification and status registers only.
 """
 
@@ -136,7 +136,7 @@ def table_for(firmware: FirmwareInfo, model: PanelModel) -> ReportTable:
 
     model is the profile in use, which sizes the basic-mode registers.
     """
-    from .report_blocks import TABLES  # generated; imported on use
+    from .report_blocks import TABLES  # data tables; imported on use
 
     family = report_family(firmware)
     table = TABLES.get((firmware.model, family)) if family else None

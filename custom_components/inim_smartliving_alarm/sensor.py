@@ -35,6 +35,14 @@ from .const import (
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
 from .peripherals import enabled_peripherals
+from .protocol.events import (
+    NO_AGENT,
+    NO_LOCATION,
+    REMOTE_LOCATION,
+    VALID_KEY_ACTION,
+    reader_index,
+)
+from .protocol.model import FALLBACK_MODEL
 from .selection import area_names, keypad_names, scenario_names, zone_names
 from .user_code import UserCodeInfo, user_code_info
 
@@ -476,7 +484,7 @@ class InimEventLogSensor(BaseInimSensorEntity):
             enriched_log_event["device_id"] = raw_api_event["device_id_hex"]
         if agent is not None:
             enriched_log_event["authorized_id"] = raw_api_event["authorized_id_hex"]
-        if raw_api_event.get("action_code") == 0x96:  # valid key, on a reader
+        if raw_api_event.get("action_code") == VALID_KEY_ACTION:
             if agent is not None:
                 enriched_log_event["authorized_by"] = names.key(agent)
             if device is not None:
@@ -588,18 +596,17 @@ class _EventNames:
 
     @property
     def _keypad_count(self) -> int:
-        # A configuration without keypad names: the 1050's 10, as before
-        return len(self._keypads) or 10
+        # A configuration without keypad names: the 1050's, as before
+        return len(self._keypads) or FALLBACK_MODEL.keypads
 
     def _reader_index(self, location: int) -> int | None:
-        index = location - self._keypad_count
-        return index if location < 0xF0 and index >= 0 else None
+        return reader_index(location, self._keypad_count)
 
     def location(self, location: int) -> str:
         """Where the event comes from."""
-        if location == 0xFE:
+        if location == REMOTE_LOCATION:
             return "Remote"
-        if location == 0xFF:
+        if location == NO_LOCATION:
             return "-"
         if location < self._keypad_count:
             return self._name(self._keypads, location, f"Keypad {location + 1}")
@@ -609,7 +616,7 @@ class _EventNames:
 
     def agent(self, agent: int, location: int | None) -> str:
         """Who caused the event: a user code, or a key used on a reader."""
-        if agent == 0xFF:
+        if agent == NO_AGENT:
             return "-"
         if location is not None and self._reader_index(location) is not None:
             return self.key(agent)

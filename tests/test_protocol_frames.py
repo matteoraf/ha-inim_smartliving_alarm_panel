@@ -4,6 +4,8 @@ Requests and command frames are compared with frames captured from a real
 SmartLiving 1050 (tests/fake_panel/captures.py).
 """
 
+import re
+
 import pytest
 
 from custom_components.inim_smartliving_alarm.protocol import registers as reg
@@ -149,8 +151,10 @@ def test_reply_checks() -> None:
     assert parse_read_reply(cap.FIRMWARE_REPLY, 12) == b"6.07 01050  "
     with pytest.raises(ProtocolError):
         parse_read_reply(cap.FIRMWARE_REPLY, 11)
-    with pytest.raises(ChecksumError):
+    with pytest.raises(ChecksumError) as err:
         parse_read_reply(cap.FIRMWARE_REPLY[:-1] + b"\x00", 12)
+    # The message holds no value: over the PIN table it would tell about it
+    assert not re.search(r"\d", str(err.value))
 
     command = arm_areas("1234", {3: ArmMode.AWAY}, SL1050)
     check_write_ack(bytes((cap.ARM_AREA_3_ACK,)), command.payload)

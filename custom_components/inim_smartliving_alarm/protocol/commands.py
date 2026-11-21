@@ -11,10 +11,10 @@ from enum import IntEnum, StrEnum
 
 from . import registers as reg
 from .errors import InvalidPinError
-from .frames import checksum, write_ram
+from .frames import PIN_LENGTH, checksum, write_ram
 from .model import PanelModel
 
-PIN_LENGTH = 6
+PIN_UNUSED_DIGIT = 0xFF  # fills a PIN shorter than six digits
 
 
 class ArmMode(IntEnum):
@@ -61,7 +61,9 @@ def encode_pin(pin: str) -> bytes:
     """Six bytes: one digit per byte, unused digits 0xFF."""
     if not pin.isdigit() or not 1 <= len(pin) <= PIN_LENGTH or not pin.isascii():
         raise InvalidPinError("the PIN must be 1 to 6 digits")
-    return bytes(int(digit) for digit in pin) + b"\xff" * (PIN_LENGTH - len(pin))
+    return bytes(int(digit) for digit in pin) + bytes(
+        (PIN_UNUSED_DIGIT,) * (PIN_LENGTH - len(pin))
+    )
 
 
 def arm_areas(pin: str, modes: Mapping[int, ArmMode], model: PanelModel) -> Command:

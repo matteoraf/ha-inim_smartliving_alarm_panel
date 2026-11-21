@@ -1,7 +1,6 @@
 """What a system report reads from each panel layout.
 
-Generated from the panel's memory maps: do not edit by hand. Every table
-is reviewed before it is used; a test checks each one against its
+Data tables: do not edit by hand. A test checks each one against its
 approved fingerprint.
 """
 

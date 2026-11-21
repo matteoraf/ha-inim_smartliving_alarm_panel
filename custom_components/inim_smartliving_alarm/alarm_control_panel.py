@@ -9,9 +9,8 @@ from homeassistant.components.alarm_control_panel import (
     AlarmControlPanelState,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, ServiceCall, callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ServiceValidationError
-from homeassistant.helpers import service
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -23,6 +22,7 @@ from .const import (
     CONF_SCENARIO_ARM_NIGHT,
     CONF_SCENARIO_ARM_VACATION,
     CONF_SCENARIO_DISARM,
+    DATA_ALARM_PANEL,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
@@ -35,7 +35,6 @@ from .const import (
     KEY_LIVE_AREAS_STATUS,
     KEY_LIVE_TAMPER_MEMORY_AREAS_LIST,
     KEY_LIVE_TRIGGERED_AREAS_LIST,
-    SERVICE_ALARM_RESET,
 )
 from .errors import InimCommandError, async_send_command
 from .legacy import LegacyPanelClient
@@ -77,69 +76,8 @@ async def async_setup_entry(
     async_add_entities([alarm_panel])
     _LOGGER.info("Inim Alarm Control Panel %s added", alarm_panel.name)
 
-    # Register the alarm_reset service
-    async def async_alarm_reset_service(call: ServiceCall) -> None:
-        """Reset the alarm memory of every area that has an alarm or tamper memory."""
-        # Get the platform object that manages all alarm_control_panel entities.
-        platform = hass.data.get("alarm_control_panel")
-        if not platform:
-            _LOGGER.error("Alarm control panel component not loaded.")
-            return
-
-        failures: list[InimCommandError] = []
-
-        # Get the string IDs of all entities targeted by the service call.
-        target_entity_ids = await service.async_extract_entity_ids(call)
-
-        # Loop through the entity IDs to get the correct entity objects.
-        for entity_id in target_entity_ids:
-            entity = platform.get_entity(entity_id)
-
-            if not isinstance(entity, InimAlarmControlPanel):
-                continue
-
-            coordinator_data = entity.coordinator.data
-            if not coordinator_data:
-                _LOGGER.warning(
-                    "No coordinator data available for %s to find triggered areas",
-                    entity.name,
-                )
-                continue
-
-            areas_status = coordinator_data.get(KEY_LIVE_AREAS_STATUS, {})
-            triggered_areas = sorted(
-                set(areas_status.get(KEY_LIVE_TRIGGERED_AREAS_LIST) or [])
-                | set(areas_status.get(KEY_LIVE_TAMPER_MEMORY_AREAS_LIST) or [])
-            )
-
-            if not triggered_areas:
-                _LOGGER.info(
-                    "Alarm Reset called for %s, but no area has an alarm or "
-                    "tamper memory",
-                    entity.name,
-                )
-                continue
-
-            _LOGGER.info(
-                "Found areas with an alarm or tamper memory to reset on %s: %s",
-                entity.name,
-                triggered_areas,
-            )
-            for area_id in triggered_areas:
-                # reset every area; report the first that was not reset
-                try:
-                    await entity.async_alarm_reset(area_id=area_id)
-                except InimCommandError as err:
-                    failures.append(err)
-
-        if failures:
-            raise failures[0]
-
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_ALARM_RESET,
-        async_alarm_reset_service,
-    )
+    # The alarm_reset action (registered once, in __init__) reaches it here
+    hass.data[DOMAIN][entry.entry_id][DATA_ALARM_PANEL] = alarm_panel
 
 
 class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
@@ -192,6 +130,9 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         self._current_ha_state_enum: AlarmControlPanelState | None = (
             AlarmControlPanelState.DISARMED  # Default to DISARMED initially
         )
+        # The unmapped active scenario last warned about, so that the warning
+        # comes once per change rather than at every poll
+        self._unmapped_scenario_logged: int | None = None
         self._update_internal_state()  # Initial state update
 
         _LOGGER.debug(
@@ -294,6 +235,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
                 return  # Exit early as TRIGGERED is definitive
 
         # If not triggered, determine state based on active scenario
+        unmapped = False
         if current_active_scenario_idx == self._scenario_mappings.get(
             CONF_SCENARIO_DISARM
         ):
@@ -326,25 +268,16 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
                     CONF_SCENARIO_DISARM
                 )  # And it's not that disarm scenario
             ):
-                _LOGGER.warning(
-                    "%s: Active scenario %s does not match any mapped HA arm state "
-                    "but is not the disarm scenario. Considering it as a generic armed state",
-                    self.name,
-                    current_active_scenario_idx,
-                )
-
-                if (
-                    new_state_enum == AlarmControlPanelState.DISARMED
-                ):  # If default was DISARMED
-                    _LOGGER.debug(
-                        "%s: Unmapped active scenario %s but defaulting to ARMED_AWAY as no specific armed state found",
+                if current_active_scenario_idx != self._unmapped_scenario_logged:
+                    _LOGGER.warning(
+                        "%s: Active scenario %s is not mapped to a Home Assistant "
+                        "state; shown as armed (custom bypass)",
                         self.name,
                         current_active_scenario_idx,
                     )
-
-                    new_state_enum = (
-                        AlarmControlPanelState.ARMED_CUSTOM_BYPASS
-                    )  # Fallback
+                    self._unmapped_scenario_logged = current_active_scenario_idx
+                unmapped = True
+                new_state_enum = AlarmControlPanelState.ARMED_CUSTOM_BYPASS
 
             elif (
                 current_active_scenario_idx == -1
@@ -356,6 +289,8 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
                 )
             # If new_state_enum is still None at this point (e.g. no disarm scenario defined and no match)
             # then it will remain None or be UNKNOWN.
+        if not unmapped:
+            self._unmapped_scenario_logged = None  # warn again on the next one
 
         if self._current_ha_state_enum != new_state_enum:
             _LOGGER.info(
@@ -431,6 +366,43 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         await self._async_activate_scenario_by_mapping(
             CONF_SCENARIO_ARM_VACATION, "arm vacation"
         )
+
+    async def async_reset_memories(self) -> None:
+        """Reset every area with an alarm or tamper memory.
+
+        Every area is tried; the first that was not reset raises.
+        """
+        coordinator_data = self.coordinator.data
+        if not coordinator_data:
+            _LOGGER.warning(
+                "No coordinator data available for %s to find triggered areas",
+                self.name,
+            )
+            return
+        areas_status = coordinator_data.get(KEY_LIVE_AREAS_STATUS, {})
+        triggered_areas = sorted(
+            set(areas_status.get(KEY_LIVE_TRIGGERED_AREAS_LIST) or [])
+            | set(areas_status.get(KEY_LIVE_TAMPER_MEMORY_AREAS_LIST) or [])
+        )
+        if not triggered_areas:
+            _LOGGER.info(
+                "Alarm Reset called for %s, but no area has an alarm or tamper memory",
+                self.name,
+            )
+            return
+        _LOGGER.info(
+            "Found areas with an alarm or tamper memory to reset on %s: %s",
+            self.name,
+            triggered_areas,
+        )
+        failures: list[InimCommandError] = []
+        for area_id in triggered_areas:
+            try:
+                await self.async_alarm_reset(area_id=area_id)
+            except InimCommandError as err:
+                failures.append(err)
+        if failures:
+            raise failures[0]
 
     async def async_alarm_reset(self, area_id: int) -> None:
         """Reset the alarm memory of one area; raise an error if not done."""

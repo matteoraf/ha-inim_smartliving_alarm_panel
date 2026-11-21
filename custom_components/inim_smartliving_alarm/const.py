@@ -1,5 +1,7 @@
 """Constants for the Inim Alarm integration."""
 
+from .protocol import smartlan
+
 DOMAIN = "inim_smartliving_alarm"
 
 # Platforms to be set up for this integration
@@ -45,11 +47,12 @@ CONF_SCENARIO_ARM_NIGHT = "scenario_arm_night"
 CONF_SCENARIO_ARM_VACATION = "scenario_arm_vacation"
 CONF_SCENARIO_DISARM = "scenario_disarm"
 
-# Board types (CONF_BOARD)
-BOARD_SMARTLAN_SI = "smartlan_si"
-BOARD_SMARTLAN_G = "smartlan_g"  # experimental: tested against a fake panel only
+# Board types (CONF_BOARD); SmartLAN/G is experimental: tested against a fake
+# panel only
+BOARD_SMARTLAN_SI = smartlan.BOARD_SMARTLAN_SI
+BOARD_SMARTLAN_G = smartlan.BOARD_SMARTLAN_G
 
-# Setup refuses panels with older firmware; 5.x is accepted with a warning
+# Setup refuses firmware older than 5.1 and models without their own layout
 
 # Defaults
 DEFAULT_POLLING_INTERVAL = 30  # seconds
@@ -64,18 +67,16 @@ DEFAULT_LIMIT_AREAS = MAX_LIMIT_AREAS
 DEFAULT_LIMIT_ZONES = MAX_LIMIT_ZONES
 DEFAULT_LIMIT_SCENARIOS = 30
 
-# Default limiys for imported events
+# Default limits for imported events
 DEFAULT_EVENT_LOG_SIZE = 50  # Default number of events to store
 SYSTEM_MAX_EVENT_LOG_SIZE = 100  # System limit of events to store, increasing this may cause exceeding the maximum size of 16384 bytes for the sensor attribute
 
 # Data keys for hass.data[DOMAIN][entry.entry_id]
 DATA_API_CLIENT = "api_client"
 DATA_COORDINATOR = "coordinator"
+DATA_ALARM_PANEL = "alarm_panel"  # the entry's alarm panel entity
+# entry.data key: the panel configuration read at setup or Re-read
 DATA_INITIAL_PANEL_CONFIG = "initial_panel_config"
-# Static configuration fetched by config_flow (e.g., zone names, scenario names)
-# will be stored in entry.data and entry.options by the config_flow itself.
-# For example, config_flow might store the result of get_initial_panel_configuration()
-# in entry.data["initial_panel_config"]
 
 # --- Keys for data structures ---
 # These keys help access specific parts of the data fetched by the API
@@ -167,7 +168,6 @@ KEY_LIVE_ALARM_AREAS_LIST = "alarm_areas"  # areas (int) in alarm now
 KEY_LIVE_TAMPER_AREAS_LIST = "tamper_areas"  # areas (int) in tamper now
 KEY_LIVE_TRIGGERED_AREAS_LIST = "triggered_areas"  # areas (int) with alarm memory
 KEY_LIVE_TAMPER_MEMORY_AREAS_LIST = "tamper_memory_areas"  # areas with tamper memory
-KEY_LIVE_AUTO_ARM_AREAS_LIST = "auto_arm_areas"  # areas with auto-arm enabled
 
 # Area arming modes as reported in KEY_LIVE_AREA_MODES_MAP
 AREA_MODE_TOTAL = "total"
@@ -191,23 +191,6 @@ KEY_PROCESSED_EVENTS = "processed_events"  # List of new events from last poll
 KEY_LATEST_EVENT_INDEX_VAL = (
     "latest_event_index_val"  # position of the newest event in the panel's ring
 )
-
-# General usage keys for constructed/parsed data (often used internally in utils or entities)
-# These might overlap with above if the structure is already ideal.
-# These are more for semantic clarity within the utility function if needed.
-KEY_SCENARIO_ID = "id"  # Typically scenario_index_0_based
-KEY_SCENARIO_NAME = "name"
-KEY_SCENARIO_AREAS_CONTROLLED = (
-    "areas_controlled"  # List of area_ids this scenario affects
-)
-
-KEY_ZONE_ID = "id"  # Typically zone_index_0_based or zone_id_1_based
-KEY_ZONE_NAME = "name"
-KEY_ZONE_STATUS = "status"  # Live status string like "alarmed", "clear"
-KEY_ZONE_ASSIGNED_AREAS = "assigned_areas"  # Re-using from init if structure matches
-
-KEY_AREA_ID = "id"  # Typically area_id_1_based
-KEY_AREA_NAME = "name"
 
 # Zone states as reported in KEY_LIVE_ZONE_STATUSES_MAP
 ZONE_STATE_CLEAR = "clear"  # at rest

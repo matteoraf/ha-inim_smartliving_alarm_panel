@@ -120,20 +120,7 @@ def test_transport_imports_only_protocol(module: str) -> None:
     assert _third_party(outside) <= {"cryptography"}
 
 
-@pytest.mark.parametrize(
-    "module",
-    [
-        "api",
-        pytest.param(
-            "discovery",
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason="discovery.py takes the board names from const.py; they "
-                "belong in protocol/",
-            ),
-        ),
-    ],
-)
+@pytest.mark.parametrize("module", ["api", "discovery"])
 def test_api_imports_only_protocol_and_transport(module: str) -> None:
     """The panel API returns typed objects and knows nothing of Home Assistant."""
     inside, outside = _imports(module)

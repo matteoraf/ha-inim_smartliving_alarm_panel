@@ -78,6 +78,7 @@ from .protocol.config import (
     decode_zone_records,
     fixed_output_number,
     output_address,
+    scenario_record_modes,
     terminal_output_number,
 )
 from .protocol.errors import ProtocolError
@@ -610,8 +611,7 @@ def zone_option_flags(config: Mapping[str, Any]) -> dict[int, dict[str, bool]]:
 def scenario_area_modes(config: Mapping[str, Any]) -> dict[int, dict[int, int]]:
     """What each scenario does to each area: number -> area -> mode.
 
-    Decoded from the stored scenario records (one nibble per area, area 1
-    in the low nibble of the first byte; see ArmMode).
+    Decoded from the stored scenario records (see ArmMode).
     """
     areas = len(area_names(config))
     modes: dict[int, dict[int, int]] = {}
@@ -619,12 +619,9 @@ def scenario_area_modes(config: Mapping[str, Any]) -> dict[int, dict[int, int]]:
         raw = activation.get(KEY_INIT_SCENARIO_ACTIVATION_RAW)
         if KEY_INIT_SCENARIO_ACTIVATION_INDEX not in activation or not raw:
             continue
-        record = bytes.fromhex(raw)
-        modes[activation[KEY_INIT_SCENARIO_ACTIVATION_INDEX] + 1] = {
-            area: record[(area - 1) // 2] >> (4 * ((area - 1) % 2)) & 0x0F
-            for area in range(1, areas + 1)
-            if (area - 1) // 2 < len(record)
-        }
+        modes[activation[KEY_INIT_SCENARIO_ACTIVATION_INDEX] + 1] = (
+            scenario_record_modes(bytes.fromhex(raw), areas)
+        )
     return modes
 
 

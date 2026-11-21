@@ -32,24 +32,12 @@ from .readiness import async_arm
 from .selection import (
     area_names,
     scenario_armed_areas,
+    scenario_label,
     scenario_names,
     zone_names,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-
-def scenario_label(initial_panel_config: dict[str, Any], index: int) -> str:
-    """A scenario's (0-based) label from the panel configuration."""
-    names = scenario_names(initial_panel_config or {})
-    if 0 <= index < len(names) and names[index]:
-        return names[index]
-    return f"Scenario {index + 1}"
-
-
-def zone_labels(initial_panel_config: dict[str, Any]) -> list[str]:
-    """The zone labels from the panel configuration, by zone number - 1."""
-    return zone_names(initial_panel_config or {})
 
 
 async def async_activate_scenario(
@@ -80,7 +68,7 @@ async def async_activate_scenario(
             lambda check: api_client.panel.activate_scenario(
                 scenario_index, on_not_ready=check
             ),
-            scenario_label(initial_panel_config, scenario_index),
+            scenario_label(initial_panel_config or {}, scenario_index + 1),
             force=force,
         )
     except InimCommandError as err:
@@ -172,7 +160,7 @@ async def async_handle_scenario_activation_failure(
 
     # Determine default scenario name for messages/titles if details aren't fully available
     base_scenario_name_for_msg = scenario_label(
-        initial_panel_config, scenario_idx_to_activate
+        initial_panel_config or {}, scenario_idx_to_activate + 1
     )
 
     notification_title = (
@@ -205,7 +193,7 @@ async def async_handle_scenario_activation_failure(
         # The zones the panel reported as not ready, as in the error message
         config = initial_panel_config or {}
         scenario_areas = scenario_armed_areas(config, scenario_idx_to_activate + 1)
-        names = zone_labels(config)
+        names = zone_names(config)
         lines = []
         for zone in error.zones:
             zone_areas = _scenario_zone_areas(config, zone, scenario_areas)

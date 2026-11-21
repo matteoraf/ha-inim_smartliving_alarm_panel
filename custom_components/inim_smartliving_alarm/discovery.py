@@ -18,8 +18,14 @@ from collections.abc import Callable
 from dataclasses import dataclass
 import logging
 
-from .const import BOARD_SMARTLAN_G, BOARD_SMARTLAN_SI
-from .protocol.smartlan import decode_si_reply
+from .protocol.smartlan import (
+    BOARD_SMARTLAN_G,
+    BOARD_SMARTLAN_SI,
+    G_REPLY_ERROR,
+    decode_g_reply,
+    decode_si_reply,
+    split_g_reply,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -64,20 +70,18 @@ def parse_si_reply(data: bytes, host: str) -> DiscoveredBoard | None:
 
 def parse_g_reply(data: bytes, host: str) -> DiscoveredBoard | None:
     """A SmartLAN/G reply, or None if it is not one."""
-    text = data.decode("ascii", errors="replace").strip("\x00\r\n ")
-    if text == "err":
+    if split_g_reply(data) == [G_REPLY_ERROR]:
         return DiscoveredBoard(BOARD_SMARTLAN_G, host, port=None)
-    parts = text.split("|")
-    if len(parts) < 5:
+    reply = decode_g_reply(data)
+    if reply is None:
         return None
-    firmware, model, name, _board_firmware, port = (part.strip() for part in parts[:5])
     return DiscoveredBoard(
         BOARD_SMARTLAN_G,
         host,
-        port=int(port) if port.isdigit() else None,
-        firmware=firmware or None,
-        model=model or None,
-        panel_name=name or None,
+        port=reply.port,
+        firmware=reply.firmware,
+        model=reply.model,
+        panel_name=reply.panel_name,
     )
 
 

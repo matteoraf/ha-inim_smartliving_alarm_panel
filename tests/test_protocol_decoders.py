@@ -21,6 +21,7 @@ from custom_components.inim_smartliving_alarm.protocol.config import (
     decode_zone_records,
     find_code_index,
     label_address,
+    scenario_record_modes,
 )
 from custom_components.inim_smartliving_alarm.protocol.errors import ProtocolError
 from custom_components.inim_smartliving_alarm.protocol.events import (
@@ -31,6 +32,7 @@ from custom_components.inim_smartliving_alarm.protocol.events import (
     decode_timestamp,
     event_address,
     newest_indexes,
+    reader_index,
 )
 from custom_components.inim_smartliving_alarm.protocol.frames import (
     parse_read_reply,
@@ -431,3 +433,20 @@ def test_cloud_status_flags(raw: int, configured: bool, bits, other: int) -> Non
     assert (flags.bit_0, flags.bit_1) == bits
     assert flags.other_bits == other
     assert flags.raw == raw
+
+
+def test_scenario_record_modes() -> None:
+    """One nibble per area, area 1 low; every value kept; short records cut."""
+    record = bytes((0x21, 0xF3, 0x40))  # areas 1-6: 1, 2, 3, 15, 0, 4
+    assert scenario_record_modes(record, 6) == {1: 1, 2: 2, 3: 3, 4: 15, 5: 0, 6: 4}
+    assert scenario_record_modes(record, 8) == {1: 1, 2: 2, 3: 3, 4: 15, 5: 0, 6: 4}
+    assert scenario_record_modes(b"", 4) == {}
+
+
+def test_reader_index() -> None:
+    """Keypads first, then readers; special locations are no reader."""
+    assert reader_index(3, keypads=10) is None  # a keypad
+    assert reader_index(10, keypads=10) == 0
+    assert reader_index(29, keypads=10) == 19
+    assert reader_index(0xF0, keypads=10) is None
+    assert reader_index(REMOTE_LOCATION, keypads=10) is None

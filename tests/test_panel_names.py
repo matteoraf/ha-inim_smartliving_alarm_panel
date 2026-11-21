@@ -205,6 +205,11 @@ REQUIRED_BLOCKS = (
     "physical_map",
     "user_code_outputs",
     "extra_output_options",
+    "key_names",
+    "reader_names",
+    "expander_names",
+    "timer_names",
+    "siren_names",
 )
 
 

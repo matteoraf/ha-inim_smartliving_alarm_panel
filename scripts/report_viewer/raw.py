@@ -119,7 +119,7 @@ def _bits(row: list[int | None]) -> str:
 def _digit(b: int | None) -> str:
     if b is None:
         return MASK
-    if b == 0xFF:
+    if b == loader.module("protocol.commands").PIN_UNUSED_DIGIT:
         return "_"
     return str(b) if b < 10 else "?"
 
@@ -230,7 +230,8 @@ def _decoders(model: Any) -> dict[str, tuple[int, Callable[[bytes], list[Any]]]]
         ]
 
     def options(data: bytes) -> list[str]:
-        refuses = config.refuses_arming_when_not_ready(data[:6])
+        length = loader.module("protocol.model").GENERAL_OPTIONS_READ_LENGTH
+        refuses = config.refuses_arming_when_not_ready(data[:length])
         return [f"refuses arming with zones not ready={'yes' if refuses else 'no'}"]
 
     def peripherals(data: bytes) -> list[Any]:

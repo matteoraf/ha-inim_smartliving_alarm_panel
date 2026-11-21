@@ -167,10 +167,9 @@ async def _validate_connection_and_fetch_initial_config(
     """Check the panel with these connection details and read its configuration.
 
     Raises ConnectionError if the panel cannot be reached and ValueError
-    (with an error key) if it is refused: firmware below 5, a PIN that
-    matches no user code, or a configuration that cannot be read. Firmware
-    5.x and models without a profile (other than the 1050 and 10100) are
-    accepted with a log warning.
+    (with an error key) if it is refused: firmware older than 5.1, a model
+    without its own layout, a PIN that matches no user code, a panel in
+    programming mode, or a configuration that cannot be read.
     """
     board = data.get(CONF_BOARD, BOARD_SMARTLAN_SI)
     try:
@@ -693,7 +692,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
         """The mode each imported area's switch arms in.
 
         One select per area, named by its number and label; "Use the
-        default" follows the general "Area switches arm in" option. Only
+        default" follows the general "Area switches default arm mode" option. Only
         areas set otherwise are stored, and only imported ones.
         """
         config = self.initial_panel_config

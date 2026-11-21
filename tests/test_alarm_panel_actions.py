@@ -1,9 +1,11 @@
 """The alarm panel's modes, alarm_reset with several panels, removing an entry."""
 
 from collections.abc import AsyncGenerator
+import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import issue_registry as ir
 import pytest
 
@@ -14,7 +16,7 @@ from custom_components.inim_smartliving_alarm.const import (
 
 from .conftest import add_entry
 from .fake_panel import FakePanel, const as c
-from .test_init_baseline import ALARM_PANEL, call, refresh, state_of
+from .test_init_baseline import ALARM_PANEL, call, entity_id_for, refresh, state_of
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
@@ -105,3 +107,50 @@ async def test_removing_an_entry_removes_its_repair_issue(
     assert await hass.config_entries.async_remove(entry.entry_id)
     await hass.async_block_till_done()
     assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is None
+
+
+async def test_alarm_reset_on_a_panel_not_loaded(
+    hass: HomeAssistant, panel: FakePanel
+) -> None:
+    """The action says the panel is not loaded instead of doing nothing."""
+    entry = await add_entry(hass, panel)
+    alarm_panel = entity_id_for(hass, entry, ALARM_PANEL)
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    await hass.async_block_till_done()
+
+    with pytest.raises(ServiceValidationError) as err:
+        await hass.services.async_call(
+            DOMAIN, SERVICE_ALARM_RESET, {"entity_id": alarm_panel}, blocking=True
+        )
+    assert err.value.translation_key == "entry_not_loaded_command"
+    assert not [r for r in panel.requests if r.write]
+
+
+async def test_unmapped_scenario_warned_once_per_change(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    panel: FakePanel,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A scenario mapped to no mode is warned about once, not at every poll."""
+
+    def warnings() -> int:
+        return sum(
+            "is not mapped to a Home Assistant state" in record.getMessage()
+            for record in caplog.records
+            if record.levelno == logging.WARNING
+        )
+
+    caplog.clear()
+    panel.state.active_scenario = 5  # mapped to no mode
+    for _ in range(3):
+        await refresh(hass, entry)
+    assert state_of(hass, entry, ALARM_PANEL) == "armed_custom_bypass"
+    assert warnings() == 1
+
+    panel.state.active_scenario = 1  # the Disarm scenario
+    await refresh(hass, entry)
+    assert state_of(hass, entry, ALARM_PANEL) == "disarmed"
+    panel.state.active_scenario = 5
+    await refresh(hass, entry)
+    assert warnings() == 2

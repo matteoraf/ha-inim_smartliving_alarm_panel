@@ -16,6 +16,14 @@ from custom_components.inim_smartliving_alarm.discovery import (
     parse_g_reply,
     parse_si_reply,
 )
+from custom_components.inim_smartliving_alarm.protocol.masking import Privacy
+from custom_components.inim_smartliving_alarm.protocol.smartlan import (
+    G_REPLY_FIELDS,
+    GReply,
+    decode_g_reply,
+    decode_si_reply,
+    split_g_reply,
+)
 
 from .fake_panel import FakePanel
 from .fake_panel.discovery import DiscoveryResponder, free_udp_port, si_reply
@@ -82,6 +90,39 @@ def test_g_reply() -> None:
         "smartlan_g", "192.168.1.50", None
     )
     assert parse_g_reply(b"hello", "192.168.1.50") is None
+
+
+def test_g_reply_fields() -> None:
+    """The reply's fields in order; only the panel name is personal."""
+    assert split_g_reply(b"6.07|01050|Casa\n|6.12|6004\x00") == [
+        "6.07",
+        "01050",
+        "Casa\n",
+        "6.12",
+        "6004",
+    ]
+    assert [name for name, _ in G_REPLY_FIELDS] == [
+        "firmware",
+        "model",
+        "panel_name",
+        "board_firmware",
+        "port",
+    ]
+    assert [
+        name for name, privacy in G_REPLY_FIELDS if privacy is not Privacy.PUBLIC
+    ] == ["panel_name"]
+    assert decode_g_reply(b"6.07|01050||6.12|") == GReply(
+        "6.07", "01050", None, "6.12", None
+    )
+    assert decode_g_reply(b"6.07|01050") is None
+    assert decode_g_reply(b"err") is None
+
+
+def test_si_mac_shown() -> None:
+    """The last two bytes of the MAC address are not personal."""
+    reply = decode_si_reply(si_reply("192.168.1.50", 5004))
+    assert reply is not None
+    assert reply.mac_shown == reply.mac[-2:]
 
 
 # ------------------------------------------------------------------- search

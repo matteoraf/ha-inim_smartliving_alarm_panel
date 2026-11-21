@@ -5,13 +5,19 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from homeassistant.components.alarm_control_panel import (
+    DOMAIN as ALARM_CONTROL_PANEL_DOMAIN,
+)
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import ATTR_CONFIG_ENTRY_ID
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import entity_registry as er, issue_registry as ir
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.service import async_set_service_schema
+from homeassistant.helpers.service import (
+    async_extract_entity_ids,
+    async_set_service_schema,
+)
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util.yaml import load_yaml_dict
 import voluptuous as vol
@@ -39,6 +45,7 @@ from .const import (
     CONF_READER_NAMES,
     CONF_SCENARIOS,
     CONF_USERNAME,
+    DATA_ALARM_PANEL,
     DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
@@ -46,23 +53,30 @@ from .const import (
     DOMAIN,
     KEY_INIT_AREA_RECORDS,
     KEY_INIT_CODES,
+    KEY_INIT_EXPANDERS,
     KEY_INIT_EXTRA_OUTPUT_OPTIONS,
     KEY_INIT_FIXED_OUTPUT_LABELS,
     KEY_INIT_FIXED_OUTPUT_RECORDS,
     KEY_INIT_GENERAL_OPTIONS,
+    KEY_INIT_KEYS,
     KEY_INIT_PERIPHERALS,
     KEY_INIT_PHYSICAL_MAP,
+    KEY_INIT_READERS,
+    KEY_INIT_SIRENS,
+    KEY_INIT_TIMERS,
     KEY_INIT_USER_CODE_OUTPUTS,
     KEY_INIT_ZONES_CONFIG,
     KEY_INIT_ZONES_CONFIG_DETAILED,
     PLATFORMS,
     SERVICE_ACTIVATE_SCENARIO,
+    SERVICE_ALARM_RESET,
     SERVICE_ARM_AREA,
     SERVICE_REREAD_PANEL_CONFIGURATION,
 )
 
 # Import the custom coordinator
 from .coordinator import InimDataUpdateCoordinator
+from .errors import InimCommandError
 
 # Import API
 from .legacy import (
@@ -111,6 +125,11 @@ _REQUIRED_CONFIGURATION_KEYS = (
     KEY_INIT_PHYSICAL_MAP,
     KEY_INIT_USER_CODE_OUTPUTS,
     KEY_INIT_EXTRA_OUTPUT_OPTIONS,
+    KEY_INIT_KEYS,
+    KEY_INIT_READERS,
+    KEY_INIT_EXPANDERS,
+    KEY_INIT_TIMERS,
+    KEY_INIT_SIRENS,
 )
 
 # Where the action descriptions from services.yaml are kept (hass.data)
@@ -245,6 +264,33 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             force=call.data[ATTR_FORCE_ARM],
         )
 
+    async def async_alarm_reset_service(call: ServiceCall) -> None:
+        """Reset the alarm and tamper memories of the targeted panels' areas."""
+        registry = er.async_get(hass)
+        failures: list[InimCommandError] = []
+        for entity_id in sorted(await async_extract_entity_ids(call)):
+            registered = registry.async_get(entity_id)
+            if (
+                registered is None
+                or registered.platform != DOMAIN
+                or registered.domain != ALARM_CONTROL_PANEL_DOMAIN
+                or registered.config_entry_id is None
+            ):
+                continue
+            entry = _loaded_entry(
+                hass, registered.config_entry_id, "entry_not_loaded_command"
+            )
+            alarm_panel = hass.data[DOMAIN][entry.entry_id].get(DATA_ALARM_PANEL)
+            if alarm_panel is None:
+                continue
+            try:
+                await alarm_panel.async_reset_memories()
+            except InimCommandError as err:
+                failures.append(err)
+        if failures:
+            raise failures[0]
+
+    hass.services.async_register(DOMAIN, SERVICE_ALARM_RESET, async_alarm_reset_service)
     hass.services.async_register(
         DOMAIN,
         SERVICE_REREAD_PANEL_CONFIGURATION,
@@ -312,19 +358,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await api.close()
         raise
 
-    # Check if the first refresh failed critically (e.g., connection error, auth error handled by coordinator)
-    if not coordinator.last_update_success:
-        _LOGGER.error(
-            "(%s) Initial data fetch failed. Integration setup will be retried.",
-            entry.title,
-        )
-        # ConfigEntryNotReady tells HA to retry setup later.
-        # The specific error (ConnectionError, AuthError) would have been logged by the coordinator.
-        await api.close()
-        raise ConfigEntryNotReady(
-            f"Failed to fetch initial data from Inim panel at {host}:{port}"
-        )
-
     await _reread_configuration_if_outdated(hass, entry, api)
     _report_unsupported_panel(hass, entry, api)
     _remove_entities_not_imported(hass, entry)
@@ -341,7 +374,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Set up platforms (alarm_control_panel, binary_sensor, switch, button, sensor)
     _LOGGER.debug("(%s) Forwarding setup to platforms: %s", entry.title, PLATFORMS)
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    try:
+        await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    except Exception:
+        # Keep nothing of a failed setup: the client's connection included
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+        if not hass.data[DOMAIN]:
+            hass.data.pop(DOMAIN)
+        await api.close()
+        raise
     _warn_about_leftover_zone_entities(hass, entry)
     await async_update_action_descriptions(hass)
 
@@ -366,10 +407,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry_data = hass.data[DOMAIN].pop(entry.entry_id)
             await entry_data[DATA_API_CLIENT].close()
             _LOGGER.debug("Cleaned up data for %s", entry.title)
-        if not hass.data[DOMAIN]:  # If no more entries for this domain
-            hass.data.pop(DOMAIN)
+        if not hass.data.get(DOMAIN):  # If no more entries for this domain
+            hass.data.pop(DOMAIN, None)
             _LOGGER.debug("Cleaned up domain data for %s", DOMAIN)
         await async_update_action_descriptions(hass)
+        if DOMAIN not in hass.data:  # the last panel: nothing to describe
+            hass.data.pop(_ACTION_DESCRIPTIONS, None)
     else:
         _LOGGER.error("Failed to unload platforms for %s", entry.title)
     return unload_ok
