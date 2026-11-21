@@ -545,6 +545,12 @@ class Forbidden:
     # (kind, pattern): what is found is logged by its kind only
     anywhere: tuple[tuple[str, re.Pattern[str]], ...] = ()
     labels: tuple[str, ...] = ()  # not in identifier-like values
+    # (kind, pattern) of digits-only credentials: found only as a number of
+    # their own, and not in times, the report's ID or hex data, as the PIN
+    standalone: tuple[tuple[str, re.Pattern[str]], ...] = ()
+    # (kind, text) of credentials too short to search inside text: found
+    # only as a whole value
+    whole: tuple[tuple[str, str], ...] = ()
 
     def match_kind(self, value: Any, key: str | None = None) -> str | None:
         """The kind of forbidden text a value holds anywhere inside; None if none.
@@ -569,17 +575,24 @@ class Forbidden:
     def _match_text(self, value: Any, key: str | None) -> str | None:
         if not isinstance(value, str):
             return None
+        stripped = value.strip()
+        for kind, text in self.whole:
+            if stripped == text:
+                return kind
         for kind, pattern in self.anywhere:
             if pattern.search(value):
                 return kind
-        if (
-            self.plain_pin is not None
-            and key not in _NOT_PIN_CHECKED
-            and not _TIMESTAMP.match(value)
-            and not _HEX_DATA.fullmatch(value)
-            and self.plain_pin.search(value)
-        ):
-            return "pin_digits"
+        exempt = (
+            key in _NOT_PIN_CHECKED
+            or _TIMESTAMP.match(value)
+            or _HEX_DATA.fullmatch(value)
+        )
+        if not exempt:
+            if self.plain_pin is not None and self.plain_pin.search(value):
+                return "pin_digits"
+            for kind, pattern in self.standalone:
+                if pattern.search(value):
+                    return kind
         if self.labels and not _IDENTIFIER.fullmatch(value):
             if any(label in value for label in self.labels):
                 return "label"
@@ -601,6 +614,27 @@ _HEX_DATA = re.compile(
 )
 
 
+class CredentialRule(Enum):
+    """How the report is searched for a credential."""
+
+    VALUE = "value"  # 1-3 characters: a value equal to it
+    DIGITS = "digits"  # digits only: a number of its own, as the PIN
+    ANYWHERE = "anywhere"  # inside any text, even inside a word
+
+
+def credential_rule(text: str) -> CredentialRule:
+    """How a credential is searched for.
+
+    A short one would turn up in ordinary text (a hex row, a word, a
+    version), and so would a number inside other numbers.
+    """
+    if len(text) <= LABEL_SHOWN:
+        return CredentialRule.VALUE
+    if text.isascii() and text.isdigit():
+        return CredentialRule.DIGITS
+    return CredentialRule.ANYWHERE
+
+
 def _forbidden(data: ReportInput) -> Forbidden:
     """What the finished report must not contain at its level."""
     level, entry = data.level, data.entry
@@ -616,12 +650,26 @@ def _forbidden(data: ReportInput) -> Forbidden:
         # The PIN kept as text (ASCII digits) in a block
         ascii_pin = entry.pin.encode().hex(" ")
         anywhere.append(("pin_ascii", re.compile(re.escape(ascii_pin), re.IGNORECASE)))
+    standalone: list[tuple[str, re.Pattern[str]]] = []
+    whole: list[tuple[str, str]] = []
+
+    def credential(text: str) -> None:
+        rule = credential_rule(text)
+        escaped = re.escape(text)
+        if rule is CredentialRule.VALUE:
+            whole.append(("credentials", text))
+        elif rule is CredentialRule.DIGITS:
+            pattern = re.compile(rf"(?<![0-9]){escaped}(?![0-9])")
+            standalone.append(("credentials", pattern))
+        else:
+            anywhere.append(("credentials", re.compile(escaped)))
+
     if entry.password:
-        anywhere.append(("credentials", re.compile(re.escape(entry.password))))
+        credential(entry.password)
     labels: tuple[str, ...] = ()
     if not shown(Privacy.PERSONAL, level):
         if entry.username:
-            anywhere.append(("credentials", re.compile(re.escape(entry.username))))
+            credential(entry.username)
         if entry.host:
             anywhere.append(("host", re.compile(re.escape(entry.host))))
         labels = tuple(
@@ -629,7 +677,9 @@ def _forbidden(data: ReportInput) -> Forbidden:
             for label in _all_labels(entry.stored_config)
             if len(label) > LABEL_SHOWN
         )
-    return Forbidden(plain_pin, tuple(anywhere), labels)
+    return Forbidden(
+        plain_pin, tuple(anywhere), labels, tuple(standalone), tuple(whole)
+    )
 
 
 def _all_labels(config: Mapping[str, Any]) -> set[str]:
