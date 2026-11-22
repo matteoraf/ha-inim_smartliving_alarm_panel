@@ -20,16 +20,17 @@ from .protocol.config import (
 if TYPE_CHECKING:
     from .selection import OutputItem
 
-# Enum members whose lower-case name is not how one would write them
-_VALUE_KEYS: dict[Any, str] = {ZoneType.H24: "24_hour"}
+# Enum members whose lower-case name is not how one would write them, by
+# enum: IntEnum members of different enums compare equal by value
+_VALUE_KEYS: dict[tuple[type, int], str] = {(ZoneType, ZoneType.H24): "24_hour"}
 
 _UNIT_TEXT = {TimeUnit.SECONDS: "s", TimeUnit.MINUTES: "min"}
 
 
 def value_key(value: Any) -> Any:
     """An enum member as a stable English key; other values as they are."""
-    if value in _VALUE_KEYS:
-        return _VALUE_KEYS[value]
+    if (key := _VALUE_KEYS.get((type(value), value))) is not None:
+        return key
     name = getattr(value, "name", None)
     return name.lower() if isinstance(name, str) else value
 
