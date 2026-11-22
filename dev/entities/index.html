@@ -858,8 +858,9 @@
 <ul>
 <li><em>Triggered</em> while any area is in alarm.</li>
 <li>Otherwise the mode whose scenario is active on the panel, for example <em>Armed night</em>.</li>
-<li>A scenario active on the panel that is not mapped to a mode shows as <em>Armed custom bypass</em>.</li>
+<li>A scenario active on the panel that is not mapped to a mode shows as <em>Armed custom bypass</em>. <em>Armed custom bypass</em> is also shown when the state of the areas matches no scenario.</li>
 <li>Without a mapped Disarm scenario, the state is unknown when no mapping matches.</li>
+<li>The state follows the scenario mapping: map as Disarm the scenario that disarms all your areas, otherwise a disarmed panel is not shown as <em>Disarmed</em>.</li>
 <li>Only the arm modes with a mapped scenario are offered. Disarming or arming without a mapped scenario fails with a message (<em>"No scenario is mapped to … choose one in the integration options"</em>).</li>
 </ul>
 </details>
@@ -1310,7 +1311,7 @@
 <tr>
 <td><code>sensor.…_active_scenario</code></td>
 <td>Active Scenario Name</td>
-<td>the active scenario's name and index, for example <code>Night (Index 1)</code></td>
+<td>the active scenario's name and index, for example <code>Night (Index 1)</code>, or <code>No scenario matches</code></td>
 </tr>
 <tr>
 <td><code>sensor.…_firmware_version</code></td>
@@ -1416,7 +1417,7 @@
 </details>
 <details class="note">
 <summary>The active scenario in detail</summary>
-<p>The state is the active scenario's name followed by its index (0-based). It is <code>Unknown Scenario (Index n)</code> for an index without a scenario name, and <code>Unknown (No data)</code> or <code>Unknown (No active index)</code> when the panel reports none.</p>
+<p>The state is the active scenario's name followed by its index (0-based). It is <code>No scenario matches</code> when the state of the areas matches no scenario, <code>Unknown Scenario (Index n)</code> for an index without a scenario name, and <code>Unknown (No data)</code> before the panel has been read.</p>
 <table>
 <thead>
 <tr>
@@ -1427,7 +1428,7 @@
 <tbody>
 <tr>
 <td><code>active_scenario_index</code></td>
-<td>the index alone</td>
+<td>the index alone; empty when no scenario matches</td>
 </tr>
 <tr>
 <td><code>raw_active_scenario_hex</code></td>
