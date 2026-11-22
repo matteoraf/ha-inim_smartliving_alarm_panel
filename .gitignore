@@ -16,3 +16,6 @@ venv/
 
 # Recordings from a real panel (names, event log): never commit
 tests/real_panel/recordings/
+
+# Documentation site build output
+site/

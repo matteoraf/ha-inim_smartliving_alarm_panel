@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block announce %}
+  {%- if config.extra.notice -%}
+    {{ config.extra.notice }}
+  {%- endif -%}
+{% endblock %}
+
+{% block outdated %}
+  This is the documentation of another version.
+  <a href="{{ '../' ~ base_url }}"><strong>Go to the current version.</strong></a>
+{% endblock %}
