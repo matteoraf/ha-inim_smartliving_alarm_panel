@@ -1,10 +1,22 @@
 # System report
 
+When you report a problem, a system report tells what the integration knows about your panel: model and firmware, board, the panel's programming as read from it, status, the event log, the integration's options and entities, and connection statistics.
+
 ## Sharing a report
 
-When you report a problem, a system report tells what the integration knows about your panel: model and firmware, board, the panel's programming as read from it, status, the event log, the integration's options and entities, and connection statistics. Download it from **Settings** -> **Devices & services** -> *Inim SmartLiving* -> the three dots of your panel -> **Download diagnostics** (the panel's device page has the same entry). It takes about 40 seconds on SmartLAN/SI; commands are not held up meanwhile.
+1.  Open your panel's device page: **Settings** → **Devices & services** → **Inim SmartLiving Alarm** → your panel.
+2.  Click **Download diagnostics** in the *Device info* card.
 
-The *Diagnostics level* select (enable it on the device page, in the *Diagnostic* section) chooses how much the report shows:
+    ![Download diagnostics on the device page](images/download-diagnostics.webp){ width="344" }
+
+3.  Wait for the file: it takes about 40 seconds on SmartLAN/SI. Commands are not held up meanwhile.
+4.  Attach the file to your GitHub issue. If GitHub refuses the file, zip it first.
+
+The same entry is in the menu (⋮) of your panel on the integration's page.
+
+### How much the report shows
+
+The *Diagnostics level* select chooses how much the next report shows. It is disabled by default: enable it on the device page, in the *Diagnostic* section.
 
 | Level | What it contains |
 |---|---|
@@ -12,16 +24,20 @@ The *Diagnostics level* select (enable it on the device page, in the *Diagnostic
 | **Full** | Also the names, the serial number and the network addresses. PINs, phone numbers, key serials and passwords are still left out. |
 | **Full confidential** | Everything, including the PINs, phone numbers, key serials and the board's passwords. |
 
-At **Redacted** one download gives a plain file you can attach to a GitHub issue as it is.
+At **Redacted**, one download gives a plain file you can attach to a GitHub issue as it is.
 
-At **Full** and **Full confidential** you get two files from the same reading of the panel:
+??? note "Full and Full confidential: two files"
 
-1.  The first download is **encrypted** to the maintainer's key: only the matching private key decrypts it. It also holds the Redacted view in clear. **Attach this file to your GitHub issue**; it is the only file to share.
-2.  Download diagnostics once more within 10 minutes to get a **readable copy** of the same report (it holds `PRIVATE COPY`), to check what you are sharing. **Do not share it**: keep it private and delete it when you no longer need it. A notification reminds you of this after the first download. Both files get the same name, so your browser saves the second one with a number added (for example `(1)`): attach the first one, which holds `encrypted` and `redacted_view`, never the one that holds `PRIVATE COPY`.
+    At **Full** and **Full confidential** you get two files from the same reading of the panel:
 
-Then the level goes back to *Redacted*. Nothing is stored: the report is held in memory only until the second download, for 10 minutes at most.
+    1.  The first download is **encrypted** to the maintainer's key: only the matching private key decrypts it. It also holds the Redacted view in clear. **Attach this file to your GitHub issue**; it is the only file to share.
+    2.  Download diagnostics once more within 10 minutes to get a **readable copy** of the same report (it holds `PRIVATE COPY`), to check what you are sharing. **Do not share it**: keep it private and delete it when you no longer need it. A notification reminds you of this after the first download. Both files get the same name, so your browser saves the second one with a number added (for example `(1)`): attach the first one, which holds `encrypted` and `redacted_view`, never the one that holds `PRIVATE COPY`.
 
-The board's own details (its network settings and firmware) are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys. If GitHub refuses the file, zip it first.
+    Then the level goes back to *Redacted*. Nothing is stored: the report is held in memory only until the second download, for 10 minutes at most.
+
+??? note "What is and is not read"
+
+    The board's own details (its network settings and firmware) are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys.
 
 ## Reading a report
 

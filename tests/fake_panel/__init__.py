@@ -12,6 +12,7 @@ from .state import (
     panel_1050,
     panel_1050_fw51,
     panel_10100,
+    panel_demo,
 )
 
 __all__ = [
@@ -29,4 +30,5 @@ __all__ = [
     "panel_1050",
     "panel_1050_fw51",
     "panel_10100",
+    "panel_demo",
 ]
