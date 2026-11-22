@@ -7,7 +7,7 @@
           "menu_options": {
             "discover": "Cerca nella rete",
             "smartlan_si": "Scheda SmartLAN/SI",
-            "smartlan_g": "Scheda SmartLAN/G (sperimentale)"
+            "smartlan_g": "Scheda SmartLAN/G"
           }
         },
         "discover": {
@@ -23,7 +23,7 @@
           "menu_options": {
             "discover": "Cerca di nuovo",
             "smartlan_si": "Scheda SmartLAN/SI",
-            "smartlan_g": "Scheda SmartLAN/G (sperimentale)"
+            "smartlan_g": "Scheda SmartLAN/G"
           }
         },
         "smartlan_si": {
@@ -41,8 +41,8 @@
           }
         },
         "smartlan_g": {
-          "title": "Connessione SmartLAN/G (sperimentale)",
-          "description": "Inserisci i dati di connessione della scheda SmartLAN/G e un codice utente della centrale. Il supporto SmartLAN/G non è ancora stato provato su una scheda reale: segnala come funziona.",
+          "title": "Connessione SmartLAN/G",
+          "description": "Inserisci i dati di connessione della scheda SmartLAN/G e un codice utente della centrale.",
           "data": {
             "host": "Host",
             "port": "Porta",

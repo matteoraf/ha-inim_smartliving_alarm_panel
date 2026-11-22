@@ -47,8 +47,7 @@ CONF_SCENARIO_ARM_NIGHT = "scenario_arm_night"
 CONF_SCENARIO_ARM_VACATION = "scenario_arm_vacation"
 CONF_SCENARIO_DISARM = "scenario_disarm"
 
-# Board types (CONF_BOARD); SmartLAN/G is experimental: tested against a fake
-# panel only
+# Board types (CONF_BOARD)
 BOARD_SMARTLAN_SI = smartlan.BOARD_SMARTLAN_SI
 BOARD_SMARTLAN_G = smartlan.BOARD_SMARTLAN_G
 
