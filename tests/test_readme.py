@@ -1,9 +1,21 @@
-"""The README's sections left out of the Home Assistant Marketplace."""
+"""The README: the sections left out of the Marketplace, and the site links."""
 
+import json
 from pathlib import Path
 import re
+import sys
 
-README = Path(__file__).parent.parent / "README.md"
+ROOT = Path(__file__).resolve().parents[1]
+README = ROOT / "README.md"
+MKDOCS = ROOT / "mkdocs.yml"
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from docs_version import (  # noqa: E402
+    MANIFEST,
+    SITE_URL,
+    manifest_version,
+    site_version,
+)
 
 MARKER = re.compile(r"<!--\s*ha-marketplace:exclude-(start|end)\s*-->")
 FENCE = re.compile(r"^\s*(```|~~~)")
@@ -64,12 +76,63 @@ def test_installation_steps_are_left_out() -> None:
 
 
 def test_the_rest_stays() -> None:
-    """The headings around the section are still shown."""
+    """The headings around the section and the documentation link are shown."""
     shown, _ = split_readme()
     for heading in (
         "Installation\n------------",
-        "### Preview versions",
-        "### Upgrading from 0.3.x",
-        "Configuration\n-------------",
+        "Documentation\n-------------",
+        "Upgrading from 0.3.x\n--------------------",
+        "Sharing a system report\n-----------------------",
+        "Troubleshooting\n---------------",
     ):
         assert heading in shown
+    assert f"**Documentation: <{site_version(manifest_version()).url}>**" in shown
+
+
+def test_site_links_match_the_version() -> None:
+    """The README and the manifest link to the site's version of this release.
+
+    The development branch links to the dev version, a release branch to its
+    own version (0.4 for 0.4.0b1 and 0.4.0): a release changes the manifest
+    version, and these links with it.
+    """
+    expected = site_version(manifest_version()).url
+    links = re.findall(
+        rf"{re.escape(SITE_URL)}[^)>\s]*", README.read_text(encoding="utf-8")
+    )
+    assert links
+    for link in links:
+        assert link.startswith(expected), link
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert manifest["documentation"] == expected
+
+
+def heading_ids(page: Path) -> set[str]:
+    """The ids the site gives the headings of a page (MkDocs' default slugs)."""
+    ids = set()
+    for heading in re.findall(r"^#+ (.+)$", page.read_text(encoding="utf-8"), re.M):
+        explicit = re.search(r"\{ *#([\w-]+) *\}$", heading)
+        if explicit:
+            ids.add(explicit.group(1))
+            continue
+        slug = re.sub(r"[^\w\s-]", "", heading).strip().lower()
+        ids.add(re.sub(r"[-\s]+", "-", slug))
+    return ids
+
+
+def test_site_links_point_to_pages() -> None:
+    """Every page and heading the README links to exists on the site."""
+    nav = set(
+        re.findall(r"^  - [^:]+: (\S+)\.md$", MKDOCS.read_text(encoding="utf-8"), re.M)
+    )
+    base = site_version(manifest_version()).url
+    links = re.findall(
+        rf"{re.escape(base)}([^)>\s#]*)(?:#([\w-]+))?",
+        README.read_text(encoding="utf-8"),
+    )
+    assert links
+    for path, anchor in links:
+        page = path.strip("/") or "index"
+        assert page in nav, path
+        if anchor:
+            assert anchor in heading_ids(ROOT / "docs" / f"{page}.md"), (path, anchor)
