@@ -93,7 +93,7 @@ body:
     id: report
     attributes:
       label: System report
-      description: Download the integration's diagnostics and drag the file here. Attach the Redacted report (the default) or the encrypted file of a Full report as it is, never the readable copy. See [Sharing a system report](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/blob/next/README.md#sharing-a-system-report) in the 0.4 README.
+      description: Download the integration's diagnostics and drag the file here. Attach the Redacted report (the default) or the encrypted file of a Full report as it is, never the readable copy. See [System report](https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/0.4/system-report/) in the 0.4 documentation.
   - type: checkboxes
     id: secrets
     attributes:
