@@ -61,7 +61,7 @@ class ZonesNotReadyError(InimCommandError):
             translation_key="zones_not_ready",
             translation_placeholders={
                 "target": target,
-                "zones": ", ".join(zone_label(zone, zone_names) for zone in zones),
+                "zones": ", ".join(zone_text(zone, zone_names) for zone in zones),
             },
         )
         self.zones = tuple(zones)
@@ -109,7 +109,7 @@ class CommandFailedError(InimCommandError):
         )
 
 
-def zone_label(zone: int, zone_names: Sequence[str]) -> str:
+def zone_text(zone: int, zone_names: Sequence[str]) -> str:
     """A zone (1-based) as its label and number, e.g. "Front door (3)"."""
     name = zone_names[zone - 1] if 0 < zone <= len(zone_names) else ""
     return f"{name} ({zone})" if name else str(zone)

@@ -19,7 +19,7 @@ from custom_components.inim_smartliving_alarm.errors import (
     CommandFailedError,
     CommandRefusedError,
     ZonesNotReadyError,
-    zone_label,
+    zone_text,
 )
 from custom_components.inim_smartliving_alarm.protocol.commands import (
     CommandKind,
@@ -123,12 +123,12 @@ def test_refusal_translation_keys(result: CommandResult, key: str | None) -> Non
     assert error.code == result.code
 
 
-def test_zone_label() -> None:
+def test_zone_text() -> None:
     """Zones are named by label and number, or by number alone."""
     names = ["Front door", "", "Window"]
-    assert zone_label(1, names) == "Front door (1)"
-    assert zone_label(2, names) == "2"
-    assert zone_label(7, names) == "7"
+    assert zone_text(1, names) == "Front door (1)"
+    assert zone_text(2, names) == "2"
+    assert zone_text(7, names) == "7"
 
 
 # ----------------------------------------------------------- area switches
@@ -254,7 +254,7 @@ async def test_scenario_not_ready_is_not_sent(
     assert zone["status"] == "not_ready"
     assert zone["areas"]
     # The plain label; the message has it with the number
-    assert err.value.translation_placeholders["zones"] == zone_label(
+    assert err.value.translation_placeholders["zones"] == zone_text(
         1, [zone["zone_name"]]
     )
 
@@ -291,7 +291,7 @@ async def test_scenario_not_ready_lists_the_panel_zones(
     # The plain labels; the message has them with their numbers
     names = zone_names(panel_config(entry.data))
     assert [z["zone_name"] for z in event["blocking_zones"]] == [names[0], names[2]]
-    assert [zone_label(zone, names) for zone in (1, 3)] == labels
+    assert [zone_text(zone, names) for zone in (1, 3)] == labels
 
     message = note.call_args.args[1]
     assert message == event["message"]

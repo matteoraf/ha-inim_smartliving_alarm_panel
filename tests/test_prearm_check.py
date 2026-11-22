@@ -49,7 +49,7 @@ from .test_item_selection import SERVICES, live_options
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
 EVENT = "inim_smartliving_alarm_zones_not_ready"
-ZONE_37 = {"zone_id": 37, "zone_name": "Zone 37 (37)"}
+ZONE_37 = {"zone_id": 37, "zone_name": "Zone 37"}
 
 
 async def set_option(hass: HomeAssistant, entry: ConfigEntry, value: str) -> None:
@@ -377,6 +377,36 @@ async def test_panel_refusal_event(
         await arm_area(hass, entry, [3], force=True)
     assert [event.data["action"] for event in events] == ["refused_by_panel"]
     assert events[0].data["zones"] == [ZONE_37]
+
+
+@pytest.mark.parametrize(
+    ("label", "zone_name", "text"),
+    [("Garage door", "Garage door", "Garage door (37)"), ("", "Zone 37", "37")],
+)
+async def test_zone_names(
+    hass: HomeAssistant, panel: FakePanel, label: str, zone_name: str, text: str
+) -> None:
+    """The event gives the zone's plain name, as the zone entities do.
+
+    The error message and the notification keep the zone number.
+    """
+    from .conftest import add_entry
+
+    panel.state.labels[c.RAM_LABELS_ZONES][36] = label
+    entry = await add_entry(hass, panel)
+    events = async_capture_events(hass, EVENT)
+    panel.state.zone_states[36] = c.ZONE_ALARM
+    with pytest.raises(ZonesNotReadyError) as err:
+        await call(hass, entry, "switch", "turn_on", AREA_3_SWITCH)
+    assert err.value.translation_placeholders["zones"] == text
+    await set_option(hass, entry, "warn")
+    with patch.object(readiness.persistent_notification, "async_create") as note:
+        await call(hass, entry, "switch", "turn_on", AREA_3_SWITCH)
+    assert [event.data["zones"] for event in events] == [
+        [{"zone_id": 37, "zone_name": zone_name}]
+    ] * 2
+    assert f"- {text}\n" in note.call_args.args[1]
+    assert await hass.config_entries.async_unload(entry.entry_id)
 
 
 @pytest.mark.parametrize("block", [False, True])
