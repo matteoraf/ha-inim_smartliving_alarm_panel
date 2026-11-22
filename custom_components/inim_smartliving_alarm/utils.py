@@ -7,15 +7,14 @@ from typing import Any
 from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .api import SmartLivingPanel
+from .attribute_values import zone_state_text
 from .const import (
     DOMAIN,
-    KEY_LIVE_ZONE_STATUSES_MAP,
-    KEY_LIVE_ZONES_STATUS,
     PROBLEM_ZONE_STATES_FOR_ARMING,
 )
+from .coordinator import InimDataUpdateCoordinator
 from .errors import (
     CommandFailedError,
     CommandRefusedError,
@@ -44,7 +43,7 @@ _LOGGER = logging.getLogger(__name__)
 async def async_activate_scenario(
     hass: HomeAssistant,
     entry: ConfigEntry,
-    coordinator: DataUpdateCoordinator | None,
+    coordinator: InimDataUpdateCoordinator | None,
     panel: SmartLivingPanel,
     initial_panel_config: dict[str, Any],
     entity_unique_id: str,
@@ -149,7 +148,7 @@ def _blocked_texts(
 
 async def async_handle_scenario_activation_failure(
     hass: HomeAssistant,
-    coordinator: DataUpdateCoordinator | None,
+    coordinator: InimDataUpdateCoordinator | None,
     initial_panel_config: dict[str, Any],
     entity_unique_id: str,
     entity_name: str,
@@ -300,9 +299,7 @@ async def async_handle_scenario_activation_failure(
             event_reason = "no_areas_identified"
         else:
             all_zone_names_list = zone_names(initial_panel_config)
-            live_zone_statuses_map = coordinator.data.get(
-                KEY_LIVE_ZONES_STATUS, {}
-            ).get(KEY_LIVE_ZONE_STATUSES_MAP, {})
+            zone_states = coordinator.data.status.zone_states
 
             problematic_zones: list[tuple[str, list[str]]] = []
             for zone_idx_0_based, zone_name_from_list in enumerate(all_zone_names_list):
@@ -310,9 +307,11 @@ async def async_handle_scenario_activation_failure(
                 # Use the name from the list, or create a default if it's empty/None
                 zone_name = zone_name_from_list or f"Zone {zone_id_1_based}"
 
-                zone_live_status = live_zone_statuses_map.get(str(zone_id_1_based))
-                if zone_live_status is None:
-                    zone_live_status = live_zone_statuses_map.get(zone_id_1_based)
+                zone_live_status = (
+                    zone_state_text(zone_states[zone_idx_0_based])
+                    if zone_idx_0_based < len(zone_states)
+                    else None
+                )
 
                 if zone_live_status in PROBLEM_ZONE_STATES_FOR_ARMING:
                     zone_config = stored_zone(initial_panel_config, zone_id_1_based)

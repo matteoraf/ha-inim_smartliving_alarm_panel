@@ -17,7 +17,7 @@ from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
 )
-from custom_components.inim_smartliving_alarm.legacy import LegacyPanelClient
+from custom_components.inim_smartliving_alarm.event_log import event_attributes
 from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
 from custom_components.inim_smartliving_alarm.protocol.config import (
     decode_peripherals,
@@ -338,18 +338,18 @@ async def test_events_in_firmware_6_numbering(fw51_panel: FakePanel) -> None:
         assert (await connection.arm_areas({1: ArmMode.AWAY})).ok
         assert (await connection.arm_areas({1: ArmMode.DISARM})).ok
         assert (await connection.activate_scenario(0)).ok
-        reads = LegacyPanelClient(connection)
-        events = (await reads.execute_get_compact_events(count=3))["events"]
+        events = (await connection.read_events(count=3)).events
     finally:
         await connection.close()
-    assert [event["action_description"] for event in events] == [
+    shown = [event_attributes(logged, {}, None) for logged in events]
+    assert [item["description"] for item in shown] == [
         "Scenario Activated",
         "End of Area(s) Armed",  # firmware 5.1 has no "area disarmed" event
         "Area(s) Armed",
     ]
     # Decoded in firmware 6 numbering, the raw bytes as the panel stored them
-    assert events[0]["action_code"] == 0x9E
-    assert events[0]["raw_hex_data"].endswith("9d")
+    assert events[0].event.action == 0x9E
+    assert shown[0]["raw_hex_data"].endswith("9d")
 
 
 async def test_event_record_read(fw51_panel: FakePanel, panel: FakePanel) -> None:

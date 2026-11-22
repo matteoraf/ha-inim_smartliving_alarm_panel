@@ -12,10 +12,8 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import stored_config
-from .attribute_values import zone_programming_attributes
+from .attribute_values import zone_programming_attributes, zone_state_text
 from .const import (
     CONF_AREAS,
     CONF_PANEL_NAME,
@@ -25,21 +23,10 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_LIVE_ALARM_AREAS_LIST,
-    KEY_LIVE_AREAS_STATUS,
-    KEY_LIVE_PANEL_PROGRAMMING,
-    KEY_LIVE_TAMPER_AREAS_LIST,
-    KEY_LIVE_TAMPER_MEMORY_AREAS_LIST,
-    KEY_LIVE_TRIGGERED_AREAS_LIST,
-    KEY_LIVE_ZONE_STATUSES_MAP,
-    KEY_LIVE_ZONE_TAMPER_MEMORY_STATUSES_MAP,
-    KEY_LIVE_ZONE_TEST_STATUSES_MAP,
-    KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP,
-    KEY_LIVE_ZONES_EXCLUDED_STATUS,
-    KEY_LIVE_ZONES_STATUS,
-    KEY_LIVE_ZONES_TRIGGERED_STATUS,
+    ZONE_STATE_ALARMED,
     ZONE_TAMPER_STATES,
 )
+from .entity import InimCoordinatorEntity, panel_device_info
 from .protocol.config import (
     Balancing,
     SensorKind,
@@ -49,10 +36,7 @@ from .protocol.config import (
 from .readiness import panel_refuses_not_ready
 from .selection import selected
 from .stored_config import (
-    SystemInfo,
     area_label,
-    device_model,
-    device_sw_version,
     scenario_label,
     terminal_records,
     zone_label,
@@ -77,9 +61,6 @@ async def async_setup_entry(
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
 
-    # Get Panel model/version
-    system_info = stored_config.system_info(initial_panel_config)
-
     # Get user-defined panel name
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
@@ -101,7 +82,6 @@ async def async_setup_entry(
                 coordinator,
                 entry,
                 panel_display_name,
-                system_info,
                 zone_index,
                 zone_name,
                 zone.slot,
@@ -113,7 +93,6 @@ async def async_setup_entry(
                 coordinator,
                 entry,
                 panel_display_name,
-                system_info,
                 zone_index,
                 zone_name,
             )
@@ -131,9 +110,7 @@ async def async_setup_entry(
     for area in areas:
         area_name = area_label(initial_panel_config, area)
         binary_sensors_to_add.extend(
-            sensor_class(
-                coordinator, entry, panel_display_name, system_info, area, area_name
-            )
+            sensor_class(coordinator, entry, panel_display_name, area, area_name)
             for sensor_class in (
                 InimAreaAlarmMemoryBinarySensor,
                 InimAreaAlarmBinarySensor,
@@ -149,23 +126,19 @@ async def async_setup_entry(
                 coordinator,
                 entry,
                 panel_display_name,
-                system_info,
                 number - 1,
                 scenario_label(initial_panel_config, number),
             )
         )
 
     binary_sensors_to_add.append(
-        InimProgrammingModeBinarySensor(
-            coordinator, entry, panel_display_name, system_info
-        )
+        InimProgrammingModeBinarySensor(coordinator, entry, panel_display_name)
     )
     binary_sensors_to_add.append(
         InimRefusesNotReadyBinarySensor(
             coordinator,
             entry,
             panel_display_name,
-            system_info,
             panel_refuses_not_ready(initial_panel_config),
         )
     )
@@ -181,7 +154,7 @@ async def async_setup_entry(
         _LOGGER.info("No Inim Alarm 'binary_sensor' entities added for %s", entry.title)
 
 
-class BaseInimBinarySensor(CoordinatorEntity, BinarySensorEntity):
+class BaseInimBinarySensor(InimCoordinatorEntity, BinarySensorEntity):
     """Base class for Inim binary sensors linked to the main panel device."""
 
     def __init__(
@@ -189,33 +162,21 @@ class BaseInimBinarySensor(CoordinatorEntity, BinarySensorEntity):
         coordinator,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the base Inim binary sensor."""
         super().__init__(coordinator)
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
-        self._system_info = system_info
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for the entity."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.config_entry.entry_id)},
-            name=self._panel_display_name,
-            manufacturer="Inim Electronics",
-            model=device_model(self._system_info),
-            sw_version=device_sw_version(self._system_info),
-        )
+        return panel_device_info(self.config_entry)
 
-    def _zone_value(self, group: str, key: str, default: Any = None) -> Any:
-        """This zone's value in a map of the live status (zone sensors only)."""
-        data = self.coordinator.data or {}
-        values = (data.get(group) or {}).get(key) or {}
-        return values.get(self._zone_id_1_based, default)
-
-    def _zone_flag(self, group: str, key: str) -> bool:
-        return bool(self._zone_value(group, key, False))
+    def _zone_status_text(self) -> str:
+        """This zone's state as text; "Unknown" when not known."""
+        state = self.zone_state(self._zone_id_1_based)
+        return "Unknown" if state is None else zone_state_text(state)
 
 
 # Device class from the terminal's programming (a wired zone has no detector
@@ -266,7 +227,6 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
         zone_index_0_based: int,
         zone_name: str,
         slot: int | None,
@@ -279,7 +239,7 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         programming: the zone's programming attributes; device_class: the
         guess from its terminal (see zone_device_class).
         """
-        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        super().__init__(coordinator, config_entry, panel_display_name)
         self._zone_index_0_based = zone_index_0_based
         self._zone_id_1_based = zone_index_0_based + 1
         self._zone_name = zone_name
@@ -304,17 +264,8 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         self.async_write_ha_state()
 
     def _update_state_from_coordinator(self) -> None:
-        is_on_state = False
-        status_text = "Unknown"
-        if self.coordinator.data and self.coordinator.data.get("zones_status"):
-            zones_data = self.coordinator.data["zones_status"]
-            if zones_data.get("zone_statuses"):
-                status_text = zones_data["zone_statuses"].get(
-                    self._zone_id_1_based, "Unknown"
-                )
-                if status_text.lower() == "alarmed":
-                    is_on_state = True
-        self._attr_is_on = is_on_state
+        status_text = self._zone_status_text()
+        self._attr_is_on = status_text == ZONE_STATE_ALARMED
         # Update attributes here as well, as they might include dynamic status_text
         self._attr_extra_state_attributes = self._get_attributes(status_text)
 
@@ -323,9 +274,7 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
             "zone_id": self._zone_id_1_based,
             "zone_name": self._zone_name,
             "status_text": current_status_text,
-            "test": self._zone_flag(
-                KEY_LIVE_ZONES_EXCLUDED_STATUS, KEY_LIVE_ZONE_TEST_STATUSES_MAP
-            ),
+            "test": bool(self.zone_in_test(self._zone_id_1_based)),
         }
         # The physical slot comes from the stored terminal map
         if self._slot is not None:
@@ -353,12 +302,11 @@ class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
         zone_index_0_based: int,
         zone_name: str,
     ) -> None:
         """Initialize the Inim zone triggered binary sensor."""
-        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        super().__init__(coordinator, config_entry, panel_display_name)
         self._zone_id_1_based = zone_index_0_based + 1
         self._zone_name = zone_name
         self._attr_name = (
@@ -380,19 +328,7 @@ class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
         self.async_write_ha_state()
 
     def _update_state_from_coordinator(self) -> None:
-        is_on_state = False
-        if self.coordinator.data and self.coordinator.data.get(
-            KEY_LIVE_ZONES_TRIGGERED_STATUS
-        ):
-            triggered_data = self.coordinator.data[KEY_LIVE_ZONES_TRIGGERED_STATUS]
-            if triggered_data.get(KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP):
-                triggered_statuses = triggered_data[
-                    KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP
-                ]
-                status_text = triggered_statuses.get(self._zone_id_1_based, "clear")
-                if status_text.lower() == "triggered":
-                    is_on_state = True
-        self._attr_is_on = is_on_state
+        self._attr_is_on = bool(self.zone_alarm_memory(self._zone_id_1_based))
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -400,10 +336,7 @@ class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
         return {
             "zone_id": self._zone_id_1_based,
             "zone_name": self._zone_name,
-            "tamper_memory": self._zone_flag(
-                KEY_LIVE_ZONES_TRIGGERED_STATUS,
-                KEY_LIVE_ZONE_TAMPER_MEMORY_STATUSES_MAP,
-            ),
+            "tamper_memory": bool(self.zone_tamper_memory(self._zone_id_1_based)),
         }
 
 
@@ -417,12 +350,11 @@ class InimZoneTamperBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
         zone_index_0_based: int,
         zone_name: str,
     ) -> None:
         """Initialize the zone tamper binary sensor."""
-        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        super().__init__(coordinator, config_entry, panel_display_name)
         self._zone_id_1_based = zone_index_0_based + 1
         self._zone_name = zone_name
         self._attr_name = f"Zone {self._zone_id_1_based} Tamper ({self._zone_name})"
@@ -441,13 +373,8 @@ class InimZoneTamperBinarySensor(BaseInimBinarySensor):
         self._update_state_from_coordinator()
         self.async_write_ha_state()
 
-    def _status(self) -> str:
-        return self._zone_value(
-            KEY_LIVE_ZONES_STATUS, KEY_LIVE_ZONE_STATUSES_MAP, "Unknown"
-        )
-
     def _update_state_from_coordinator(self) -> None:
-        self._attr_is_on = self._status() in ZONE_TAMPER_STATES
+        self._attr_is_on = self._zone_status_text() in ZONE_TAMPER_STATES
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -455,14 +382,14 @@ class InimZoneTamperBinarySensor(BaseInimBinarySensor):
         return {
             "zone_id": self._zone_id_1_based,
             "zone_name": self._zone_name,
-            "status_text": self._status(),
+            "status_text": self._zone_status_text(),
         }
 
 
 class InimAreaBinarySensor(BaseInimBinarySensor):
     """On while an area is in one of the area lists of the live status."""
 
-    _status_key: str  # list of areas in the coordinator's areas_status
+    _status_key: str  # the areas field of the live status (alarm, tamper, ...)
     _label: str  # shown in the name
     _unique_id_suffix: str
     _object_id_suffix: str
@@ -472,12 +399,11 @@ class InimAreaBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
         area_id_1_based: int,
         area_name: str,
     ) -> None:
         """Initialize the area binary sensor."""
-        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        super().__init__(coordinator, config_entry, panel_display_name)
         self._area_id_1_based = area_id_1_based
         self._area_name = area_name
         self._attr_name = (
@@ -502,10 +428,9 @@ class InimAreaBinarySensor(BaseInimBinarySensor):
         self._update_state_from_coordinator()
         self.async_write_ha_state()
 
-    def _areas(self, key: str) -> list[int]:
-        if self.coordinator.data and self.coordinator.data.get(KEY_LIVE_AREAS_STATUS):
-            return self.coordinator.data[KEY_LIVE_AREAS_STATUS].get(key) or []
-        return []
+    def _areas(self, key: str) -> frozenset[int]:
+        status = self.status
+        return frozenset() if status is None else getattr(status.areas, key)
 
     def _update_state_from_coordinator(self) -> None:
         self._attr_is_on = self._area_id_1_based in self._areas(self._status_key)
@@ -523,7 +448,7 @@ class InimAreaAlarmMemoryBinarySensor(InimAreaBinarySensor):
     """
 
     _attr_device_class = BinarySensorDeviceClass.SAFETY
-    _status_key = KEY_LIVE_TRIGGERED_AREAS_LIST
+    _status_key = "alarm_memory"
     _label = "Alarm memory"
     _unique_id_suffix = "triggered_bs"
     _object_id_suffix = "triggered"
@@ -533,8 +458,7 @@ class InimAreaAlarmMemoryBinarySensor(InimAreaBinarySensor):
         """Return the state attributes, with the area's tamper memory."""
         return {
             **super().extra_state_attributes,
-            "tamper_memory": self._area_id_1_based
-            in self._areas(KEY_LIVE_TAMPER_MEMORY_AREAS_LIST),
+            "tamper_memory": self._area_id_1_based in self._areas("tamper_memory"),
         }
 
 
@@ -542,7 +466,7 @@ class InimAreaAlarmBinarySensor(InimAreaBinarySensor):
     """An area in alarm now."""
 
     _attr_device_class = BinarySensorDeviceClass.SAFETY
-    _status_key = KEY_LIVE_ALARM_AREAS_LIST
+    _status_key = "alarm"
     _label = "Alarm"
     _unique_id_suffix = "alarm_bs"
     _object_id_suffix = "alarm"
@@ -552,7 +476,7 @@ class InimAreaTamperBinarySensor(InimAreaBinarySensor):
     """An area in tamper now."""
 
     _attr_device_class = BinarySensorDeviceClass.TAMPER
-    _status_key = KEY_LIVE_TAMPER_AREAS_LIST
+    _status_key = "tamper"
     _label = "Tamper"
     _unique_id_suffix = "tamper_bs"
     _object_id_suffix = "tamper"
@@ -568,12 +492,11 @@ class InimSpecificScenarioActiveBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
         scenario_index_0_based: int,
         scenario_name: str,
     ) -> None:
         """Initialize the Inim specific scenario active binary sensor."""
-        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        super().__init__(coordinator, config_entry, panel_display_name)
         self._scenario_index_0_based = scenario_index_0_based
         self._scenario_name = scenario_name
         self._attr_name = f"Scenario '{self._scenario_name}' Active"
@@ -596,14 +519,11 @@ class InimSpecificScenarioActiveBinarySensor(BaseInimBinarySensor):
         self.async_write_ha_state()
 
     def _update_state_from_coordinator(self) -> None:
-        is_on_state = False
-        if self.coordinator.data and self.coordinator.data.get("active_scenario"):
-            active_idx = self.coordinator.data["active_scenario"].get(
-                "active_scenario_number"
-            )
-            if active_idx == self._scenario_index_0_based:
-                is_on_state = True
-        self._attr_is_on = is_on_state
+        status = self.status
+        self._attr_is_on = (
+            status is not None
+            and status.active_scenario == self._scenario_index_0_based
+        )
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -631,14 +551,16 @@ class InimProgrammingModeBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the programming mode sensor of the panel."""
-        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        super().__init__(coordinator, config_entry, panel_display_name)
         self._attr_unique_id = f"{config_entry.entry_id}_programming_mode"
 
     def _value(self) -> bool | None:
-        return (self.coordinator.data or {}).get(KEY_LIVE_PANEL_PROGRAMMING)
+        status = self.status
+        if status is None or status.panel_state is None:
+            return None
+        return status.panel_state.programming
 
     @property
     def available(self) -> bool:
@@ -669,11 +591,10 @@ class InimRefusesNotReadyBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
         refuses: bool | None,
     ) -> None:
         """Initialize from the stored configuration."""
-        super().__init__(coordinator, config_entry, panel_display_name, system_info)
+        super().__init__(coordinator, config_entry, panel_display_name)
         self._attr_unique_id = f"{config_entry.entry_id}_refuses_arming_not_ready"
         self._refuses = refuses
 

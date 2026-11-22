@@ -56,15 +56,24 @@ import pytest
 import pytest_socket
 
 from custom_components.inim_smartliving_alarm.api import (
+    PANEL_ERRORS,
+    EventBatch,
+    PanelStatus,
     ProgrammingModeError,
+    SmartLivingPanel,
     create_panel,
+)
+from custom_components.inim_smartliving_alarm.attribute_values import (
+    area_mode_text,
+    area_status_text,
+    zone_state_text,
 )
 from custom_components.inim_smartliving_alarm.errors import (
     CommandRefusedError,
     PanelProgrammingError,
     async_send_command,
 )
-from custom_components.inim_smartliving_alarm.legacy import LegacyPanelClient
+from custom_components.inim_smartliving_alarm.event_log import event_attributes
 from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
 from custom_components.inim_smartliving_alarm.protocol.errors import (
     ProtocolError,
@@ -129,15 +138,36 @@ pytestmark = [
 ProxyFactory = Callable[[WriteGuard | None], Awaitable[PanelProxy]]
 
 
-def client_for(host: str, port: int, pin: str) -> LegacyPanelClient:
-    """A client that waits as long as the proxy may take to reach the panel."""
-    return LegacyPanelClient(create_panel(host, port, pin, reply_timeout=REPLY_TIMEOUT))
+def client_for(host: str, port: int, pin: str) -> SmartLivingPanel:
+    """A panel that waits as long as the proxy may take to reach the panel."""
+    return create_panel(host, port, pin, reply_timeout=REPLY_TIMEOUT)
 
 
-async def read_stored(client: LegacyPanelClient) -> dict[str, Any] | None:
+async def read_status(client: SmartLivingPanel) -> PanelStatus | None:
+    """The live status; None if it could not be read."""
+    try:
+        return await client.read_status()
+    except PANEL_ERRORS:
+        return None
+
+
+async def read_events(client: SmartLivingPanel, count: int) -> EventBatch | None:
+    """The newest events; None if the log could not be read."""
+    try:
+        return await client.read_events(count=count)
+    except PANEL_ERRORS:
+        return None
+
+
+def area_states(status: PanelStatus) -> dict[int, str]:
+    """Each area's state as the area switches show it."""
+    return {area: area_status_text(mode) for area, mode in status.areas.modes.items()}
+
+
+async def read_stored(client: SmartLivingPanel) -> dict[str, Any] | None:
     """The panel configuration as stored in the entry; None if not read."""
     try:
-        return store(await client.panel.read_configuration())
+        return store(await client.read_configuration())
     except (
         TransportError,
         ProtocolError,
@@ -214,21 +244,11 @@ async def proxy(make_proxy: ProxyFactory) -> PanelProxy:
 
 
 @pytest.fixture
-async def api(proxy: PanelProxy) -> AsyncGenerator[LegacyPanelClient]:
+async def api(proxy: PanelProxy) -> AsyncGenerator[SmartLivingPanel]:
     """Client reading the real panel through the read-only proxy."""
     client = client_for(proxy.host, proxy.port, READ_ONLY_PIN)
     yield client
-    await client.panel.close()
-
-
-async def run(
-    hass: HomeAssistant,
-    func: Callable[..., Awaitable[Any]],
-    *args: Any,
-    **kwargs: Any,
-) -> Any:
-    """Call a client method (hass kept so the tests read as before)."""
-    return await func(*args, **kwargs)
+    await client.close()
 
 
 async def read_system_info(proxy: PanelProxy) -> dict[str, Any]:
@@ -318,7 +338,7 @@ async def test_model_and_firmware(proxy: PanelProxy) -> None:
 
 
 async def test_configuration_decodes_like_the_fake(
-    hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
+    hass: HomeAssistant, api: SmartLivingPanel, panel: FakePanel
 ) -> None:
     """The configuration has the same structure as the fake panel's."""
     fake_api = client_for(panel.host, panel.port, "1234")
@@ -326,7 +346,7 @@ async def test_configuration_decodes_like_the_fake(
     try:
         fake = require(await read_stored(fake_api), "fake configuration")
     finally:
-        await fake_api.panel.close()
+        await fake_api.close()
 
     assert real.keys() == fake.keys()
     for names in (area_names, zone_names, scenario_names, keypad_names):
@@ -345,48 +365,41 @@ async def test_configuration_decodes_like_the_fake(
         assert zone.slot is None or 0 <= zone.slot < 130
 
 
-async def test_live_status(hass: HomeAssistant, api: LegacyPanelClient) -> None:
+async def test_live_status(hass: HomeAssistant, api: SmartLivingPanel) -> None:
     """Every area and zone has a decoded status."""
-    status = require(await run(hass, api.get_live_status_snapshot), "status")
+    status = require(await read_status(api), "status")
 
-    assert status["errors"] == []
-    assert set(status["areas_status"]["area_statuses"]) == set(range(1, 11))
-    assert set(status["areas_status"]["triggered_areas"]) <= set(range(1, 11))
-    for key, statuses in (
-        ("zones_status", "zone_statuses"),
-        ("zones_excluded_status", "zone_excluded_statuses"),
-        ("zones_triggered_status", "zone_triggered_statuses"),
-    ):
-        # every zone number of a 1050: zones 1-50 and second zones 51-100
-        assert set(status[key][statuses]) == set(range(1, 101)), key
-    assert status["active_scenario"] is not None
+    assert set(status.areas.modes) == set(range(1, 11))
+    assert status.areas.alarm_memory <= set(range(1, 11))
+    # every zone number of a 1050: zones 1-50 and second zones 51-100
+    assert len(status.zone_states) == 100
+    assert len(status.zone_inclusion.included) == 100
+    assert len(status.zone_memory.alarm_memory) == 100
+    assert len(status.raw_active_scenario) == 1
 
 
-async def test_recent_events(hass: HomeAssistant, api: LegacyPanelClient) -> None:
+async def test_recent_events(hass: HomeAssistant, api: SmartLivingPanel) -> None:
     """The newest events are read and get plausible timestamps."""
     # any zone will do: only the plausibility of the times is checked
-    result = require(
-        await run(hass, api.execute_get_compact_events, count=5, time_zone=UTC),
-        "event log",
-    )
+    batch = require(await read_events(api, 5), "event log")
 
-    events = result["events"]
-    assert events, "the event log is empty"
+    assert batch.events, "the event log is empty"
     # The panel clock may run a little ahead of this machine's
     latest = datetime.now(UTC) + timedelta(days=1)
-    for event in events:
-        when = datetime.fromisoformat(event["timestamp_iso"])
+    for logged in batch.events:
+        item = event_attributes(logged, {}, UTC)
+        when = datetime.fromisoformat(item["timestamp"])
         assert datetime(2015, 1, 1, tzinfo=UTC) < when < latest
-        assert event["action_description"]
+        assert item["description"]
 
 
 async def test_replies_have_the_fake_layout(
-    hass: HomeAssistant, api: LegacyPanelClient, proxy: PanelProxy, panel: FakePanel
+    hass: HomeAssistant, api: SmartLivingPanel, proxy: PanelProxy, panel: FakePanel
 ) -> None:
     """Every read gets a valid reply as long as the fake panel's."""
     require(await read_stored(api), "configuration")
-    require(await run(hass, api.get_live_status_snapshot), "status")
-    require(await run(hass, api.execute_get_compact_events, count=3), "event log")
+    require(await read_status(api), "status")
+    require(await read_events(api, 3), "event log")
 
     # PIN-table replies are not kept by the proxy, so they cannot be compared
     reads = [
@@ -459,11 +472,11 @@ def quiet_api_log() -> Iterator[None]:
 
 
 @pytest.fixture
-async def panel_config(hass: HomeAssistant, api: LegacyPanelClient) -> dict[str, Any]:
+async def panel_config(hass: HomeAssistant, api: SmartLivingPanel) -> dict[str, Any]:
     """The panel configuration, read before the write proxy connects."""
     config = require(await read_stored(api), "configuration")
     # The board takes one client: free the connection for the write proxy
-    await api.panel.close()
+    await api.close()
     return config
 
 
@@ -490,7 +503,7 @@ async def write_api(
     proxy: PanelProxy,
     make_proxy: ProxyFactory,
     zone_slot: int,
-) -> AsyncGenerator[LegacyPanelClient]:
+) -> AsyncGenerator[SmartLivingPanel]:
     """Client that may change area 4 and zone 18 only."""
     state = await raw_read(proxy, RAM_PANEL_STATE, 2)
     if state[1] & PANEL_STATE_PROGRAMMING:
@@ -498,7 +511,7 @@ async def write_api(
     guarded = await make_proxy(WriteGuard(area=WRITE_AREA, zone_slot=zone_slot))
     client = client_for(guarded.host, guarded.port, write_pin)
     yield client
-    await client.panel.close()
+    await client.close()
 
 
 @pytest.mark.parametrize(
@@ -507,7 +520,7 @@ async def write_api(
 )
 async def test_arm_and_disarm_area(
     hass: HomeAssistant,
-    write_api: LegacyPanelClient,
+    write_api: SmartLivingPanel,
     area_zones: list[int],
     mode: ArmMode,
     arming_mode: str,
@@ -518,103 +531,107 @@ async def test_arm_and_disarm_area(
     alarm, so the area is armed only when all its zones are at rest; an
     alarm after arming disarms at once and fails the test.
     """
-    before = require(await run(hass, write_api.get_live_status_snapshot), "status")
-    areas = before["areas_status"]
+    before = require(await read_status(write_api), "status")
+    areas = before.areas
     if (
-        areas["area_statuses"][WRITE_AREA] != "disarmed"
-        or WRITE_AREA in areas["triggered_areas"]
-        or WRITE_AREA in areas["alarm_areas"]
-        or WRITE_AREA in areas["tamper_areas"]
+        area_states(before)[WRITE_AREA] != "disarmed"
+        or WRITE_AREA in areas.alarm_memory
+        or WRITE_AREA in areas.alarm
+        or WRITE_AREA in areas.tamper
     ):
         pytest.skip(f"area {WRITE_AREA} is not disarmed and quiet")
-    zone_statuses = before["zones_status"]["zone_statuses"]
-    not_at_rest = [zone for zone in area_zones if zone_statuses.get(zone) != "clear"]
+    not_at_rest = [
+        zone
+        for zone in area_zones
+        if zone_state_text(before.zone_states[zone - 1]) != "clear"
+    ]
     if not_at_rest:
         pytest.skip(f"zones {not_at_rest} of area {WRITE_AREA} are not at rest")
 
     try:
         if mode is ArmMode.AWAY:  # the area switch's command
-            assert await accepted(write_api.panel.arm_areas({WRITE_AREA: ArmMode.AWAY}))
+            assert await accepted(write_api.arm_areas({WRITE_AREA: ArmMode.AWAY}))
         else:
-            result = await write_api.panel.arm_areas({WRITE_AREA: mode})
+            result = await write_api.arm_areas({WRITE_AREA: mode})
             assert result.ok, result.reason
-        armed = await run(hass, write_api.get_live_status_snapshot)
-        assert WRITE_AREA not in armed["areas_status"]["alarm_areas"], (
+        armed = await read_status(write_api)
+        assert armed is not None
+        assert WRITE_AREA not in armed.areas.alarm, (
             f"area {WRITE_AREA} went into alarm after arming; disarmed, "
             "reset its alarm memory before the next run"
         )
-        statuses = armed["areas_status"]["area_statuses"]
+        statuses = area_states(armed)
         assert statuses[WRITE_AREA] == "armed"
-        assert armed["areas_status"]["area_modes"][WRITE_AREA] == arming_mode
+        assert area_mode_text(armed.areas.modes[WRITE_AREA]) == arming_mode
         assert {k: v for k, v in statuses.items() if k != WRITE_AREA} == {
-            k: v for k, v in areas["area_statuses"].items() if k != WRITE_AREA
+            k: v for k, v in area_states(before).items() if k != WRITE_AREA
         }
     finally:
-        assert await accepted(write_api.panel.arm_areas({WRITE_AREA: ArmMode.DISARM}))
+        assert await accepted(write_api.arm_areas({WRITE_AREA: ArmMode.DISARM}))
 
-    after = await run(hass, write_api.get_live_status_snapshot)
-    assert after["areas_status"]["area_statuses"][WRITE_AREA] == "disarmed"
+    after = await read_status(write_api)
+    assert after is not None
+    assert area_states(after)[WRITE_AREA] == "disarmed"
 
 
 async def test_bypass_and_include_zone(
-    hass: HomeAssistant, write_api: LegacyPanelClient, zone_slot: int
+    hass: HomeAssistant, write_api: SmartLivingPanel, zone_slot: int
 ) -> None:
     """Zone 18 can be bypassed and included again."""
     slot = zone_slot
-    before = require(await run(hass, write_api.get_live_status_snapshot), "status")
-    excluded = before["zones_excluded_status"]["zone_excluded_statuses"]
-    if excluded[WRITE_ZONE] != "enabled":
+    before = require(await read_status(write_api), "status")
+    if not before.zone_inclusion.included[WRITE_ZONE - 1]:
         pytest.skip(f"zone {WRITE_ZONE} is not included")
 
     try:
-        assert await accepted(write_api.panel.bypass_zone(slot, bypass=True))
-        bypassed = await run(hass, write_api.get_live_status_snapshot)
-        statuses = bypassed["zones_excluded_status"]["zone_excluded_statuses"]
-        assert statuses[WRITE_ZONE] == "disabled"
+        assert await accepted(write_api.bypass_zone(slot, bypass=True))
+        bypassed = await read_status(write_api)
+        assert bypassed is not None
+        assert bypassed.zone_inclusion.included[WRITE_ZONE - 1] is False
     finally:
-        assert await accepted(write_api.panel.bypass_zone(slot, bypass=False))
+        assert await accepted(write_api.bypass_zone(slot, bypass=False))
 
-    after = await run(hass, write_api.get_live_status_snapshot)
-    statuses = after["zones_excluded_status"]["zone_excluded_statuses"]
-    assert statuses[WRITE_ZONE] == "enabled"
+    after = await read_status(write_api)
+    assert after is not None
+    assert after.zone_inclusion.included[WRITE_ZONE - 1] is True
 
 
 async def test_include_an_included_zone(
-    hass: HomeAssistant, write_api: LegacyPanelClient, zone_slot: int
+    hass: HomeAssistant, write_api: SmartLivingPanel, zone_slot: int
 ) -> None:
     """Including zone 18 while it is included: the panel reports no change."""
-    before = require(await run(hass, write_api.get_live_status_snapshot), "status")
-    excluded = before["zones_excluded_status"]["zone_excluded_statuses"]
-    if excluded[WRITE_ZONE] != "enabled":
+    before = require(await read_status(write_api), "status")
+    if not before.zone_inclusion.included[WRITE_ZONE - 1]:
         pytest.skip(f"zone {WRITE_ZONE} is not included")
 
     with pytest.raises(CommandRefusedError) as err:
         await async_send_command(
-            write_api.panel.bypass_zone(zone_slot, bypass=False), f"Zone {WRITE_ZONE}"
+            write_api.bypass_zone(zone_slot, bypass=False), f"Zone {WRITE_ZONE}"
         )
     print(f"include of an included zone: result {err.value.code:#04x}")
     assert err.value.reason == "already_in_state", err.value.code
 
-    after = await run(hass, write_api.get_live_status_snapshot)
-    statuses = after["zones_excluded_status"]["zone_excluded_statuses"]
-    assert statuses[WRITE_ZONE] == "enabled"
+    after = await read_status(write_api)
+    assert after is not None
+    assert after.zone_inclusion.included[WRITE_ZONE - 1] is True
 
 
 async def test_disarm_a_disarmed_area(
-    hass: HomeAssistant, write_api: LegacyPanelClient
+    hass: HomeAssistant, write_api: SmartLivingPanel
 ) -> None:
     """Disarming area 4 while it is disarmed changes nothing."""
-    before = require(await run(hass, write_api.get_live_status_snapshot), "status")
-    statuses = before["areas_status"]["area_statuses"]
+    before = require(await read_status(write_api), "status")
+    statuses = area_states(before)
     if statuses[WRITE_AREA] != "disarmed":
         pytest.skip(f"area {WRITE_AREA} is not disarmed")
 
-    result = await write_api.panel.arm_areas({WRITE_AREA: ArmMode.DISARM})
+    result = await write_api.arm_areas({WRITE_AREA: ArmMode.DISARM})
     print(f"disarm of a disarmed area: result {result.code:#04x}")
     assert result.ok, result.code
 
-    after = await run(hass, write_api.get_live_status_snapshot)
-    assert after["areas_status"]["area_statuses"] == statuses
+    after = await read_status(write_api)
+    assert after is not None
+    assert area_states(after) == statuses
 
 
 @pytest.fixture
@@ -624,7 +641,7 @@ async def wrong_pin_api(
     proxy: PanelProxy,
     make_proxy: ProxyFactory,
     zone_slot: int,
-) -> AsyncGenerator[LegacyPanelClient]:
+) -> AsyncGenerator[SmartLivingPanel]:
     """Client with a PIN that matches no user code; may change area 4 only."""
     if not WRONG_PIN:
         pytest.skip("set INIM_PANEL_WRONG_PIN=1 to send a command with a wrong PIN")
@@ -634,35 +651,36 @@ async def wrong_pin_api(
     guarded = await make_proxy(WriteGuard(area=WRITE_AREA, zone_slot=zone_slot))
     for pin in WRONG_PIN_CANDIDATES:
         client = client_for(guarded.host, guarded.port, pin)
-        await client.panel.identify()
-        if not client.panel.user_code_found:
+        await client.identify()
+        if not client.user_code_found:
             break
-        await client.panel.close()
+        await client.close()
     else:
         pytest.skip("every candidate PIN matches a user code of the panel")
     yield client
-    await client.panel.close()
+    await client.close()
 
 
 async def test_wrong_pin_is_refused(
-    hass: HomeAssistant, wrong_pin_api: LegacyPanelClient
+    hass: HomeAssistant, wrong_pin_api: SmartLivingPanel
 ) -> None:
     """A PIN that matches no user code is refused; nothing changes."""
-    before = require(await run(hass, wrong_pin_api.get_live_status_snapshot), "status")
-    statuses = before["areas_status"]["area_statuses"]
+    before = require(await read_status(wrong_pin_api), "status")
+    statuses = area_states(before)
     if statuses[WRITE_AREA] != "disarmed":
         pytest.skip(f"area {WRITE_AREA} is not disarmed")
 
     with pytest.raises(CommandRefusedError) as err:
         await async_send_command(
-            wrong_pin_api.panel.arm_areas({WRITE_AREA: ArmMode.DISARM}),
+            wrong_pin_api.arm_areas({WRITE_AREA: ArmMode.DISARM}),
             f"Area {WRITE_AREA}",
         )
     print(f"command with a wrong PIN: result {err.value.code:#04x}")
     assert err.value.reason == "invalid_code", err.value.code
 
-    after = await run(hass, wrong_pin_api.get_live_status_snapshot)
-    assert after["areas_status"]["area_statuses"] == statuses
+    after = await read_status(wrong_pin_api)
+    assert after is not None
+    assert area_states(after) == statuses
 
 
 async def test_programming_mode_stops_commands(proxy: PanelProxy) -> None:
@@ -681,15 +699,15 @@ async def test_programming_mode_stops_commands(proxy: PanelProxy) -> None:
 
     client = client_for(proxy.host, proxy.port, READ_ONLY_PIN)
     try:
-        status = await client.panel.read_status()
+        status = await client.read_status()
         assert status.panel_state is not None
         assert status.panel_state.programming
         with pytest.raises(PanelProgrammingError) as err:
             await async_send_command(
-                client.panel.arm_areas({WRITE_AREA: ArmMode.DISARM}),
+                client.arm_areas({WRITE_AREA: ArmMode.DISARM}),
                 f"Area {WRITE_AREA}",
             )
         assert not err.value.sent
     finally:
-        await client.panel.close()
+        await client.close()
     assert proxy.blocked == []

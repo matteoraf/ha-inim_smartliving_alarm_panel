@@ -8,10 +8,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import stored_config
 from .api import SmartLivingPanel
+from .attribute_values import area_mode_text, area_status_text
 from .const import (
     ARM_MODE_INSTANT,
     ARM_MODE_PARTIAL,
@@ -27,25 +26,19 @@ from .const import (
     DEFAULT_AREA_SWITCHES_ARM_MODE,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_LIVE_AREA_MODES_MAP,
-    KEY_LIVE_AREA_STATUSES_MAP,
-    KEY_LIVE_AREAS_STATUS,
-    KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP,
-    KEY_LIVE_ZONES_EXCLUDED_STATUS,
 )
+from .entity import InimCoordinatorEntity, panel_device_info
 from .errors import async_send_command
-from .outputs import InimOutputEntity, is_dimmer
+from .outputs import InimOutputEntity
 from .protocol.commands import ArmMode
 from .readiness import async_arm
 from .selection import (
     imported_outputs,
+    is_dimmer,
     selected,
 )
 from .stored_config import (
-    SystemInfo,
     area_label,
-    device_model,
-    device_sw_version,
     zone_label,
     zones_to_create,
 )
@@ -74,7 +67,6 @@ async def async_setup_entry(
     panel: SmartLivingPanel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
 
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
-    system_info = stored_config.system_info(initial_panel_config)
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
     switches_to_add = []
@@ -89,7 +81,6 @@ async def async_setup_entry(
                 panel,
                 entry,
                 panel_display_name,
-                system_info,
                 area_id_1_based,
                 area_label(initial_panel_config, area_id_1_based),
             )
@@ -116,7 +107,6 @@ async def async_setup_entry(
                 panel,
                 entry,
                 panel_display_name,
-                system_info,
                 zone.number,
                 zone_label(initial_panel_config, zone.number),
                 zone.slot,
@@ -133,7 +123,6 @@ async def async_setup_entry(
                     panel,
                     entry,
                     panel_display_name,
-                    system_info,
                     item,
                 )
             )
@@ -149,7 +138,7 @@ async def async_setup_entry(
         _LOGGER.info("No Inim Alarm switch entities added for %s", entry.title)
 
 
-class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
+class InimAreaSwitch(InimCoordinatorEntity, SwitchEntity):
     """An Inim area as a switch: on in any armed mode.
 
     Turning it on arms in the mode chosen in the options (total by default).
@@ -161,7 +150,6 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         panel: SmartLivingPanel,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
         area_id_1_based: int,
         area_name: str,
     ) -> None:
@@ -170,7 +158,6 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         self.panel = panel
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
-        self._system_info = system_info
         self._area_id_1_based = area_id_1_based
         self._area_name = area_name
 
@@ -189,13 +176,7 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for the entity."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.config_entry.entry_id)},
-            name=self._panel_display_name,
-            manufacturer="Inim Electronics",
-            model=device_model(self._system_info),
-            sw_version=device_sw_version(self._system_info),
-        )
+        return panel_device_info(self.config_entry)
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -203,15 +184,8 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         self.async_write_ha_state()
 
     def _update_state_from_coordinator(self) -> None:
-        new_is_on = False
-        if self.coordinator.data and self.coordinator.data.get(KEY_LIVE_AREAS_STATUS):
-            area_statuses = self.coordinator.data[KEY_LIVE_AREAS_STATUS].get(
-                KEY_LIVE_AREA_STATUSES_MAP, {}
-            )
-            status_text = area_statuses.get(self._area_id_1_based)
-            if status_text and status_text.lower() == "armed":
-                new_is_on = True
-        self._attr_is_on = new_is_on
+        mode = self.area_mode(self._area_id_1_based)
+        self._attr_is_on = mode is not None and mode.armed
         self._attr_icon = (
             "mdi:shield-check" if self._attr_is_on else "mdi:shield-off-outline"
         )
@@ -263,19 +237,14 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         """Additional Attributes."""
         attrs = {"area_id": self._area_id_1_based, "area_name": self._area_name}
-        if self.coordinator.data and self.coordinator.data.get(KEY_LIVE_AREAS_STATUS):
-            area_statuses = self.coordinator.data[KEY_LIVE_AREAS_STATUS].get(
-                KEY_LIVE_AREA_STATUSES_MAP, {}
-            )
-            attrs["status_text"] = area_statuses.get(self._area_id_1_based, "Unknown")
-            area_modes = self.coordinator.data[KEY_LIVE_AREAS_STATUS].get(
-                KEY_LIVE_AREA_MODES_MAP, {}
-            )
-            attrs["arming_mode"] = area_modes.get(self._area_id_1_based, "unknown")
+        if self.status is not None:
+            mode = self.area_mode(self._area_id_1_based)
+            attrs["status_text"] = "Unknown" if mode is None else area_status_text(mode)
+            attrs["arming_mode"] = "unknown" if mode is None else area_mode_text(mode)
         return attrs
 
 
-class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
+class InimZoneEnabledSwitch(InimCoordinatorEntity, SwitchEntity):
     """Representation of an Inim Zone's enabled status as a switch. ON = Enabled, OFF = Excluded."""
 
     def __init__(
@@ -284,7 +253,6 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
         panel: SmartLivingPanel,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
         zone_id_1_based: int,
         zone_name: str,
         zone_internal_index: int,
@@ -295,7 +263,6 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
         self.panel = panel
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
-        self._system_info = system_info
         self._zone_id_1_based = zone_id_1_based
         self._zone_name = zone_name
         self._zone_internal_index = zone_internal_index
@@ -314,13 +281,7 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for the entity."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.config_entry.entry_id)},
-            name=self._panel_display_name,
-            manufacturer="Inim Electronics",
-            model=device_model(self._system_info),
-            sw_version=device_sw_version(self._system_info),
-        )
+        return panel_device_info(self.config_entry)
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -328,19 +289,8 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
         self.async_write_ha_state()
 
     def _update_state_from_coordinator(self) -> None:
-        # Default to ON (enabled)
-        new_is_on = True
-        if self.coordinator.data and self.coordinator.data.get(
-            KEY_LIVE_ZONES_EXCLUDED_STATUS
-        ):
-            excluded_statuses = self.coordinator.data[
-                KEY_LIVE_ZONES_EXCLUDED_STATUS
-            ].get(KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP, {})
-            status_text = excluded_statuses.get(self._zone_id_1_based)
-            # The switch is ON if the zone is 'enabled'
-            if status_text and status_text.lower() == "disabled":
-                new_is_on = False
-        self._attr_is_on = new_is_on
+        # On (included) unless the panel says the zone is bypassed
+        self._attr_is_on = self.zone_included(self._zone_id_1_based) is not False
         self._attr_icon = (
             "mdi:shield-check" if self._attr_is_on else "mdi:shield-remove-outline"
         )

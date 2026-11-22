@@ -78,51 +78,13 @@ DATA_ALARM_PANEL = "alarm_panel"  # the entry's alarm panel entity
 # stored by stored_config
 DATA_INITIAL_PANEL_CONFIG = "initial_panel_config"
 
-# --- Keys for data structures ---
-# These keys help access specific parts of the data provided by the
-# coordinator.
-
-# From coordinator.data (live status snapshot)
-KEY_LIVE_ACTIVE_SCENARIO = "active_scenario"  # Dict with current active scenario info
-KEY_LIVE_ACTIVE_SCENARIO_NUMBER = "active_scenario_number"  # 0-indexed int
-KEY_LIVE_PANEL_PROGRAMMING = "panel_programming"  # bool; None when not read
-# Imported dimmers' levels: logical terminal (0-based) -> 0-100 or None
-KEY_LIVE_OUTPUT_LEVELS = "output_levels"
-
-KEY_LIVE_AREAS_STATUS = "areas_status"  # Dict with current area statuses
-KEY_LIVE_AREA_STATUSES_MAP = (
-    "area_statuses"  # {area_id: "armed" (any mode) / "disarmed" / "unknown"}
-)
-KEY_LIVE_AREA_MODES_MAP = "area_modes"  # {area_id: an AREA_MODE_* value or "unknown"}
-KEY_LIVE_ALARM_AREAS_LIST = "alarm_areas"  # areas (int) in alarm now
-KEY_LIVE_TAMPER_AREAS_LIST = "tamper_areas"  # areas (int) in tamper now
-KEY_LIVE_TRIGGERED_AREAS_LIST = "triggered_areas"  # areas (int) with alarm memory
-KEY_LIVE_TAMPER_MEMORY_AREAS_LIST = "tamper_memory_areas"  # areas with tamper memory
-
-# Area arming modes as reported in KEY_LIVE_AREA_MODES_MAP
+# Area arming modes as entity attributes (attribute_values.area_mode_text)
 AREA_MODE_TOTAL = "total"
 AREA_MODE_PARTIAL = "partial"
 AREA_MODE_INSTANT = "instant"
 AREA_MODE_DISARMED = "disarmed"
 
-KEY_LIVE_ZONES_STATUS = "zones_status"  # Dict with current zone statuses
-KEY_LIVE_ZONE_STATUSES_MAP = (
-    "zone_statuses"  # Dict within zones_status: {zone_id_1_based_str: "status_str"}
-)
-KEY_LIVE_ZONES_EXCLUDED_STATUS = "zones_excluded_status"
-KEY_LIVE_ZONE_EXCLUDED_STATUSES_MAP = "zone_excluded_statuses"
-
-KEY_LIVE_ZONES_TRIGGERED_STATUS = "zones_triggered_status"
-KEY_LIVE_ZONE_TRIGGERED_STATUSES_MAP = "zone_triggered_statuses"
-KEY_LIVE_ZONE_TAMPER_MEMORY_STATUSES_MAP = "zone_tamper_memory_statuses"  # {zone: bool}
-KEY_LIVE_ZONE_TEST_STATUSES_MAP = "zone_test_statuses"  # in zones_excluded_status
-
-KEY_PROCESSED_EVENTS = "processed_events"  # List of new events from last poll
-KEY_LATEST_EVENT_INDEX_VAL = (
-    "latest_event_index_val"  # position of the newest event in the panel's ring
-)
-
-# Zone states as reported in KEY_LIVE_ZONE_STATUSES_MAP
+# Zone states as entity attributes (attribute_values.zone_state_text)
 ZONE_STATE_CLEAR = "clear"  # at rest
 ZONE_STATE_ALARMED = "alarmed"  # open
 ZONE_STATE_SHORT = "short"  # short circuit
@@ -131,7 +93,6 @@ ZONE_TAMPER_STATES = (ZONE_STATE_SHORT, ZONE_STATE_TAMPER)
 
 # Zone states that prevent a scenario from being activated
 PROBLEM_ZONE_STATES_FOR_ARMING = [ZONE_STATE_ALARMED, *ZONE_TAMPER_STATES]
-# --- End Data Structure Keys ---
 
 # --- Sensor Entity Suffixes/Keys ---
 SENSOR_LAST_EVENT_LOG_SUFFIX = "event_log"  # For the new event log sensor

@@ -13,9 +13,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import stored_config
 from .api import SmartLivingPanel
 from .const import (
     CONF_PANEL_NAME,
@@ -30,23 +28,18 @@ from .const import (
     DATA_PANEL,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_LIVE_ACTIVE_SCENARIO,
-    KEY_LIVE_ACTIVE_SCENARIO_NUMBER,
-    KEY_LIVE_ALARM_AREAS_LIST,
-    KEY_LIVE_AREAS_STATUS,
-    KEY_LIVE_TAMPER_MEMORY_AREAS_LIST,
-    KEY_LIVE_TRIGGERED_AREAS_LIST,
 )
+from .entity import InimCoordinatorEntity, panel_device_info
 from .errors import InimCommandError, async_send_command
 from .stored_config import (
-    SystemInfo,
     area_names,
-    device_model,
-    device_sw_version,
 )
 from .utils import async_activate_scenario
 
 _LOGGER = logging.getLogger(__name__)
+
+# Logged in place of a scenario when none matches the areas' state
+NO_MATCH = -1
 
 
 async def async_setup_entry(
@@ -62,7 +55,6 @@ async def async_setup_entry(
 
     # Initial config fetched by config_flow and stored in entry.data
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
-    system_info = stored_config.system_info(initial_panel_config)
 
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
@@ -75,7 +67,6 @@ async def async_setup_entry(
         entry,
         initial_panel_config,
         panel_display_name,
-        system_info,
         scenario_mappings,
     )
     async_add_entities([alarm_panel])
@@ -85,7 +76,7 @@ async def async_setup_entry(
     hass.data[DOMAIN][entry.entry_id][DATA_ALARM_PANEL] = alarm_panel
 
 
-class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
+class InimAlarmControlPanel(InimCoordinatorEntity, AlarmControlPanelEntity):
     """Representation of an Inim Alarm Control Panel."""
 
     def __init__(
@@ -95,7 +86,6 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         config_entry: ConfigEntry,
         initial_panel_config: dict[str, Any],
         panel_display_name: str,
-        system_info: SystemInfo | None,
         scenario_mappings: dict[str, int | None],
     ) -> None:
         """Initialize the alarm control panel entity."""
@@ -104,7 +94,6 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         self.config_entry = config_entry
         self._initial_panel_config = initial_panel_config
         self._panel_display_name = panel_display_name
-        self._system_info = system_info
         self._scenario_mappings = scenario_mappings
 
         self._attr_name = self._panel_display_name
@@ -135,8 +124,9 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         self._current_ha_state_enum: AlarmControlPanelState | None = (
             AlarmControlPanelState.DISARMED  # Default to DISARMED initially
         )
-        # The unmapped active scenario last warned about, so that the warning
-        # comes once per change rather than at every poll
+        # The unmapped active scenario last warned about (NO_MATCH when no
+        # scenario matches the areas' state), so that the warning comes once
+        # per change rather than at every poll
         self._unmapped_scenario_logged: int | None = None
         self._update_internal_state()  # Initial state update
 
@@ -151,13 +141,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for this alarm panel."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.config_entry.entry_id)},
-            name=self._panel_display_name,
-            manufacturer="Inim Electronics",
-            model=device_model(self._system_info),
-            sw_version=device_sw_version(self._system_info),
-        )
+        return panel_device_info(self.config_entry)
 
     @property
     def alarm_state(self) -> AlarmControlPanelState | None:
@@ -175,28 +159,16 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
 
     def _update_internal_state(self) -> None:
         """Update the internal HA state based on coordinator data, using AlarmControlPanelState enum."""
-        if self.coordinator.data is None:
+        status = self.status
+        if status is None:
             _LOGGER.warning(
                 "Coordinator data is None for %s, cannot update state. Previous state: %s",
                 self.name,
                 self._current_ha_state_enum,
             )
-            # Optionally set to UNKNOWN or keep previous state.
-            # self._current_ha_state_enum = AlarmControlPanelState.UNKNOWN # Or None
             return
 
-        active_scenario_data = self.coordinator.data.get(KEY_LIVE_ACTIVE_SCENARIO)
-        areas_status_data = self.coordinator.data.get(KEY_LIVE_AREAS_STATUS)
-
-        current_active_scenario_idx = -1  # Default to unknown
-        if (
-            active_scenario_data
-            and active_scenario_data.get(KEY_LIVE_ACTIVE_SCENARIO_NUMBER) is not None
-        ):
-            current_active_scenario_idx = active_scenario_data.get(
-                KEY_LIVE_ACTIVE_SCENARIO_NUMBER
-            )
-
+        current_active_scenario_idx = status.active_scenario  # None: no match
         _LOGGER.debug(
             "%s: Current active Inim scenario index: %s",
             self.name,
@@ -214,86 +186,73 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
 
         # TRIGGERED while an area is in alarm now (highest priority); the alarm
         # memory that stays after the alarm is not considered here
-        if areas_status_data and areas_status_data.get(KEY_LIVE_ALARM_AREAS_LIST):
-            if any(areas_status_data[KEY_LIVE_ALARM_AREAS_LIST]):
+        if status.areas.alarm:
+            _LOGGER.info(
+                "%s: Panel is TRIGGERED. Areas in alarm: %s",
+                self.name,
+                sorted(status.areas.alarm),
+            )
+            new_state_enum = AlarmControlPanelState.TRIGGERED
+            # If triggered, this state takes precedence over scenario-based states
+            if self._current_ha_state_enum != new_state_enum:
                 _LOGGER.info(
-                    "%s: Panel is TRIGGERED. Areas in alarm: %s",
+                    "%s: State changed from %s to %s (Triggered)",
                     self.name,
-                    areas_status_data[KEY_LIVE_ALARM_AREAS_LIST],
+                    self._current_ha_state_enum,
+                    new_state_enum,
                 )
-                new_state_enum = AlarmControlPanelState.TRIGGERED
-                # If triggered, this state takes precedence over scenario-based states
-                if self._current_ha_state_enum != new_state_enum:
-                    _LOGGER.info(
-                        "%s: State changed from %s to %s (Triggered)",
-                        self.name,
-                        self._current_ha_state_enum,
-                        new_state_enum,
-                    )
-                    self._current_ha_state_enum = new_state_enum
-                else:
-                    _LOGGER.debug(
-                        "%s: State remains %s (Triggered)",
-                        self.name,
-                        self._current_ha_state_enum,
-                    )
-                return  # Exit early as TRIGGERED is definitive
+                self._current_ha_state_enum = new_state_enum
+            else:
+                _LOGGER.debug(
+                    "%s: State remains %s (Triggered)",
+                    self.name,
+                    self._current_ha_state_enum,
+                )
+            return  # Exit early as TRIGGERED is definitive
 
         # If not triggered, determine state based on active scenario
         unmapped = False
-        if current_active_scenario_idx == self._scenario_mappings.get(
-            CONF_SCENARIO_DISARM
-        ):
-            new_state_enum = AlarmControlPanelState.DISARMED
-        elif current_active_scenario_idx == self._scenario_mappings.get(
-            CONF_SCENARIO_ARM_HOME
-        ):
-            new_state_enum = AlarmControlPanelState.ARMED_HOME
-        elif current_active_scenario_idx == self._scenario_mappings.get(
-            CONF_SCENARIO_ARM_AWAY
-        ):
-            new_state_enum = AlarmControlPanelState.ARMED_AWAY
-        elif current_active_scenario_idx == self._scenario_mappings.get(
-            CONF_SCENARIO_ARM_NIGHT
-        ):
-            new_state_enum = AlarmControlPanelState.ARMED_NIGHT
-        elif current_active_scenario_idx == self._scenario_mappings.get(
-            CONF_SCENARIO_ARM_VACATION
-        ):
-            new_state_enum = AlarmControlPanelState.ARMED_VACATION
-        else:
-            # Active scenario does not match any mapped HA arm state.
-            # If it's a valid scenario index but not the disarm one, it implies some form of armed state.
-            if (
-                current_active_scenario_idx != -1  # A valid scenario is active
-                and self._scenario_mappings.get(CONF_SCENARIO_DISARM)
-                is not None  # Disarm scenario is known
-                and current_active_scenario_idx
-                != self._scenario_mappings.get(
-                    CONF_SCENARIO_DISARM
-                )  # And it's not that disarm scenario
-            ):
-                if current_active_scenario_idx != self._unmapped_scenario_logged:
+        mapped = {
+            CONF_SCENARIO_DISARM: AlarmControlPanelState.DISARMED,
+            CONF_SCENARIO_ARM_HOME: AlarmControlPanelState.ARMED_HOME,
+            CONF_SCENARIO_ARM_AWAY: AlarmControlPanelState.ARMED_AWAY,
+            CONF_SCENARIO_ARM_NIGHT: AlarmControlPanelState.ARMED_NIGHT,
+            CONF_SCENARIO_ARM_VACATION: AlarmControlPanelState.ARMED_VACATION,
+        }
+        state_of_scenario = next(
+            (
+                state
+                for key, state in mapped.items()
+                if status.scenario_matches
+                and current_active_scenario_idx == self._scenario_mappings.get(key)
+            ),
+            None,
+        )
+        if state_of_scenario is not None:
+            new_state_enum = state_of_scenario
+        elif self._scenario_mappings.get(CONF_SCENARIO_DISARM) is not None:
+            # A scenario not mapped to a state, or none matching the areas'
+            # state: some area is armed in a way the mapping does not name
+            unmapped = True
+            new_state_enum = AlarmControlPanelState.ARMED_CUSTOM_BYPASS
+            logged = (
+                current_active_scenario_idx if status.scenario_matches else NO_MATCH
+            )
+            if logged != self._unmapped_scenario_logged:
+                if status.scenario_matches:
                     _LOGGER.warning(
                         "%s: Active scenario %s is not mapped to a Home Assistant "
                         "state; shown as armed (custom bypass)",
                         self.name,
                         current_active_scenario_idx,
                     )
-                    self._unmapped_scenario_logged = current_active_scenario_idx
-                unmapped = True
-                new_state_enum = AlarmControlPanelState.ARMED_CUSTOM_BYPASS
-
-            elif (
-                current_active_scenario_idx == -1
-                and new_state_enum == AlarmControlPanelState.DISARMED
-            ):
-                _LOGGER.debug(
-                    "%s: No active scenario reported by panel (-1), defaulting to DISARMED",
-                    self.name,
-                )
-            # If new_state_enum is still None at this point (e.g. no disarm scenario defined and no match)
-            # then it will remain None or be UNKNOWN.
+                else:
+                    _LOGGER.warning(
+                        "%s: no scenario matches the areas' state; shown as armed "
+                        "(custom bypass)",
+                        self.name,
+                    )
+                self._unmapped_scenario_logged = logged
         if not unmapped:
             self._unmapped_scenario_logged = None  # warn again on the next one
 
@@ -379,18 +338,14 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
 
         Every area is tried; the first that was not reset raises.
         """
-        coordinator_data = self.coordinator.data
-        if not coordinator_data:
+        status = self.status
+        if status is None:
             _LOGGER.warning(
                 "No coordinator data available for %s to find triggered areas",
                 self.name,
             )
             return
-        areas_status = coordinator_data.get(KEY_LIVE_AREAS_STATUS, {})
-        triggered_areas = sorted(
-            set(areas_status.get(KEY_LIVE_TRIGGERED_AREAS_LIST) or [])
-            | set(areas_status.get(KEY_LIVE_TAMPER_MEMORY_AREAS_LIST) or [])
-        )
+        triggered_areas = sorted(status.areas.alarm_memory | status.areas.tamper_memory)
         if not triggered_areas:
             _LOGGER.info(
                 "Alarm Reset called for %s, but no area has an alarm or tamper memory",

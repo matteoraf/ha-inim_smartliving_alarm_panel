@@ -5607,7 +5607,7 @@
   },
   {
    "attributes": {
-    "active_scenario_index": 255,
+    "active_scenario_index": null,
     "friendly_name": "Test Panel Active Scenario Name",
     "icon": "mdi:list-status",
     "raw_active_scenario_hex": "ff"
@@ -5620,7 +5620,7 @@
    "original_icon": "mdi:list-status",
    "original_name": "Active Scenario Name",
    "platform": "sensor",
-   "state": "Unknown Scenario (Index 255)",
+   "state": "No scenario matches",
    "unique_id": "_active_scenario_name"
   },
   {

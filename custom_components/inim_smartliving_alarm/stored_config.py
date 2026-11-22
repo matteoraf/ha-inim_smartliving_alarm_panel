@@ -356,16 +356,6 @@ def system_info(stored: Mapping[str, Any]) -> SystemInfo | None:
     )
 
 
-def device_model(info: SystemInfo | None) -> str:
-    """The panel type for the device entry ("SmartLiving" if not known)."""
-    return info.type if info is not None else "SmartLiving"
-
-
-def device_sw_version(info: SystemInfo | None) -> str:
-    """The firmware version for the device entry ("Unknown" if not known)."""
-    return info.version if info is not None else "Unknown"
-
-
 # ----------------------------------------------------------------- labels
 
 

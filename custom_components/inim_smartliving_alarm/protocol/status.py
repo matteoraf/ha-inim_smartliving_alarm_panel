@@ -72,6 +72,14 @@ class ZoneMemory:
     outputs: tuple[bool, ...]  # per logical terminal (L)
     fixed_outputs: tuple[bool, ...]  # O1-O3
 
+    def zone_tamper_memory(self, zone: int) -> bool:
+        """The tamper memory of a zone's (0-based) terminal.
+
+        Both zones of a double terminal share it.
+        """
+        terminals = self.terminal_tamper_memory
+        return bool(terminals) and terminals[zone % len(terminals)]
+
 
 @dataclass(frozen=True, slots=True)
 class PanelState:

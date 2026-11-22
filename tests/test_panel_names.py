@@ -13,7 +13,7 @@ from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
 )
-from custom_components.inim_smartliving_alarm.sensor import _EventNames
+from custom_components.inim_smartliving_alarm.event_log import EventNames
 from custom_components.inim_smartliving_alarm.stored_config import (
     BLOCKS,
     name_table,
@@ -97,7 +97,7 @@ CONFIG_1050 = {
 )
 def test_event_locations(location: int, expected: str) -> None:
     """Keypads, then readers, then remote and none."""
-    assert _EventNames(CONFIG_1050).location(location) == expected
+    assert EventNames(CONFIG_1050).location(location) == expected
 
 
 @pytest.mark.parametrize(
@@ -113,7 +113,7 @@ def test_event_locations(location: int, expected: str) -> None:
 )
 def test_event_agents(agent: int, location: int, expected: str) -> None:
     """User codes, or keys on a reader."""
-    assert _EventNames(CONFIG_1050).agent(agent, location) == expected
+    assert EventNames(CONFIG_1050).agent(agent, location) == expected
 
 
 def test_readers_follow_the_keypad_count() -> None:
@@ -122,14 +122,14 @@ def test_readers_follow_the_keypad_count() -> None:
         "keypad_labels": label_block([""] * 15),
         "reader_labels": label_block(["Gate"]),
     }
-    names = _EventNames(config)
+    names = EventNames(config)
     assert names.location(12) == "Keypad 13"
     assert names.location(15) == "Gate"
 
 
 def test_configuration_without_the_names() -> None:
     """A configuration stored by an earlier version names them as before."""
-    names = _EventNames({})
+    names = EventNames({})
     assert names.agent(0, 0xFE) == "Master Code"
     assert names.agent(3, 0) == "User 3"
     assert names.location(9) == "Keypad 10"
