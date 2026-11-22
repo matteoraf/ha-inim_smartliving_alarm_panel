@@ -1,0 +1,5928 @@
+{
+ "available": {
+  "areas": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "outputs": [
+   41,
+   42,
+   43,
+   51,
+   52,
+   53
+  ],
+  "scenarios": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30
+  ],
+  "zones": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37
+  ]
+ },
+ "configuration": {
+  "areas": [
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 1",
+    "number": 1,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 2",
+    "number": 2,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 3",
+    "number": 3,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 4",
+    "number": 4,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 5",
+    "number": 5,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 6",
+    "number": 6,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 7",
+    "number": 7,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 8",
+    "number": 8,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 9",
+    "number": 9,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   {
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "label": "Area 10",
+    "number": 10,
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   }
+  ],
+  "codes": [
+   {
+    "label": "Master",
+    "number": 1
+   },
+   {
+    "label": "User 2",
+    "number": 2
+   },
+   {
+    "label": "User 3",
+    "number": 3
+   },
+   {
+    "label": "User 4",
+    "number": 4
+   },
+   {
+    "label": "User 5",
+    "number": 5
+   },
+   {
+    "label": "User 6",
+    "number": 6
+   },
+   {
+    "label": "User 7",
+    "number": 7
+   },
+   {
+    "label": "User 8",
+    "number": 8
+   },
+   {
+    "label": "User 9",
+    "number": 9
+   },
+   {
+    "label": "User 10",
+    "number": 10
+   },
+   {
+    "label": "User 11",
+    "number": 11
+   },
+   {
+    "label": "User 12",
+    "number": 12
+   },
+   {
+    "label": "User 13",
+    "number": 13
+   },
+   {
+    "label": "User 14",
+    "number": 14
+   },
+   {
+    "label": "User 15",
+    "number": 15
+   },
+   {
+    "label": "User 16",
+    "number": 16
+   },
+   {
+    "label": "User 17",
+    "number": 17
+   },
+   {
+    "label": "User 18",
+    "number": 18
+   },
+   {
+    "label": "User 19",
+    "number": 19
+   },
+   {
+    "label": "User 20",
+    "number": 20
+   },
+   {
+    "label": "User 21",
+    "number": 21
+   },
+   {
+    "label": "User 22",
+    "number": 22
+   },
+   {
+    "label": "User 23",
+    "number": 23
+   },
+   {
+    "label": "User 24",
+    "number": 24
+   },
+   {
+    "label": "User 25",
+    "number": 25
+   },
+   {
+    "label": "User 26",
+    "number": 26
+   },
+   {
+    "label": "User 27",
+    "number": 27
+   },
+   {
+    "label": "User 28",
+    "number": 28
+   },
+   {
+    "label": "User 29",
+    "number": 29
+   },
+   {
+    "label": "User 30",
+    "number": 30
+   },
+   {
+    "label": "User 31",
+    "number": 31
+   },
+   {
+    "label": "User 32",
+    "number": 32
+   },
+   {
+    "label": "User 33",
+    "number": 33
+   },
+   {
+    "label": "User 34",
+    "number": 34
+   },
+   {
+    "label": "User 35",
+    "number": 35
+   },
+   {
+    "label": "User 36",
+    "number": 36
+   },
+   {
+    "label": "User 37",
+    "number": 37
+   },
+   {
+    "label": "User 38",
+    "number": 38
+   },
+   {
+    "label": "User 39",
+    "number": 39
+   },
+   {
+    "label": "User 40",
+    "number": 40
+   },
+   {
+    "label": "User 41",
+    "number": 41
+   },
+   {
+    "label": "User 42",
+    "number": 42
+   },
+   {
+    "label": "User 43",
+    "number": 43
+   },
+   {
+    "label": "User 44",
+    "number": 44
+   },
+   {
+    "label": "User 45",
+    "number": 45
+   },
+   {
+    "label": "User 46",
+    "number": 46
+   },
+   {
+    "label": "User 47",
+    "number": 47
+   },
+   {
+    "label": "User 48",
+    "number": 48
+   },
+   {
+    "label": "User 49",
+    "number": 49
+   },
+   {
+    "label": "User 50",
+    "number": 50
+   }
+  ],
+  "enabled_devices": {
+   "expanders": [
+    "Exp Kitchen"
+   ],
+   "keypads": [
+    "Tast Zona Giorno",
+    "Tast Garage"
+   ],
+   "readers": [
+    "PK Giorno",
+    "PK Garage",
+    "Reader 3"
+   ],
+   "sirens": [
+    "Outdoor siren"
+   ]
+  },
+  "expanders": [
+   {
+    "label": "Exp Kitchen",
+    "number": 1
+   },
+   {
+    "label": "",
+    "number": 2
+   },
+   {
+    "label": "",
+    "number": 3
+   },
+   {
+    "label": "",
+    "number": 4
+   },
+   {
+    "label": "",
+    "number": 5
+   },
+   {
+    "label": "",
+    "number": 6
+   },
+   {
+    "label": "",
+    "number": 7
+   },
+   {
+    "label": "",
+    "number": 8
+   },
+   {
+    "label": "",
+    "number": 9
+   },
+   {
+    "label": "",
+    "number": 10
+   },
+   {
+    "label": "",
+    "number": 11
+   },
+   {
+    "label": "",
+    "number": 12
+   },
+   {
+    "label": "",
+    "number": 13
+   },
+   {
+    "label": "",
+    "number": 14
+   },
+   {
+    "label": "",
+    "number": 15
+   },
+   {
+    "label": "",
+    "number": 16
+   },
+   {
+    "label": "",
+    "number": 17
+   },
+   {
+    "label": "",
+    "number": 18
+   },
+   {
+    "label": "",
+    "number": 19
+   },
+   {
+    "label": "",
+    "number": 20
+   }
+  ],
+  "keypads": [
+   {
+    "label": "Tast Zona Giorno",
+    "number": 1
+   },
+   {
+    "label": "Tast Garage",
+    "number": 2
+   },
+   {
+    "label": "",
+    "number": 3
+   },
+   {
+    "label": "",
+    "number": 4
+   },
+   {
+    "label": "",
+    "number": 5
+   },
+   {
+    "label": "",
+    "number": 6
+   },
+   {
+    "label": "",
+    "number": 7
+   },
+   {
+    "label": "",
+    "number": 8
+   },
+   {
+    "label": "",
+    "number": 9
+   },
+   {
+    "label": "",
+    "number": 10
+   }
+  ],
+  "keys": [
+   {
+    "label": "Key Anna",
+    "number": 1
+   },
+   {
+    "label": "Key Marco",
+    "number": 2
+   },
+   {
+    "label": "",
+    "number": 3
+   },
+   {
+    "label": "",
+    "number": 4
+   },
+   {
+    "label": "",
+    "number": 5
+   },
+   {
+    "label": "",
+    "number": 6
+   },
+   {
+    "label": "",
+    "number": 7
+   },
+   {
+    "label": "",
+    "number": 8
+   },
+   {
+    "label": "",
+    "number": 9
+   },
+   {
+    "label": "",
+    "number": 10
+   },
+   {
+    "label": "",
+    "number": 11
+   },
+   {
+    "label": "",
+    "number": 12
+   },
+   {
+    "label": "",
+    "number": 13
+   },
+   {
+    "label": "",
+    "number": 14
+   },
+   {
+    "label": "",
+    "number": 15
+   },
+   {
+    "label": "",
+    "number": 16
+   },
+   {
+    "label": "",
+    "number": 17
+   },
+   {
+    "label": "",
+    "number": 18
+   },
+   {
+    "label": "",
+    "number": 19
+   },
+   {
+    "label": "",
+    "number": 20
+   },
+   {
+    "label": "",
+    "number": 21
+   },
+   {
+    "label": "",
+    "number": 22
+   },
+   {
+    "label": "",
+    "number": 23
+   },
+   {
+    "label": "",
+    "number": 24
+   },
+   {
+    "label": "",
+    "number": 25
+   },
+   {
+    "label": "",
+    "number": 26
+   },
+   {
+    "label": "",
+    "number": 27
+   },
+   {
+    "label": "",
+    "number": 28
+   },
+   {
+    "label": "",
+    "number": 29
+   },
+   {
+    "label": "",
+    "number": 30
+   },
+   {
+    "label": "",
+    "number": 31
+   },
+   {
+    "label": "",
+    "number": 32
+   },
+   {
+    "label": "",
+    "number": 33
+   },
+   {
+    "label": "",
+    "number": 34
+   },
+   {
+    "label": "",
+    "number": 35
+   },
+   {
+    "label": "",
+    "number": 36
+   },
+   {
+    "label": "",
+    "number": 37
+   },
+   {
+    "label": "",
+    "number": 38
+   },
+   {
+    "label": "",
+    "number": 39
+   },
+   {
+    "label": "",
+    "number": 40
+   },
+   {
+    "label": "",
+    "number": 41
+   },
+   {
+    "label": "",
+    "number": 42
+   },
+   {
+    "label": "",
+    "number": 43
+   },
+   {
+    "label": "",
+    "number": 44
+   },
+   {
+    "label": "",
+    "number": 45
+   },
+   {
+    "label": "",
+    "number": 46
+   },
+   {
+    "label": "",
+    "number": 47
+   },
+   {
+    "label": "",
+    "number": 48
+   },
+   {
+    "label": "",
+    "number": 49
+   },
+   {
+    "label": "",
+    "number": 50
+   },
+   {
+    "label": "",
+    "number": 51
+   },
+   {
+    "label": "",
+    "number": 52
+   },
+   {
+    "label": "",
+    "number": 53
+   },
+   {
+    "label": "",
+    "number": 54
+   },
+   {
+    "label": "",
+    "number": 55
+   },
+   {
+    "label": "",
+    "number": 56
+   },
+   {
+    "label": "",
+    "number": 57
+   },
+   {
+    "label": "",
+    "number": 58
+   },
+   {
+    "label": "",
+    "number": 59
+   },
+   {
+    "label": "",
+    "number": 60
+   },
+   {
+    "label": "",
+    "number": 61
+   },
+   {
+    "label": "",
+    "number": 62
+   },
+   {
+    "label": "",
+    "number": 63
+   },
+   {
+    "label": "",
+    "number": 64
+   },
+   {
+    "label": "",
+    "number": 65
+   },
+   {
+    "label": "",
+    "number": 66
+   },
+   {
+    "label": "",
+    "number": 67
+   },
+   {
+    "label": "",
+    "number": 68
+   },
+   {
+    "label": "",
+    "number": 69
+   },
+   {
+    "label": "",
+    "number": 70
+   },
+   {
+    "label": "",
+    "number": 71
+   },
+   {
+    "label": "",
+    "number": 72
+   },
+   {
+    "label": "",
+    "number": 73
+   },
+   {
+    "label": "",
+    "number": 74
+   },
+   {
+    "label": "",
+    "number": 75
+   },
+   {
+    "label": "",
+    "number": 76
+   },
+   {
+    "label": "",
+    "number": 77
+   },
+   {
+    "label": "",
+    "number": 78
+   },
+   {
+    "label": "",
+    "number": 79
+   },
+   {
+    "label": "",
+    "number": 80
+   },
+   {
+    "label": "",
+    "number": 81
+   },
+   {
+    "label": "",
+    "number": 82
+   },
+   {
+    "label": "",
+    "number": 83
+   },
+   {
+    "label": "",
+    "number": 84
+   },
+   {
+    "label": "",
+    "number": 85
+   },
+   {
+    "label": "",
+    "number": 86
+   },
+   {
+    "label": "",
+    "number": 87
+   },
+   {
+    "label": "",
+    "number": 88
+   },
+   {
+    "label": "",
+    "number": 89
+   },
+   {
+    "label": "",
+    "number": 90
+   },
+   {
+    "label": "",
+    "number": 91
+   },
+   {
+    "label": "",
+    "number": 92
+   },
+   {
+    "label": "",
+    "number": 93
+   },
+   {
+    "label": "",
+    "number": 94
+   },
+   {
+    "label": "",
+    "number": 95
+   },
+   {
+    "label": "",
+    "number": 96
+   },
+   {
+    "label": "",
+    "number": 97
+   },
+   {
+    "label": "",
+    "number": 98
+   },
+   {
+    "label": "",
+    "number": 99
+   },
+   {
+    "label": "",
+    "number": 100
+   }
+  ],
+  "model": "SmartLiving 1050",
+  "outputs": [
+   {
+    "buzzer": false,
+    "flashing": false,
+    "home_automation": false,
+    "keep_on_restoral": false,
+    "kind": "on_off",
+    "label": "Gate",
+    "normally_closed": false,
+    "number": 41,
+    "output_number": 41,
+    "relay_use": false,
+    "terminal_index": 40,
+    "toggle": false
+   },
+   {
+    "buzzer": false,
+    "flashing": false,
+    "home_automation": false,
+    "keep_on_restoral": false,
+    "kind": "monostable",
+    "label": "Door strike",
+    "monostable_time": "2 s",
+    "normally_closed": false,
+    "number": 42,
+    "output_number": 42,
+    "relay_use": false,
+    "terminal_index": 41,
+    "toggle": false
+   },
+   {
+    "buzzer": false,
+    "flashing": false,
+    "home_automation": false,
+    "keep_on_restoral": false,
+    "kind": "dimmer",
+    "label": "Lounge",
+    "normally_closed": false,
+    "number": 43,
+    "output_number": 43,
+    "relay_use": false,
+    "terminal_index": 42,
+    "toggle": false
+   },
+   {
+    "buzzer": false,
+    "flashing": false,
+    "home_automation": false,
+    "keep_on_restoral": false,
+    "kind": "on_off",
+    "label": "Zone 44",
+    "normally_closed": false,
+    "number": 44,
+    "output_number": 44,
+    "relay_use": false,
+    "terminal_index": 43,
+    "toggle": false
+   },
+   {
+    "buzzer": false,
+    "flashing": false,
+    "home_automation": false,
+    "keep_on_restoral": false,
+    "kind": "on_off",
+    "label": "Zone 45",
+    "normally_closed": false,
+    "number": 45,
+    "output_number": 45,
+    "relay_use": false,
+    "terminal_index": 44,
+    "toggle": false
+   },
+   {
+    "buzzer": false,
+    "fixed_output": 1,
+    "flashing": false,
+    "home_automation": false,
+    "keep_on_restoral": false,
+    "kind": "monostable",
+    "label": "Siren relay",
+    "monostable_time": "30 s",
+    "normally_closed": true,
+    "number": 51,
+    "output_number": 51,
+    "relay_use": false,
+    "toggle": false
+   },
+   {
+    "buzzer": false,
+    "fixed_output": 2,
+    "flashing": false,
+    "home_automation": false,
+    "keep_on_restoral": false,
+    "kind": "on_off",
+    "label": "Garden",
+    "normally_closed": false,
+    "number": 52,
+    "output_number": 52,
+    "relay_use": false,
+    "toggle": false
+   },
+   {
+    "buzzer": false,
+    "fixed_output": 3,
+    "flashing": false,
+    "home_automation": false,
+    "keep_on_restoral": false,
+    "kind": "on_off",
+    "label": "",
+    "normally_closed": false,
+    "number": 53,
+    "output_number": 53,
+    "relay_use": false,
+    "toggle": false
+   }
+  ],
+  "readers": [
+   {
+    "label": "PK Giorno",
+    "number": 1
+   },
+   {
+    "label": "PK Garage",
+    "number": 2
+   },
+   {
+    "label": "",
+    "number": 3
+   },
+   {
+    "label": "",
+    "number": 4
+   },
+   {
+    "label": "",
+    "number": 5
+   },
+   {
+    "label": "",
+    "number": 6
+   },
+   {
+    "label": "",
+    "number": 7
+   },
+   {
+    "label": "",
+    "number": 8
+   },
+   {
+    "label": "",
+    "number": 9
+   },
+   {
+    "label": "",
+    "number": 10
+   },
+   {
+    "label": "",
+    "number": 11
+   },
+   {
+    "label": "",
+    "number": 12
+   },
+   {
+    "label": "",
+    "number": 13
+   },
+   {
+    "label": "",
+    "number": 14
+   },
+   {
+    "label": "",
+    "number": 15
+   },
+   {
+    "label": "",
+    "number": 16
+   },
+   {
+    "label": "",
+    "number": 17
+   },
+   {
+    "label": "",
+    "number": 18
+   },
+   {
+    "label": "",
+    "number": 19
+   },
+   {
+    "label": "",
+    "number": 20
+   }
+  ],
+  "refuses_arming_with_zones_not_ready": false,
+  "scenarios": [
+   {
+    "areas": {
+     "1": "total",
+     "10": "keep",
+     "2": "total",
+     "3": "total",
+     "4": "total",
+     "5": "total",
+     "6": "total",
+     "7": "total",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 1",
+    "number": 1
+   },
+   {
+    "areas": {
+     "1": "disarm",
+     "10": "keep",
+     "2": "disarm",
+     "3": "disarm",
+     "4": "disarm",
+     "5": "disarm",
+     "6": "disarm",
+     "7": "disarm",
+     "8": "disarm",
+     "9": "keep"
+    },
+    "label": "Scenario 2",
+    "number": 2
+   },
+   {
+    "areas": {
+     "1": "total",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "total",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 3",
+    "number": 3
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 4",
+    "number": 4
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 5",
+    "number": 5
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 6",
+    "number": 6
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 7",
+    "number": 7
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 8",
+    "number": 8
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 9",
+    "number": 9
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 10",
+    "number": 10
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 11",
+    "number": 11
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 12",
+    "number": 12
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 13",
+    "number": 13
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 14",
+    "number": 14
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 15",
+    "number": 15
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 16",
+    "number": 16
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 17",
+    "number": 17
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 18",
+    "number": 18
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 19",
+    "number": 19
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 20",
+    "number": 20
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 21",
+    "number": 21
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 22",
+    "number": 22
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 23",
+    "number": 23
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 24",
+    "number": 24
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 25",
+    "number": 25
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 26",
+    "number": 26
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 27",
+    "number": 27
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 28",
+    "number": 28
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 29",
+    "number": 29
+   },
+   {
+    "areas": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
+    "label": "Scenario 30",
+    "number": 30
+   }
+  ],
+  "sirens": [
+   {
+    "label": "Outdoor siren",
+    "number": 1
+   },
+   {
+    "label": "",
+    "number": 2
+   },
+   {
+    "label": "",
+    "number": 3
+   },
+   {
+    "label": "",
+    "number": 4
+   },
+   {
+    "label": "",
+    "number": 5
+   },
+   {
+    "label": "",
+    "number": 6
+   },
+   {
+    "label": "",
+    "number": 7
+   },
+   {
+    "label": "",
+    "number": 8
+   },
+   {
+    "label": "",
+    "number": 9
+   },
+   {
+    "label": "",
+    "number": 10
+   }
+  ],
+  "timers": [
+   {
+    "label": "Timer 1",
+    "number": 1
+   },
+   {
+    "label": "",
+    "number": 2
+   },
+   {
+    "label": "",
+    "number": 3
+   },
+   {
+    "label": "",
+    "number": 4
+   },
+   {
+    "label": "",
+    "number": 5
+   },
+   {
+    "label": "",
+    "number": 6
+   },
+   {
+    "label": "",
+    "number": 7
+   },
+   {
+    "label": "",
+    "number": 8
+   },
+   {
+    "label": "",
+    "number": 9
+   },
+   {
+    "label": "",
+    "number": 10
+   }
+  ],
+  "zones": [
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 1",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 1,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 0,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 2",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 2,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 1,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 3",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 3,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 2,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 4",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 4,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 3,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 5",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 5,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 4,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 6",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 6,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 5,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 7",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 7,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 6,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 8",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 8,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 7,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 9",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 9,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 8,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 10",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 10,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 9,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 11",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 11,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 10,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 12",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 12,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 11,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 13",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 13,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 12,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 14",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 14,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 13,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 15",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 15,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 14,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 16",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 16,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 15,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 17",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 17,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 16,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 18",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 18,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 17,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 19",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 19,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 18,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     1
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 20",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 20,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 19,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     2
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 21",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 21,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 20,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     2
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 22",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 22,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 21,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     2
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 23",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 23,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 22,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     4
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 24",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 24,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 23,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     4
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 25",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 25,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 24,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     4
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 26",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 26,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 25,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     4
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 27",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 27,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 26,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     4
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 28",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 28,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 27,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     5
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 29",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 29,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 28,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     5
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 30",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 30,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 29,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     5
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 31",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 31,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 30,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     5
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 32",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 32,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 31,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     6
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 33",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 33,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 32,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     6
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 34",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 34,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 33,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     6
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 35",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 35,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 34,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     7
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 36",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 36,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 35,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [
+     3
+    ],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 37",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 37,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 36,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 38",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 38,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 37,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 39",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 39,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 38,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 40",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 40,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 39,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Gate",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 41,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 40,
+    "terminal_type": "output",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Door strike",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 42,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 41,
+    "terminal_type": "output",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Lounge",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 43,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 42,
+    "terminal_type": "out_dimming",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 44",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 44,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 43,
+    "terminal_type": "output",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 45",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 45,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 44,
+    "terminal_type": "output",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 46",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 46,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 45,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 47",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 47,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 46,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 48",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 48,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 47,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 49",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 49,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 48,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 50",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 50,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": false,
+    "sensor_kind": "generic",
+    "terminal_index": 49,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 51",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 51,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 0,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 52",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 52,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 1,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 53",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 53,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 2,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 54",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 54,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 3,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 55",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 55,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 4,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 56",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 56,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 5,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 57",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 57,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 6,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 58",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 58,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 7,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 59",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 59,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 8,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 60",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 60,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 9,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 61",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 61,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 10,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 62",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 62,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 11,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 63",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 63,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 12,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 64",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 64,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 13,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 65",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 65,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 14,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 66",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 66,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 15,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 67",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 67,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 16,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 68",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 68,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 17,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 69",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 69,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 18,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 70",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 70,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 19,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 71",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 71,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 20,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 72",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 72,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 21,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 73",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 73,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 22,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 74",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 74,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 23,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 75",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 75,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 24,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 76",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 76,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 25,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 77",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 77,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 26,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 78",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 78,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 27,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 79",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 79,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 28,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 80",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 80,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 29,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 81",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 81,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 30,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 82",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 82,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 31,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 83",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 83,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 32,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 84",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 84,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 33,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 85",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 85,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 34,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 86",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 86,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 35,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 87",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 87,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 36,
+    "terminal_type": "input",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 88",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 88,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 37,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 89",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 89,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 38,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 90",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 90,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 39,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 91",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 91,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 40,
+    "terminal_type": "output",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 92",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 92,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 41,
+    "terminal_type": "output",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 93",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 93,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 42,
+    "terminal_type": "out_dimming",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 94",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 94,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 43,
+    "terminal_type": "output",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 95",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 95,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 44,
+    "terminal_type": "output",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 96",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 96,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 45,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 97",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 97,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 46,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 98",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 98,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 47,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 99",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 99,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 48,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   },
+   {
+    "alarm_cycles": 0,
+    "alarm_pulse_duration": "0 ms",
+    "assigned_areas": [],
+    "autobypass": false,
+    "autobypass_no_reinclude": false,
+    "balancing": "normally_open",
+    "chime": false,
+    "entry_time_2": false,
+    "fault_zone": false,
+    "hold_up": false,
+    "interior": false,
+    "label": "Zone 100",
+    "last_exit_zone": false,
+    "no_arming_if_not_ready": false,
+    "number": 100,
+    "pulse_count": 0,
+    "pulse_window_time": "0 s",
+    "reinclude_on_disarm": false,
+    "second_zone": true,
+    "sensor_kind": "generic",
+    "terminal_index": 49,
+    "terminal_type": "null",
+    "test_programmed": false,
+    "unbypassable": false,
+    "zone_type": "instant"
+   }
+  ]
+ },
+ "output_addresses": {
+  "41": 40,
+  "42": 41,
+  "43": 42,
+  "44": null,
+  "45": 44,
+  "51": 0,
+  "52": 1,
+  "53": 2
+ },
+ "scenario_modes": {
+  "1": {
+   "1": 1,
+   "10": 0,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 1,
+   "7": 1,
+   "8": 0,
+   "9": 0
+  },
+  "10": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "11": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "12": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "13": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "14": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "15": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "16": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "17": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "18": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "19": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "2": {
+   "1": 4,
+   "10": 0,
+   "2": 4,
+   "3": 4,
+   "4": 4,
+   "5": 4,
+   "6": 4,
+   "7": 4,
+   "8": 4,
+   "9": 0
+  },
+  "20": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "21": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "22": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "23": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "24": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "25": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "26": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "27": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "28": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "29": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "3": {
+   "1": 1,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 1,
+   "8": 0,
+   "9": 0
+  },
+  "30": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "4": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "5": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "6": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "7": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "8": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  },
+  "9": {
+   "1": 0,
+   "10": 0,
+   "2": 0,
+   "3": 0,
+   "4": 0,
+   "5": 0,
+   "6": 0,
+   "7": 0,
+   "8": 0,
+   "9": 0
+  }
+ },
+ "suggested_mappings": {
+  "scenario_arm_away": 0,
+  "scenario_disarm": 1
+ },
+ "suggested_selection": {
+  "areas": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ],
+  "outputs": [],
+  "scenarios": [
+   1,
+   2,
+   3
+  ],
+  "zones": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22,
+   23,
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31,
+   32,
+   33,
+   34,
+   35,
+   36,
+   37
+  ]
+ },
+ "system_info": {
+  "type": "01050",
+  "version": "6.07"
+ },
+ "zones": [
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 1,
+   "second_zone": false,
+   "slot": 0,
+   "terminal": 0,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 2,
+   "second_zone": false,
+   "slot": 1,
+   "terminal": 1,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 3,
+   "second_zone": false,
+   "slot": null,
+   "terminal": 2,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 4,
+   "second_zone": false,
+   "slot": 3,
+   "terminal": 3,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 5,
+   "second_zone": false,
+   "slot": 4,
+   "terminal": 4,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 6,
+   "second_zone": false,
+   "slot": 5,
+   "terminal": 5,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 7,
+   "second_zone": false,
+   "slot": 6,
+   "terminal": 6,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 8,
+   "second_zone": false,
+   "slot": 7,
+   "terminal": 7,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 9,
+   "second_zone": false,
+   "slot": 8,
+   "terminal": 8,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 10,
+   "second_zone": false,
+   "slot": 9,
+   "terminal": 9,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 11,
+   "second_zone": false,
+   "slot": 10,
+   "terminal": 10,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 12,
+   "second_zone": false,
+   "slot": 11,
+   "terminal": 11,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 13,
+   "second_zone": false,
+   "slot": 12,
+   "terminal": 12,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 14,
+   "second_zone": false,
+   "slot": 13,
+   "terminal": 13,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 15,
+   "second_zone": false,
+   "slot": 14,
+   "terminal": 14,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 16,
+   "second_zone": false,
+   "slot": 15,
+   "terminal": 15,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 17,
+   "second_zone": false,
+   "slot": 16,
+   "terminal": 16,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 18,
+   "second_zone": false,
+   "slot": 17,
+   "terminal": 17,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 19,
+   "second_zone": false,
+   "slot": 18,
+   "terminal": 18,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    1
+   ],
+   "exists": true,
+   "number": 20,
+   "second_zone": false,
+   "slot": 19,
+   "terminal": 19,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    2
+   ],
+   "exists": true,
+   "number": 21,
+   "second_zone": false,
+   "slot": 20,
+   "terminal": 20,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    2
+   ],
+   "exists": true,
+   "number": 22,
+   "second_zone": false,
+   "slot": 21,
+   "terminal": 21,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    2
+   ],
+   "exists": true,
+   "number": 23,
+   "second_zone": false,
+   "slot": 22,
+   "terminal": 22,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    4
+   ],
+   "exists": true,
+   "number": 24,
+   "second_zone": false,
+   "slot": 23,
+   "terminal": 23,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    4
+   ],
+   "exists": true,
+   "number": 25,
+   "second_zone": false,
+   "slot": 24,
+   "terminal": 24,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    4
+   ],
+   "exists": true,
+   "number": 26,
+   "second_zone": false,
+   "slot": 25,
+   "terminal": 25,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    4
+   ],
+   "exists": true,
+   "number": 27,
+   "second_zone": false,
+   "slot": 26,
+   "terminal": 26,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    4
+   ],
+   "exists": true,
+   "number": 28,
+   "second_zone": false,
+   "slot": 27,
+   "terminal": 27,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    5
+   ],
+   "exists": true,
+   "number": 29,
+   "second_zone": false,
+   "slot": 28,
+   "terminal": 28,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    5
+   ],
+   "exists": true,
+   "number": 30,
+   "second_zone": false,
+   "slot": 29,
+   "terminal": 29,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    5
+   ],
+   "exists": true,
+   "number": 31,
+   "second_zone": false,
+   "slot": 30,
+   "terminal": 30,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    5
+   ],
+   "exists": true,
+   "number": 32,
+   "second_zone": false,
+   "slot": 31,
+   "terminal": 31,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    6
+   ],
+   "exists": true,
+   "number": 33,
+   "second_zone": false,
+   "slot": 32,
+   "terminal": 32,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    6
+   ],
+   "exists": true,
+   "number": 34,
+   "second_zone": false,
+   "slot": 33,
+   "terminal": 33,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    6
+   ],
+   "exists": true,
+   "number": 35,
+   "second_zone": false,
+   "slot": 34,
+   "terminal": 34,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    7
+   ],
+   "exists": true,
+   "number": 36,
+   "second_zone": false,
+   "slot": 110,
+   "terminal": 35,
+   "terminal_type": 0
+  },
+  {
+   "areas": [
+    3
+   ],
+   "exists": true,
+   "number": 37,
+   "second_zone": false,
+   "slot": 112,
+   "terminal": 36,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 38,
+   "second_zone": false,
+   "slot": null,
+   "terminal": 37,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 39,
+   "second_zone": false,
+   "slot": null,
+   "terminal": 38,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 40,
+   "second_zone": false,
+   "slot": null,
+   "terminal": 39,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 41,
+   "second_zone": false,
+   "slot": 40,
+   "terminal": 40,
+   "terminal_type": 1
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 42,
+   "second_zone": false,
+   "slot": 41,
+   "terminal": 41,
+   "terminal_type": 1
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 43,
+   "second_zone": false,
+   "slot": 42,
+   "terminal": 42,
+   "terminal_type": 5
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 44,
+   "second_zone": false,
+   "slot": 2,
+   "terminal": 43,
+   "terminal_type": 1
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 45,
+   "second_zone": false,
+   "slot": 44,
+   "terminal": 44,
+   "terminal_type": 1
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 46,
+   "second_zone": false,
+   "slot": null,
+   "terminal": 45,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 47,
+   "second_zone": false,
+   "slot": null,
+   "terminal": 46,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 48,
+   "second_zone": false,
+   "slot": null,
+   "terminal": 47,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 49,
+   "second_zone": false,
+   "slot": null,
+   "terminal": 48,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 50,
+   "second_zone": false,
+   "slot": null,
+   "terminal": 49,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 51,
+   "second_zone": true,
+   "slot": 0,
+   "terminal": 0,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 52,
+   "second_zone": true,
+   "slot": 1,
+   "terminal": 1,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 53,
+   "second_zone": true,
+   "slot": null,
+   "terminal": 2,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 54,
+   "second_zone": true,
+   "slot": 3,
+   "terminal": 3,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 55,
+   "second_zone": true,
+   "slot": 4,
+   "terminal": 4,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 56,
+   "second_zone": true,
+   "slot": 5,
+   "terminal": 5,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 57,
+   "second_zone": true,
+   "slot": 6,
+   "terminal": 6,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 58,
+   "second_zone": true,
+   "slot": 7,
+   "terminal": 7,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 59,
+   "second_zone": true,
+   "slot": 8,
+   "terminal": 8,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 60,
+   "second_zone": true,
+   "slot": 9,
+   "terminal": 9,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 61,
+   "second_zone": true,
+   "slot": 10,
+   "terminal": 10,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 62,
+   "second_zone": true,
+   "slot": 11,
+   "terminal": 11,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 63,
+   "second_zone": true,
+   "slot": 12,
+   "terminal": 12,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 64,
+   "second_zone": true,
+   "slot": 13,
+   "terminal": 13,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 65,
+   "second_zone": true,
+   "slot": 14,
+   "terminal": 14,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 66,
+   "second_zone": true,
+   "slot": 15,
+   "terminal": 15,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 67,
+   "second_zone": true,
+   "slot": 16,
+   "terminal": 16,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 68,
+   "second_zone": true,
+   "slot": 17,
+   "terminal": 17,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 69,
+   "second_zone": true,
+   "slot": 18,
+   "terminal": 18,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 70,
+   "second_zone": true,
+   "slot": 19,
+   "terminal": 19,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 71,
+   "second_zone": true,
+   "slot": 20,
+   "terminal": 20,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 72,
+   "second_zone": true,
+   "slot": 21,
+   "terminal": 21,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 73,
+   "second_zone": true,
+   "slot": 22,
+   "terminal": 22,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 74,
+   "second_zone": true,
+   "slot": 23,
+   "terminal": 23,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 75,
+   "second_zone": true,
+   "slot": 24,
+   "terminal": 24,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 76,
+   "second_zone": true,
+   "slot": 25,
+   "terminal": 25,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 77,
+   "second_zone": true,
+   "slot": 26,
+   "terminal": 26,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 78,
+   "second_zone": true,
+   "slot": 27,
+   "terminal": 27,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 79,
+   "second_zone": true,
+   "slot": 28,
+   "terminal": 28,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 80,
+   "second_zone": true,
+   "slot": 29,
+   "terminal": 29,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 81,
+   "second_zone": true,
+   "slot": 30,
+   "terminal": 30,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 82,
+   "second_zone": true,
+   "slot": 31,
+   "terminal": 31,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 83,
+   "second_zone": true,
+   "slot": 32,
+   "terminal": 32,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 84,
+   "second_zone": true,
+   "slot": 33,
+   "terminal": 33,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 85,
+   "second_zone": true,
+   "slot": 34,
+   "terminal": 34,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 86,
+   "second_zone": true,
+   "slot": 110,
+   "terminal": 35,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 87,
+   "second_zone": true,
+   "slot": 112,
+   "terminal": 36,
+   "terminal_type": 0
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 88,
+   "second_zone": true,
+   "slot": null,
+   "terminal": 37,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 89,
+   "second_zone": true,
+   "slot": null,
+   "terminal": 38,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 90,
+   "second_zone": true,
+   "slot": null,
+   "terminal": 39,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 91,
+   "second_zone": true,
+   "slot": 40,
+   "terminal": 40,
+   "terminal_type": 1
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 92,
+   "second_zone": true,
+   "slot": 41,
+   "terminal": 41,
+   "terminal_type": 1
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 93,
+   "second_zone": true,
+   "slot": 42,
+   "terminal": 42,
+   "terminal_type": 5
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 94,
+   "second_zone": true,
+   "slot": 2,
+   "terminal": 43,
+   "terminal_type": 1
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 95,
+   "second_zone": true,
+   "slot": 44,
+   "terminal": 44,
+   "terminal_type": 1
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 96,
+   "second_zone": true,
+   "slot": null,
+   "terminal": 45,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 97,
+   "second_zone": true,
+   "slot": null,
+   "terminal": 46,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 98,
+   "second_zone": true,
+   "slot": null,
+   "terminal": 47,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 99,
+   "second_zone": true,
+   "slot": null,
+   "terminal": 48,
+   "terminal_type": 4
+  },
+  {
+   "areas": [],
+   "exists": false,
+   "number": 100,
+   "second_zone": true,
+   "slot": null,
+   "terminal": 49,
+   "terminal_type": 4
+  }
+ ]
+}

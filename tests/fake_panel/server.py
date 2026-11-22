@@ -94,6 +94,9 @@ class FakePanel:
         self.refuse_connections = False
         self.drop_after_requests: int | None = None
         self.corrupt_replies = 0
+        # EEPROM addresses whose reads always get a reply with a bad checksum,
+        # as a block the panel cannot deliver (other reads are unaffected)
+        self.unreadable_eeprom: list[range] = []
         # SmartLAN/G only: send read replies with the panel's checksum, as
         # no known board does (the board sends the data alone)
         self.g_reply_checksum = False
@@ -161,6 +164,8 @@ class FakePanel:
                     continue
                 handled += 1
                 reply = self._dispatch(request)
+                if self._unreadable(request) and reply:
+                    reply = reply[:-1] + bytes(((reply[-1] + 1) & 0xFF,))
                 await self._send(writer, reply)
                 if (
                     self.drop_after_requests is not None
@@ -174,6 +179,16 @@ class FakePanel:
             if self._client is writer:
                 self._client = None
             writer.close()
+
+    def _unreadable(self, request: Request) -> bool:
+        """Whether an EEPROM read touches an address in unreadable_eeprom."""
+        if request.write or request.space != SPACE_EEPROM:
+            return False
+        read = range(request.address, request.address + request.length)
+        return any(
+            read.start < block.stop and block.start < read.stop
+            for block in self.unreadable_eeprom
+        )
 
     async def _read(self, reader: asyncio.StreamReader, count: int) -> bytes:
         if self.idle_timeout is None:
