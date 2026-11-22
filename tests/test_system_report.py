@@ -13,6 +13,12 @@ from custom_components.inim_smartliving_alarm.const import (
 )
 from custom_components.inim_smartliving_alarm.legacy import configuration_dict
 from custom_components.inim_smartliving_alarm.protocol.commands import encode_pin
+from custom_components.inim_smartliving_alarm.protocol.config import (
+    TERMINAL_BALANCING_OFFSET,
+    TERMINAL_TYPE_OFFSET,
+    Balancing,
+    TerminalType,
+)
 from custom_components.inim_smartliving_alarm.protocol.masking import Level
 from custom_components.inim_smartliving_alarm.protocol.model import SMARTLIVING_1050_FW6
 from custom_components.inim_smartliving_alarm.protocol.report_layout import Space
@@ -486,6 +492,27 @@ async def test_sections_are_decoded(make_report) -> None:
         "raw": "00",
         "last_result": "00000000",
     }
+
+
+async def test_zone_values_by_terminal(make_report) -> None:
+    """A double-zone terminal's two zones, and a zone on an unused terminal.
+
+    Balancing.DOUBLE_ZONE and TerminalType.NULL are worth 4, as ZoneType.H24
+    is; neither is written 24_hour.
+    """
+    state = panel_1050()
+    record = bytearray(c.TERMINAL_RECORD_LENGTH)
+    record[TERMINAL_BALANCING_OFFSET] = Balancing.DOUBLE_ZONE
+    record[TERMINAL_TYPE_OFFSET] = TerminalType.DOUBLE
+    state.terminal_types[0] = c.TERMINAL_DOUBLE
+    state.terminal_records[0] = bytes(record)
+    assert state.terminal_types[49] == c.TERMINAL_NULL
+    report, _state = await make_report(Level.REDACTED, state)
+    zones = {zone["number"]: zone for zone in report["configuration"]["zones"]}
+    for number in (1, 51):
+        assert zones[number]["balancing"] == "double_zone", number
+        assert zones[number]["terminal_type"] == "double", number
+    assert zones[50]["terminal_type"] == "null"
 
 
 def test_self_check_drops_a_section_with_the_pin() -> None:
