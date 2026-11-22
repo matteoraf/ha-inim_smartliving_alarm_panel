@@ -491,6 +491,100 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Common problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cannot-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cannot connect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-finds-no-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search finds no board
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smartlang-the-reply-was-not-in-the-expected-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SmartLAN/G: the reply was not in the expected format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-inim-app-cannot-connect-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Inim app cannot connect locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#programming-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Programming mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands-not-carried-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands not carried out
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entities-missing-or-not-updating" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entities missing or not updating
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug log
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -628,6 +722,100 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Common problems">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cannot-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cannot connect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#search-finds-no-board" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Search finds no board
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smartlang-the-reply-was-not-in-the-expected-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SmartLAN/G: the reply was not in the expected format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-inim-app-cannot-connect-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Inim app cannot connect locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#programming-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Programming mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands-not-carried-out" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands not carried out
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entities-missing-or-not-updating" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entities missing or not updating
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-log" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debug log
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -648,183 +836,195 @@
 
 
 <h1 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h1>
+<p>Start with the table: find your problem, then follow the link for the details.</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>What to check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The setup is refused</td>
+<td>The message on the form: see <a href="../setup/#why-the-setup-can-be-refused">Why the setup can be refused</a>.</td>
+</tr>
+<tr>
+<td>Home Assistant cannot connect</td>
+<td>Address, port, network, firewall: see <a href="#cannot-connect">Cannot connect</a>.</td>
+</tr>
+<tr>
+<td><strong>Search the network</strong> finds no board</td>
+<td>Same subnet, free UDP ports: see <a href="#search-finds-no-board">Search finds no board</a>.</td>
+</tr>
+<tr>
+<td>A command fails with a message</td>
+<td>The message says why: see <a href="#when-the-panel-refuses-a-command">When the panel refuses a command</a>.</td>
+</tr>
+<tr>
+<td>Arming is refused because zones are not ready</td>
+<td>Close or bypass the zones, or arm anyway: see <a href="../actions-events/#zones-not-ready">Zones not ready</a>.</td>
+</tr>
+<tr>
+<td>Commands fail with "the panel is in programming mode"</td>
+<td>Wait until programming has ended: see <a href="#programming-mode">Programming mode</a>.</td>
+</tr>
+<tr>
+<td>Names, zones or scenarios are out of date</td>
+<td>Use <strong>Re-read panel configuration</strong>: see <a href="../setup/#re-reading-the-panel-configuration">Setup</a>.</td>
+</tr>
+<tr>
+<td>Entities are missing, too many, or not updating</td>
+<td>See <a href="#entities-missing-or-not-updating">Entities missing or not updating</a>.</td>
+</tr>
+<tr>
+<td>The Inim app cannot connect locally</td>
+<td>See <a href="#the-inim-app-cannot-connect-locally">The Inim app</a>.</td>
+</tr>
+<tr>
+<td>Reporting a problem</td>
+<td>Attach a <a href="../system-report/">system report</a> to the GitHub issue, and if you can a <a href="#debug-log">debug log</a>.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="when-the-panel-refuses-a-command">When the panel refuses a command<a class="headerlink" href="#when-the-panel-refuses-a-command" title="Permanent link">&para;</a></h2>
-<p>Arming, disarming, bypassing a zone, activating a scenario, resetting the alarm memory and switching an output fail with a message when they are not carried out. The message says which of three things happened:</p>
+<p>Arming, disarming, bypassing a zone, running a scenario, resetting the alarm memory and switching an output fail with a message when they are not carried out. The message says which of three things happened.</p>
+<p><strong>1. The integration did not send the command.</strong></p>
 <ul>
-<li>
-<p><strong>The integration did not send the command</strong>:</p>
-<ul>
-<li>
-<p>Before arming or activating a scenario, the integration checks the zones (see <a href="../actions-events/#zones-not-ready">Zones not ready</a>). If some are not ready and the option says <em>Refuse</em>, the message lists them and nothing is sent to the panel.</p>
-</li>
-<li>
-<p>While the panel is in programming mode, it ignores commands, so none is sent (<em>"The command for Area 3 was not sent: the panel is in programming mode. Try again when programming has ended."</em>). If the panel enters programming mode while a command is being sent, the message says that the command may not have been carried out: check the area or zone, and try again when programming has ended.</p>
-</li>
+<li>Before arming or running a scenario, the integration checks the zones (see <a href="../actions-events/#zones-not-ready">Zones not ready</a>). If some are not ready and the option says <em>Refuse</em>, the message lists them and nothing is sent to the panel.</li>
+<li>While the panel is in programming mode, it ignores commands, so none is sent (<em>"The command for Area 3 was not sent: the panel is in programming mode. Try again when programming has ended."</em>). If the panel enters programming mode while a command is being sent, the message says that the command may not have been carried out: check the area or zone, and try again when programming has ended.</li>
 </ul>
-</li>
-<li>
-<p><strong>The panel refused it</strong>: the message gives the panel's reason:</p>
+<p><strong>2. The panel refused it.</strong> The message gives the panel's reason:</p>
 <table>
 <thead>
 <tr>
 <th>Message</th>
+<th>Reason in events</th>
 <th>What to do</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>The panel did not accept the PIN</td>
+<td><code>invalid_code</code></td>
 <td>The user code was changed or deleted on the panel: enter the current PIN with <strong>Reconfigure</strong>.</td>
 </tr>
 <tr>
 <td>The PIN is not enabled for it</td>
+<td><code>code_not_enabled</code></td>
 <td>The user code does not control that area: enable it on the panel or use another code.</td>
 </tr>
 <tr>
-<td>The panel does not allow arming while zones are not ready</td>
+<td>It does not allow arming while zones are not ready</td>
+<td><code>open_zones</code></td>
 <td>Close or bypass the open zones of the area, then arm again.</td>
 </tr>
 <tr>
-<td>The zone cannot be bypassed / belongs to no area</td>
+<td>The zone cannot be bypassed</td>
+<td><code>cannot_be_bypassed</code></td>
+<td>The zone's programming on the panel does not allow it.</td>
+</tr>
+<tr>
+<td>The zone belongs to no area</td>
+<td><code>no_areas</code></td>
 <td>The zone's programming on the panel does not allow it.</td>
 </tr>
 <tr>
 <td>Double zone error</td>
+<td><code>double_zone_error</code></td>
 <td>The zone's programming on the panel does not allow it.</td>
 </tr>
 <tr>
-<td>Already in the requested state</td>
+<td>It is already in the requested state</td>
+<td><code>already_in_state</code></td>
 <td>Nothing to do: the zone or area was already as requested.</td>
 </tr>
 <tr>
-<td>Its terminal is out of range / not connected / not in use</td>
+<td>Its terminal is out of range</td>
+<td><code>slot_out_of_range</code></td>
 <td>The zone's or output's terminal has changed on the panel: use <strong>Re-read panel configuration</strong>.</td>
 </tr>
 <tr>
+<td>Its terminal is not connected</td>
+<td><code>slot_not_connected</code></td>
+<td>As above.</td>
+</tr>
+<tr>
+<td>Its terminal is not in use</td>
+<td><code>null_terminal</code></td>
+<td>As above.</td>
+</tr>
+<tr>
 <td>The output is not enabled</td>
+<td><code>output_not_enabled</code></td>
 <td>Your user code may not switch that output: enable it for the code on the panel, or untick the output.</td>
 </tr>
 <tr>
 <td>The output is locked while its areas are armed</td>
+<td><code>areas_armed</code></td>
 <td>The panel does not let the output change while its areas are armed: disarm them first.</td>
 </tr>
 <tr>
 <td>The panel refused the command</td>
+<td><code>refused</code></td>
 <td>The panel gave no reason.</td>
 </tr>
 <tr>
 <td>The panel refused the command (result code N)</td>
-<td>The panel gave a reason this integration does not know yet.</td>
+<td><code>unknown</code></td>
+<td>The panel gave a reason the integration does not know yet.</td>
 </tr>
 </tbody>
 </table>
-</li>
-<li>
-<p><strong>The command could not be completed</strong>: the panel could not be reached, or its answer could not be read. See <em>Cannot Connect</em> below; try again once the connection is back.</p>
-</li>
-</ul>
-<p>Scenario activations that fail also show a persistent notification and fire the <code>inim_smartliving_alarm_scenario_activation_failed</code> event, as before. The event has <code>reason</code>, <code>panel_result</code>, <code>blocking_zones</code> (each with <code>zone_id</code>, <code>zone_name</code>, <code>status</code> and <code>areas</code>) and <code>message</code> (always in English, whatever Home Assistant's language). The <code>reason</code> is <code>zones_blocked</code>, <code>no_areas_identified</code>, <code>unknown_zones_error</code>, <code>no_data_available</code>, <code>disarm_failed</code>, <code>unknown</code>, <code>panel_programming</code>, <code>command_failed</code>, or the reason the panel gave (for example <code>invalid_code</code>).</p>
+<p><strong>3. The command could not be completed.</strong> The panel could not be reached, or its answer could not be read. See <a href="#cannot-connect">Cannot connect</a>; try again once the connection is back.</p>
+<p>A failed scenario also shows a notification and fires the <a href="../actions-events/#event-scenario-activation-failed"><code>inim_smartliving_alarm_scenario_activation_failed</code></a> event, with the reason.</p>
 <h2 id="common-problems">Common problems<a class="headerlink" href="#common-problems" title="Permanent link">&para;</a></h2>
+<h3 id="cannot-connect">Cannot connect<a class="headerlink" href="#cannot-connect" title="Permanent link">&para;</a></h3>
 <ul>
-<li>
-<p><strong>Reporting a problem</strong>: attach a system report to the GitHub issue (see <a href="../system-report/">Sharing a system report</a>), and if you can a debug log (see below).</p>
-</li>
-<li>
-<p><strong>Cannot</strong> Connect / <strong>Connection Timed Out</strong>:</p>
-<ul>
-<li>
-<p>Verify the IP address and Port for your SmartLAN module are correct.</p>
-</li>
-<li>
-<p>Ensure your Home Assistant instance can reach the panel's IP address on the specified port (check firewalls, network segmentation).</p>
-</li>
-<li>
-<p>Make sure the SmartLAN module is powered and connected to the network.</p>
-</li>
-<li>
-<p>If the module's IP address or port has changed, update it with <strong>Reconfigure</strong> (see <a href="../setup/#changing-the-connection-details-reconfigure">Changing the connection details</a>) instead of removing the integration.</p>
-</li>
+<li>Verify the IP address and port of your SmartLAN board.</li>
+<li>Make sure Home Assistant can reach the board's address on that port (check firewalls and network segmentation).</li>
+<li>Make sure the board is powered and connected to the network.</li>
+<li>If the board's address or port has changed, update it with <strong>Reconfigure</strong> (see <a href="../setup/#changing-the-connection-details-reconfigure">Changing the connection details</a>) instead of removing the integration.</li>
 </ul>
-</li>
-<li>
-<p><strong>Search the network finds no board</strong>:</p>
+<h3 id="search-finds-no-board">Search finds no board<a class="headerlink" href="#search-finds-no-board" title="Permanent link">&para;</a></h3>
 <ul>
-<li>
-<p>The search only reaches boards on the same subnet as Home Assistant (the boards answer only on their own network segment). Enter a board on another subnet or VLAN by hand.</p>
-</li>
-<li>
-<p>The search listens on UDP ports 5001 (SmartLAN/SI) and 7001 (SmartLAN/G) of the Home Assistant host; another program using them, or a firewall, prevents it. Boards that are already set up are not listed.</p>
-</li>
+<li>The search only reaches boards on the same subnet as Home Assistant (the boards answer only on their own network segment). Enter a board on another subnet or VLAN by hand.</li>
+<li>The search listens on UDP ports 5001 (SmartLAN/SI) and 7001 (SmartLAN/G) of the Home Assistant host; another program using them, or a firewall, prevents it.</li>
+<li>Boards that are already set up are not listed.</li>
 </ul>
-</li>
-<li>
-<p><strong>SmartLAN/G: "the board answered, but its reply was not in the expected format"</strong> during setup:</p>
+<h3 id="smartlang-the-reply-was-not-in-the-expected-format">SmartLAN/G: the reply was not in the expected format<a class="headerlink" href="#smartlang-the-reply-was-not-in-the-expected-format" title="Permanent link">&para;</a></h3>
+<p>The setup says <em>"The SmartLAN/G board answered, but its reply was not in the expected format"</em>. Check the board's user name and password first. If they are right, your board probably answers in a way this integration does not handle yet. Please open a GitHub issue with your panel model and firmware, the board's version and a <a href="#debug-log">debug log</a> of a setup attempt.</p>
+<h3 id="the-inim-app-cannot-connect-locally">The Inim app cannot connect locally<a class="headerlink" href="#the-inim-app-cannot-connect-locally" title="Permanent link">&para;</a></h3>
+<p>The SmartLAN/SI board accepts only one local connection at a time. Home Assistant keeps its connection open while it reads the panel and for a few seconds after each update, so the app may have to retry. Remote access through Inim Cloud is not affected.</p>
+<h3 id="programming-mode">Programming mode<a class="headerlink" href="#programming-mode" title="Permanent link">&para;</a></h3>
 <ul>
-<li>
-<p>Check the board's user name and password first. If they are right, your board probably answers in a way this integration does not handle yet. Please open a GitHub issue with your panel model and firmware, the board's version and a debug log of a setup attempt. To get the log, add this to <code>configuration.yaml</code>, restart Home Assistant and try the setup again:</p>
+<li>Someone is programming the panel from a keypad, or the panel is reloading its configuration. Commands work again when programming has ended; the <em>Programming mode</em> sensor shows when.</li>
+<li>Programming from the installer software on a PC does not block commands. After the software writes new programming, the panel may restart by itself, and Home Assistant cannot reach it for a short time. Then use <strong>Re-read panel configuration</strong> to pick up the changes.</li>
+</ul>
+<h3 id="commands-not-carried-out">Commands not carried out<a class="headerlink" href="#commands-not-carried-out" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The error message tells why (see <a href="#when-the-panel-refuses-a-command">When the panel refuses a command</a>).</li>
+<li>Check that the PIN is a valid user PIN of the panel, with the areas you want to control. Setup and <strong>Reconfigure</strong> refuse a PIN that matches no user code; for a panel set up with an older version of the integration, the log shows a warning (<em>"The PIN does not match any user code of the panel"</em>) each time the integration connects. Change it with <strong>Reconfigure</strong> (see <a href="../setup/#changing-the-connection-details-reconfigure">Changing the connection details</a>).</li>
+<li><strong>Arming is refused because zones are not ready</strong>: close or bypass the zones the message lists, or set <strong>When zones are not ready</strong> to <em>Arm anyway and warn</em> (or use <code>force: true</code> in an action). See <a href="../actions-events/#zones-not-ready">Zones not ready</a>.</li>
+</ul>
+<h3 id="entities-missing-or-not-updating">Entities missing or not updating<a class="headerlink" href="#entities-missing-or-not-updating" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Check the Home Assistant logs (<strong>Settings</strong> → <strong>System</strong> → <strong>Logs</strong>) for errors from the <code>inim_smartliving_alarm</code> integration.</li>
+<li>Check the polling interval in the <a href="../options/#all-options">options</a>. Too short can overload the panel or the network; too long delays updates.</li>
+<li>Only ticked items get entities: check the options under <strong>Areas, zones, scenarios and outputs</strong>.</li>
+<li>A zone is listed only if its terminal is programmed as a zone on the panel. If you changed the panel's programming, use <strong>Re-read panel configuration</strong> first.</li>
+</ul>
+<details class="note">
+<summary>Rare cases: no switches, no scenario buttons</summary>
+<p>The area, zone and output switches are created only when the panel data stored for the areas has names, and the scenario buttons only when the scenarios have names. If they are all missing, use <strong>Re-read panel configuration</strong>; the log says when the names are missing.</p>
+</details>
+<h3 id="debug-log">Debug log<a class="headerlink" href="#debug-log" title="Permanent link">&para;</a></h3>
+<p>To get a debug log, add this to <code>configuration.yaml</code>, restart Home Assistant and repeat what failed:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">logger</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">logs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">custom_components.inim_smartliving_alarm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">debug</span>
 </code></pre></div>
-<p>The log shows the requests and replies (the PIN is masked; the board's user name and password are never logged). Remove the lines again afterwards.</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>The Inim app cannot connect locally while Home Assistant is running</strong>:</p>
-<ul>
-<li>The SmartLAN/SI module accepts only one local connection at a time. Home Assistant keeps its connection open while it reads the panel and for a few seconds after each update, so the app may have to retry. Remote access through Inim Cloud is not affected.</li>
-</ul>
-</li>
-<li>
-<p><strong>Names, zones or scenarios out of date</strong> after changing them on the panel:</p>
-<ul>
-<li>Use the <strong>Re-read panel configuration</strong> button or action (see <a href="../setup/#re-reading-the-panel-configuration">Re-reading the panel configuration</a>).</li>
-</ul>
-</li>
-<li>
-<p><strong>Scenarios not activating or Areas not arming/disarming</strong>: the error message tells why (see <a href="#when-the-panel-refuses-a-command">When the panel refuses a command</a>).</p>
-<ul>
-<li>Double-check that the PIN code entered during configuration is correct and is a valid user PIN for the panel with sufficient permissions. Setup and <strong>Reconfigure</strong> refuse a PIN that matches no user code; for a panel set up with an older version of the integration, the log shows a warning ("The PIN does not match any user code of the panel") each time the integration connects. You can change it with <strong>Reconfigure</strong> (see <a href="../setup/#changing-the-connection-details-reconfigure">Changing the connection details</a>).</li>
-</ul>
-</li>
-<li>
-<p><strong>Commands fail with "the panel is in programming mode"</strong>:</p>
-<ul>
-<li>
-<p>Someone is programming the panel from a keypad, or the panel is reloading its configuration. Commands work again when programming has ended; the <em>Programming mode</em> sensor shows when.</p>
-</li>
-<li>
-<p>Programming from the installer software on a PC does not block commands. After the software writes new programming, the panel may restart by itself, and Home Assistant cannot reach it for a short time. Then use <strong>Re-read panel configuration</strong> to pick up the changes.</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Arming is refused because zones are not ready</strong>: close or bypass the zones the message lists, or set <strong>When zones are not ready</strong> to <em>Arm anyway and warn</em> (or use <code>force: true</code> in an action). See <a href="../actions-events/#zones-not-ready">Zones not ready</a>.</p>
-</li>
-<li>
-<p><strong>Entities Not Appearing or Not Updating</strong>:</p>
-<ul>
-<li>
-<p>Check the Home Assistant logs (Settings -&gt; System -&gt; Logs) for errors related to the inim_smartliving_alarm integration.</p>
-</li>
-<li>
-<p>Ensure the polling interval is set appropriately. Too short might overload the panel or network; too long will delay updates.</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Incorrect Number of Entities</strong>:</p>
-<ul>
-<li>
-<p>Check the integration's options under <strong>Areas, zones, scenarios and outputs</strong>: only ticked items get entities.</p>
-</li>
-<li>
-<p>A zone is listed only if its terminal is programmed as a zone on the panel. If you changed the panel's programming, use <strong>Re-read panel configuration</strong> first.</p>
-</li>
-</ul>
-</li>
-</ul>
+<p>The log shows the requests and replies; the PIN is masked, and the board's user name and password are never logged. Remove the lines again afterwards.</p>
 
 
 

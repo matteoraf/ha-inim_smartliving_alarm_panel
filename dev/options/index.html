@@ -410,6 +410,56 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Changing the options later">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#areas-zones-scenarios-and-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Areas, zones, scenarios and outputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#area-switches-arm-mode-per-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Area switches arm mode per area
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#all-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All options
+      
+    </span>
+  </a>
+  
 </li>
       
     </ul>
@@ -628,6 +678,56 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Changing the options later">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#areas-zones-scenarios-and-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Areas, zones, scenarios and outputs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#area-switches-arm-mode-per-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Area switches arm mode per area
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#all-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        All options
+      
+    </span>
+  </a>
+  
 </li>
       
     </ul>
@@ -648,26 +748,141 @@
 
 
 <h1 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h1>
+<p>Options set how the integration reads your panel and what it does when you arm. You choose some of them when you add the panel, and can change all of them later.</p>
 <h2 id="initial-options">Initial options<a class="headerlink" href="#initial-options" title="Permanent link">&para;</a></h2>
+<p>When you add a panel, the last step asks for:</p>
 <ul>
-<li>
-<p><strong>Polling Interval</strong>: How often Home Assistant should query the panel for status updates (in seconds).</p>
-</li>
-<li>
-<p><strong>Event Log Size</strong>: The number of recent events to store and display in the event log sensor's attributes.</p>
-</li>
-<li>
-<p><strong>Scenario Mappings</strong>: You can map your panel's scenarios to Home Assistant's standard alarm actions (Arm Home, Arm Away, etc.). Only the scenarios you import are offered. The setup proposes <strong>Arm Away</strong> and <strong>Disarm</strong>: for Arm Away, an imported scenario that arms every imported area (one that arms them all in total mode first, then the lowest number); for Disarm, the lowest-numbered imported scenario that disarms every imported area. What a scenario does to areas you don't import doesn't matter. If none fits, the mode stays unmapped. Check the proposal and change it if you like; the options keep what you saved.</p>
-</li>
-<li>
-<p><strong>Area switches default arm mode</strong> (options only, not at setup): the mode an area switch arms in when turned on: total (the default), partial or instant. The <em>arming mode</em> select of each area offers every mode. In the options, <strong>Area switches arm mode per area</strong> sets a different mode for single areas (for example, partial for the bedrooms); the others follow this option.</p>
-</li>
-<li>
-<p><strong>When zones are not ready</strong> (options only, not at setup): <em>Refuse</em> (the default) or <em>Arm anyway and warn</em>; see <a href="../actions-events/#zones-not-ready">Zones not ready</a>.</p>
-</li>
+<li><strong>Polling Interval (seconds)</strong>: how often Home Assistant reads the panel's state.</li>
+<li><strong>Number of Events to store in log</strong>: how many recent events the event log sensor keeps.</li>
+<li><strong>Arm Home, Arm Away, Arm Night, Arm Vacation and Disarm Scenario</strong>: which of your scenarios the alarm panel card runs for each button. An arm mode without a scenario is not offered; Disarm without a scenario fails with a message.</li>
 </ul>
+<p>The setup proposes <strong>Arm Away</strong> and <strong>Disarm</strong> from what your scenarios do to the areas you import. Check the proposal and change it if you like.</p>
+<details class="note">
+<summary>How Arm Away and Disarm are proposed</summary>
+<ul>
+<li><strong>Arm Away</strong>: an imported scenario that arms every imported area (one that arms them all in total mode first, then the lowest number).</li>
+<li><strong>Disarm</strong>: the lowest-numbered imported scenario that disarms every imported area.</li>
+</ul>
+<p>What a scenario does to areas you do not import does not matter. If no scenario fits, the mode stays without a scenario. Only the scenarios you import are offered, and the mapping fields are shown only when at least one scenario is imported.</p>
+</details>
 <h2 id="changing-the-options-later">Changing the options later<a class="headerlink" href="#changing-the-options-later" title="Permanent link">&para;</a></h2>
-<p>You can change all of this later: on the Devices &amp; Services page, open the integration and click <strong>CONFIGURE</strong>, then choose <strong>Areas, zones, scenarios and outputs</strong>, <strong>Area switches arm mode per area</strong> (the mode each area's switch arms in, if not the general one) or <strong>General settings</strong> (everything else, including the PIN: leave <strong>New PIN Code</strong> empty to keep the current PIN; a new PIN is checked with the panel as at setup. The step names the user code the current PIN belongs to and the areas it controls). Unticking an area, zone or scenario removes its entities, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs. A scenario that an alarm panel mode uses cannot be unticked: change the mode's scenario in the general settings first.</p>
+<ol>
+<li>Go to <strong>Settings</strong> → <strong>Devices &amp; services</strong> and open <strong>Inim SmartLiving Alarm</strong>.</li>
+<li>Click the gear icon (⚙) on your panel's row (on Home Assistant versions before 2026.11, <strong>Configure</strong>).</li>
+<li>
+<p>Choose what to change:</p>
+<p><img alt="The options menu" src="../images/options-menu.webp" width="480" /></p>
+<ul>
+<li><strong>Areas, zones, scenarios and outputs</strong>: what to import. The same step as at setup.</li>
+<li><strong>Area switches arm mode per area</strong>: the mode each area's switch arms in, if not the general one.</li>
+<li><strong>General settings</strong>: everything else, including a new PIN.</li>
+</ul>
+</li>
+<li>
+<p>Click <strong>Submit</strong>. The integration reloads with the new options.</p>
+</li>
+</ol>
+<h3 id="areas-zones-scenarios-and-outputs">Areas, zones, scenarios and outputs<a class="headerlink" href="#areas-zones-scenarios-and-outputs" title="Permanent link">&para;</a></h3>
+<p>Tick what you want in Home Assistant. Unticking an area, zone, scenario or output <strong>removes its entities</strong>, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs.</p>
+<p>A scenario that an alarm panel mode uses cannot be unticked: choose another scenario for that mode in <strong>General settings</strong> first.</p>
+<h3 id="area-switches-arm-mode-per-area">Area switches arm mode per area<a class="headerlink" href="#area-switches-arm-mode-per-area" title="Permanent link">&para;</a></h3>
+<p>Each area's switch arms in the mode chosen here when you turn it on. <em>Use the default</em> follows <strong>Area switches default arm mode</strong> in <strong>General settings</strong>. For example, set the bedrooms to <em>Partial</em> and leave the others at the default.</p>
+<p><img alt="Choosing an arm mode for each area switch" src="../images/options-area-switches.webp" width="480" /></p>
+<h3 id="general-settings">General settings<a class="headerlink" href="#general-settings" title="Permanent link">&para;</a></h3>
+<p><img alt="The general settings" src="../images/options-general.webp" width="480" /></p>
+<p>The step names the user code the current PIN belongs to and the areas it controls. Leave <strong>New PIN Code</strong> empty to keep the current PIN; a new PIN is checked with the panel as at setup.</p>
+<h2 id="all-options">All options<a class="headerlink" href="#all-options" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Where</th>
+<th>Values</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Polling Interval (seconds)</strong></td>
+<td>setup, General settings</td>
+<td>5 to 300</td>
+<td>30</td>
+<td>How often the panel's state is read. Shorter intervals show changes sooner and keep the board busier.</td>
+</tr>
+<tr>
+<td><strong>Number of Events to store in log</strong></td>
+<td>setup, General settings</td>
+<td>1 to 100</td>
+<td>50</td>
+<td>How many recent events the event log sensor keeps in its attributes.</td>
+</tr>
+<tr>
+<td><strong>Arm Home Scenario</strong></td>
+<td>setup, General settings</td>
+<td><em>None (Do Not Assign)</em> or an imported scenario</td>
+<td>none</td>
+<td>The scenario the alarm panel's Arm Home runs.</td>
+</tr>
+<tr>
+<td><strong>Arm Away Scenario</strong></td>
+<td>setup, General settings</td>
+<td>as above</td>
+<td>proposed</td>
+<td>The scenario the alarm panel's Arm Away runs.</td>
+</tr>
+<tr>
+<td><strong>Arm Night Scenario</strong></td>
+<td>setup, General settings</td>
+<td>as above</td>
+<td>none</td>
+<td>The scenario the alarm panel's Arm Night runs.</td>
+</tr>
+<tr>
+<td><strong>Arm Vacation Scenario</strong></td>
+<td>setup, General settings</td>
+<td>as above</td>
+<td>none</td>
+<td>The scenario the alarm panel's Arm Vacation runs.</td>
+</tr>
+<tr>
+<td><strong>Disarm Scenario</strong></td>
+<td>setup, General settings</td>
+<td>as above</td>
+<td>proposed</td>
+<td>The scenario the alarm panel's Disarm runs.</td>
+</tr>
+<tr>
+<td><strong>Area switches default arm mode</strong></td>
+<td>General settings</td>
+<td><em>Total</em>, <em>Partial</em>, <em>Instant</em></td>
+<td><em>Total</em></td>
+<td>The mode an area switch arms in when turned on. The arming mode select of each area offers every mode.</td>
+</tr>
+<tr>
+<td><strong>Area switches arm mode per area</strong></td>
+<td>its own step</td>
+<td><em>Use the default</em>, <em>Total</em>, <em>Partial</em>, <em>Instant</em>, for each area</td>
+<td><em>Use the default</em></td>
+<td>A different mode for single areas' switches.</td>
+</tr>
+<tr>
+<td><strong>When zones are not ready</strong></td>
+<td>General settings</td>
+<td><em>Refuse</em>, <em>Arm anyway and warn</em></td>
+<td><em>Refuse</em></td>
+<td>What happens when zones are not ready at arming; see <a href="../actions-events/#zones-not-ready">Zones not ready</a>.</td>
+</tr>
+<tr>
+<td><strong>New PIN Code</strong></td>
+<td>General settings</td>
+<td>1 to 6 digits, or empty</td>
+<td>empty</td>
+<td>A new PIN, checked with the panel. Empty keeps the current PIN.</td>
+</tr>
+</tbody>
+</table>
+<p>The board's address, port, user name and password are changed with <strong>Reconfigure</strong> (see <a href="../setup/#changing-the-connection-details-reconfigure">Setup</a>).</p>
 
 
 

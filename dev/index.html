@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#home-assistant-integration-for-inim-smartliving-alarm-systems" class="md-skip">
+        <a href="#inim-smartliving-alarm-for-home-assistant" class="md-skip">
           Skip to content
         </a>
       
@@ -308,10 +308,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Features
+        Getting started
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you get
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Words used on this site
       
     </span>
   </a>
@@ -607,10 +629,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#features" class="md-nav__link">
+  <a href="#getting-started" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Features
+        Getting started
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you get
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Words used on this site
       
     </span>
   </a>
@@ -645,118 +689,136 @@
 
 
 
-<h1 id="home-assistant-integration-for-inim-smartliving-alarm-systems">Home Assistant Integration for Inim SmartLiving Alarm Systems<a class="headerlink" href="#home-assistant-integration-for-inim-smartliving-alarm-systems" title="Permanent link">&para;</a></h1>
+<h1 id="inim-smartliving-alarm-for-home-assistant">Inim SmartLiving Alarm for Home Assistant<a class="headerlink" href="#inim-smartliving-alarm-for-home-assistant" title="Permanent link">&para;</a></h1>
+<p>This integration connects Home Assistant to an Inim SmartLiving alarm panel on your local network. You can see the state of every area and zone, arm and disarm, run the panel's scenarios and switch its outputs, from dashboards and automations.</p>
+<p><img alt="The panel's device page in Home Assistant" src="images/device-page-light.webp#only-light" width="800" />
+<img alt="The panel's device page in Home Assistant" src="images/device-page-dark.webp#only-dark" width="800" /></p>
 <div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.</p>
-<p>SmartLiving 1050 on firmware 6 has been tested and confirmed by multiple users. SmartLiving 10100 with a SmartLAN/G board has been tested by one user. The SmartLiving 505, 515 and all four models on firmware 5.1, are supported experimentally. Contributors are welcome.</p>
+<p class="admonition-title">Not an official Inim product</p>
+<p>This integration is not made or supported by Inim Electronics. Use it at your own risk.</p>
+<p>The SmartLiving 1050 on firmware 6 is tested and confirmed by several users. The SmartLiving 10100 with a SmartLAN/G board is confirmed by one user. The SmartLiving 505 and 515, and all four models on firmware 5.1, are supported experimentally. Reports from users of these panels help.</p>
 </div>
-<p>This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI or SmartLAN/G network interface (SmartLAN/G support is experimental). It enables monitoring and control of your alarm system directly from Home Assistant.</p>
-<p>New here? Start with <a href="installation/">Installation</a>, then <a href="setup/">Setup</a>. Coming from 0.3.x? Read <a href="upgrading/">Upgrading</a> first. Something not working? See <a href="troubleshooting/">Troubleshooting</a>.</p>
-<h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
-<ul>
-<li>
-<p><strong>Comprehensive Alarm Control Panel</strong>: The core of the integration, allowing for standard arming and disarming actions. During configuration, you can map your panel's specific scenarios to Home Assistant's default actions (arm_home, arm_away, disarm, etc.).</p>
-</li>
-<li>
-<p><strong>Full Area Management</strong>: Areas (partitions) are exposed as:</p>
-<ul>
-<li>
-<p><strong>Switch entities</strong>: For direct arming (turn on) and disarming (turn off) of each area. The switch is on whenever the area is armed, in total, partial or instant mode; turning it on arms in the mode chosen in the options (total by default).</p>
-</li>
-<li>
-<p><strong>Select entities</strong>: The arming mode of each area (Disarmed, Armed total, Armed partial, Armed instant); choosing a mode arms or disarms the area.</p>
-</li>
-<li>
-<p><strong>The <code>arm_area</code> action</strong>: Arms or disarms one or more areas in a single command (see <a href="actions-events/#arming-areas-from-automations">Arming areas from automations</a>).</p>
-</li>
-<li>
-<p><strong>Zones checked before arming</strong>: before arming an area or activating a scenario, the integration asks the panel which zones are not ready, and refuses or arms anyway with a warning, as you choose (see <a href="actions-events/#zones-not-ready">Zones not ready</a>).</p>
-</li>
-<li>
-<p><strong>Binary Sensor entities</strong>: Per area, whether it is in alarm now, in tamper now, and whether it has an alarm memory (kept after the alarm until it is reset).</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Detailed Zone Monitoring</strong>: Every zone of the panel (zones of input, input/output and double terminals, including the second zone of double terminals) is exposed as:</p>
-<ul>
-<li>
-<p><strong>Binary Sensor Status entities</strong>: On while the zone is in alarm, with a device class guessed from the zone's programming (see the zone sensor below) and the zone's programming as attributes.</p>
-</li>
-<li>
-<p>Extended attributes provide additional configuration parameters for each zone.</p>
-</li>
-<li>
-<p><strong>Binary Sensor Alarm memory entities</strong>: Telling if a zone has triggered the system (until the alarm memory is reset).</p>
-</li>
-<li>
-<p><strong>Binary Sensor Tamper entities</strong>: Telling if a zone is in tamper or short circuit.</p>
-</li>
-<li>
-<p><strong>Switch entities</strong>: To allow individual zone exclusion.</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Advanced Scenario Control</strong>: Scenarios are exposed as:</p>
-<ul>
-<li>
-<p><strong>Button entities</strong>: To activate any scenario directly. If a zone that is not ready prevents the activation, or the panel refuses it, Home Assistant shows an error and a persistent notification with the reason (see <a href="troubleshooting/#when-the-panel-refuses-a-command">When the panel refuses a command</a>).</p>
-</li>
-<li>
-<p><strong>Binary Sensor entities</strong>: To indicate if a specific scenario is currently active.</p>
-</li>
-<li>
-<p>A dedicated sensor also displays the name of the single, currently active scenario on the panel.</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Outputs</strong>: the panel's terminal outputs and its fixed outputs O1-O3 that your user code may switch, as <strong>switch</strong> entities (on/off and monostable outputs) and <strong>light</strong> entities with brightness (dimmers), named from the panel. Only the outputs the installer marked as home automation outputs are proposed (see <a href="entities/#outputs">Outputs</a>).</p>
-</li>
-<li>
-<p><strong>Configurable Event Log</strong>:</p>
-<ul>
-<li>
-<p>A sensor entity provides a log of recent panel events, with the names programmed on the panel: who did it (user code or key) and where (keypad or reader).</p>
-</li>
-<li>
-<p>The number of events stored in the sensor's attributes is configurable during setup.</p>
-</li>
-<li>
-<p>The log persists its last known state even if the connection to the alarm panel is temporarily lost.</p>
-</li>
-<li>
-<p>The sensor's state reflects the panel's latest event index, allowing for efficient, incremental event fetching.</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Detailed Panel Information</strong>:</p>
-<ul>
-<li>
-<p>Sensors for the panel's firmware version and system type.</p>
-</li>
-<li>
-<p>A diagnostic sensor showing when the panel is in programming mode. No command is sent then: the action fails with a message (see <a href="troubleshooting/#when-the-panel-refuses-a-command">When the panel refuses a command</a>).</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Maintenance without re-adding the integration</strong>:</p>
-<ul>
-<li>
-<p><strong>Reconfigure</strong> the host, port and PIN of an existing panel, for example after its IP address changed.</p>
-</li>
-<li>
-<p><strong>Re-read the panel configuration</strong> (names, zone setup, scenarios) after changing it on the panel, with a button or an action.</p>
-</li>
-</ul>
-</li>
-</ul>
+<h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Check the <a href="installation/#requirements">requirements</a></strong>: a supported panel, a SmartLAN/SI or SmartLAN/G board on your network, and a user code (PIN) of the panel.</li>
+<li><strong><a href="installation/#installing">Install the integration</a></strong> and restart Home Assistant.</li>
+<li><strong><a href="setup/#adding-a-panel">Add your panel</a></strong>: enter the board's address and the PIN, then choose what to import.</li>
+<li><strong><a href="entities/">Find your entities</a></strong> on the panel's device page, and add them to a dashboard.</li>
+</ol>
+<p>Coming from version 0.3? Read <a href="upgrading/#from-03x">Upgrading</a> first. Something not working? See <a href="troubleshooting/">Troubleshooting</a>.</p>
+<h2 id="what-you-get">What you get<a class="headerlink" href="#what-you-get" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Part of the panel</th>
+<th>What you can do</th>
+<th>Page</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The whole panel</td>
+<td>Arm and disarm with the alarm panel card, using the panel's scenarios</td>
+<td><a href="entities/#the-alarm-panel">Entities</a></td>
+</tr>
+<tr>
+<td>Each area</td>
+<td>Arm or disarm it, choose the arming mode, see alarm, tamper and alarm memory</td>
+<td><a href="entities/#areas">Entities</a></td>
+</tr>
+<tr>
+<td>Each zone</td>
+<td>See whether it is open, in tamper or has an alarm memory; bypass it</td>
+<td><a href="entities/#zones">Entities</a></td>
+</tr>
+<tr>
+<td>Each scenario</td>
+<td>Run it with a button; see whether it is active</td>
+<td><a href="entities/#scenarios">Entities</a></td>
+</tr>
+<tr>
+<td>Outputs</td>
+<td>Switch lights, gates and other outputs; dim dimmers</td>
+<td><a href="entities/#outputs">Entities</a></td>
+</tr>
+<tr>
+<td>Event log</td>
+<td>See the panel's recent events, with names</td>
+<td><a href="entities/#sensors">Entities</a></td>
+</tr>
+<tr>
+<td>Automations</td>
+<td>Arm areas, run scenarios and reset the alarm memory with actions; react to events</td>
+<td><a href="actions-events/">Actions and events</a></td>
+</tr>
+</tbody>
+</table>
+<p>Before arming an area or running a scenario, the integration asks the panel which zones are not ready, and refuses or arms anyway with a warning, as you choose (see <a href="actions-events/#zones-not-ready">Zones not ready</a>).</p>
+<h2 id="terms">Words used on this site<a class="headerlink" href="#terms" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Word</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Panel</strong></td>
+<td>The SmartLiving alarm control unit (central unit).</td>
+</tr>
+<tr>
+<td><strong>SmartLAN board</strong></td>
+<td>The network board in the panel: <strong>SmartLAN/SI</strong> or <strong>SmartLAN/G</strong>. Home Assistant talks to the panel through it.</td>
+</tr>
+<tr>
+<td><strong>Area</strong></td>
+<td>A part of the house that is armed and disarmed together, for example <em>Ground floor</em>. Other systems call it a partition.</td>
+</tr>
+<tr>
+<td><strong>Zone</strong></td>
+<td>One detector input: a door contact, a motion sensor, a smoke detector. Each zone belongs to one or more areas.</td>
+</tr>
+<tr>
+<td><strong>Terminal</strong></td>
+<td>A connection on the panel or on an expander. A terminal is programmed as an input (one zone), an output, or both.</td>
+</tr>
+<tr>
+<td><strong>Double terminal and second zone</strong></td>
+<td>A terminal programmed with two zones on the same wires. Its second zone has a number above the panel's terminals: 51 to 100 on the SmartLiving 1050, for example.</td>
+</tr>
+<tr>
+<td><strong>Scenario</strong></td>
+<td>A set of actions programmed on the panel, for example <em>Night</em>: arm some areas, disarm others.</td>
+</tr>
+<tr>
+<td><strong>Output</strong></td>
+<td>A terminal or one of the fixed outputs O1 to O3 that drives something: a light, a gate, a siren.</td>
+</tr>
+<tr>
+<td><strong>Home automation output</strong></td>
+<td>An output the installer marked for home automation in the panel's programming. Only these are ticked for you at setup.</td>
+</tr>
+<tr>
+<td><strong>Alarm memory</strong></td>
+<td>After an alarm, the panel remembers which areas and zones raised it, until the memory is reset.</td>
+</tr>
+<tr>
+<td><strong>Bypass</strong></td>
+<td>Excluding a zone, so it cannot raise an alarm until it is included again.</td>
+</tr>
+<tr>
+<td><strong>User code and PIN</strong></td>
+<td>A user code is a user programmed on the panel (for example <em>Master</em>). Its PIN is the number typed to use it. Home Assistant sends commands with one PIN, so it can control only the areas of that user code.</td>
+</tr>
+<tr>
+<td><strong>Programming mode</strong></td>
+<td>While someone programs the panel from a keypad, it ignores commands. No command is sent then.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h2>
-<p>Contributions to this integration are welcome! Please feel free to open an issue or submit pull requests.</p>
+<p>Contributions are welcome: open an issue or a pull request on <a href="https://github.com/matteoraf/ha-inim_smartliving_alarm_panel">GitHub</a>.</p>
 
 
 
