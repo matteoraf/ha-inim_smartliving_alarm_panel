@@ -11,6 +11,7 @@ from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.core import HomeAssistant
 import pytest
 
+from custom_components.inim_smartliving_alarm.attribute_values import value_key
 from custom_components.inim_smartliving_alarm.binary_sensor import (
     zone_device_class,
     zone_programming_attributes,
@@ -33,7 +34,7 @@ from custom_components.inim_smartliving_alarm.protocol.model import (
 )
 
 from .conftest import add_entry
-from .fake_panel import FakePanel
+from .fake_panel import FakePanel, const as c
 from .test_init_baseline import entity_id_for
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
@@ -196,6 +197,50 @@ def test_shock_and_roller_attributes() -> None:
 
 
 @pytest.mark.parametrize(
+    "member",
+    [*ZoneType, *Balancing, *TerminalType],
+    ids=lambda member: f"{type(member).__name__}.{member.name}",
+)
+def test_value_keys_of_every_member(
+    member: ZoneType | Balancing | TerminalType,
+) -> None:
+    """Each member is its lower-case name; only ZoneType.H24 is written otherwise.
+
+    Members of different enums compare equal by value: Balancing.DOUBLE_ZONE
+    and TerminalType.NULL are both 4, like ZoneType.H24.
+    """
+    expected = "24_hour" if member is ZoneType.H24 else member.name.lower()
+    assert value_key(member) == expected
+
+
+@pytest.mark.parametrize("number", [4, 9])
+def test_value_key_plain_numbers(number: int) -> None:
+    """Values the enums do not know stay numbers, even one worth ZoneType.H24."""
+    assert value_key(number) == number
+
+
+@pytest.mark.parametrize("second_zone", [False, True])
+def test_double_zone_terminal_attributes(second_zone: bool) -> None:
+    """Both zones of an instant double-zone terminal: its balancing, not 24_hour."""
+    data = (
+        terminal_record(Balancing.DOUBLE_ZONE, 0, TerminalType.DOUBLE) * MODEL.terminals
+    )
+    attributes = zone_programming_attributes(
+        zone(zone_record(ZoneType.INSTANT, 15, 20, 0x05, 1)),
+        decode_terminals(data, MODEL)[0],
+        terminal_index=0,
+        second_zone=second_zone,
+    )
+    expected = {
+        "zone_type": "instant",
+        "balancing": "double_zone",
+        "terminal_type": "double",
+        "second_zone": second_zone,
+    }
+    assert {key: attributes[key] for key in expected} == expected
+
+
+@pytest.mark.parametrize(
     ("balancing", "sensor", "device_class"),
     [
         (Balancing.NORMALLY_OPEN, 0, BinarySensorDeviceClass.OPENING),
@@ -242,6 +287,26 @@ async def test_zone_sensor(hass: HomeAssistant, panel: FakePanel) -> None:
         "sensor_type",
     ):
         assert old not in state.attributes, old
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_double_zone_sensors(hass: HomeAssistant, panel: FakePanel) -> None:
+    """Both zones of a double-zone terminal on the fake 1050 (zones 1 and 51)."""
+    panel.state.terminal_types[0] = c.TERMINAL_DOUBLE
+    panel.state.terminal_records[0] = terminal_record(
+        Balancing.DOUBLE_ZONE, 0, TerminalType.DOUBLE
+    )
+    record = zone_record(ZoneType.INSTANT, 15, 20, 0x05, 1)
+    panel.state.zone_records[0] = record
+    panel.state.zone_records[MODEL.terminals] = record
+    entry = await add_entry(hass, panel, zones=(1, MODEL.terminals + 1))
+    for number, second_zone in ((1, False), (MODEL.terminals + 1, True)):
+        entity = ("binary_sensor", f"_zone_{number}")
+        attributes = hass.states.get(entity_id_for(hass, entry, entity)).attributes
+        assert attributes["zone_type"] == "instant", number
+        assert attributes["balancing"] == "double_zone", number
+        assert attributes["terminal_type"] == "double", number
+        assert attributes["second_zone"] is second_zone, number
     assert await hass.config_entries.async_unload(entry.entry_id)
 
 
