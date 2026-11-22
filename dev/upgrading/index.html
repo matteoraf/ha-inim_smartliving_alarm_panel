@@ -526,26 +526,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#from-040b1-or-040b2" class="md-nav__link">
+  <a href="#from-04" class="md-nav__link">
     <span class="md-ellipsis">
       
-        From 0.4.0b1 or 0.4.0b2
+        From 0.4
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#from-03x" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        From 0.3.x
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="From 0.3.x">
+    <nav class="md-nav" aria-label="From 0.4">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -572,6 +561,67 @@
         
           <li class="md-nav__item">
   <a href="#what-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-040b1-or-040b2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 0.4.0b1 or 0.4.0b2
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-03x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 0.3.x
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From 0.3.x">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-you-update_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before you update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-you-update_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After you update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-changed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         What changed
@@ -742,26 +792,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#from-040b1-or-040b2" class="md-nav__link">
+  <a href="#from-04" class="md-nav__link">
     <span class="md-ellipsis">
       
-        From 0.4.0b1 or 0.4.0b2
+        From 0.4
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#from-03x" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        From 0.3.x
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="From 0.3.x">
+    <nav class="md-nav" aria-label="From 0.4">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -788,6 +827,67 @@
         
           <li class="md-nav__item">
   <a href="#what-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-040b1-or-040b2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 0.4.0b1 or 0.4.0b2
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-03x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 0.3.x
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="From 0.3.x">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-you-update_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before you update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-you-update_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After you update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-changed_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         What changed
@@ -914,18 +1014,59 @@
 
 
 <h1 id="upgrading">Upgrading<a class="headerlink" href="#upgrading" title="Permanent link">&para;</a></h1>
+<h2 id="from-04">From 0.4<a class="headerlink" href="#from-04" title="Permanent link">&para;</a></h2>
+<p>This version keeps the panel configuration in a new format. Your entity IDs and options stay as they are, and your configuration entry is updated automatically. Coming from 0.4.0b1 or 0.4.0b2, read also <a href="#from-040b1-or-040b2">the section below</a>.</p>
+<h3 id="before-you-update">Before you update<a class="headerlink" href="#before-you-update" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Take a Home Assistant backup</strong> (<strong>Settings</strong> → <strong>System</strong> → <strong>Backups</strong>). <strong>To go back to 0.4, restore that backup</strong>: 0.4 does not load a configuration entry in the new format.</li>
+</ol>
+<h3 id="after-you-update">After you update<a class="headerlink" href="#after-you-update" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Look at the log</strong> after the first start. The integration reads the panel configuration again once by itself, and says so. If it cannot, it tries again at every start (see below).</li>
+</ol>
+<h3 id="what-changed">What changed<a class="headerlink" href="#what-changed" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Change</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New format of the configuration entry; the panel configuration is read again once</td>
+<td>Nothing; to go back to 0.4, restore your backup</td>
+</tr>
+<tr>
+<td>Switches, area sensors and arming mode selects no longer depend on the stored area names</td>
+<td>Nothing</td>
+</tr>
+<tr>
+<td>Zone bypass switches find the zone's terminal the same way as outputs</td>
+<td>Nothing</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Details</summary>
+<ul>
+<li><strong>Your configuration entry is updated to a new format (version 2.1).</strong> It now keeps only the panel data as read, and names, zones and scenarios are worked out from it. At the first start the integration reads the panel configuration again once by itself (the log says so). If it cannot, it tries again at every start; until then the names of user codes, keys, readers, expanders, timers and sirens show their defaults (such as <em>Code 1</em>, <em>Reader 1</em> or <em>Key 5</em>), and on an entry first set up before 0.4.0b1 the zone bypass switches appear only once that read has succeeded. <strong>Re-read panel configuration</strong> reads it at once. Entity IDs and options do not change. <strong>To go back to 0.4, restore the backup taken before the update</strong>: 0.4 does not load an entry in the new format.</li>
+<li><strong>Switches, area sensors and arming mode selects no longer depend on the stored area names.</strong> Before, a panel configuration stored without them (for example after an incomplete read) left the panel without any switch, including the zone bypass and output switches, and without the area alarm, tamper and alarm memory sensors and the arming mode selects. Now each of them is created on its own, an area without a name is called <em>Area N</em>, and the scenario buttons show what they do to each area.</li>
+<li><strong>Zone bypass switches find the zone's terminal in the panel's terminal list the same way as outputs.</strong> A zone on the last position of the list (a keypad terminal on a fully used panel) now gets a bypass switch; before, it had none. If a terminal appears twice in the list, the switch uses its first position, and the zone's <code>internal_index</code> attribute shows it.</li>
+</ul>
+</details>
 <h2 id="from-040b1-or-040b2">From 0.4.0b1 or 0.4.0b2<a class="headerlink" href="#from-040b1-or-040b2" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>Check your automations:</strong> in the <code>inim_smartliving_alarm_zones_not_ready</code> event, <code>zone_name</code> is now the zone's plain name (for example <code>Kitchen window</code>), as in the zone entities and the scenario failure event. Automations that match a name with the number in brackets, such as <code>Kitchen window (12)</code>, need updating; <code>zone_id</code> still gives the number.</li>
 </ul>
 <h2 id="from-03x">From 0.3.x<a class="headerlink" href="#from-03x" title="Permanent link">&para;</a></h2>
 <p>Version 0.4 reworks how the integration talks to the panel. Your entity IDs and options stay as they are, and your configuration entry is updated automatically.</p>
-<h3 id="before-you-update">Before you update<a class="headerlink" href="#before-you-update" title="Permanent link">&para;</a></h3>
+<h3 id="before-you-update_1">Before you update<a class="headerlink" href="#before-you-update_1" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Take a Home Assistant backup</strong> (<strong>Settings</strong> → <strong>System</strong> → <strong>Backups</strong>), above all for a preview or a beta (see <a href="../installation/#preview-versions">Preview versions</a>).</li>
 <li><strong>Read the changes below</strong>, above all those marked <em>check your automations</em>.</li>
 </ol>
-<h3 id="after-you-update">After you update<a class="headerlink" href="#after-you-update" title="Permanent link">&para;</a></h3>
+<h3 id="after-you-update_1">After you update<a class="headerlink" href="#after-you-update_1" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Look at the log</strong> after the first start. The integration may read the panel configuration again by itself, once, and says so.</li>
 <li><strong>Delete leftover entities</strong>: entities of terminals that are not zones, or of zones and areas your panel does not have, stay as unavailable entities and are listed in the log at every start. Delete them in <strong>Settings</strong> → <strong>Devices &amp; services</strong> → <strong>Entities</strong>.</li>
@@ -933,7 +1074,7 @@
 <li><strong>Choose what happens with zones not ready</strong>: arming now checks the zones, and refuses by default (see <a href="../actions-events/#zones-not-ready">Zones not ready</a>).</li>
 <li><strong>Check your automations and templates</strong> against the changes marked <em>check your automations</em>.</li>
 </ol>
-<h3 id="what-changed">What changed<a class="headerlink" href="#what-changed" title="Permanent link">&para;</a></h3>
+<h3 id="what-changed_1">What changed<a class="headerlink" href="#what-changed_1" title="Permanent link">&para;</a></h3>
 <h4 id="areas-and-the-alarm-panel">Areas and the alarm panel<a class="headerlink" href="#areas-and-the-alarm-panel" title="Permanent link">&para;</a></h4>
 <table>
 <thead>
