@@ -13,9 +13,9 @@ idle connection, pause before reconnecting) is kept anyway, as it costs
 little. EEPROM requests use the board's own device code and reads may be
 up to 2000 bytes.
 
-Experimental: tested against the fake panel only, not on a real board.
-Frames are logged before encryption (PIN masked); the user name, the
-password and the key are never logged.
+Confirmed on a real board, with a SmartLiving 10100. Frames are logged
+before encryption (PIN masked); the user name, the password and the key
+are never logged.
 """
 
 import asyncio

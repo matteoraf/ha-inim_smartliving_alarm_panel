@@ -1,75 +1,57 @@
-# Home Assistant Integration for Inim SmartLiving Alarm Systems
+# Inim SmartLiving Alarm for Home Assistant
 
-!!! warning
+This integration connects Home Assistant to an Inim SmartLiving alarm panel on your local network. You can see the state of every area and zone, arm and disarm, run the panel's scenarios and switch its outputs, from dashboards and automations.
 
-    This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
+![The panel's device page in Home Assistant](images/device-page-light.webp#only-light){ width="800" }
+![The panel's device page in Home Assistant](images/device-page-dark.webp#only-dark){ width="800" }
 
-    SmartLiving 1050 on firmware 6 has been tested and confirmed by multiple users. SmartLiving 10100 with a SmartLAN/G board has been tested by one user. The SmartLiving 505, 515 and all four models on firmware 5.1, are supported experimentally. Contributors are welcome.
+!!! warning "Not an official Inim product"
 
-This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI or SmartLAN/G network interface (SmartLAN/G support is experimental). It enables monitoring and control of your alarm system directly from Home Assistant.
+    This integration is not made or supported by Inim Electronics. Use it at your own risk.
 
-New here? Start with [Installation](installation.md), then [Setup](setup.md). Coming from 0.3.x? Read [Upgrading](upgrading.md) first. Something not working? See [Troubleshooting](troubleshooting.md).
+    The SmartLiving 1050 on firmware 6 is tested and confirmed by several users. The SmartLiving 10100 with a SmartLAN/G board is confirmed by one user. The SmartLiving 505 and 515, and all four models on firmware 5.1, are supported experimentally. Reports from users of these panels help.
 
-## Features
+## Getting started
 
-*   **Comprehensive Alarm Control Panel**: The core of the integration, allowing for standard arming and disarming actions. During configuration, you can map your panel's specific scenarios to Home Assistant's default actions (arm\_home, arm\_away, disarm, etc.).
-    
-*   **Full Area Management**: Areas (partitions) are exposed as:
-    
-    *   **Switch entities**: For direct arming (turn on) and disarming (turn off) of each area. The switch is on whenever the area is armed, in total, partial or instant mode; turning it on arms in the mode chosen in the options (total by default).
-        
-    *   **Select entities**: The arming mode of each area (Disarmed, Armed total, Armed partial, Armed instant); choosing a mode arms or disarms the area.
-        
-    *   **The `arm_area` action**: Arms or disarms one or more areas in a single command (see [Arming areas from automations](actions-events.md#arming-areas-from-automations)).
-        
-    *   **Zones checked before arming**: before arming an area or activating a scenario, the integration asks the panel which zones are not ready, and refuses or arms anyway with a warning, as you choose (see [Zones not ready](actions-events.md#zones-not-ready)).
-        
-    *   **Binary Sensor entities**: Per area, whether it is in alarm now, in tamper now, and whether it has an alarm memory (kept after the alarm until it is reset).
-        
-*   **Detailed Zone Monitoring**: Every zone of the panel (zones of input, input/output and double terminals, including the second zone of double terminals) is exposed as:
-    
-    *   **Binary Sensor Status entities**: On while the zone is in alarm, with a device class guessed from the zone's programming (see the zone sensor below) and the zone's programming as attributes.
-        
-    *   Extended attributes provide additional configuration parameters for each zone.
-    
-    *   **Binary Sensor Alarm memory entities**: Telling if a zone has triggered the system (until the alarm memory is reset).
-    
-    *   **Binary Sensor Tamper entities**: Telling if a zone is in tamper or short circuit.
-    
-    *   **Switch entities**: To allow individual zone exclusion.
-        
-*   **Advanced Scenario Control**: Scenarios are exposed as:
-    
-    *   **Button entities**: To activate any scenario directly. If a zone that is not ready prevents the activation, or the panel refuses it, Home Assistant shows an error and a persistent notification with the reason (see [When the panel refuses a command](troubleshooting.md#when-the-panel-refuses-a-command)).
-        
-    *   **Binary Sensor entities**: To indicate if a specific scenario is currently active.
-        
-    *   A dedicated sensor also displays the name of the single, currently active scenario on the panel.
-        
-*   **Outputs**: the panel's terminal outputs and its fixed outputs O1-O3 that your user code may switch, as **switch** entities (on/off and monostable outputs) and **light** entities with brightness (dimmers), named from the panel. Only the outputs the installer marked as home automation outputs are proposed (see [Outputs](entities.md#outputs)).
-        
-*   **Configurable Event Log**:
-    
-    *   A sensor entity provides a log of recent panel events, with the names programmed on the panel: who did it (user code or key) and where (keypad or reader).
-        
-    *   The number of events stored in the sensor's attributes is configurable during setup.
-        
-    *   The log persists its last known state even if the connection to the alarm panel is temporarily lost.
-        
-    *   The sensor's state reflects the panel's latest event index, allowing for efficient, incremental event fetching.
-        
-*   **Detailed Panel Information**:
-    
-    *   Sensors for the panel's firmware version and system type.
-        
-    *   A diagnostic sensor showing when the panel is in programming mode. No command is sent then: the action fails with a message (see [When the panel refuses a command](troubleshooting.md#when-the-panel-refuses-a-command)).
-        
-*   **Maintenance without re-adding the integration**:
-    
-    *   **Reconfigure** the host, port and PIN of an existing panel, for example after its IP address changed.
-        
-    *   **Re-read the panel configuration** (names, zone setup, scenarios) after changing it on the panel, with a button or an action.
+1.  **Check the [requirements](installation.md#requirements)**: a supported panel, a SmartLAN/SI or SmartLAN/G board on your network, and a user code (PIN) of the panel.
+2.  **[Install the integration](installation.md#installing)** and restart Home Assistant.
+3.  **[Add your panel](setup.md#adding-a-panel)**: enter the board's address and the PIN, then choose what to import.
+4.  **[Find your entities](entities.md)** on the panel's device page, and add them to a dashboard.
+
+Coming from version 0.3? Read [Upgrading](upgrading.md#from-03x) first. Something not working? See [Troubleshooting](troubleshooting.md).
+
+## What you get
+
+| Part of the panel | What you can do | Page |
+|---|---|---|
+| The whole panel | Arm and disarm with the alarm panel card, using the panel's scenarios | [Entities](entities.md#the-alarm-panel) |
+| Each area | Arm or disarm it, choose the arming mode, see alarm, tamper and alarm memory | [Entities](entities.md#areas) |
+| Each zone | See whether it is open, in tamper or has an alarm memory; bypass it | [Entities](entities.md#zones) |
+| Each scenario | Run it with a button; see whether it is active | [Entities](entities.md#scenarios) |
+| Outputs | Switch lights, gates and other outputs; dim dimmers | [Entities](entities.md#outputs) |
+| Event log | See the panel's recent events, with names | [Entities](entities.md#sensors) |
+| Automations | Arm areas, run scenarios and reset the alarm memory with actions; react to events | [Actions and events](actions-events.md) |
+
+Before arming an area or running a scenario, the integration asks the panel which zones are not ready, and refuses or arms anyway with a warning, as you choose (see [Zones not ready](actions-events.md#zones-not-ready)).
+
+## Words used on this site { #terms }
+
+| Word | Meaning |
+|---|---|
+| **Panel** | The SmartLiving alarm control unit (central unit). |
+| **SmartLAN board** | The network board in the panel: **SmartLAN/SI** or **SmartLAN/G**. Home Assistant talks to the panel through it. |
+| **Area** | A part of the house that is armed and disarmed together, for example *Ground floor*. Other systems call it a partition. |
+| **Zone** | One detector input: a door contact, a motion sensor, a smoke detector. Each zone belongs to one or more areas. |
+| **Terminal** | A connection on the panel or on an expander. A terminal is programmed as an input (one zone), an output, or both. |
+| **Double terminal and second zone** | A terminal programmed with two zones on the same wires. Its second zone has a number above the panel's terminals: 51 to 100 on the SmartLiving 1050, for example. |
+| **Scenario** | A set of actions programmed on the panel, for example *Night*: arm some areas, disarm others. |
+| **Output** | A terminal or one of the fixed outputs O1 to O3 that drives something: a light, a gate, a siren. |
+| **Home automation output** | An output the installer marked for home automation in the panel's programming. Only these are ticked for you at setup. |
+| **Alarm memory** | After an alarm, the panel remembers which areas and zones raised it, until the memory is reset. |
+| **Bypass** | Excluding a zone, so it cannot raise an alarm until it is included again. |
+| **User code and PIN** | A user code is a user programmed on the panel (for example *Master*). Its PIN is the number typed to use it. Home Assistant sends commands with one PIN, so it can control only the areas of that user code. |
+| **Programming mode** | While someone programs the panel from a keypad, it ignores commands. No command is sent then. |
 
 ## Contributing
 
-Contributions to this integration are welcome! Please feel free to open an issue or submit pull requests.
+Contributions are welcome: open an issue or a pull request on [GitHub](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel).

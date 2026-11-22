@@ -416,7 +416,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_smartlan_g(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Connection details for a SmartLAN/G board (experimental)."""
+        """Connection details for a SmartLAN/G board."""
         return await self._async_step_connection(BOARD_SMARTLAN_G, user_input)
 
     async def _async_step_connection(
