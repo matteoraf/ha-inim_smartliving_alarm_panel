@@ -215,6 +215,34 @@ def header(report: Mapping[str, Any]) -> tuple[str, str]:
     return f"SmartLiving {model} · firmware {firmware}", second
 
 
+def not_zones(report: Mapping[str, Any]) -> set[int] | None:
+    """0-based indexes of the zone numbers the report marks as not zones.
+
+    None when the report does not mark them (made before the marker, or
+    without the zone records): counts then take every zone number.
+    """
+    config = report.get("configuration")
+    if _withheld(config) or not isinstance(config, Mapping):
+        return None
+    zones = config.get("zones")
+    if not isinstance(zones, list):
+        return None
+    marked = [z for z in zones if isinstance(z, Mapping) and "is_zone" in z]
+    if not marked:
+        return None
+    return {
+        z["number"] - 1
+        for z in marked
+        if z.get("is_zone") is False and isinstance(z.get("number"), int)
+    }
+
+
+def _zone_states(report: Mapping[str, Any], states: list[Any]) -> list[Any]:
+    """The states of the zone numbers that are zones (all, if not marked)."""
+    skip = not_zones(report) or set()
+    return [state for index, state in enumerate(states) if index not in skip]
+
+
 def headline(report: Mapping[str, Any]) -> list[tuple[str, str, str]]:
     """Four numbers at a glance: (label, value, tone: ok / warn / bad / dim)."""
     status = report.get("status")
@@ -223,7 +251,7 @@ def headline(report: Mapping[str, Any]) -> list[tuple[str, str, str]]:
     modes = areas.get("modes") or {} if isinstance(areas, Mapping) else {}
     armed = sum(1 for m in modes.values() if str(m) != "disarmed")
     states = data.get("zone_states") or []
-    alarm = sum(1 for z in states if str(z) == "alarm")
+    alarm = sum(1 for z in _zone_states(report, states) if str(z) == "alarm")
     faults = data.get("faults") or {}
     active = faults.get("active") if isinstance(faults, Mapping) else None
     cloud = data.get("cloud") if isinstance(data.get("cloud"), Mapping) else None
@@ -342,6 +370,7 @@ def configuration(report: Mapping[str, Any], *, details: bool = False) -> list[S
         details=details,
     )
     _add_zone_state(zones, config.get("zones"), report.get("status"))
+    _add_zone_marker(zones, config.get("zones"))
     areas = _items(
         "Areas",
         config.get("areas"),
@@ -413,6 +442,25 @@ def record_link(
         return None
     block, size = sizes[kind]
     return block, (item["number"] - 1) * size, size
+
+
+def _add_zone_marker(section: Section, zones: Any) -> None:
+    """Whether each zone number is a zone on the panel, where the report
+    says so: a column and the "not-zone" tag."""
+    if not isinstance(zones, list) or not any(
+        isinstance(zone, Mapping) and "is_zone" in zone for zone in zones
+    ):
+        return
+    section.columns.append("Zone")
+    tags = list(section.tags) + [frozenset()] * (len(section.rows) - len(section.tags))
+    for index, (row, zone) in enumerate(zip(section.rows, zones, strict=False)):
+        value = zone.get("is_zone") if isinstance(zone, Mapping) else None
+        if value is False:
+            row.append(Cell("no", badge="not-zone"))
+            tags[index] = tags[index] | {"not-zone"}
+        else:
+            row.append(cell(value if value is None else "yes"))
+    section.tags = tags
 
 
 def _add_zone_state(section: Section, zones: Any, data: Any) -> None:
@@ -509,9 +557,12 @@ def status(report: Mapping[str, Any]) -> Section:
     states = data.get("zone_states")
     if isinstance(states, list):
         counts: dict[str, int] = {}
-        for state in states:
+        for state in _zone_states(report, states):
             counts[str(state)] = counts.get(str(state), 0) + 1
-        rows.append(("Zone states", [f"{k}: {v}" for k, v in sorted(counts.items())]))
+        title = "Zone states"
+        if skipped := len([i for i in not_zones(report) or () if 0 <= i < len(states)]):
+            title += f" ({skipped} not zones left out)"
+        rows.append((title, [f"{k}: {v}" for k, v in sorted(counts.items())]))
     rows += [
         ("Faults", data.get("faults")),
         ("Panel state", data.get("panel_state")),
