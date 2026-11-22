@@ -4,7 +4,9 @@ Dependencies point down only: protocol, then transport, then the API, then
 the Home Assistant integration. Some integration modules are kept free of
 Home Assistant, so that the report viewer and the tests can load them
 alone. Only stored_config knows the shape of the stored panel
-configuration. legacy.py is frozen: it may lose names, never gain them.
+configuration. Only the protocol, the transport, the API and the system
+report import the register addresses (directly or through a name another
+module imported them as), and the entity modules import no transport.
 """
 
 import ast
@@ -131,6 +133,7 @@ def test_api_imports_only_protocol_and_transport(module: str) -> None:
 
 HA_FREE = [
     "attribute_values",
+    "event_log",
     "panel_view",
     "peripherals",
     "report_crypto",
@@ -279,58 +282,91 @@ def test_only_stored_config_reads_the_stored_shape(module: str) -> None:
     assert _stored_lookups(tree) == set()
 
 
-# ------------------------------------------------------------------ legacy.py
-
-LEGACY_NAMES = {
-    # functions
-    "_areas",
-    "status_dict",
-    "_flags",
-    "_area_status",
-    "event_dict",
-    # class
-    "LegacyPanelClient",
-    # constants
-    "_LOGGER",
-    "MAX_EVENTS_PER_FETCH",
-    "EVENT_ACTIONS",
-    "_AREA_EVENTS",
-    "_ZONE_EVENTS",
-    "_AREA_MODES",
-    "_ZONE_STATES",
-    "_ERRORS",
-}
-LEGACY_METHODS = {
-    "__init__",
-    "get_live_status_snapshot",
-    "execute_get_compact_events",
-}
-FROZEN = "legacy.py is frozen: put new code in protocol/ or an integration module"
+# ----------------------------------------------------------- registers
 
 
-def _defined(body: list[ast.stmt]) -> set[str]:
+# Modules that may use the panel's register addresses: the protocol and the
+# transport below the API, the API that reads them, and the system report
+# that lists them
+REGISTER_USERS = {"api", "system_report"}
+# The entities and what only they use: no transport, no register address
+ENTITY_MODULES = [
+    "alarm_control_panel",
+    "binary_sensor",
+    "button",
+    "entity",
+    "light",
+    "outputs",
+    "select",
+    "sensor",
+    "switch",
+]
+
+
+def _register_names(module: str) -> set[str]:
+    """The names a module binds protocol.registers to (import ... as X)."""
     names = set()
-    for node in body:
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            names.add(node.name)
-        elif isinstance(node, ast.Assign):
-            names |= {t.id for t in node.targets if isinstance(t, ast.Name)}
-        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
-            names.add(node.target.id)
+    for node in ast.walk(ast.parse(MODULES[module].read_text(encoding="utf-8"))):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                if alias.name == "registers" or alias.name.endswith(".registers"):
+                    names.add(alias.asname or alias.name.rpartition(".")[2])
     return names
 
 
-def test_legacy_gains_no_names() -> None:
-    """No new function, class or constant in legacy.py; removing them is fine."""
-    tree = ast.parse(MODULES["legacy"].read_text(encoding="utf-8"))
-    assert _defined(tree.body) - LEGACY_NAMES == set(), FROZEN
-    client = next(
-        (
-            node
-            for node in tree.body
-            if isinstance(node, ast.ClassDef) and node.name == "LegacyPanelClient"
-        ),
-        None,
-    )
-    if client is not None:
-        assert _defined(client.body) - LEGACY_METHODS == set(), FROZEN
+def _registers_reached(module: str) -> bool:
+    """Whether a module imports the registers, directly or as a name another
+    module of the package bound them to (from .api import reg)."""
+    if "protocol.registers" in _imports(module)[0]:
+        return True
+    path = MODULES[module]
+    package = module.split(".")[:-1] if path.name != "__init__.py" else []
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+        if not isinstance(node, ast.ImportFrom) or not node.module:
+            continue
+        if node.level:
+            base = package[: len(package) - (node.level - 1)]
+            source = _resolve(".".join([*base, *node.module.split(".")]))
+        else:
+            source = _resolve(node.module.removeprefix(f"{PACKAGE}."))
+        if source is None or source == module:
+            continue
+        bound = _register_names(source)
+        if any(alias.name in bound for alias in node.names):
+            return True
+    return False
+
+
+@pytest.mark.parametrize("module", sorted(MODULES))
+def test_only_lower_layers_and_the_report_use_registers(module: str) -> None:
+    """No module but the protocol, the transport, the API and the system
+    report imports the register addresses, directly or re-exported."""
+    if _layer(module) in ("protocol", "transport") or module in REGISTER_USERS:
+        return
+    assert not _registers_reached(module)
+
+
+@pytest.mark.parametrize(
+    ("source", "found"),
+    [
+        ("from .api import reg\n", True),  # the name api imported them as
+        ("from .protocol import registers\n", True),
+        ("from .api import SmartLivingPanel\n", False),
+    ],
+)
+def test_register_imports_are_found(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, source: str, found: bool
+) -> None:
+    """A direct import and a re-export both count; other names do not."""
+    probe = tmp_path / "probe.py"
+    probe.write_text(source, encoding="utf-8")
+    monkeypatch.setitem(MODULES, "probe", probe)
+    assert _registers_reached("probe") is found
+
+
+@pytest.mark.parametrize("module", ENTITY_MODULES)
+def test_entity_modules_import_no_transport(module: str) -> None:
+    """The entities, their base and the outputs use the panel API: they import
+    no transport module and no register address."""
+    assert {_layer(m) for m in _imports(module)[0]} & {"transport"} == set()
+    assert not _registers_reached(module)

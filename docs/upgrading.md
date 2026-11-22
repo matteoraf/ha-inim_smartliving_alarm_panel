@@ -19,12 +19,16 @@ This version keeps the panel configuration in a new format. Your entity IDs and 
 | New format of the configuration entry; the panel configuration is read again once | Nothing; to go back to 0.4, restore your backup |
 | Switches, area sensors and arming mode selects no longer depend on the stored area names | Nothing |
 | Zone bypass switches find the zone's terminal the same way as outputs | Nothing |
+| The active scenario sensor says *No scenario matches* when no scenario matches the areas | *Check your automations* if they test for *Unknown Scenario (Index 255)* or index 255 |
+| The event log no longer shows events twice after a poll that failed | Nothing |
 
 ??? note "Details"
 
     *   **Your configuration entry is updated to a new format (version 2.1).** It now keeps only the panel data as read, and names, zones and scenarios are worked out from it. At the first start the integration reads the panel configuration again once by itself (the log says so). If it cannot, it tries again at every start; until then the names of user codes, keys, readers, expanders, timers and sirens show their defaults (such as *Code 1*, *Reader 1* or *Key 5*), and on an entry first set up before 0.4.0b1 the zone bypass switches appear only once that read has succeeded. **Re-read panel configuration** reads it at once. Entity IDs and options do not change. **To go back to 0.4, restore the backup taken before the update**: 0.4 does not load an entry in the new format.
     *   **Switches, area sensors and arming mode selects no longer depend on the stored area names.** Before, a panel configuration stored without them (for example after an incomplete read) left the panel without any switch, including the zone bypass and output switches, and without the area alarm, tamper and alarm memory sensors and the arming mode selects. Now each of them is created on its own, an area without a name is called *Area N*, and the scenario buttons show what they do to each area.
     *   **Zone bypass switches find the zone's terminal in the panel's terminal list the same way as outputs.** A zone on the last position of the list (a keypad terminal on a fully used panel) now gets a bypass switch; before, it had none. If a terminal appears twice in the list, the switch uses its first position, and the zone's `internal_index` attribute shows it.
+    *   **When no scenario matches the state of the areas** (no scenario matches, or the panel reports none), the *Active scenario* sensor now says *No scenario matches* and its `active_scenario_index` attribute is empty; before, it said *Unknown Scenario (Index 255)* and 255. `raw_active_scenario_hex` still gives the value the panel reported. The alarm panel still shows *Armed custom bypass* then, as before.
+    *   **The event log no longer shows events twice.** When a poll failed after a good one, the events of that good poll were added to the log a second time.
 
 ## From 0.4.0b1 or 0.4.0b2
 

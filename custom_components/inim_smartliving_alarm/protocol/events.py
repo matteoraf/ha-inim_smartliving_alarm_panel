@@ -16,6 +16,43 @@ VALID_KEY_ACTION = 0x96
 # Written in place of a code that firmware 6 does not have (it uses 0-113)
 NO_FW6_CODE = 0x7F
 CODE_OFFSET = 8  # byte with the event code (bits 0-6) and activation (bit 7)
+ACTIVATION_BIT = 0x80
+
+# Event actions: the code byte in firmware 6 numbering, activation bit
+# included (a restoral has it clear)
+AREA_ZONE_ALARM = 0x80
+AREA_ZONE_ALARM_END = 0x00
+AREAS_ARMED = 0x8A
+AREAS_DISARMED = 0x8C
+AREAS_RESET = 0x8D
+ZONE_EXCLUDED = 0x85
+ZONE_EXCLUDED_END = 0x05
+AREAS_ARMED_END = 0x0A
+AREAS_DISARMED_END = 0x0C
+INSTALLER_CODE_INSERTED = 0xBA
+PROGRAMMING_STARTED = 0xC2
+PROGRAMMING_ENDED = 0x42
+FAILED_CALL = 0x9B
+FAILED_CALL_END = 0x1B
+VALID_CODE = 0x95
+SCENARIO_ACTIVATED = 0x9E
+# Actions whose agent and location are a user code (or key) and a device,
+# and whose areas are those affected
+AREA_ACTIONS = frozenset(
+    (
+        AREAS_ARMED,
+        AREAS_DISARMED,
+        AREAS_RESET,
+        AREAS_ARMED_END,
+        AREAS_DISARMED_END,
+        VALID_CODE,
+        VALID_KEY_ACTION,
+    )
+)
+# Actions whose agent is a zone (0-based)
+ZONE_ACTIONS = frozenset(
+    (AREA_ZONE_ALARM, AREA_ZONE_ALARM_END, ZONE_EXCLUDED, ZONE_EXCLUDED_END)
+)
 
 
 def reader_index(location: int, keypads: int) -> int | None:
@@ -52,6 +89,15 @@ class PanelEvent:
     code: int | None  # event type, firmware 6 numbering; None if it has none
     activation: bool  # False = restoral
 
+    @property
+    def action(self) -> int:
+        """The code byte in firmware 6 numbering, activation bit included.
+
+        NO_FW6_CODE stands for a code firmware 6 does not have.
+        """
+        code = NO_FW6_CODE if self.code is None else self.code
+        return (ACTIVATION_BIT if self.activation else 0) | code
+
 
 def decode_event_pointers(data: bytes, model: PanelModel) -> EventPointers:
     """Decode the 4-byte event pointers (head, tail; u16 LE each)."""
@@ -69,6 +115,31 @@ def newest_indexes(pointers: EventPointers, model: PanelModel, count: int) -> li
     size = model.event_ring_size
     available = size if pointers.wrapped else pointers.head
     return [(pointers.head - 1 - n) % size for n in range(min(count, available))]
+
+
+def indexes_to_read(
+    pointers: EventPointers,
+    model: PanelModel,
+    *,
+    count: int | None = None,
+    after: int | None = None,
+    limit: int,
+) -> list[int]:
+    """Ring indexes of the events to read, newest first.
+
+    With count, the newest count events (at least 1, at most limit); with
+    after, those written since that index (none if it is not a ring index
+    or the ring is empty), at most limit. The ring wraps around.
+    """
+    if count is not None:
+        return newest_indexes(pointers, model, min(max(1, count), limit))
+    if after is None:
+        raise ValueError("either count or after is needed")
+    size = model.event_ring_size
+    newest = newest_indexes(pointers, model, 1)
+    if not newest or not 0 <= after < size:
+        return []
+    return newest_indexes(pointers, model, min((newest[0] - after) % size, limit))
 
 
 def event_address(index: int, model: PanelModel) -> int:
@@ -119,7 +190,7 @@ def decode_event_record(data: bytes, model: PanelModel) -> PanelEvent:
         agent=None if data[6] == NO_AGENT else data[6],
         location=None if data[7] == NO_LOCATION else data[7],
         code=fw6_event_code(data[CODE_OFFSET] & 0x7F, model),
-        activation=bool(data[CODE_OFFSET] & 0x80),
+        activation=bool(data[CODE_OFFSET] & ACTIVATION_BIT),
     )
 
 

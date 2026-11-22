@@ -9,9 +9,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from . import stored_config
 from .api import SmartLivingPanel
 from .const import (
     CONF_PANEL_NAME,
@@ -22,6 +20,8 @@ from .const import (
     DEFAULT_PANEL_NAME,
     DOMAIN,
 )
+from .coordinator import InimDataUpdateCoordinator
+from .entity import panel_device_info
 from .panel_config import async_reread_panel_configuration
 from .selection import (
     is_disarm_scenario,
@@ -29,9 +29,6 @@ from .selection import (
     selected,
 )
 from .stored_config import (
-    SystemInfo,
-    device_model,
-    device_sw_version,
     scenario_label,
 )
 from .utils import async_activate_scenario
@@ -51,17 +48,14 @@ async def async_setup_entry(
 
     panel: SmartLivingPanel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
 
-    coordinator: DataUpdateCoordinator | None = hass.data[DOMAIN][entry.entry_id].get(
-        DATA_COORDINATOR
-    )
+    coordinator: InimDataUpdateCoordinator | None = hass.data[DOMAIN][
+        entry.entry_id
+    ].get(DATA_COORDINATOR)
 
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
-    system_info = stored_config.system_info(initial_panel_config)
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
-    async_add_entities(
-        [InimRereadConfigurationButton(entry, panel_display_name, system_info)]
-    )
+    async_add_entities([InimRereadConfigurationButton(entry, panel_display_name)])
 
     buttons_to_add = []
 
@@ -78,7 +72,6 @@ async def async_setup_entry(
                 entry,
                 initial_panel_config,
                 panel_display_name,
-                system_info,
                 scenario_index_0_based,
                 scenario_name,
             )
@@ -99,11 +92,10 @@ class InimScenarioActivationButton(ButtonEntity):
     def __init__(
         self,
         panel: SmartLivingPanel,
-        coordinator: DataUpdateCoordinator | None,
+        coordinator: InimDataUpdateCoordinator | None,
         config_entry: ConfigEntry,
         initial_panel_config: dict[str, Any],
         panel_display_name: str,
-        system_info: SystemInfo | None,
         scenario_index_0_based: int,
         scenario_name: str,
     ) -> None:
@@ -113,7 +105,6 @@ class InimScenarioActivationButton(ButtonEntity):
         self.config_entry = config_entry
         self._initial_panel_config = initial_panel_config
         self._panel_display_name = panel_display_name
-        self._system_info = system_info
         self._scenario_index_0_based = scenario_index_0_based
         self._scenario_name = scenario_name
 
@@ -131,13 +122,7 @@ class InimScenarioActivationButton(ButtonEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for the entity."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.config_entry.entry_id)},
-            name=self._panel_display_name,
-            manufacturer="Inim Electronics",
-            model=device_model(self._system_info),
-            sw_version=device_sw_version(self._system_info),
-        )
+        return panel_device_info(self.config_entry)
 
     async def async_press(self) -> None:
         """Handle the button press to activate the scenario."""
@@ -189,12 +174,10 @@ class InimRereadConfigurationButton(ButtonEntity):
         self,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the button."""
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
-        self._system_info = system_info
         self._attr_name = "Re-read panel configuration"
         self._attr_unique_id = f"{config_entry.entry_id}_reread_panel_configuration"
 
@@ -206,13 +189,7 @@ class InimRereadConfigurationButton(ButtonEntity):
     @property
     def device_info(self) -> DeviceInfo:
         """Return device information for the entity."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self.config_entry.entry_id)},
-            name=self._panel_display_name,
-            manufacturer="Inim Electronics",
-            model=device_model(self._system_info),
-            sw_version=device_sw_version(self._system_info),
-        )
+        return panel_device_info(self.config_entry)
 
     async def async_press(self) -> None:
         """Read the panel configuration again and reload the entry."""

@@ -7,6 +7,16 @@ members as lower-case keys, times with a short unit.
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
+from .const import (
+    AREA_MODE_DISARMED,
+    AREA_MODE_INSTANT,
+    AREA_MODE_PARTIAL,
+    AREA_MODE_TOTAL,
+    ZONE_STATE_ALARMED,
+    ZONE_STATE_CLEAR,
+    ZONE_STATE_SHORT,
+    ZONE_STATE_TAMPER,
+)
 from .protocol.commands import ArmMode
 from .protocol.config import (
     TERMINAL_NOT_ASSIGNED,
@@ -19,6 +29,7 @@ from .protocol.config import (
     ZoneConfig,
     ZoneType,
 )
+from .protocol.status import AreaMode, ZoneState
 
 if TYPE_CHECKING:
     from .selection import OutputItem
@@ -37,6 +48,38 @@ ARM_MODE_TEXT: dict[ArmMode, str] = {
     ArmMode.INSTANT: "instant",
     ArmMode.DISARM: "disarm",
 }
+
+
+_AREA_MODE_TEXT = {
+    AreaMode.AWAY: AREA_MODE_TOTAL,
+    AreaMode.STAY: AREA_MODE_PARTIAL,
+    AreaMode.INSTANT: AREA_MODE_INSTANT,
+    AreaMode.DISARMED: AREA_MODE_DISARMED,
+}
+_ZONE_STATE_TEXT = {
+    ZoneState.SHORT: ZONE_STATE_SHORT,
+    ZoneState.STANDBY: ZONE_STATE_CLEAR,
+    ZoneState.ALARM: ZONE_STATE_ALARMED,
+    ZoneState.TAMPER: ZONE_STATE_TAMPER,
+}
+
+
+def area_mode_text(mode: AreaMode) -> str:
+    """An area's arming mode: "total", "partial", "instant", "disarmed" or
+    "unknown"."""
+    return _AREA_MODE_TEXT.get(mode, "unknown")
+
+
+def area_status_text(mode: AreaMode) -> str:
+    """An area's state: "armed" (any mode), "disarmed" or "unknown"."""
+    if mode.armed:
+        return "armed"
+    return "disarmed" if mode is AreaMode.DISARMED else "unknown"
+
+
+def zone_state_text(state: ZoneState) -> str:
+    """A zone's state: "clear", "alarmed", "short" or "tamper"."""
+    return _ZONE_STATE_TEXT[state]
 
 
 def value_key(value: Any) -> Any:

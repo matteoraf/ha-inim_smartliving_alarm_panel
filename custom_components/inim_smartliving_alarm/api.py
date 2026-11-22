@@ -55,10 +55,15 @@ from .protocol.config import (
     label_address,
     refuses_arming_when_not_ready,
 )
-from .protocol.errors import ProtocolError
+from .protocol.errors import ProtocolError, UnsupportedPanelError
 from .protocol.events import (
     EVENT_RECORD_LENGTH,
+    PanelEvent,
+    decode_event_pointers,
+    decode_event_record,
     event_address,
+    indexes_to_read,
+    newest_indexes,
     normalized_event_record,
 )
 from .protocol.frames import (
@@ -106,6 +111,13 @@ from .transport.smartlan_g import SmartLanGTransport
 from .transport.smartlan_si import SmartLanSiTransport
 
 _LOGGER = logging.getLogger(__name__)
+
+# Errors of a read or command that did not reach a result: the panel not
+# reachable, a reply not understood, a panel without a profile, a value out
+# of range
+PANEL_ERRORS = (TransportError, ProtocolError, UnsupportedPanelError, ValueError)
+# Events read at most in one go
+MAX_EVENTS_PER_READ = 50
 
 # After accepting a command the panel needs a moment before its status shows
 # the change (measured on a 1050: still old after 88 ms, new after 218 ms)
@@ -178,6 +190,23 @@ class EventRecord:
 
     raw: bytes  # as read from the panel
     record: bytes  # with the event code in firmware 6 numbering
+
+
+@dataclass(frozen=True, slots=True)
+class LoggedEvent:
+    """One event of the panel's log, at its ring index."""
+
+    index: int
+    raw: bytes  # as read from the panel
+    event: PanelEvent
+
+
+@dataclass(frozen=True, slots=True)
+class EventBatch:
+    """Events read in one go, newest first, and the newest event's index."""
+
+    events: tuple[LoggedEvent, ...]
+    latest_index: int | None  # None when the log is empty
 
 
 @dataclass(frozen=True, slots=True)
@@ -337,9 +366,17 @@ class PanelStatus:
     zone_states: tuple[ZoneState, ...]
     zone_inclusion: ZoneInclusion
     zone_memory: ZoneMemory
-    active_scenario: int | None  # 0-based; None when no scenario matches
+    # 0-based; None when no scenario matches the areas' state (the panel
+    # reports a value that is not a scenario), and only then
+    active_scenario: int | None
     panel_state: PanelState | None  # None when the panel's model is not known
     raw: Mapping[int, bytes]  # reply data by register
+    raw_active_scenario: bytes = b""  # the active scenario as reported
+
+    @property
+    def scenario_matches(self) -> bool:
+        """Whether the areas' state matches a scenario."""
+        return self.active_scenario is not None
 
 
 class SmartLivingPanel:
@@ -604,6 +641,7 @@ class SmartLivingPanel:
             active_scenario=decode_active_scenario(raw[reg.ACTIVE_SCENARIO], model),
             panel_state=None if faults is None else _panel_state(faults),
             raw=raw,
+            raw_active_scenario=raw[reg.ACTIVE_SCENARIO],
         )
 
     async def _not_ready_for_areas(
@@ -662,6 +700,38 @@ class SmartLivingPanel:
                 event_address(index, model), EVENT_RECORD_LENGTH
             )
         return EventRecord(raw, normalized_event_record(raw, model))
+
+    async def read_events(
+        self,
+        *,
+        count: int | None = None,
+        after: int | None = None,
+        limit: int = MAX_EVENTS_PER_READ,
+    ) -> EventBatch:
+        """The newest count events, or those written after a ring index.
+
+        At most limit events, newest first. A record that cannot be read
+        ends the read: the events read until then are returned. Raises if
+        the ring pointers cannot be read.
+        """
+        data = await self.read_ram(reg.EVENT_POINTERS, reg.EVENT_POINTERS_LENGTH)
+        model = self.model
+        pointers = decode_event_pointers(data, model)
+        newest = newest_indexes(pointers, model, 1)
+        events: list[LoggedEvent] = []
+        indexes = indexes_to_read(
+            pointers, model, count=count, after=after, limit=limit
+        )
+        for index in indexes:
+            try:
+                read = await self.read_event_record(index)
+            except PANEL_ERRORS as err:
+                _LOGGER.info("Stopped reading events at %s: %s", index, err)
+                break
+            events.append(
+                LoggedEvent(index, read.raw, decode_event_record(read.raw, model))
+            )
+        return EventBatch(tuple(events), newest[0] if newest else None)
 
     # ---------------------------------------------------------- system report
 

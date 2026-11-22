@@ -35,8 +35,9 @@ The alarm panel arms and disarms with the scenarios you mapped in the [options](
 
     *   *Triggered* while any area is in alarm.
     *   Otherwise the mode whose scenario is active on the panel, for example *Armed night*.
-    *   A scenario active on the panel that is not mapped to a mode shows as *Armed custom bypass*.
+    *   A scenario active on the panel that is not mapped to a mode shows as *Armed custom bypass*. *Armed custom bypass* is also shown when the state of the areas matches no scenario.
     *   Without a mapped Disarm scenario, the state is unknown when no mapping matches.
+    *   The state follows the scenario mapping: map as Disarm the scenario that disarms all your areas, otherwise a disarmed panel is not shown as *Disarmed*.
     *   Only the arm modes with a mapped scenario are offered. Disarming or arming without a mapped scenario fails with a message (*"No scenario is mapped to … choose one in the integration options"*).
 
 ## Areas
@@ -167,7 +168,7 @@ The zone sensor's attributes are the zone's programming, as read from the panel.
 | ID ends with | Name | State |
 |---|---|---|
 | `sensor.…_event_log` | *panel* Event Log | the position of the newest event in the panel's log |
-| `sensor.…_active_scenario` | Active Scenario Name | the active scenario's name and index, for example `Night (Index 1)` |
+| `sensor.…_active_scenario` | Active Scenario Name | the active scenario's name and index, for example `Night (Index 1)`, or `No scenario matches` |
 | `sensor.…_firmware_version` | Firmware Version | the panel's firmware, for example `6.07` |
 | `sensor.…_system_type` | System Type | the panel's model, for example `01050` |
 
@@ -205,11 +206,11 @@ The zone sensor's attributes are the zone's programming, as read from the panel.
 
 ??? note "The active scenario in detail"
 
-    The state is the active scenario's name followed by its index (0-based). It is `Unknown Scenario (Index n)` for an index without a scenario name, and `Unknown (No data)` or `Unknown (No active index)` when the panel reports none.
+    The state is the active scenario's name followed by its index (0-based). It is `No scenario matches` when the state of the areas matches no scenario, `Unknown Scenario (Index n)` for an index without a scenario name, and `Unknown (No data)` before the panel has been read.
 
     | Attribute | Values |
     |---|---|
-    | `active_scenario_index` | the index alone |
+    | `active_scenario_index` | the index alone; empty when no scenario matches |
     | `raw_active_scenario_hex` | the panel's raw value |
 
 ## Diagnostic and configuration entities

@@ -18,10 +18,10 @@ from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
 )
-from custom_components.inim_smartliving_alarm.legacy import LegacyPanelClient
 from custom_components.inim_smartliving_alarm.protocol.model import (
     SMARTLIVING_10100_FW6,
 )
+from custom_components.inim_smartliving_alarm.protocol.status import AreaMode
 from custom_components.inim_smartliving_alarm.stored_config import (
     area_names,
     scenario_area_modes,
@@ -84,11 +84,9 @@ async def test_identified_as_10100(
             15: 1,
         }
 
-        status = await LegacyPanelClient(connection).get_live_status_snapshot()
-        assert status["areas_status"]["area_modes"] == dict.fromkeys(
-            range(1, 16), "disarmed"
-        )
-        assert len(status["zones_status"]["zone_statuses"]) == 200
+        status = await connection.read_status()
+        assert status.areas.modes == dict.fromkeys(range(1, 16), AreaMode.DISARMED)
+        assert len(status.zone_states) == 200
         assert panel.protocol_errors == []
     finally:
         await connection.close()

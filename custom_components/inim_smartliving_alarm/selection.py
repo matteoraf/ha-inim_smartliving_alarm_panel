@@ -36,6 +36,7 @@ from .const import (
 from .protocol.commands import ArmMode
 from .protocol.config import (
     OutputConfig,
+    OutputKind,
     fixed_output_number,
     output_address,
     terminal_output_number,
@@ -287,6 +288,11 @@ def output_items(config: Mapping[str, Any]) -> list[OutputItem]:
             )
         )
     return items
+
+
+def is_dimmer(item: OutputItem) -> bool:
+    """Whether the output is switched with a level (a light)."""
+    return item.config.kind is OutputKind.DIMMER
 
 
 def imported_outputs(

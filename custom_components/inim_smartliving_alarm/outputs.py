@@ -6,48 +6,32 @@ a dimmer's level, on panels that report it, is read for the imported
 dimmers on every poll and after each dimmer command.
 """
 
-from collections.abc import Mapping
 import logging
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import callback
-from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .api import SmartLivingPanel
+from .api import PanelStatus, SmartLivingPanel
 from .attribute_values import output_attributes
-from .const import (
-    DOMAIN,
-    KEY_LIVE_OUTPUT_LEVELS,
-    KEY_LIVE_ZONES_TRIGGERED_STATUS,
-)
+from .coordinator import PanelData
+from .entity import InimCoordinatorEntity, panel_device_info
 from .errors import CommandRefusedError, async_send_command
-from .protocol.config import OutputKind
-from .protocol.errors import ProtocolError
-from .protocol.status import decode_zone_memory
 from .selection import OutputItem
-from .stored_config import SystemInfo, device_model, device_sw_version
 
 _LOGGER = logging.getLogger(__name__)
 
-# The raw zone memory register in the coordinator's data (with the outputs)
-_RAW_HEX = "raw_hex_data"
-
 
 def output_image(
-    data: Mapping[str, Any] | None, panel: SmartLivingPanel
+    status: PanelStatus | None,
 ) -> tuple[tuple[bool, ...], tuple[bool, ...]] | None:
     """(terminal outputs, O1-O3) on/off from the last poll; None if unknown."""
-    raw = ((data or {}).get(KEY_LIVE_ZONES_TRIGGERED_STATUS) or {}).get(_RAW_HEX)
-    try:
-        memory = decode_zone_memory(bytes.fromhex(raw), panel.model)
-    except (TypeError, ValueError, ProtocolError, RuntimeError):
+    if status is None:
         return None
-    return memory.outputs, memory.fixed_outputs
+    return status.zone_memory.outputs, status.zone_memory.fixed_outputs
 
 
-class InimOutputEntity(CoordinatorEntity):
+class InimOutputEntity(InimCoordinatorEntity):
     """An output of the panel; the platforms add how it is switched."""
 
     _attr_has_entity_name = True
@@ -58,7 +42,6 @@ class InimOutputEntity(CoordinatorEntity):
         panel: SmartLivingPanel,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: SystemInfo | None,
         item: OutputItem,
     ) -> None:
         """Initialize the entity of one output.
@@ -78,13 +61,7 @@ class InimOutputEntity(CoordinatorEntity):
             self._attr_translation_key = "terminal_output"
             self._attr_translation_placeholders = {"number": str(item.number)}
         self._attr_extra_state_attributes = output_attributes(item)
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, config_entry.entry_id)},
-            name=panel_display_name,
-            manufacturer="Inim Electronics",
-            model=device_model(system_info),
-            sw_version=device_sw_version(system_info),
-        )
+        self._attr_device_info = panel_device_info(config_entry)
         self._optimistic: bool | None = None
 
     @property
@@ -98,7 +75,7 @@ class InimOutputEntity(CoordinatorEntity):
 
     def _image_state(self) -> bool | None:
         """The output's on/off state in the last poll."""
-        image = output_image(self.coordinator.data, self.panel)
+        image = output_image(self.status)
         if image is None:
             return None
         terminals, fixed = image
@@ -135,12 +112,8 @@ class InimOutputEntity(CoordinatorEntity):
         await self.coordinator.async_request_refresh()
 
 
-def is_dimmer(item: OutputItem) -> bool:
-    """Whether the output is switched with a level (a light)."""
-    return item.config.kind is OutputKind.DIMMER
-
-
-def output_level(data: Mapping[str, Any] | None, item: OutputItem) -> int | None:
+def output_level(data: PanelData | None, item: OutputItem) -> int | None:
     """A dimmer's level (0-100) from the last poll; None if not read."""
-    levels = (data or {}).get(KEY_LIVE_OUTPUT_LEVELS) or {}
-    return levels.get(item.terminal)
+    if data is None or item.terminal is None:
+        return None
+    return data.output_levels.get(item.terminal)
