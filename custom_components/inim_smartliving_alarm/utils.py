@@ -25,7 +25,7 @@ from .errors import (
     InimCommandError,
     PanelProgrammingError,
     ZonesNotReadyError,
-    zone_label,
+    zone_text,
 )
 from .legacy import LegacyPanelClient, zone_exists
 from .notifications import ENGLISH, Texts, async_texts
@@ -35,6 +35,7 @@ from .selection import (
     scenario_armed_areas,
     scenario_label,
     scenario_names,
+    zone_label,
     zone_names,
 )
 
@@ -246,12 +247,11 @@ async def async_handle_scenario_activation_failure(
         blocking: list[tuple[str, list[str]]] = []
         for zone in error.zones:
             zone_areas = _scenario_zone_areas(config, zone, scenario_areas)
-            blocking.append((zone_label(zone, names), zone_areas))
-            plain = names[zone - 1] if 0 < zone <= len(names) else ""
+            blocking.append((zone_text(zone, names), zone_areas))
             blocking_zones_event_data.append(
                 {
                     "zone_id": zone,
-                    "zone_name": plain or f"Zone {zone}",
+                    "zone_name": zone_label(config, zone),
                     "status": "not_ready",
                     "areas": zone_areas,
                 }

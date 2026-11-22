@@ -222,7 +222,6 @@ SMARTLIVING_10100_FW6 = PanelModel(
     area_records=0x0A36B,
     fixed_output_records=0x0957D,
     extra_output_options=0x0E7B9,
-    experimental=True,
 )
 
 SMARTLIVING_505_FW6 = PanelModel(

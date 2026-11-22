@@ -925,3 +925,141 @@ def panel_505_fw51() -> PanelState:
     state = _small_panel(c.LAYOUT_505_FW51)
     state.firmware = "5.12 00505  "
     return state
+
+
+def panel_demo() -> PanelState:
+    """A made-up 1050 (firmware 6.07) with plain names, for the documentation.
+
+    Nothing comes from captures. Five named areas; twelve zones, among them a
+    double terminal (its second zone is 54), a shock sensor and a 24-hour
+    smoke detector; three home automation outputs (on/off, a 3 s monostable
+    and a dimmer); six scenarios; codes "Master" (PIN 1234, every area and
+    the outputs) and "Family" (PIN 5678, areas 1-2).
+    """
+    state = PanelState()
+    terminals = c.NUM_TERMINALS
+
+    areas = ["Ground floor", "First floor", "Garage", "Garden", "Office"]
+    # (terminal, name, area, zone type, balancing, sensor byte, terminal type)
+    nc, double_eol, double_zone = 1, 3, 4
+    instant, delayed, h24 = 0, 1, 4
+    shock = 0x40
+    inputs = [
+        (0, "Front door", 1, delayed, nc, 0, c.TERMINAL_INPUT),
+        (1, "Hall motion", 1, instant, double_eol, 0, c.TERMINAL_INPUT),
+        (2, "Kitchen window", 1, instant, nc, 0, c.TERMINAL_INPUT),
+        (3, "Lounge window", 1, instant, double_zone, 0, c.TERMINAL_DOUBLE),
+        (4, "Bedroom window", 2, instant, nc, 0, c.TERMINAL_INPUT),
+        (5, "Landing motion", 2, instant, double_eol, 0, c.TERMINAL_INPUT),
+        (6, "Bathroom window", 2, instant, nc, shock, c.TERMINAL_INPUT),
+        (7, "Garage door", 3, delayed, nc, 0, c.TERMINAL_INPUT),
+        (8, "Garage motion", 3, instant, double_eol, 0, c.TERMINAL_INPUT),
+        (9, "Garden barrier", 4, instant, nc, 0, c.TERMINAL_INPUT),
+        (10, "Office door", 5, delayed, nc, 0, c.TERMINAL_INPUT),
+        (11, "Kitchen smoke", 1, h24, nc, 0, c.TERMINAL_INPUT),
+    ]
+    zone_names = [""] * c.NUM_ZONES
+    for terminal, name, area, zone_type, balancing, sensor, kind in inputs:
+        state.terminal_types[terminal] = kind
+        state.physical_map[terminal] = terminal
+        state.terminal_records[terminal] = (
+            bytes(5) + bytes((balancing, sensor)) + bytes(4) + bytes((kind,))
+        )
+        state.zone_areas[terminal] = 1 << (area - 1)
+        state.zone_records[terminal] = bytes(
+            (1 << (area - 1), 0, zone_type, 0, 0, 3, 5, 30, 1)
+        )
+        zone_names[terminal] = name
+    # The second zone of the double terminal 4 (zone 54)
+    second = 3 + terminals
+    state.zone_areas[second] = 1
+    state.zone_records[second] = bytes((1, 0, instant, 0, 0, 3, 5, 30, 1))
+    zone_names[second] = "Lounge shutter"
+
+    # Home automation outputs: Garden lights (on/off), Gate (3 s monostable),
+    # Porch light (dimmer)
+    outputs = {20: "Garden lights", 21: "Gate", 22: "Porch light"}
+    for terminal, name in outputs.items():
+        state.terminal_types[terminal] = c.TERMINAL_OUTPUT
+        state.physical_map[terminal] = terminal
+        zone_names[terminal] = name
+    state.terminal_types[22] = c.TERMINAL_OUT_DIMMING
+    state.output_programming[21] = (0x03, 0x02)  # 3 s, monostable
+    state.home_automation = set(outputs)
+
+    state.pins[0:2] = ["1234", "5678"]
+    master = bytearray(c.CODE_RECORD_LENGTH)
+    master[0:2] = (0x1F).to_bytes(2, "little")
+    for terminal in outputs:
+        master[c.CODE_OUTPUT_MASK_OFFSET + 1 + terminal // 8] |= 1 << (terminal % 8)
+    state.code_records[0] = bytes(master)
+    state.code_records[1] = (0x03).to_bytes(2, "little") + bytes(
+        c.CODE_RECORD_LENGTH - 2
+    )
+
+    def scenario(modes: dict[int, int]) -> bytes:
+        record = bytearray(c.SCENARIO_RECORD_LENGTH)
+        for area, mode in modes.items():
+            record[(area - 1) // 2] |= mode << (4 if area % 2 == 0 else 0)
+        return bytes(record)
+
+    every_area = range(1, len(areas) + 1)
+    state.scenario_records[0] = scenario(dict.fromkeys(every_area, c.MODE_AWAY))
+    state.scenario_records[1] = scenario(
+        {1: c.MODE_STAY, 2: c.MODE_DISARMED, 3: c.MODE_AWAY, 4: c.MODE_AWAY}
+    )
+    state.scenario_records[2] = scenario(dict.fromkeys(every_area, c.MODE_DISARMED))
+    state.scenario_records[3] = scenario({3: c.MODE_AWAY})
+    state.scenario_records[4] = scenario(dict.fromkeys(every_area, c.MODE_AWAY))
+    state.scenario_records[5] = scenario({5: c.MODE_AWAY})
+
+    state.labels = {
+        c.RAM_LABELS_AREAS: areas
+        + [f"Area {n}" for n in range(len(areas) + 1, c.NUM_AREAS + 1)],
+        c.RAM_LABELS_ZONES: zone_names,
+        c.RAM_LABELS_CODES: ["Master", "Family"]
+        + [f"User {n}" for n in range(3, c.NUM_CODES + 1)],
+        c.RAM_LABELS_KEYPADS: ["Hall keypad", "Garage keypad"],
+        c.RAM_LABELS_READERS: ["Garage reader"],
+        c.RAM_LABELS_KEYS: ["Key 1", "Key 2"],
+        c.RAM_LABELS_EXPANDERS: ["Bedroom expander"],
+        c.RAM_LABELS_TIMERS: ["Evening timer"],
+        c.RAM_LABELS_SIRENS: ["Main siren"],
+        c.RAM_LABELS_SCENARIOS: [
+            "Away",
+            "Night",
+            "Disarm",
+            "Garage only",
+            "Holiday",
+            "Office closed",
+        ]
+        + [f"Scenario {n}" for n in range(7, c.NUM_SCENARIOS + 1)],
+    }
+    state.peripherals = {
+        "keypads": [0, 1],
+        "readers": [0],
+        "expanders": [0],
+        "sirens": [0],
+    }
+
+    # A short event log: the house armed in the evening, disarmed this morning
+    evening = state.clock - 13 * 3600
+    for offset, (areas_mask, code, text) in enumerate(
+        [
+            (0x1F, c.EVENT_SCENARIO | c.EVENT_ACTIVATION, "Scenario"),
+            (0x1F, c.EVENT_AREA_ARMED | c.EVENT_ACTIVATION, "Area armed"),
+        ]
+    ):
+        state.events[offset] = EventRecord(
+            evening + offset, areas_mask, 0, c.LOCATION_NETWORK, code, text
+        )
+    state.events[2] = EventRecord(
+        state.clock - 3600,
+        0x1F,
+        1,
+        c.LOCATION_NETWORK,
+        c.EVENT_AREA_DISARMED | c.EVENT_ACTIVATION,
+        "Area disarmed",
+    )
+    state.event_head = 3
+    return state

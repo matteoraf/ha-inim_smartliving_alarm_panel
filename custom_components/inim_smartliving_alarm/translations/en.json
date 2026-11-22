@@ -7,7 +7,7 @@
           "menu_options": {
             "discover": "Search the network",
             "smartlan_si": "SmartLAN/SI board",
-            "smartlan_g": "SmartLAN/G board (experimental)"
+            "smartlan_g": "SmartLAN/G board"
           }
         },
         "discover": {
@@ -23,7 +23,7 @@
           "menu_options": {
             "discover": "Search again",
             "smartlan_si": "SmartLAN/SI board",
-            "smartlan_g": "SmartLAN/G board (experimental)"
+            "smartlan_g": "SmartLAN/G board"
           }
         },
         "smartlan_si": {
@@ -41,8 +41,8 @@
           }
         },
         "smartlan_g": {
-          "title": "SmartLAN/G connection (experimental)",
-          "description": "Enter the connection details of the SmartLAN/G board and a user PIN of the panel. SmartLAN/G support has not been tested on a real board yet: please report how it works.",
+          "title": "SmartLAN/G connection",
+          "description": "Enter the connection details of the SmartLAN/G board and a user PIN of the panel.",
           "data": {
             "host": "Host",
             "port": "Port",
