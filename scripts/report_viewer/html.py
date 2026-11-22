@@ -35,8 +35,14 @@ MENU = {
     "Last exchanges": "Last exchanges",
     "Integration": "Integration",
 }
-# Zone chips: (tag, label); "All" is added
-ZONE_CHIPS = (("alarm", "Alarm"), ("bypassed", "Bypassed"), ("not-ready", "Not ready"))
+# Zone chips: (tag, label); "All" is added. "Not zones" only for a report
+# that marks them
+ZONE_CHIPS = (
+    ("alarm", "Alarm"),
+    ("bypassed", "Bypassed"),
+    ("not-ready", "Not ready"),
+    ("not-zone", "Not zones"),
+)
 # Drop-down filters built by the script from the rows' tags: (prefix, label)
 SELECT_FILTERS = {"Events": (("area-", "Area"), ("code-", "Code"))}
 
@@ -120,6 +126,7 @@ th{position:sticky;top:0;background:var(--head);font-weight:600;white-space:nowr
 tbody tr:nth-child(even) td{background:var(--stripe)}
 tbody tr:hover td{background:var(--head)}
 tbody tr[aria-selected=true] td{background:var(--sel)}
+tbody tr[data-tags~=not-zone] td{color:var(--dim)}
 tr[data-title]{cursor:pointer}
 td{overflow-wrap:break-word}
 .badge{display:inline-block;padding:.05em .55em;border-radius:99px;font-size:.85em;
@@ -359,6 +366,7 @@ def _chips(section: Section) -> str:
         f'<button type="button" data-chip="{escape(tag)}" aria-pressed="false">'
         f"{escape(label)} {counts[tag]}</button>"
         for tag, label in ZONE_CHIPS
+        if tag != "not-zone" or counts[tag]
     ]
     chips.append(
         '<button type="button" data-chip="" aria-pressed="true">'

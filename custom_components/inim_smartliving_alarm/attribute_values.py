@@ -9,10 +9,12 @@ from typing import TYPE_CHECKING, Any
 
 from .protocol.commands import ArmMode
 from .protocol.config import (
+    TERMINAL_NOT_ASSIGNED,
     AreaConfig,
     PanelTime,
     SensorKind,
     Terminal,
+    TerminalType,
     TimeUnit,
     ZoneConfig,
     ZoneType,
@@ -43,6 +45,14 @@ def value_key(value: Any) -> Any:
         return key
     name = getattr(value, "name", None)
     return name.lower() if isinstance(name, str) else value
+
+
+def terminal_type_key(value: TerminalType | int) -> Any:
+    """A terminal type as a stable key; "not_assigned" for a record never
+    assigned, any other unknown value as its number."""
+    if value == TERMINAL_NOT_ASSIGNED and not isinstance(value, TerminalType):
+        return "not_assigned"
+    return value_key(value)
 
 
 def time_text(time: PanelTime) -> str:
@@ -88,7 +98,7 @@ def zone_programming_attributes(
         "balancing": value_key(terminal.balancing),
         "sensor_kind": kind.value,
         "terminal_index": terminal_index,
-        "terminal_type": value_key(terminal.terminal_type),
+        "terminal_type": terminal_type_key(terminal.terminal_type),
         "second_zone": second_zone,
         **zone.flags,
     }

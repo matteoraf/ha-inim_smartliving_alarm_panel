@@ -86,6 +86,10 @@ class TerminalType(IntEnum):
     OUT_NOT_ENABLED = 8
 
 
+# Type byte of a terminal record never assigned (the record all zero, the
+# terminal in no physical slot): not a TerminalType
+TERMINAL_NOT_ASSIGNED = 0xFF
+
 ZONE_TYPES = frozenset((TerminalType.INPUT, TerminalType.IN_OUT, TerminalType.DOUBLE))
 
 

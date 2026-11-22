@@ -25,6 +25,7 @@ from .stored_config import (
     refuses_not_ready,
     scenario_names,
     stored_model,
+    stored_zones,
     terminal_records,
     zone_names,
     zone_records,
@@ -52,7 +53,9 @@ def configuration_view(config: Mapping[str, Any]) -> dict[str, Any]:
     """The stored configuration, decoded; labels in clear.
 
     Each list item has "number" (1-based, as the panel numbers it) and
-    "label" (the panel's label, empty if none).
+    "label" (the panel's label, empty if none). Each zone number also has
+    "is_zone": whether it is a zone on the panel, by its terminal's type
+    (left out when the stored records cannot be decoded).
     """
     model = stored_model(config)
     areas = area_records(config) or []
@@ -65,8 +68,18 @@ def configuration_view(config: Mapping[str, Any]) -> dict[str, Any]:
             item |= area_settings_attributes(areas[number - 1])
         return item
 
+    # Whether each zone number is a zone on the panel; not known (left out)
+    # without the zone and terminal records
+    is_zone = {
+        zone.number: zone.exists
+        for zone in stored_zones(config)
+        if zone.terminal is not None
+    }
+
     def zone(number: int, label: str) -> dict[str, Any]:
         item: dict[str, Any] = {"number": number, "label": label}
+        if number in is_zone:
+            item["is_zone"] = is_zone[number]
         index = number - 1
         if terminals and index < len(zones):
             terminal_index = index % len(terminals)
