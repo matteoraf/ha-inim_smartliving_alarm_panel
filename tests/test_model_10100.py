@@ -13,13 +13,22 @@ from homeassistant.helpers import entity_registry as er
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.inim_smartliving_alarm.api import create_panel
 from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
 )
-from custom_components.inim_smartliving_alarm.legacy import create_client
+from custom_components.inim_smartliving_alarm.legacy import LegacyPanelClient
 from custom_components.inim_smartliving_alarm.protocol.model import (
     SMARTLIVING_10100_FW6,
+)
+from custom_components.inim_smartliving_alarm.stored_config import (
+    area_names,
+    scenario_area_modes,
+    store,
+    stored_zones,
+    system_info,
+    zone_names,
 )
 
 from .conftest import ALL, add_entry
@@ -56,32 +65,33 @@ async def test_identified_as_10100(
     panel: FakePanel, caplog: pytest.LogCaptureFixture
 ) -> None:
     """The 10100 profile is used, without a warning that it is experimental."""
-    client = create_client(panel.host, panel.port, "1234")
+    connection = create_panel(panel.host, panel.port, "1234")
     try:
         with caplog.at_level(logging.WARNING):
-            config = await client.get_initial_panel_configuration()
-        assert client.panel.model is SMARTLIVING_10100_FW6
+            config = store(await connection.read_configuration())
+        assert connection.model is SMARTLIVING_10100_FW6
         assert "is experimental" not in caplog.text
-        assert client.panel.user_code_found
-        assert config["errors"] == []
-        assert config["system_info"]["type"] == "10100"
-        assert config["areas"]["names"] == [f"Area {n}" for n in range(1, 16)]
-        assert len(config["zones"]["zone_names"]) == 200
-        assert len(config["zones_config"]["zones_config_detailed"]) == 200
+        assert connection.user_code_found
+        info = system_info(config)
+        assert info is not None
+        assert info.type == "10100"
+        assert area_names(config) == [f"Area {n}" for n in range(1, 16)]
+        assert len(zone_names(config)) == 200
+        assert len(stored_zones(config)) == 200
         # scenario 3 arms area 15 only: all 15 areas are read from the record
-        assert config["scenario_activations"][2]["area_actions"] == {
-            **dict.fromkeys(range(1, 15), "keep"),
-            15: "total",
+        assert scenario_area_modes(config)[3] == {
+            **dict.fromkeys(range(1, 15), 0),
+            15: 1,
         }
 
-        status = await client.get_live_status_snapshot()
+        status = await LegacyPanelClient(connection).get_live_status_snapshot()
         assert status["areas_status"]["area_modes"] == dict.fromkeys(
             range(1, 16), "disarmed"
         )
         assert len(status["zones_status"]["zone_statuses"]) == 200
         assert panel.protocol_errors == []
     finally:
-        await client.close()
+        await connection.close()
 
 
 async def test_setup_offers_every_area_and_zone(
@@ -143,17 +153,17 @@ async def test_configuration_of_another_layout_is_read_again(
     """A 10100 stored with the 1050's layout is read again once at startup."""
     old = FakePanel()  # a 1050: its configuration has the 1050's sizes
     await old.start()
-    client = create_client(old.host, old.port, "1234")
+    connection = create_panel(old.host, old.port, "1234")
     try:
-        stored = await client.get_initial_panel_configuration()
+        stored = store(await connection.read_configuration())
     finally:
-        await client.close()
+        await connection.close()
         await old.stop()
 
     entry = MockConfigEntry(
         domain=DOMAIN,
-        version=1,
-        minor_version=3,
+        version=2,
+        minor_version=1,
         title="10100",
         data={
             "host": panel.host,
@@ -163,7 +173,11 @@ async def test_configuration_of_another_layout_is_read_again(
             "panel_name": "Big",
             DATA_INITIAL_PANEL_CONFIG: stored,
         },
-        options={"limit_areas": 16, "limit_zones": 200, "limit_scenarios": 30},
+        options={
+            "areas": list(range(1, 16)),
+            "zones": list(range(1, 201)),
+            "scenarios": list(range(1, 31)),
+        },
     )
     entry.add_to_hass(hass)
     with caplog.at_level(logging.WARNING):
@@ -172,8 +186,8 @@ async def test_configuration_of_another_layout_is_read_again(
 
     assert "does not fit the SmartLiving 10100" in caplog.text
     config = entry.data[DATA_INITIAL_PANEL_CONFIG]
-    assert len(config["areas"]["names"]) == 15
-    assert len(config["zones_config"]["zones_config_detailed"]) == 200
+    assert len(area_names(config)) == 15
+    assert len(stored_zones(config)) == 200
     registry = er.async_get(hass)
     assert registry.async_get_entity_id(
         "switch", DOMAIN, f"{entry.entry_id}_area_switch_15"

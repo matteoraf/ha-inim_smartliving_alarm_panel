@@ -15,26 +15,14 @@ from .attribute_values import (
     output_attributes,
     zone_programming_attributes,
 )
-from .const import (
-    KEY_INIT_CODES,
-    KEY_INIT_EXPANDERS,
-    KEY_INIT_GENERAL_OPTIONS,
-    KEY_INIT_KEYS,
-    KEY_INIT_NAMES,
-    KEY_INIT_RAW_HEX,
-    KEY_INIT_READERS,
-    KEY_INIT_SIRENS,
-    KEY_INIT_TIMERS,
-)
 from .peripherals import enabled_peripherals
-from .protocol.config import refuses_arming_when_not_ready
-from .protocol.errors import ProtocolError
-from .selection import (
+from .selection import output_items, scenario_actions
+from .stored_config import (
     area_names,
     area_records,
     keypad_names,
-    output_items,
-    scenario_actions,
+    name_table,
+    refuses_not_ready,
     scenario_names,
     stored_model,
     terminal_records,
@@ -43,32 +31,21 @@ from .selection import (
 )
 
 
-def _stored_names(table: str) -> Callable[[Mapping[str, Any]], list[str]]:
-    """The names of a stored table, as stored."""
-    return lambda config: list((config.get(table) or {}).get(KEY_INIT_NAMES) or [])
+def _names(kind: str) -> Callable[[Mapping[str, Any]], list[str]]:
+    """The names of a stored name table."""
+    return lambda config: name_table(config, kind)
 
 
 # Name tables of the other objects: view key, how to get the names
 _NAME_TABLES: tuple[tuple[str, Callable[[Mapping[str, Any]], list[str]]], ...] = (
-    ("codes", _stored_names(KEY_INIT_CODES)),
+    ("codes", _names("codes")),
     ("keypads", keypad_names),
-    ("readers", _stored_names(KEY_INIT_READERS)),
-    ("expanders", _stored_names(KEY_INIT_EXPANDERS)),
-    ("keys", _stored_names(KEY_INIT_KEYS)),
-    ("timers", _stored_names(KEY_INIT_TIMERS)),
-    ("sirens", _stored_names(KEY_INIT_SIRENS)),
+    ("readers", _names("readers")),
+    ("expanders", _names("expanders")),
+    ("keys", _names("keys")),
+    ("timers", _names("timers")),
+    ("sirens", _names("sirens")),
 )
-
-
-def _refuses_not_ready(config: Mapping[str, Any]) -> bool | None:
-    """The panel's own refuse-arming option; None if not stored or unreadable."""
-    if stored_model(config) is None:
-        return None
-    raw = (config.get(KEY_INIT_GENERAL_OPTIONS) or {}).get(KEY_INIT_RAW_HEX)
-    try:
-        return refuses_arming_when_not_ready(bytes.fromhex(raw))
-    except (TypeError, ValueError, ProtocolError):
-        return None
 
 
 def configuration_view(config: Mapping[str, Any]) -> dict[str, Any]:
@@ -103,7 +80,7 @@ def configuration_view(config: Mapping[str, Any]) -> dict[str, Any]:
 
     view: dict[str, Any] = {
         "model": None if model is None else model.name,
-        "refuses_arming_with_zones_not_ready": _refuses_not_ready(config),
+        "refuses_arming_with_zones_not_ready": refuses_not_ready(config),
         "areas": [
             area(number, label)
             for number, label in enumerate(area_names(config), start=1)

@@ -16,6 +16,7 @@ from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
 )
+from custom_components.inim_smartliving_alarm.panel_config import PanelUnreachable
 from custom_components.inim_smartliving_alarm.protocol.config import (
     TimeUnit,
     decode_area_records,
@@ -26,7 +27,9 @@ from custom_components.inim_smartliving_alarm.protocol.model import (
     SMARTLIVING_10100_FW6,
 )
 from custom_components.inim_smartliving_alarm.select import area_settings_attributes
-from custom_components.inim_smartliving_alarm.selection import area_records
+from custom_components.inim_smartliving_alarm.stored_config import (
+    area_records,
+)
 from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
@@ -134,9 +137,9 @@ async def test_read_with_the_configuration(ten_thousand: bool, count: int) -> No
 
 
 def stored(model_string: bytes, records: bytes | None = REAL_1050) -> dict:
-    config: dict = {"system_info": {"raw_hex": model_string.hex()}}
+    config: dict = {"model_string": model_string.hex()}
     if records is not None:
-        config["area_records"] = {"raw_hex": records.hex()}
+        config["area_records"] = records.hex()
     return config
 
 
@@ -182,8 +185,8 @@ async def old_entry(hass: HomeAssistant, panel: FakePanel) -> MockConfigEntry:
     del config["area_records"]
     entry = MockConfigEntry(
         domain=DOMAIN,
-        version=1,
-        minor_version=5,
+        version=2,
+        minor_version=1,
         title="Old",
         data={
             "host": panel.host,
@@ -221,7 +224,7 @@ async def test_old_entry_without_a_re_read(
     with patch.object(
         integration,
         "async_fetch_panel_configuration",
-        side_effect=ConnectionError("unreachable"),
+        side_effect=PanelUnreachable("unreachable"),
     ):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()

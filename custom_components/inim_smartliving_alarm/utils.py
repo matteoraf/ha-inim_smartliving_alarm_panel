@@ -9,12 +9,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from .api import SmartLivingPanel
 from .const import (
     DOMAIN,
-    KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS,
-    KEY_INIT_ZONE_CONFIG_INDEX,
-    KEY_INIT_ZONES_CONFIG,
-    KEY_INIT_ZONES_CONFIG_DETAILED,
     KEY_LIVE_ZONE_STATUSES_MAP,
     KEY_LIVE_ZONES_STATUS,
     PROBLEM_ZONE_STATES_FOR_ARMING,
@@ -27,14 +24,16 @@ from .errors import (
     ZonesNotReadyError,
     zone_text,
 )
-from .legacy import LegacyPanelClient, zone_exists
 from .notifications import ENGLISH, Texts, async_texts
 from .readiness import async_arm
 from .selection import (
-    area_names,
     scenario_armed_areas,
+)
+from .stored_config import (
+    area_names,
     scenario_label,
     scenario_names,
+    stored_zone,
     zone_label,
     zone_names,
 )
@@ -46,7 +45,7 @@ async def async_activate_scenario(
     hass: HomeAssistant,
     entry: ConfigEntry,
     coordinator: DataUpdateCoordinator | None,
-    api_client: LegacyPanelClient,
+    panel: SmartLivingPanel,
     initial_panel_config: dict[str, Any],
     entity_unique_id: str,
     entity_name: str,
@@ -68,9 +67,7 @@ async def async_activate_scenario(
         await async_arm(
             hass,
             entry,
-            lambda check: api_client.panel.activate_scenario(
-                scenario_index, on_not_ready=check
-            ),
+            lambda check: panel.activate_scenario(scenario_index, on_not_ready=check),
             scenario_label(initial_panel_config or {}, scenario_index + 1),
             force=force,
         )
@@ -102,16 +99,10 @@ def _scenario_zone_areas(
     initial_panel_config: dict[str, Any], zone: int, scenario_areas: list[int]
 ) -> list[str]:
     """Names of a zone's (1-based) areas that the scenario arms, as programmed."""
-    zones_config = initial_panel_config.get(KEY_INIT_ZONES_CONFIG, {}).get(
-        KEY_INIT_ZONES_CONFIG_DETAILED, []
-    )
     names_of_areas = area_names(initial_panel_config)
-    zone_config = next(
-        (zc for zc in zones_config if zc.get(KEY_INIT_ZONE_CONFIG_INDEX) == zone - 1),
-        None,
-    )
+    stored = stored_zone(initial_panel_config, zone)
     names = []
-    for area_id in (zone_config or {}).get(KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS, []):
+    for area_id in stored.areas if stored is not None else ():
         if area_id in scenario_areas:
             name = f"Area {area_id}"
             if 0 < area_id <= len(names_of_areas):
@@ -309,9 +300,6 @@ async def async_handle_scenario_activation_failure(
             event_reason = "no_areas_identified"
         else:
             all_zone_names_list = zone_names(initial_panel_config)
-            all_zones_config_detailed_list = initial_panel_config.get(
-                KEY_INIT_ZONES_CONFIG, {}
-            ).get(KEY_INIT_ZONES_CONFIG_DETAILED, [])
             live_zone_statuses_map = coordinator.data.get(
                 KEY_LIVE_ZONES_STATUS, {}
             ).get(KEY_LIVE_ZONE_STATUSES_MAP, {})
@@ -327,18 +315,9 @@ async def async_handle_scenario_activation_failure(
                     zone_live_status = live_zone_statuses_map.get(zone_id_1_based)
 
                 if zone_live_status in PROBLEM_ZONE_STATES_FOR_ARMING:
-                    zone_config = next(
-                        (
-                            zc
-                            for zc in all_zones_config_detailed_list
-                            if zc.get(KEY_INIT_ZONE_CONFIG_INDEX) == zone_idx_0_based
-                        ),
-                        None,
-                    )
-                    if zone_config and zone_exists(zone_config):
-                        assigned_areas = zone_config.get(
-                            KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS, []
-                        )
+                    zone_config = stored_zone(initial_panel_config, zone_id_1_based)
+                    if zone_config is not None and zone_config.exists:
+                        assigned_areas = zone_config.areas
                         is_relevant = any(
                             area_id in areas_controlled_by_scenario
                             for area_id in assigned_areas

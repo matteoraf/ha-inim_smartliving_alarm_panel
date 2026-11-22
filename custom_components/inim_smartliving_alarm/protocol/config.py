@@ -52,12 +52,18 @@ class PhysicalMap:
 
     terminal_by_slot: tuple[int | None, ...]
 
+    def slots_of(self, terminal: int) -> tuple[int, ...]:
+        """Every physical slot of a logical terminal, in slot order."""
+        return tuple(
+            slot
+            for slot, found in enumerate(self.terminal_by_slot)
+            if found == terminal
+        )
+
     def slot_of(self, terminal: int) -> int | None:
         """Physical slot of a logical terminal (first match), if connected."""
-        try:
-            return self.terminal_by_slot.index(terminal)
-        except ValueError:
-            return None
+        slots = self.slots_of(terminal)
+        return slots[0] if slots else None
 
 
 def decode_physical_map(data: bytes, model: PanelModel) -> PhysicalMap:
@@ -81,6 +87,19 @@ class TerminalType(IntEnum):
 
 
 ZONE_TYPES = frozenset((TerminalType.INPUT, TerminalType.IN_OUT, TerminalType.DOUBLE))
+
+
+def is_zone_terminal(terminal_type: TerminalType | int, second_zone: bool) -> bool:
+    """Whether a zone number is a zone on the panel, by its terminal's type.
+
+    A zone of an input, input/output or double terminal; the second zone of
+    a terminal (zone L+n) only for a double terminal.
+    """
+    if second_zone:
+        return terminal_type == TerminalType.DOUBLE
+    return terminal_type in ZONE_TYPES
+
+
 OUTPUT_TYPES = frozenset(
     (
         TerminalType.OUTPUT,
@@ -180,8 +199,8 @@ def output_address(number: int, physical_map: PhysicalMap, model: PanelModel) ->
         return number - model.terminals - 1
     if not 1 <= number <= model.terminals:
         raise ValueError(f"output number out of range: {number}")
-    for slot, terminal in enumerate(physical_map.terminal_by_slot):
-        if slot >= FIXED_OUTPUTS and terminal == number - 1:
+    for slot in physical_map.slots_of(number - 1):
+        if slot >= FIXED_OUTPUTS:
             return slot
     raise ValueError(f"terminal {number} is not in a physical slot of 3 or more")
 

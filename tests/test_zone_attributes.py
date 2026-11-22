@@ -320,7 +320,7 @@ def test_fallback_model_gives_attributes(model_string: bytes) -> None:
     from custom_components.inim_smartliving_alarm.binary_sensor import (
         _zone_programming,
     )
-    from custom_components.inim_smartliving_alarm.selection import (
+    from custom_components.inim_smartliving_alarm.stored_config import (
         terminal_records,
         zone_records,
     )
@@ -328,11 +328,9 @@ def test_fallback_model_gives_attributes(model_string: bytes) -> None:
     zones = zone_record(ZoneType.DELAYED, 15, 0x1E, 0x02, 1) * MODEL.zones
     terminals = terminal_record(Balancing.SINGLE_EOL, 0) * MODEL.terminals
     config = {
-        "system_info": {"raw_hex": model_string.hex()},
-        "zones_config": {
-            "raw_hex_part1_full_response": zones.hex(),
-            "raw_hex_part2_full_response": terminals.hex(),
-        },
+        "model_string": model_string.hex(),
+        "zone_records": zones.hex(),
+        "terminal_records": terminals.hex(),
     }
     attributes, device_class = _zone_programming(
         zone_records(config), terminal_records(config), 0

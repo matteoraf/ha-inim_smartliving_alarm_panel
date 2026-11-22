@@ -12,14 +12,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 import pytest
 
+from custom_components.inim_smartliving_alarm.api import create_panel
 from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
-    KEY_INIT_PERIPHERALS,
-    KEY_INIT_RAW_HEX,
-    KEY_INIT_SYSTEM_INFO,
 )
-from custom_components.inim_smartliving_alarm.legacy import create_client
+from custom_components.inim_smartliving_alarm.legacy import LegacyPanelClient
+from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
 from custom_components.inim_smartliving_alarm.protocol.config import (
     decode_peripherals,
     refuses_arming_when_not_ready,
@@ -49,10 +48,15 @@ from custom_components.inim_smartliving_alarm.protocol.model import (
 from custom_components.inim_smartliving_alarm.readiness import (
     panel_refuses_not_ready,
 )
-from custom_components.inim_smartliving_alarm.selection import (
+from custom_components.inim_smartliving_alarm.stored_config import (
+    area_names,
     area_records,
+    name_table,
+    peripherals,
+    raw_block,
     stored_layout_fits,
     stored_model,
+    zone_names,
     zone_records,
 )
 
@@ -313,13 +317,13 @@ async def test_configuration_read(fw51_panel: FakePanel) -> None:
     """Labels from bank 0, 20 bytes of peripherals, options at 0x0015."""
     config = await stored_configuration(fw51_panel)
     layout = fw51_panel.state.layout
-    assert config["areas"]["names"][:2] == ["Area 1", "Area 2"]
-    assert len(config["zones"]["zone_names"]) == layout.zones
-    assert config["code_names"]["names"][0] == "Master"
-    assert len(bytes.fromhex(config[KEY_INIT_PERIPHERALS][KEY_INIT_RAW_HEX])) == 20
-    assert config[KEY_INIT_PERIPHERALS]["keypads"] == [
-        n + 1 for n in fw51_panel.state.peripherals["keypads"]
-    ]
+    assert area_names(config)[:2] == ["Area 1", "Area 2"]
+    assert len(zone_names(config)) == layout.zones
+    assert name_table(config, "codes")[0] == "Master"
+    assert len(raw_block(config, "peripherals")) == 20
+    assert list(peripherals(config).keypads) == list(
+        fw51_panel.state.peripherals["keypads"]
+    )
     assert panel_refuses_not_ready(config) is True
     assert stored_model(config).name.endswith("(firmware 5.1)")
     assert area_records(config) is not None
@@ -329,14 +333,15 @@ async def test_configuration_read(fw51_panel: FakePanel) -> None:
 async def test_events_in_firmware_6_numbering(fw51_panel: FakePanel) -> None:
     """Events the panel logs in its own numbering are described as on 6."""
     fw51_panel.state.block_arming_when_not_ready = False
-    client = create_client(fw51_panel.host, fw51_panel.port, "1234")
+    connection = create_panel(fw51_panel.host, fw51_panel.port, "1234")
     try:
-        assert await client.execute_arm_disarm_areas(areas_to_arm=[1])
-        assert await client.execute_arm_disarm_areas(areas_to_disarm=[1])
-        assert await client.execute_activate_scenario(0)
-        events = (await client.execute_get_compact_events(count=3))["events"]
+        assert (await connection.arm_areas({1: ArmMode.AWAY})).ok
+        assert (await connection.arm_areas({1: ArmMode.DISARM})).ok
+        assert (await connection.activate_scenario(0)).ok
+        reads = LegacyPanelClient(connection)
+        events = (await reads.execute_get_compact_events(count=3))["events"]
     finally:
-        await client.close()
+        await connection.close()
     assert [event["action_description"] for event in events] == [
         "Scenario Activated",
         "End of Area(s) Armed",  # firmware 5.1 has no "area disarmed" event
@@ -351,13 +356,13 @@ async def test_event_record_read(fw51_panel: FakePanel, panel: FakePanel) -> Non
     """The API gives each record as read and in firmware 6 numbering."""
     for fake, translated in ((fw51_panel, True), (panel, False)):
         fake.state.block_arming_when_not_ready = False
-        client = create_client(fake.host, fake.port, "1234")
+        connection = create_panel(fake.host, fake.port, "1234")
         try:
-            assert await client.execute_activate_scenario(0)
+            assert (await connection.activate_scenario(0)).ok
             head = fake.state.event_head
-            read = await client.panel.read_event_record(head - 1)
+            read = await connection.read_event_record(head - 1)
         finally:
-            await client.close()
+            await connection.close()
         assert read.raw[:8] == read.record[:8]
         assert read.record[8] == 0x9E  # scenario activated
         assert read.raw[8] == (0x9D if translated else 0x9E)
@@ -372,7 +377,7 @@ async def test_setup(
     layout = fw51_panel.state.layout
     assert entry.state is ConfigEntryState.LOADED
     config = entry.data[DATA_INITIAL_PANEL_CONFIG]
-    assert len(config["areas"]["names"]) == layout.areas
+    assert len(area_names(config)) == layout.areas
     assert len(entry.options["zones"]) == min(layout.terminals, 37)
     assert "(firmware 5.1) is experimental" in caplog.text
     assert not ir.async_get(hass).async_get_issue(
@@ -392,13 +397,7 @@ async def test_setup(
 
 def as_on_firmware_51(config: dict, model_string: bytes) -> dict:
     """A configuration read with the 1050 firmware 6 layout from a 5.1 panel."""
-    return {
-        **config,
-        KEY_INIT_SYSTEM_INFO: {
-            **config[KEY_INIT_SYSTEM_INFO],
-            KEY_INIT_RAW_HEX: model_string.hex(),
-        },
-    }
+    return {**config, "model_string": model_string.hex()}
 
 
 async def test_blocks_read_with_another_layout_are_not_decoded(
@@ -450,8 +449,8 @@ async def test_existing_entry_is_read_again(
             await hass.async_block_till_done()
         assert "(firmware 5.1) (it was read with another layout)" in caplog.text
         config = entry.data[DATA_INITIAL_PANEL_CONFIG]
-        assert len(bytes.fromhex(config[KEY_INIT_PERIPHERALS][KEY_INIT_RAW_HEX])) == 20
-        assert len(config["zones"]["zone_names"]) == fake.state.layout.zones
+        assert len(raw_block(config, "peripherals")) == 20
+        assert len(zone_names(config)) == fake.state.layout.zones
         assert stored_model(config) is not None
         assert not ir.async_get(hass).async_get_issue(
             DOMAIN, f"unsupported_panel_{entry.entry_id}"

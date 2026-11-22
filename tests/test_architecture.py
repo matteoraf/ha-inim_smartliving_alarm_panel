@@ -3,7 +3,8 @@
 Dependencies point down only: protocol, then transport, then the API, then
 the Home Assistant integration. Some integration modules are kept free of
 Home Assistant, so that the report viewer and the tests can load them
-alone. legacy.py is frozen: it may lose names, never gain them.
+alone. Only stored_config knows the shape of the stored panel
+configuration. legacy.py is frozen: it may lose names, never gain them.
 """
 
 import ast
@@ -134,6 +135,7 @@ HA_FREE = [
     "peripherals",
     "report_crypto",
     "selection",
+    "stored_config",
     "system_report",
     "user_code",
 ]
@@ -169,21 +171,118 @@ def test_viewer_loads_the_integration_only_through_its_loader(path: Path) -> Non
             assert not name.startswith(("custom_components", "homeassistant")), name
 
 
+# ------------------------------------------------------------ stored shape
+
+
+def _block_constants() -> dict[str, str]:
+    """stored_config's constants naming a stored block: name -> block."""
+    tree = ast.parse(MODULES["stored_config"].read_text(encoding="utf-8"))
+    found = {}
+    for node in tree.body:
+        if (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
+        ):
+            found[node.targets[0].id] = node.value.value
+    blocks = next(
+        node.value
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and isinstance(node.targets[0], ast.Name)
+        and node.targets[0].id == "BLOCKS"
+    )
+    names = {element.id for element in blocks.elts if isinstance(element, ast.Name)}
+    return {name: value for name, value in found.items() if name in names}
+
+
+BLOCK_CONSTANTS = _block_constants()
+BLOCK_NAMES = set(BLOCK_CONSTANTS.values())
+# Keys entry version 1 stored the configuration under (generic words such as
+# "areas" or "zones" left out: other dictionaries use them too)
+VERSION_1_KEYS = {
+    "system_info",
+    "zones_config",
+    "zones_config_detailed",
+    "scenario_activations",
+    "keyboard_names",
+    "code_names",
+    "key_names",
+    "reader_names",
+    "expander_names",
+    "timer_names",
+    "siren_names",
+}
+
+
+def _stored_lookups(tree: ast.AST) -> set[str]:
+    """Stored keys a module looks up, as x[key] or x.get(key, ...).
+
+    The key is a string naming a stored block or a version 1 key, or a
+    constant of stored_config naming a block, used bare (ZONE_RECORDS) or
+    through the module (stored_config.ZONE_RECORDS).
+    """
+    found = set()
+    for node in ast.walk(tree):
+        key = None
+        if isinstance(node, ast.Subscript) and isinstance(node.ctx, ast.Load):
+            key = node.slice
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "get"
+            and node.args
+        ):
+            key = node.args[0]
+        if isinstance(key, ast.Constant) and isinstance(key.value, str):
+            if key.value in BLOCK_NAMES | VERSION_1_KEYS:
+                found.add(key.value)
+        elif isinstance(key, ast.Name) and key.id in BLOCK_CONSTANTS:
+            found.add(BLOCK_CONSTANTS[key.id])
+        elif isinstance(key, ast.Attribute) and key.attr in BLOCK_CONSTANTS:
+            found.add(BLOCK_CONSTANTS[key.attr])
+    return found
+
+
+@pytest.mark.parametrize(
+    ("source", "found"),
+    [
+        ('config["zone_records"]', {"zone_records"}),
+        ('config.get("physical_map")', {"physical_map"}),
+        ('config["system_info"]["raw_hex"]', {"system_info"}),
+        ("config[ZONE_RECORDS]", {"zone_records"}),
+        ("config.get(PHYSICAL_MAP, '')", {"physical_map"}),
+        ("config[stored_config.ZONE_RECORDS]", {"zone_records"}),
+        ("config.get(sc.MODEL_STRING)", {"model_string"}),
+        ('placeholders["zones"]', set()),  # a generic word
+        ('status.get("areas")', set()),
+        ("config[OTHER_NAME]", set()),
+        ('config["zone_records"] = value', set()),  # writing, not reading
+    ],
+)
+def test_stored_lookups_are_found(source: str, found: set[str]) -> None:
+    """Each way of looking up a stored key is caught; other keys are not."""
+    assert _stored_lookups(ast.parse(source)) == found
+
+
+def test_every_block_has_a_constant() -> None:
+    """The guard knows every stored block by its constant."""
+    assert len(BLOCK_CONSTANTS) == 22
+
+
+@pytest.mark.parametrize("module", sorted(m for m in MODULES if m != "stored_config"))
+def test_only_stored_config_reads_the_stored_shape(module: str) -> None:
+    """Other modules read the stored configuration through stored_config."""
+    tree = ast.parse(MODULES[module].read_text(encoding="utf-8"))
+    assert _stored_lookups(tree) == set()
+
+
 # ------------------------------------------------------------------ legacy.py
 
 LEGACY_NAMES = {
     # functions
-    "create_client",
-    "configuration_dict",
-    "_peripherals",
-    "_names",
-    "_zones",
-    "zone_details",
-    "zone_exists",
-    "zones_to_create",
-    "upgrade_zone_configuration",
-    "_time",
-    "_scenario_activations",
     "_areas",
     "status_dict",
     "_flags",
@@ -193,14 +292,7 @@ LEGACY_NAMES = {
     "LegacyPanelClient",
     # constants
     "_LOGGER",
-    "LABEL_LENGTH",
     "MAX_EVENTS_PER_FETCH",
-    "ACTIVATION_TYPES",
-    "BALANCING_TYPES",
-    "SENSOR_TYPES",
-    "TERMINAL_TYPES",
-    "TERMINAL_TYPE_OFFSET",
-    "SCENARIO_ACTIONS",
     "EVENT_ACTIONS",
     "_AREA_EVENTS",
     "_ZONE_EVENTS",
@@ -210,17 +302,8 @@ LEGACY_NAMES = {
 }
 LEGACY_METHODS = {
     "__init__",
-    "close",
-    "released",
-    "get_initial_panel_configuration",
     "get_live_status_snapshot",
     "execute_get_compact_events",
-    "execute_arm_disarm_areas",
-    "execute_reset_area_alarm",
-    "execute_set_zone_excluded_status",
-    "execute_activate_scenario",
-    "execute_check_scenario_activation_allowed",
-    "_run",
 }
 FROZEN = "legacy.py is frozen: put new code in protocol/ or an integration module"
 

@@ -115,7 +115,7 @@ The zone sensor's attributes are the zone's programming, as read from the panel.
     | `zone_name` | all zone entities | the zone's name on the panel |
     | `status_text` | sensor, tamper | `clear`, `alarmed`, `short`, `tamper`; `Unknown` when the panel reports no state |
     | `test` | sensor | `true` while the zone is in test |
-    | `internal_index` | sensor, switch | the zone's position in the panel's status (0-based) |
+    | `internal_index` | sensor, switch | the position of the zone's terminal in the panel's terminal list (0-based), used by the bypass switch; not shown when the terminal is not in the list |
     | `tamper_memory` | alarm memory | `true` when the zone's terminal has a tamper memory (both zones of a double terminal share it) |
     | `zone_type` | sensor | `instant`, `delayed`, `viewable_delayed`, `route`, `24_hour`, `automation`, `arm`, `disarm`, `switch`, `arm_disarm`, `patrol`, `emergency_exit_without_call`, `emergency_exit`; a number for a value not listed here |
     | `assigned_areas` | sensor | the numbers of the zone's areas |

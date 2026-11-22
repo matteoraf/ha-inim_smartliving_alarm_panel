@@ -23,8 +23,6 @@ from .const import (
     CONF_ZONES_NOT_READY,
     DEFAULT_ZONES_NOT_READY,
     EVENT_ZONES_NOT_READY,
-    KEY_INIT_GENERAL_OPTIONS,
-    KEY_INIT_RAW_HEX,
     ZONES_NOT_READY_WARN,
 )
 from .errors import (
@@ -35,9 +33,8 @@ from .errors import (
 )
 from .notifications import Texts, async_texts
 from .protocol.commands import CommandResult
-from .protocol.config import refuses_arming_when_not_ready
-from .protocol.errors import ProtocolError
-from .selection import panel_config, stored_model, zone_label, zone_names
+from .selection import panel_config
+from .stored_config import refuses_not_ready, zone_label, zone_names
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,13 +50,7 @@ def panel_refuses_not_ready(config: Mapping[str, Any]) -> bool | None:
     (an earlier version), were read with another layout, or cannot be
     decoded.
     """
-    raw = (config.get(KEY_INIT_GENERAL_OPTIONS) or {}).get(KEY_INIT_RAW_HEX)
-    if stored_model(config) is None:
-        return None
-    try:
-        return refuses_arming_when_not_ready(bytes.fromhex(raw))
-    except (TypeError, ValueError, ProtocolError):
-        return None
+    return refuses_not_ready(config)
 
 
 class ReadyCheck:

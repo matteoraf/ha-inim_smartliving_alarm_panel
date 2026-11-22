@@ -12,7 +12,7 @@ never logged or kept.
 """
 
 import asyncio
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import AsyncIterator, Callable, Iterable, Mapping
 import contextlib
 from dataclasses import dataclass, field
 import logging
@@ -77,12 +77,14 @@ from .protocol.model import (
     LABEL_LENGTH,
     PERIPHERALS_ADDRESS,
     SCENARIOS,
+    SMARTLIVING_1050_FW6,
     FirmwareInfo,
     PanelModel,
     model_for_or_fallback,
     parse_model_string,
 )
 from .protocol.report_layout import ReportBlock, ReportTable, Space, table_for
+from .protocol.smartlan import BOARD_SMARTLAN_G, BOARD_SMARTLAN_SI
 from .protocol.status import (
     OUTPUT_DETAIL_LENGTH,
     AreaStatus,
@@ -100,6 +102,8 @@ from .protocol.status import (
     decode_zone_states,
 )
 from .transport.base import PanelTransport, Priority, Session, TransportError
+from .transport.smartlan_g import SmartLanGTransport
+from .transport.smartlan_si import SmartLanSiTransport
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -403,6 +407,16 @@ class SmartLivingPanel:
     async def close(self) -> None:
         """Close the connection."""
         await self.transport.close()
+
+    @contextlib.asynccontextmanager
+    async def released(self) -> AsyncIterator[None]:
+        """Hold this panel's requests and free its connection meanwhile.
+
+        For another client that must reach the same board, which may accept
+        only one connection; the panel reconnects on its next request.
+        """
+        async with self.transport.released():
+            yield
 
     # ---------------------------------------------------------- identification
 
@@ -940,3 +954,33 @@ def _panel_state(faults: bytes) -> PanelState:
     """The panel state flags, read with the faults register."""
     start = reg.PANEL_STATE_OFFSET
     return decode_panel_state(faults[start : start + reg.PANEL_STATE_LENGTH])
+
+
+def create_panel(
+    host: str,
+    port: int,
+    pin: str,
+    *,
+    board: str = BOARD_SMARTLAN_SI,
+    username: str = "",
+    password: str = "",
+    **options: float,
+) -> SmartLivingPanel:
+    """A panel behind a SmartLAN/SI or SmartLAN/G board.
+
+    User name and password are the SmartLAN/G board's (they derive its
+    encryption key). Options are the transport's (timeouts, pauses). Panels
+    without a profile of their own (models other than those supported,
+    firmware below 6) are handled with the SmartLiving 1050's layout, with a
+    warning.
+    """
+    transport: PanelTransport
+    if board == BOARD_SMARTLAN_G:
+        transport = SmartLanGTransport(
+            host, port, username=username, password=password, **options
+        )
+    elif board == BOARD_SMARTLAN_SI:
+        transport = SmartLanSiTransport(host, port, **options)
+    else:
+        raise ValueError(f"unknown board type: {board}")
+    return SmartLivingPanel(transport, pin, fallback_model=SMARTLIVING_1050_FW6)

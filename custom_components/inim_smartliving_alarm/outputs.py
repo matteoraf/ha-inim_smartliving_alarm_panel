@@ -15,20 +15,19 @@ from homeassistant.core import callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from .api import SmartLivingPanel
 from .attribute_values import output_attributes
 from .const import (
     DOMAIN,
-    KEY_INIT_SYSTEM_INFO_TYPE,
-    KEY_INIT_SYSTEM_INFO_VERSION,
     KEY_LIVE_OUTPUT_LEVELS,
     KEY_LIVE_ZONES_TRIGGERED_STATUS,
 )
 from .errors import CommandRefusedError, async_send_command
-from .legacy import LegacyPanelClient
 from .protocol.config import OutputKind
 from .protocol.errors import ProtocolError
 from .protocol.status import decode_zone_memory
 from .selection import OutputItem
+from .stored_config import SystemInfo, device_model, device_sw_version
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,12 +36,12 @@ _RAW_HEX = "raw_hex_data"
 
 
 def output_image(
-    data: Mapping[str, Any] | None, api_client: LegacyPanelClient
+    data: Mapping[str, Any] | None, panel: SmartLivingPanel
 ) -> tuple[tuple[bool, ...], tuple[bool, ...]] | None:
     """(terminal outputs, O1-O3) on/off from the last poll; None if unknown."""
     raw = ((data or {}).get(KEY_LIVE_ZONES_TRIGGERED_STATUS) or {}).get(_RAW_HEX)
     try:
-        memory = decode_zone_memory(bytes.fromhex(raw), api_client.panel.model)
+        memory = decode_zone_memory(bytes.fromhex(raw), panel.model)
     except (TypeError, ValueError, ProtocolError, RuntimeError):
         return None
     return memory.outputs, memory.fixed_outputs
@@ -56,10 +55,10 @@ class InimOutputEntity(CoordinatorEntity):
     def __init__(
         self,
         coordinator: Any,
-        api_client: LegacyPanelClient,
+        panel: SmartLivingPanel,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: Mapping[str, Any],
+        system_info: SystemInfo | None,
         item: OutputItem,
     ) -> None:
         """Initialize the entity of one output.
@@ -67,7 +66,7 @@ class InimOutputEntity(CoordinatorEntity):
         Named from the panel's label; without one, "Output n" or "O1"-"O3".
         """
         super().__init__(coordinator)
-        self.api_client = api_client
+        self.panel = panel
         self._item = item
         self._attr_unique_id = f"{config_entry.entry_id}_{item.unique_suffix}"
         if item.name:
@@ -83,8 +82,8 @@ class InimOutputEntity(CoordinatorEntity):
             identifiers={(DOMAIN, config_entry.entry_id)},
             name=panel_display_name,
             manufacturer="Inim Electronics",
-            model=system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(system_info),
+            sw_version=device_sw_version(system_info),
         )
         self._optimistic: bool | None = None
 
@@ -99,7 +98,7 @@ class InimOutputEntity(CoordinatorEntity):
 
     def _image_state(self) -> bool | None:
         """The output's on/off state in the last poll."""
-        image = output_image(self.coordinator.data, self.api_client)
+        image = output_image(self.coordinator.data, self.panel)
         if image is None:
             return None
         terminals, fixed = image
@@ -126,7 +125,7 @@ class InimOutputEntity(CoordinatorEntity):
         _LOGGER.info("Switching %s to %s", self._target, value)
         try:
             await async_send_command(
-                self.api_client.panel.set_output(address, value), self._target
+                self.panel.set_output(address, value), self._target
             )
         except CommandRefusedError as err:
             if err.reason != "already_in_state":

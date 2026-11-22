@@ -11,22 +11,16 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from . import stored_config
 from .const import (
     CONF_EVENT_LOG_SIZE,
     CONF_PANEL_NAME,
-    DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DEFAULT_EVENT_LOG_SIZE,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_CODES,
-    KEY_INIT_KEYS,
-    KEY_INIT_NAMES,
-    KEY_INIT_READERS,
-    KEY_INIT_SYSTEM_INFO,
-    KEY_INIT_SYSTEM_INFO_TYPE,
-    KEY_INIT_SYSTEM_INFO_VERSION,
     KEY_LATEST_EVENT_INDEX_VAL,
     KEY_LIVE_ACTIVE_SCENARIO,
     KEY_LIVE_ACTIVE_SCENARIO_NUMBER,
@@ -43,7 +37,16 @@ from .protocol.events import (
     reader_index,
 )
 from .protocol.model import FALLBACK_MODEL
-from .selection import area_names, keypad_names, scenario_names, zone_names
+from .stored_config import (
+    SystemInfo,
+    area_names,
+    device_model,
+    device_sw_version,
+    keypad_names,
+    name_table,
+    scenario_names,
+    zone_names,
+)
 from .user_code import UserCodeInfo, user_code_info
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,7 +64,7 @@ async def async_setup_entry(
 
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
-    system_info = initial_panel_config.get(KEY_INIT_SYSTEM_INFO, {})
+    system_info = stored_config.system_info(initial_panel_config)
 
     # Get user-defined panel name
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
@@ -78,7 +81,7 @@ async def async_setup_entry(
     )
 
     # Sensor for Panel Firmware Version (static after setup)
-    if system_info and system_info.get(KEY_INIT_SYSTEM_INFO_VERSION):
+    if system_info and system_info.version:
         sensors_to_add.append(
             PanelFirmwareSensor(entry, panel_display_name, system_info)
         )
@@ -89,7 +92,7 @@ async def async_setup_entry(
         )
 
     # Sensor for Panel System Type (static after setup)
-    if system_info and system_info.get(KEY_INIT_SYSTEM_INFO_TYPE):
+    if system_info and system_info.type:
         sensors_to_add.append(
             PanelSystemTypeSensor(entry, panel_display_name, system_info)
         )
@@ -107,13 +110,13 @@ async def async_setup_entry(
         )
 
     # The user code of the PIN (checked when the integration connected)
-    api = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    panel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
     sensors_to_add.append(
         PanelUserCodeSensor(
             entry,
             panel_display_name,
             system_info,
-            user_code_info(api.panel, initial_panel_config),
+            user_code_info(panel, initial_panel_config),
         )
     )
 
@@ -146,7 +149,7 @@ class BaseInimSensorEntity(CoordinatorEntity, SensorEntity):
         coordinator,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the Base Inim Sensor."""
         super().__init__(coordinator)
@@ -161,8 +164,8 @@ class BaseInimSensorEntity(CoordinatorEntity, SensorEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
 
@@ -174,7 +177,7 @@ class ActiveInimScenarioNameSensor(BaseInimSensorEntity):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         scenario_names: list[str],
     ) -> None:
         """Initialize the Active Scenario Sensor."""
@@ -229,7 +232,7 @@ class PanelFirmwareSensor(SensorEntity):
         self,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the Panel Firmware Sensor."""
         self.config_entry = config_entry
@@ -238,9 +241,7 @@ class PanelFirmwareSensor(SensorEntity):
         self._attr_name = "Firmware Version"
         self._attr_unique_id = f"{config_entry.entry_id}_firmware_version"
         self._attr_icon = "mdi:chip"
-        self._attr_native_value = self._system_info.get(
-            KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"
-        )
+        self._attr_native_value = device_sw_version(self._system_info)
 
     @property
     def suggested_object_id(self) -> str | None:
@@ -254,8 +255,8 @@ class PanelFirmwareSensor(SensorEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
 
@@ -268,7 +269,7 @@ class PanelSystemTypeSensor(SensorEntity):
         self,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the Panel System Type Sensor."""
         self.config_entry = config_entry
@@ -277,8 +278,8 @@ class PanelSystemTypeSensor(SensorEntity):
         self._attr_name = "System Type"
         self._attr_unique_id = f"{config_entry.entry_id}_system_type"
         self._attr_icon = "mdi:information-outline"
-        self._attr_native_value = self._system_info.get(
-            KEY_INIT_SYSTEM_INFO_TYPE, "Unknown"
+        self._attr_native_value = (
+            self._system_info.type if self._system_info is not None else "Unknown"
         )
 
     @property
@@ -293,10 +294,8 @@ class PanelSystemTypeSensor(SensorEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(
-                KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"
-            ),  # Model can also be the system type
-            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(self._system_info),  # Model can also be the system type
+            sw_version=device_sw_version(self._system_info),
         )
 
 
@@ -317,7 +316,7 @@ class PanelPeripheralsSensor(SensorEntity):
         self,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         peripherals: dict[str, list[str]],
     ) -> None:
         """Initialize the sensor from the stored configuration."""
@@ -335,8 +334,8 @@ class PanelPeripheralsSensor(SensorEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
 
@@ -358,7 +357,7 @@ class PanelUserCodeSensor(SensorEntity):
         self,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         info: UserCodeInfo | None,
     ) -> None:
         """Initialize the sensor from what the connection found."""
@@ -380,8 +379,8 @@ class PanelUserCodeSensor(SensorEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
 
@@ -394,7 +393,7 @@ class InimEventLogSensor(BaseInimSensorEntity):
         config_entry: ConfigEntry,
         initial_panel_config: dict[str, Any],
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the event log sensor."""
         super().__init__(coordinator, config_entry, panel_display_name, system_info)
@@ -582,13 +581,10 @@ class _EventNames:
     """
 
     def __init__(self, config: dict[str, Any]) -> None:
-        def names(key: str) -> list[str]:
-            return (config.get(key) or {}).get(KEY_INIT_NAMES) or []
-
         self._keypads = keypad_names(config)
-        self._codes = names(KEY_INIT_CODES)
-        self._keys = names(KEY_INIT_KEYS)
-        self._readers = names(KEY_INIT_READERS)
+        self._codes = name_table(config, "codes")
+        self._keys = name_table(config, "keys")
+        self._readers = name_table(config, "readers")
 
     @staticmethod
     def _name(names: list[str], index: int, fallback: str) -> str:

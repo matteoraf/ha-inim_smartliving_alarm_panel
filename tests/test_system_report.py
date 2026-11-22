@@ -11,7 +11,6 @@ from custom_components.inim_smartliving_alarm.const import (
     BOARD_SMARTLAN_G,
     BOARD_SMARTLAN_SI,
 )
-from custom_components.inim_smartliving_alarm.legacy import configuration_dict
 from custom_components.inim_smartliving_alarm.protocol.commands import encode_pin
 from custom_components.inim_smartliving_alarm.protocol.config import (
     TERMINAL_BALANCING_OFFSET,
@@ -22,6 +21,7 @@ from custom_components.inim_smartliving_alarm.protocol.config import (
 from custom_components.inim_smartliving_alarm.protocol.masking import Level
 from custom_components.inim_smartliving_alarm.protocol.model import SMARTLIVING_1050_FW6
 from custom_components.inim_smartliving_alarm.protocol.report_layout import Space
+from custom_components.inim_smartliving_alarm.stored_config import store
 from custom_components.inim_smartliving_alarm.system_report import (
     CredentialRule,
     EntryFacts,
@@ -41,6 +41,7 @@ from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
+from .conftest import label_block
 from .fake_panel import (
     FakePanel,
     PanelState,
@@ -137,7 +138,7 @@ async def make_report() -> AsyncGenerator:
             transport = SmartLanSiTransport(fake.host, fake.port, reconnect_pause=0.01)
         panel = SmartLivingPanel(transport, PIN, fallback_model=SMARTLIVING_1050_FW6)
         started.append((fake, panel))
-        config = configuration_dict(await panel.read_configuration())
+        config = store(await panel.read_configuration())
         table = (await panel.read_report()).table
         pin_table = table.block("pin_table")
         phone = table.block("phone_numbers")
@@ -644,13 +645,13 @@ def test_report_without_the_panel() -> None:
     """An unreachable panel: the stored configuration and the error."""
     facts = EntryFacts(
         title="Home",
-        entry_version="1.5",
+        entry_version="2.1",
         integration_version="0.4.0",
         board=BOARD_SMARTLAN_SI,
         host="192.168.77.93",
         port=5004,
         options={},
-        stored_config={"areas": {"names": ["Kitchen area", "Garage"]}},
+        stored_config={"area_labels": label_block(["Kitchen area", "Garage"])},
         pin=PIN,
     )
     report = build_report(

@@ -78,7 +78,7 @@ Versions such as `0.4.0a1` (preview) or `0.4.0b1` (beta) are published as GitHub
 
 !!! warning "Take a backup first"
 
-    **Take a Home Assistant backup before installing a preview or a beta** (**Settings** → **System** → **Backups**). A preview or a beta updates your configuration entry to a newer format that the stable 0.3.x versions do not fully understand: installed over it, 0.3.x creates entities again for 10 areas, 50 zones and 30 scenarios (including those you had not imported), cannot connect to SmartLAN/G boards, and leaves the entities only 0.4 has (such as the arming mode selects, the outputs and the diagnostic sensors) as unavailable entities. To go back to a stable version, restore that backup; this also undoes any other change made in Home Assistant since the backup.
+    **Take a Home Assistant backup before installing a preview or a beta** (**Settings** → **System** → **Backups**). A preview or a beta updates your configuration entry to a newer format that the stable 0.3.x versions do not fully understand: installed over it, 0.3.x creates entities again for 10 areas, 50 zones and 30 scenarios (including those you had not imported), cannot connect to SmartLAN/G boards, and leaves the entities only 0.4 has (such as the arming mode selects, the outputs and the diagnostic sensors) as unavailable entities. To go back to a stable version, restore that backup; this also undoes any other change made in Home Assistant since the backup. Going back from 0.5 to 0.4 needs that backup too: 0.4 does not load the configuration entry of 0.5.
 
 === "Marketplace (2026.11 or later)"
 

@@ -23,9 +23,8 @@ from homeassistant.helpers.event import async_call_later
 from homeassistant.loader import async_get_integration
 from homeassistant.util import dt as dt_util
 
-from .api import SmartLivingPanel
+from .api import SmartLivingPanel, create_panel
 from .const import (
-    BOARD_SMARTLAN_G,
     BOARD_SMARTLAN_SI,
     CONF_BOARD,
     CONF_HOST,
@@ -33,15 +32,14 @@ from .const import (
     CONF_PIN,
     CONF_PORT,
     CONF_USERNAME,
-    DATA_API_CLIENT,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DOMAIN,
 )
 from .discovery import async_board_reply
 from .notifications import async_texts
 from .protocol.errors import ProtocolError
 from .protocol.masking import Level
-from .protocol.model import FALLBACK_MODEL
 from .report_crypto import encrypt
 from .report_state import (
     Snapshot,
@@ -50,9 +48,7 @@ from .report_state import (
     report_state,
 )
 from .system_report import EntryFacts, ReportInput, build_report, report_text
-from .transport.base import PanelTransport, TransportError
-from .transport.smartlan_g import SmartLanGTransport
-from .transport.smartlan_si import SmartLanSiTransport
+from .transport.base import TransportError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -179,32 +175,26 @@ def _entities(hass: HomeAssistant, entry: ConfigEntry) -> list[dict[str, Any]]:
 
 
 def _temporary_panel(entry: ConfigEntry) -> SmartLivingPanel:
-    """A panel client of our own, for an entry that is not loaded."""
-    host, port = entry.data[CONF_HOST], entry.data[CONF_PORT]
-    transport: PanelTransport
-    if entry.data.get(CONF_BOARD, BOARD_SMARTLAN_SI) == BOARD_SMARTLAN_G:
-        transport = SmartLanGTransport(
-            host,
-            port,
-            username=entry.data.get(CONF_USERNAME, ""),
-            password=entry.data.get(CONF_PASSWORD, ""),
-        )
-    else:
-        transport = SmartLanSiTransport(host, port)
-    return SmartLivingPanel(
-        transport, entry.data[CONF_PIN], fallback_model=FALLBACK_MODEL
+    """A panel connection of our own, for an entry that is not loaded."""
+    return create_panel(
+        entry.data[CONF_HOST],
+        entry.data[CONF_PORT],
+        entry.data[CONF_PIN],
+        board=entry.data.get(CONF_BOARD, BOARD_SMARTLAN_SI),
+        username=entry.data.get(CONF_USERNAME, ""),
+        password=entry.data.get(CONF_PASSWORD, ""),
     )
 
 
 async def _async_report_input(
     hass: HomeAssistant, entry: ConfigEntry, report_id: str, level: Level
 ) -> ReportInput:
-    """Read the panel through the entry's own client (or a temporary one)."""
+    """Read the panel through the entry's own connection (or a temporary one)."""
     entry_data = hass.data.get(DOMAIN, {}).get(entry.entry_id) or {}
-    client = entry_data.get(DATA_API_CLIENT)
-    temporary = client is None
+    loaded = entry_data.get(DATA_PANEL)
+    temporary = loaded is None
     # The entry is not loaded: the board is free for a connection of our own
-    panel = _temporary_panel(entry) if client is None else client.panel
+    panel = _temporary_panel(entry) if loaded is None else loaded
     reads, read_error = None, None
     try:
         reads = await panel.read_report()

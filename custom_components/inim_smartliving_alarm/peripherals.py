@@ -7,41 +7,28 @@ diagnostic sensor, with the names the panel gives them.
 from collections.abc import Mapping
 from typing import Any
 
-from .const import (
-    KEY_INIT_EXPANDERS,
-    KEY_INIT_KEYBOARDS,
-    KEY_INIT_NAMES,
-    KEY_INIT_PERIPHERALS,
-    KEY_INIT_READERS,
-    KEY_INIT_SIRENS,
-)
-from .selection import keypad_names
+from .stored_config import keypad_names, name_table, peripherals
 
-# Kind -> (its name table in the stored configuration, name when it has none)
-PERIPHERAL_KINDS: dict[str, tuple[str, str]] = {
-    "keypads": (KEY_INIT_KEYBOARDS, "Keypad"),
-    "readers": (KEY_INIT_READERS, "Reader"),
-    "expanders": (KEY_INIT_EXPANDERS, "Expander"),
-    "sirens": (KEY_INIT_SIRENS, "Siren"),
+# Kind -> name when it has none
+PERIPHERAL_KINDS: dict[str, str] = {
+    "keypads": "Keypad",
+    "readers": "Reader",
+    "expanders": "Expander",
+    "sirens": "Siren",
 }
 
 
 def enabled_peripherals(config: Mapping[str, Any]) -> dict[str, list[str]] | None:
     """The names of the enabled devices of each kind; None if not stored."""
-    stored = config.get(KEY_INIT_PERIPHERALS)
-    if not isinstance(stored, Mapping):
+    stored = peripherals(config)
+    if stored is None:
         return None
     found = {}
-    for kind, (table, fallback) in PERIPHERAL_KINDS.items():
-        names = (
-            keypad_names(config)
-            if table == KEY_INIT_KEYBOARDS
-            else (config.get(table) or {}).get(KEY_INIT_NAMES) or []
-        )
+    for kind, fallback in PERIPHERAL_KINDS.items():
+        names = keypad_names(config) if kind == "keypads" else name_table(config, kind)
         found[kind] = [
-            (names[number - 1] if number <= len(names) else "")
-            or f"{fallback} {number}"
-            for number in stored.get(kind) or []
+            (names[index] if index < len(names) else "") or f"{fallback} {index + 1}"
+            for index in getattr(stored, kind)
         ]
     return found
 

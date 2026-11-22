@@ -9,8 +9,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .api import SmartLivingPanel
-from .const import KEY_INIT_CODES, KEY_INIT_NAMES
-from .selection import area_label
+from .stored_config import area_label, name_table
 
 # Code types of the code records (firmware 5.1 and later)
 CODE_TYPES = {0: "standard", 1: "manager", 2: "master"}
@@ -33,7 +32,7 @@ def user_code_info(
     index, code = panel.user_code_index, panel.user_code
     if index is None or code is None:
         return None
-    names = (config.get(KEY_INIT_CODES) or {}).get(KEY_INIT_NAMES) or []
+    names = name_table(config, "codes")
     name = (names[index] if index < len(names) else "") or f"Code {index + 1}"
     return UserCodeInfo(
         name=name,

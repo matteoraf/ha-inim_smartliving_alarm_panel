@@ -71,85 +71,16 @@ DEFAULT_EVENT_LOG_SIZE = 50  # Default number of events to store
 SYSTEM_MAX_EVENT_LOG_SIZE = 100  # System limit of events to store, increasing this may cause exceeding the maximum size of 16384 bytes for the sensor attribute
 
 # Data keys for hass.data[DOMAIN][entry.entry_id]
-DATA_API_CLIENT = "api_client"
+DATA_PANEL = "panel"  # the entry's SmartLivingPanel
 DATA_COORDINATOR = "coordinator"
 DATA_ALARM_PANEL = "alarm_panel"  # the entry's alarm panel entity
-# entry.data key: the panel configuration read at setup or Re-read
+# entry.data key: the panel configuration read at setup or Re-read, as
+# stored by stored_config
 DATA_INITIAL_PANEL_CONFIG = "initial_panel_config"
 
 # --- Keys for data structures ---
-# These keys help access specific parts of the data fetched by the API
-# and stored in initial_panel_config or provided by the coordinator.
-
-# From initial_panel_config (entry.data[DATA_INITIAL_PANEL_CONFIG])
-KEY_INIT_KEYBOARDS = "keyboard_names"
-KEY_INIT_KEYBOARD_NAMES = "names"
-# Name tables, each {"names": [...]} (KEY_INIT_NAMES)
-KEY_INIT_CODES = "code_names"
-KEY_INIT_KEYS = "key_names"
-KEY_INIT_READERS = "reader_names"
-KEY_INIT_EXPANDERS = "expander_names"
-KEY_INIT_TIMERS = "timer_names"
-KEY_INIT_SIRENS = "siren_names"
-KEY_INIT_NAMES = "names"
-# Enabled keypads, readers, expanders and sirens: {"keypads": [1, 2], ...}
-KEY_INIT_PERIPHERALS = "peripherals"
-# The panel's general options as read: {"raw_hex": ...}
-KEY_INIT_GENERAL_OPTIONS = "general_options"
-# The area records as read: {"raw_hex": ...}
-KEY_INIT_AREA_RECORDS = "area_records"
-# Outputs, as read: O1-O3 records and labels, the physical-to-logical
-# terminal map, and the output mask of the PIN's user code ({"raw_hex": ...})
-KEY_INIT_FIXED_OUTPUT_RECORDS = "fixed_output_records"
-KEY_INIT_FIXED_OUTPUT_LABELS = "fixed_output_labels"
-KEY_INIT_PHYSICAL_MAP = "physical_map"
-KEY_INIT_USER_CODE_OUTPUTS = "user_code_outputs"
-# Extra output options (bit 0: home automation output); empty where unknown
-KEY_INIT_EXTRA_OUTPUT_OPTIONS = "extra_output_options"
-KEY_INIT_RAW_HEX = "raw_hex"
-
-KEY_INIT_SYSTEM_INFO = "system_info"
-KEY_INIT_SYSTEM_INFO_TYPE = "type"
-KEY_INIT_SYSTEM_INFO_VERSION = "version"
-
-KEY_INIT_SCENARIOS = "scenarios"  # Dict containing list of scenario names
-KEY_INIT_SCENARIO_NAMES = "names"  # List of scenario names (str)
-
-KEY_INIT_SCENARIO_ACTIVATIONS = (
-    "scenario_activations"  # List of dicts, each detailing a scenario's actions
-)
-KEY_INIT_SCENARIO_ACTIVATION_INDEX = (
-    "scenario_index"  # Key for 0-indexed scenario number in activation details
-)
-KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS = (
-    "area_actions"  # Dict within activation detail: {area_id_str: "action_str"}
-)
-# The scenario record as read, hex: one mode nibble per area (area 1 low)
-KEY_INIT_SCENARIO_ACTIVATION_RAW = "raw_activation_hex"
-
-KEY_INIT_ZONES = "zones"  # Dict containing list of zone names
-KEY_INIT_ZONE_NAMES = "zone_names"  # List of zone names (str)
-KEY_INIT_ZONE_LABELS_RAW = "raw_hex_full"  # in zones: the zone labels as read, hex
-
-KEY_INIT_ZONES_CONFIG = "zones_config"  # Dict containing detailed zone configurations
-KEY_INIT_ZONES_CONFIG_DETAILED = (
-    "zones_config_detailed"  # List of dicts, each a detailed zone config
-)
-KEY_INIT_ZONE_RECORDS_RAW = (
-    "raw_hex_part1_full_response"  # in zones_config: zone records, hex
-)
-KEY_INIT_TERMINAL_RECORDS_RAW = (
-    "raw_hex_part2_full_response"  # in zones_config: logical terminal records, hex
-)
-KEY_INIT_ZONE_CONFIG_INDEX = (
-    "zone_index"  # Key for 0-indexed zone number in detailed config
-)
-KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS = (
-    "assigned_areas"  # Key for list of area_ids (int) a zone belongs to
-)
-
-KEY_INIT_AREAS = "areas"  # Dict containing list of area names
-KEY_INIT_AREA_NAMES = "names"  # List of area names (str)
+# These keys help access specific parts of the data provided by the
+# coordinator.
 
 # From coordinator.data (live status snapshot)
 KEY_LIVE_ACTIVE_SCENARIO = "active_scenario"  # Dict with current active scenario info

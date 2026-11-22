@@ -14,6 +14,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from . import stored_config
 from .attribute_values import zone_programming_attributes
 from .const import (
     CONF_AREAS,
@@ -24,8 +25,6 @@ from .const import (
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_ZONES_CONFIG,
-    KEY_INIT_ZONES_CONFIG_DETAILED,
     KEY_LIVE_ALARM_AREAS_LIST,
     KEY_LIVE_AREAS_STATUS,
     KEY_LIVE_PANEL_PROGRAMMING,
@@ -41,7 +40,6 @@ from .const import (
     KEY_LIVE_ZONES_TRIGGERED_STATUS,
     ZONE_TAMPER_STATES,
 )
-from .legacy import zones_to_create
 from .protocol.config import (
     Balancing,
     SensorKind,
@@ -49,13 +47,17 @@ from .protocol.config import (
     ZoneConfig,
 )
 from .readiness import panel_refuses_not_ready
-from .selection import (
+from .selection import selected
+from .stored_config import (
+    SystemInfo,
     area_label,
+    device_model,
+    device_sw_version,
     scenario_label,
-    selected,
     terminal_records,
-    zone_names,
+    zone_label,
     zone_records,
+    zones_to_create,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -76,19 +78,10 @@ async def async_setup_entry(
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
 
     # Get Panel model/version
-    system_info = initial_panel_config.get("system_info", {})
+    system_info = stored_config.system_info(initial_panel_config)
 
     # Get user-defined panel name
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
-
-    all_zone_names = zone_names(initial_panel_config)
-
-    zone_configurations_data = initial_panel_config.get(KEY_INIT_ZONES_CONFIG, {})
-    detailed_zone_configs = (
-        zone_configurations_data.get(KEY_INIT_ZONES_CONFIG_DETAILED, [])
-        if zone_configurations_data
-        else []
-    )
 
     binary_sensors_to_add = []
     # The zone and terminal records, decoded from the stored configuration
@@ -96,12 +89,13 @@ async def async_setup_entry(
     terminals = terminal_records(initial_panel_config)
 
     zones = zones_to_create(
-        all_zone_names,
-        detailed_zone_configs,
+        initial_panel_config,
         selected(entry.options, initial_panel_config, CONF_ZONES),
     )
     _LOGGER.debug("Setting up binary sensors for %s zones", len(zones))
-    for zone_index, zone_name, zone_config_detail in zones:
+    for zone in zones:
+        zone_index = zone.number - 1
+        zone_name = zone_label(initial_panel_config, zone.number)
         binary_sensors_to_add.append(
             InimZoneBinarySensor(
                 coordinator,
@@ -110,7 +104,7 @@ async def async_setup_entry(
                 system_info,
                 zone_index,
                 zone_name,
-                zone_config_detail,
+                zone.slot,
                 *_zone_programming(records, terminals, zone_index),
             )
         )
@@ -195,7 +189,7 @@ class BaseInimBinarySensor(CoordinatorEntity, BinarySensorEntity):
         coordinator,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the base Inim binary sensor."""
         super().__init__(coordinator)
@@ -210,8 +204,8 @@ class BaseInimBinarySensor(CoordinatorEntity, BinarySensorEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get("type", "SmartLiving"),
-            sw_version=self._system_info.get("version", "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
     def _zone_value(self, group: str, key: str, default: Any = None) -> Any:
@@ -272,15 +266,16 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         zone_index_0_based: int,
         zone_name: str,
-        zone_config_detail: dict[str, Any] | None,
+        slot: int | None,
         programming: dict[str, Any] | None = None,
         device_class: BinarySensorDeviceClass | None = None,
     ) -> None:
         """Initialize the Inim zone status binary sensor.
 
+        slot: the first physical slot of the zone's terminal, if any;
         programming: the zone's programming attributes; device_class: the
         guess from its terminal (see zone_device_class).
         """
@@ -288,7 +283,7 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         self._zone_index_0_based = zone_index_0_based
         self._zone_id_1_based = zone_index_0_based + 1
         self._zone_name = zone_name
-        self._zone_config_detail = zone_config_detail if zone_config_detail else {}
+        self._slot = slot
         self._programming = programming or {}
         self._attr_name = f"Zone {self._zone_id_1_based} ({self._zone_name})"
         self._attr_unique_id = f"{config_entry.entry_id}_zone_{self._zone_id_1_based}"
@@ -333,8 +328,8 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
             ),
         }
         # The physical slot comes from the stored terminal map
-        if "internal_index" in self._zone_config_detail:
-            attrs["internal_index"] = self._zone_config_detail["internal_index"]
+        if self._slot is not None:
+            attrs["internal_index"] = self._slot
         # The zone's programming, decoded from the stored records
         attrs.update(self._programming)
         return attrs
@@ -358,7 +353,7 @@ class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         zone_index_0_based: int,
         zone_name: str,
     ) -> None:
@@ -422,7 +417,7 @@ class InimZoneTamperBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         zone_index_0_based: int,
         zone_name: str,
     ) -> None:
@@ -477,7 +472,7 @@ class InimAreaBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         area_id_1_based: int,
         area_name: str,
     ) -> None:
@@ -573,7 +568,7 @@ class InimSpecificScenarioActiveBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         scenario_index_0_based: int,
         scenario_name: str,
     ) -> None:
@@ -636,7 +631,7 @@ class InimProgrammingModeBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the programming mode sensor of the panel."""
         super().__init__(coordinator, config_entry, panel_display_name, system_info)
@@ -674,7 +669,7 @@ class InimRefusesNotReadyBinarySensor(BaseInimBinarySensor):
         coordinator: Any,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         refuses: bool | None,
     ) -> None:
         """Initialize from the stored configuration."""

@@ -1,5 +1,31 @@
 # Upgrading
 
+## From 0.4
+
+This version keeps the panel configuration in a new format. Your entity IDs and options stay as they are, and your configuration entry is updated automatically. Coming from 0.4.0b1 or 0.4.0b2, read also [the section below](#from-040b1-or-040b2).
+
+### Before you update
+
+1.  **Take a Home Assistant backup** (**Settings** → **System** → **Backups**). **To go back to 0.4, restore that backup**: 0.4 does not load a configuration entry in the new format.
+
+### After you update
+
+1.  **Look at the log** after the first start. The integration reads the panel configuration again once by itself, and says so. If it cannot, it tries again at every start (see below).
+
+### What changed
+
+| Change | What to do |
+|---|---|
+| New format of the configuration entry; the panel configuration is read again once | Nothing; to go back to 0.4, restore your backup |
+| Switches, area sensors and arming mode selects no longer depend on the stored area names | Nothing |
+| Zone bypass switches find the zone's terminal the same way as outputs | Nothing |
+
+??? note "Details"
+
+    *   **Your configuration entry is updated to a new format (version 2.1).** It now keeps only the panel data as read, and names, zones and scenarios are worked out from it. At the first start the integration reads the panel configuration again once by itself (the log says so). If it cannot, it tries again at every start; until then the names of user codes, keys, readers, expanders, timers and sirens show their defaults (such as *Code 1*, *Reader 1* or *Key 5*), and on an entry first set up before 0.4.0b1 the zone bypass switches appear only once that read has succeeded. **Re-read panel configuration** reads it at once. Entity IDs and options do not change. **To go back to 0.4, restore the backup taken before the update**: 0.4 does not load an entry in the new format.
+    *   **Switches, area sensors and arming mode selects no longer depend on the stored area names.** Before, a panel configuration stored without them (for example after an incomplete read) left the panel without any switch, including the zone bypass and output switches, and without the area alarm, tamper and alarm memory sensors and the arming mode selects. Now each of them is created on its own, an area without a name is called *Area N*, and the scenario buttons show what they do to each area.
+    *   **Zone bypass switches find the zone's terminal in the panel's terminal list the same way as outputs.** A zone on the last position of the list (a keypad terminal on a fully used panel) now gets a bypass switch; before, it had none. If a terminal appears twice in the list, the switch uses its first position, and the zone's `internal_index` attribute shows it.
+
 ## From 0.4.0b1 or 0.4.0b2
 
 *   **Check your automations:** in the `inim_smartliving_alarm_zones_not_ready` event, `zone_name` is now the zone's plain name (for example `Kitchen window`), as in the zone entities and the scenario failure event. Automations that match a name with the number in brackets, such as `Kitchen window (12)`, need updating; `zone_id` still gives the number.

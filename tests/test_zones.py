@@ -1,5 +1,5 @@
 """Zones by terminal type: second zones of double terminals, output and
-unused terminals, zone tamper, and the entry update to version 1.3."""
+unused terminals, and zone tamper."""
 
 from collections.abc import AsyncGenerator
 import logging
@@ -8,28 +8,16 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.inim_smartliving_alarm import async_migrate_entry
-from custom_components.inim_smartliving_alarm.const import (
-    DATA_INITIAL_PANEL_CONFIG,
-    DOMAIN,
-)
-from custom_components.inim_smartliving_alarm.legacy import create_client
+from custom_components.inim_smartliving_alarm.api import create_panel
+from custom_components.inim_smartliving_alarm.const import DOMAIN
+from custom_components.inim_smartliving_alarm.stored_config import store
 
 from .conftest import ALL, add_entry
 from .fake_panel import FakePanel, const as c
 from .test_init_baseline import call, entity_id_for, refresh, state_of
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
-
-# Keys the zone list gained in version 1.3
-NEW_ZONE_KEYS = (
-    "terminal_index",
-    "terminal_type_val",
-    "terminal_type_desc",
-    "second_zone",
-)
 
 
 def zone_entities(zone: int) -> list[tuple[str, str]]:
@@ -182,77 +170,13 @@ async def test_leftover_zone_entities_are_reported_not_removed(
     assert registry.async_get(old.entity_id) is not None
 
 
-# --------------------------------------------------------------- migration
+# ------------------------------------------------------------ stored shape
 
 
 async def stored_configuration(panel: FakePanel) -> dict:
     """The configuration a fresh setup stores for the fake panel."""
-    client = create_client(panel.host, panel.port, "1234")
+    connection = create_panel(panel.host, panel.port, "1234")
     try:
-        return await client.get_initial_panel_configuration()
+        return store(await connection.read_configuration())
     finally:
-        await client.close()
-
-
-def as_stored_by_1_2(config: dict) -> dict:
-    """The same configuration as version 1.2 stored it (first 50 zones only)."""
-    zones_config = config["zones_config"]
-    return {
-        **config,
-        "zones": {**config["zones"], "zone_names": config["zones"]["zone_names"][:50]},
-        "zones_config": {
-            **zones_config,
-            "zones_config_detailed": [
-                {k: v for k, v in zone.items() if k not in NEW_ZONE_KEYS}
-                for zone in zones_config["zones_config_detailed"][:50]
-            ],
-        },
-    }
-
-
-async def test_migration_rebuilds_the_zone_list(
-    hass: HomeAssistant, panel: FakePanel
-) -> None:
-    """1.2 -> 1.3 gives the zone list a fresh setup stores, without the panel."""
-    panel.state.terminal_types[0] = c.TERMINAL_DOUBLE
-    fresh = await stored_configuration(panel)
-    host, port = panel.host, panel.port
-    await panel.stop()  # the update must not need the panel
-
-    entry = MockConfigEntry(
-        domain=DOMAIN,
-        version=1,
-        minor_version=2,
-        data={
-            "host": host,
-            "port": port,
-            "pin": "1234",
-            "board": "smartlan_si",
-            DATA_INITIAL_PANEL_CONFIG: as_stored_by_1_2(fresh),
-        },
-    )
-    entry.add_to_hass(hass)
-    assert await async_migrate_entry(hass, entry)
-
-    assert entry.minor_version == 5
-    assert entry.data[DATA_INITIAL_PANEL_CONFIG] == fresh
-
-
-async def test_migration_without_raw_data_keeps_the_zones(
-    hass: HomeAssistant, panel: FakePanel, caplog: pytest.LogCaptureFixture
-) -> None:
-    """Without the raw records the stored zone list is kept, with a warning."""
-    stored = as_stored_by_1_2(await stored_configuration(panel))
-    del stored["zones_config"]["raw_hex_part2_full_response"]
-    entry = MockConfigEntry(
-        domain=DOMAIN,
-        version=1,
-        minor_version=2,
-        data={"host": "192.0.2.10", "port": 5004, DATA_INITIAL_PANEL_CONFIG: stored},
-    )
-    entry.add_to_hass(hass)
-    assert await async_migrate_entry(hass, entry)
-
-    assert entry.minor_version == 5
-    assert entry.data[DATA_INITIAL_PANEL_CONFIG] == stored
-    assert "Re-read panel configuration" in caplog.text
+        await connection.close()
