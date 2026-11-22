@@ -418,6 +418,83 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#what-you-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you get
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-alarm-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The alarm panel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Areas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zones
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenarios
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sensors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnostic-and-configuration-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic and configuration entities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#outputs" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -598,6 +675,83 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#what-you-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What you get
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-alarm-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The alarm panel
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Areas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zones
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenarios
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sensors
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnostic-and-configuration-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Diagnostic and configuration entities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#outputs" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -626,149 +780,847 @@
 
 
 <h1 id="entities">Entities<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h1>
-<p>This integration exposes your Inim alarm system's components as various Home Assistant entities. The entity IDs are programmatically generated based on the panel name and the names of your areas, zones, and scenarios fetched from the panel.</p>
+<p>Your panel appears in Home Assistant as one device, named as you chose at setup. Its entities are the areas, zones, scenarios and outputs you import, plus a few sensors about the panel itself. Open the device page from <strong>Settings</strong> → <strong>Devices &amp; services</strong> → <strong>Inim SmartLiving Alarm</strong>.</p>
+<h2 id="what-you-get">What you get<a class="headerlink" href="#what-you-get" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Entities</th>
+<th>What you do with them</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#the-alarm-panel">The panel</a></td>
+<td>an alarm panel</td>
+<td>Arm and disarm with the alarm panel card, using your scenarios</td>
+</tr>
+<tr>
+<td><a href="#areas">Each area</a></td>
+<td>a switch, an arming mode select, three binary sensors</td>
+<td>Arm or disarm the area; see alarm, tamper and alarm memory</td>
+</tr>
+<tr>
+<td><a href="#zones">Each zone</a></td>
+<td>a binary sensor, a switch, two more binary sensors</td>
+<td>See whether the zone is open; bypass it; see tamper and alarm memory</td>
+</tr>
+<tr>
+<td><a href="#scenarios">Each scenario</a></td>
+<td>a button, a binary sensor</td>
+<td>Run the scenario; see whether it is active</td>
+</tr>
+<tr>
+<td><a href="#outputs">Each output</a></td>
+<td>a switch, or a light for dimmers</td>
+<td>Switch or dim the output</td>
+</tr>
+<tr>
+<td><a href="#sensors">The panel's state</a></td>
+<td>sensors</td>
+<td>The event log, the active scenario, firmware and model</td>
+</tr>
+<tr>
+<td><a href="#diagnostic-and-configuration-entities">Diagnostics</a></td>
+<td>sensors, a select, a button</td>
+<td>The user code, the devices found, programming mode, system reports, re-reading the configuration</td>
+</tr>
+</tbody>
+</table>
+<p>For example, the tile cards of an area: its arming mode, its switch and its alarm memory.</p>
+<p><img alt="Tile cards for an area" src="../images/area-card-light.webp#only-light" width="400" />
+<img alt="Tile cards for an area" src="../images/area-card-dark.webp#only-dark" width="400" /></p>
+<div class="admonition note">
+<p class="admonition-title">Entity IDs</p>
+<p>Entity IDs start with your panel's name: with the name <em>Home</em>, area 1's switch is <code>switch.home_home_area_1</code> on a new installation (the name appears twice, see <a href="../limitations/">Known limitations</a>), or <code>switch.home_area_1</code> on one set up with an earlier version. The tables below give the end of each ID; <em>N</em> is the area, zone or scenario number. Every entity is enabled by default, except <strong>Diagnostics level</strong>.</p>
+</div>
+<h2 id="the-alarm-panel">The alarm panel<a class="headerlink" href="#the-alarm-panel" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ID ends with</th>
+<th>Name</th>
+<th>States</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>alarm_control_panel.…</code></td>
+<td>the panel's name</td>
+<td>armed home, armed away, armed night, armed vacation, armed custom bypass, disarmed, triggered</td>
+</tr>
+</tbody>
+</table>
+<p>The alarm panel arms and disarms with the scenarios you mapped in the <a href="../options/#initial-options">options</a>. Use it with Home Assistant's alarm panel card. No code is asked.</p>
+<details class="note">
+<summary>How the state is worked out</summary>
 <ul>
-<li>
-<p><strong>alarm_control_panel.your_panel_name</strong>: The main entity to arm and disarm the system. Its actions (Arm Home, Arm Away, etc.) are linked to the scenarios you mapped during setup. It shows <em>Triggered</em> while any area is in alarm. A scenario active on the panel that is not mapped to a mode shows as <em>Armed custom bypass</em>. Without a mapped Disarm scenario, the state is unknown when no mapping matches.</p>
-</li>
-<li>
-<p><strong>Areas</strong>:</p>
-<ul>
-<li>
-<p><em>switch.your_panel_name_area_X</em>: Allows direct arming (on) and disarming (off) of an individual area. It is on when the area is armed in any mode (total, partial or instant); turning it on arms in the area's own mode set under <strong>Area switches arm mode per area</strong>, else in the mode of the <strong>Area switches default arm mode</strong> option (total by default). Attributes: <code>status_text</code> (<code>armed</code>, <code>disarmed</code> or <code>unknown</code>; <code>Unknown</code> when there is no status for the area) and <code>arming_mode</code> (<code>total</code>, <code>partial</code>, <code>instant</code>, <code>disarmed</code> or <code>unknown</code>).</p>
-</li>
-<li>
-<p><em>select.your_panel_name_area_X_arming_mode</em> (named <em>Area X arming mode</em>): The area's arming mode: <em>Disarmed</em>, <em>Armed total</em>, <em>Armed partial</em> or <em>Armed instant</em> (unknown while the panel reports none of these). Choosing a mode arms the area in that mode or disarms it; if the panel refuses, an error says why. Attributes: <code>area_id</code> and <code>area_name</code>.</p>
-<p>Its attributes also show the area's delays and options, as programmed on the panel: <code>exit_time</code> (time to leave after arming) and <code>entry_time</code> (time to disarm after a delayed zone opens), for example <code>120 s</code> or <code>2 min</code>; <code>entry_time_2</code> (the second entry time, used by zones with the <code>entry_time_2</code> option) or <code>not used</code>; <code>pre_arm_warning_time</code> and <code>patrol_time</code> (in minutes, for example <code>3 min</code>); <code>timer_program</code> (the arm/disarm timer program, or <code>none</code>); and <code>reset_alarm_memory_on_arming</code>, <code>auto_arm_partial</code> and <code>clear_call_queue_on_disarm</code> (<code>true</code> or <code>false</code>). They are not shown for panels handled with another model's layout (see <a href="../limitations/">Known limitations</a>).</p>
-</li>
-<li>
-<p><em>binary_sensor.your_panel_name_area_X_alarm</em>: On while the area is in alarm.</p>
-</li>
-<li>
-<p><em>binary_sensor.your_panel_name_area_X_tamper</em>: On while the area is in tamper.</p>
-</li>
-<li>
-<p><em>binary_sensor.your_panel_name_area_X_triggered</em> (named <em>Area X Alarm memory</em>): On after an alarm in the area until the alarm memory is reset (see <a href="../actions-events/#resetting-the-alarm-memory">Resetting the alarm memory</a>). The <code>tamper_memory</code> attribute tells whether the area also has a tamper memory.</p>
-</li>
+<li><em>Triggered</em> while any area is in alarm.</li>
+<li>Otherwise the mode whose scenario is active on the panel, for example <em>Armed night</em>.</li>
+<li>A scenario active on the panel that is not mapped to a mode shows as <em>Armed custom bypass</em>.</li>
+<li>Without a mapped Disarm scenario, the state is unknown when no mapping matches.</li>
+<li>Only the arm modes with a mapped scenario are offered. Disarming or arming without a mapped scenario fails with a message (<em>"No scenario is mapped to … choose one in the integration options"</em>).</li>
 </ul>
-</li>
-<li>
-<p><strong>Zones</strong>:</p>
+</details>
+<h2 id="areas">Areas<a class="headerlink" href="#areas" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ID ends with</th>
+<th>Name</th>
+<th>States</th>
+<th>Device class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>switch.…_area_N</code></td>
+<td><em>panel</em> Area N (<em>name</em>)</td>
+<td>on when armed in any mode</td>
+<td>–</td>
+</tr>
+<tr>
+<td><code>select.…_area_N_arming_mode</code></td>
+<td>Area N arming mode</td>
+<td>Disarmed, Armed total, Armed partial, Armed instant</td>
+<td>–</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_area_N_alarm</code></td>
+<td>Area N Alarm (<em>name</em>)</td>
+<td>on while the area is in alarm</td>
+<td>safety</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_area_N_tamper</code></td>
+<td>Area N Tamper (<em>name</em>)</td>
+<td>on while the area is in tamper</td>
+<td>tamper</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_area_N_triggered</code></td>
+<td>Area N Alarm memory (<em>name</em>)</td>
+<td>on after an alarm, until the memory is reset</td>
+<td>safety</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>The switch</strong> arms the area when you turn it on and disarms it when you turn it off. It arms in the area's own mode set under <strong>Area switches arm mode per area</strong>, else in <strong>Area switches default arm mode</strong> (total by default).</li>
+<li><strong>The arming mode select</strong> arms the area in the mode you choose, or disarms it. If the panel refuses, an error says why. It is unknown while the panel reports none of the four modes.</li>
+<li><strong>The alarm memory</strong> stays on after an alarm until it is reset (see <a href="../actions-events/#resetting-the-alarm-memory">Resetting the alarm memory</a>). Home Assistant shows the safety class as <em>Unsafe</em> while it is on.</li>
+</ul>
+<p>Arming from the switch or the select checks the zones first: see <a href="../actions-events/#zones-not-ready">Zones not ready</a>.</p>
+<details class="note">
+<summary>Attributes of the area entities</summary>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>On</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>area_id</code></td>
+<td>all area entities</td>
+<td>the area's number</td>
+</tr>
+<tr>
+<td><code>area_name</code></td>
+<td>all area entities</td>
+<td>the area's name on the panel</td>
+</tr>
+<tr>
+<td><code>status_text</code></td>
+<td>switch</td>
+<td><code>armed</code>, <code>disarmed</code>, <code>unknown</code>; <code>Unknown</code> when the panel reports no state for the area</td>
+</tr>
+<tr>
+<td><code>arming_mode</code></td>
+<td>switch</td>
+<td><code>total</code>, <code>partial</code>, <code>instant</code>, <code>disarmed</code>, <code>unknown</code></td>
+</tr>
+<tr>
+<td><code>tamper_memory</code></td>
+<td>alarm memory</td>
+<td><code>true</code> when the area also has a tamper memory</td>
+</tr>
+<tr>
+<td><code>exit_time</code></td>
+<td>arming mode select</td>
+<td>time to leave after arming, for example <code>120 s</code> or <code>2 min</code></td>
+</tr>
+<tr>
+<td><code>entry_time</code></td>
+<td>arming mode select</td>
+<td>time to disarm after a delayed zone opens</td>
+</tr>
+<tr>
+<td><code>entry_time_2</code></td>
+<td>arming mode select</td>
+<td>the second entry time, used by zones with the <code>entry_time_2</code> option, or <code>not used</code></td>
+</tr>
+<tr>
+<td><code>pre_arm_warning_time</code></td>
+<td>arming mode select</td>
+<td>in minutes, for example <code>3 min</code></td>
+</tr>
+<tr>
+<td><code>patrol_time</code></td>
+<td>arming mode select</td>
+<td>in minutes</td>
+</tr>
+<tr>
+<td><code>timer_program</code></td>
+<td>arming mode select</td>
+<td>the arm/disarm timer program, or <code>none</code></td>
+</tr>
+<tr>
+<td><code>reset_alarm_memory_on_arming</code></td>
+<td>arming mode select</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>auto_arm_partial</code></td>
+<td>arming mode select</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>clear_call_queue_on_disarm</code></td>
+<td>arming mode select</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>The switch shows <code>status_text</code> and <code>arming_mode</code> once the panel's state has been read. The select's delays and options are as programmed on the panel; they are not shown for panels handled with another model's layout (see <a href="../limitations/">Known limitations</a>).</p>
+</details>
+<h2 id="zones">Zones<a class="headerlink" href="#zones" title="Permanent link">&para;</a></h2>
 <p>Only zones that exist on the panel get entities: zones of input, input/output and double terminals. Output terminals (for example a siren) and unused terminals have none. Zones 1 to N are the zones of the panel's N terminals (50 on the SmartLiving 1050, 100 on the 10100); a double terminal <em>n</em> also has a second zone, numbered N + <em>n</em> (51 to 100 on the 1050, 101 to 200 on the 10100).</p>
+<table>
+<thead>
+<tr>
+<th>ID ends with</th>
+<th>Name</th>
+<th>States</th>
+<th>Device class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>binary_sensor.…_zone_N</code></td>
+<td>Zone N (<em>name</em>)</td>
+<td>on while the zone is in alarm (open)</td>
+<td>guessed, see below</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_zone_N_triggered</code></td>
+<td>Zone N Alarm memory (<em>name</em>)</td>
+<td>on after the zone raised an alarm, until the memory is reset</td>
+<td>problem</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_zone_N_tamper</code></td>
+<td>Zone N Tamper (<em>name</em>)</td>
+<td>on while the zone is in tamper or short circuit</td>
+<td>tamper</td>
+</tr>
+<tr>
+<td><code>switch.…_zone_N</code></td>
+<td><em>panel</em> Zone N Enabled (<em>name</em>)</td>
+<td>on: included; off: bypassed</td>
+<td>–</td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li>
-<p><em>binary_sensor.your_panel_name_zone_X</em>: Represents a single zone. It is on only while the zone is in alarm (open); a short circuit or tamper shows in <code>status_text</code> (<code>clear</code>, <code>alarmed</code>, <code>short</code> or <code>tamper</code>) and in the zone's tamper sensor. <code>test</code> tells whether the zone is in test now.</p>
-<p><strong>Device class</strong>: a wired zone does not tell the panel what detector it has, so the device class is a guess from the zone's programming: a shock sensor is <em>vibration</em>; a roller-blind sensor, a normally open or normally closed contact and a single EOL balancing are <em>opening</em>; a double EOL balancing is <em>motion</em>; anything else has no class. If the guess is wrong, change it in Home Assistant: open the entity's settings and pick <strong>Show as</strong>.</p>
-<p><strong>Attributes</strong>: the zone's programming as read from the panel, with stable English values:</p>
+<li><strong>The zone sensor</strong> is on while the zone is open or in alarm. A short circuit or tamper shows in its <code>status_text</code> and in the zone's tamper sensor.</li>
+<li><strong>The zone switch</strong> bypasses the zone when you turn it off, and includes it again when you turn it on.</li>
+</ul>
+<details class="note">
+<summary>Device class of the zone sensor</summary>
+<p>A wired zone does not tell the panel what detector it has, so the device class is a guess from the zone's programming:</p>
+<table>
+<thead>
+<tr>
+<th>Zone programming</th>
+<th>Device class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shock sensor</td>
+<td>vibration</td>
+</tr>
+<tr>
+<td>roller-blind sensor, normally open or normally closed contact, single EOL balancing</td>
+<td>opening</td>
+</tr>
+<tr>
+<td>double EOL balancing</td>
+<td>motion</td>
+</tr>
+<tr>
+<td>anything else</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p>If the guess is wrong, change it in Home Assistant: open the entity's settings and pick <strong>Show as</strong>.</p>
+</details>
+<p>The zone sensor's attributes are the zone's programming, as read from the panel. Open the sensor, then the menu (⋮) → <strong>Details</strong>:</p>
+<p><img alt="A zone's attributes" src="../images/zone-attributes.webp" width="480" /></p>
+<details class="note">
+<summary>Attributes of the zone entities</summary>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>On</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>zone_id</code></td>
+<td>all zone entities</td>
+<td>the zone's number</td>
+</tr>
+<tr>
+<td><code>zone_name</code></td>
+<td>all zone entities</td>
+<td>the zone's name on the panel</td>
+</tr>
+<tr>
+<td><code>status_text</code></td>
+<td>sensor, tamper</td>
+<td><code>clear</code>, <code>alarmed</code>, <code>short</code>, <code>tamper</code>; <code>Unknown</code> when the panel reports no state</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>sensor</td>
+<td><code>true</code> while the zone is in test</td>
+</tr>
+<tr>
+<td><code>internal_index</code></td>
+<td>sensor, switch</td>
+<td>the zone's position in the panel's status (0-based)</td>
+</tr>
+<tr>
+<td><code>tamper_memory</code></td>
+<td>alarm memory</td>
+<td><code>true</code> when the zone's terminal has a tamper memory (both zones of a double terminal share it)</td>
+</tr>
+<tr>
+<td><code>zone_type</code></td>
+<td>sensor</td>
+<td><code>instant</code>, <code>delayed</code>, <code>viewable_delayed</code>, <code>route</code>, <code>24_hour</code>, <code>automation</code>, <code>arm</code>, <code>disarm</code>, <code>switch</code>, <code>arm_disarm</code>, <code>patrol</code>, <code>emergency_exit_without_call</code>, <code>emergency_exit</code>; a number for a value not listed here</td>
+</tr>
+<tr>
+<td><code>assigned_areas</code></td>
+<td>sensor</td>
+<td>the numbers of the zone's areas</td>
+</tr>
+<tr>
+<td><code>alarm_cycles</code></td>
+<td>sensor</td>
+<td>how many times the zone can raise an alarm, or <code>unlimited</code></td>
+</tr>
+<tr>
+<td><code>sensor_kind</code></td>
+<td>sensor</td>
+<td><code>generic</code>, <code>roller_blind</code>, <code>shock</code></td>
+</tr>
+<tr>
+<td><code>alarm_pulse_duration</code></td>
+<td>sensor</td>
+<td>generic sensors only: for example <code>300 ms</code> or <code>20 s</code> (the panel counts in steps of 15 ms or of 10 s)</td>
+</tr>
+<tr>
+<td><code>shock_sensitivity</code></td>
+<td>sensor</td>
+<td>shock sensors only: 0 to 40</td>
+</tr>
+<tr>
+<td><code>pulse_window_time</code></td>
+<td>sensor</td>
+<td>the time in which pulses are counted, for example <code>30 s</code> or <code>1 min</code></td>
+</tr>
+<tr>
+<td><code>pulse_count</code></td>
+<td>sensor</td>
+<td>how many pulses in that time raise the alarm</td>
+</tr>
+<tr>
+<td><code>balancing</code></td>
+<td>sensor</td>
+<td><code>normally_open</code>, <code>normally_closed</code>, <code>single_eol</code>, <code>double_eol</code>, <code>double_zone</code>, <code>double_zone_eol</code>, <code>personalized</code></td>
+</tr>
+<tr>
+<td><code>terminal_index</code></td>
+<td>sensor</td>
+<td>the zone's terminal (0-based)</td>
+</tr>
+<tr>
+<td><code>terminal_type</code></td>
+<td>sensor</td>
+<td><code>input</code>, <code>output</code>, <code>in_out</code>, <code>double</code>, <code>null</code>, <code>out_dimming</code>, <code>out_dac</code>, <code>out_analog</code>, <code>out_not_enabled</code></td>
+</tr>
+<tr>
+<td><code>second_zone</code></td>
+<td>sensor</td>
+<td><code>true</code> for the second zone of a double terminal</td>
+</tr>
+<tr>
+<td><code>interior</code></td>
+<td>sensor</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>autobypass</code></td>
+<td>sensor</td>
+<td>bypassed by the panel when its areas arm while it is open</td>
+</tr>
+<tr>
+<td><code>unbypassable</code></td>
+<td>sensor</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>chime</code></td>
+<td>sensor</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>test_programmed</code></td>
+<td>sensor</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>autobypass_no_reinclude</code></td>
+<td>sensor</td>
+<td>autobypassed and not included again when back at rest</td>
+</tr>
+<tr>
+<td><code>no_arming_if_not_ready</code></td>
+<td>sensor</td>
+<td>stops arming in every mode, when the panel refuses arming with zones not ready</td>
+</tr>
+<tr>
+<td><code>entry_time_2</code></td>
+<td>sensor</td>
+<td>uses the area's second entry time</td>
+</tr>
+<tr>
+<td><code>last_exit_zone</code></td>
+<td>sensor</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>reinclude_on_disarm</code></td>
+<td>sensor</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>hold_up</code></td>
+<td>sensor</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>fault_zone</code></td>
+<td>sensor</td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>The programming attributes (from <code>zone_type</code> on) are not shown when the panel data stored for the zone cannot be read; use <strong>Re-read panel configuration</strong> then. Options that only apply to wireless zones are not shown.</p>
+</details>
+<h2 id="scenarios">Scenarios<a class="headerlink" href="#scenarios" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ID ends with</th>
+<th>Name</th>
+<th>States</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>button.…_scenario_N</code></td>
+<td>Activate '<em>name</em>'</td>
+<td>–</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_scenario_N_active</code></td>
+<td>Scenario '<em>name</em>' Active</td>
+<td>on while the scenario is the active one on the panel</td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li><code>zone_id</code> and <code>zone_name</code>: the zone's number and name.</li>
-<li><code>zone_type</code>: <code>instant</code>, <code>delayed</code>, <code>viewable_delayed</code>, <code>route</code>, <code>24_hour</code>, <code>automation</code>, <code>arm</code>, <code>disarm</code>, <code>switch</code>, <code>arm_disarm</code>, <code>patrol</code>, <code>emergency_exit_without_call</code> or <code>emergency_exit</code> (a number if the panel uses a value not listed here).</li>
-<li><code>alarm_cycles</code>: how many times the zone can raise an alarm, or <code>unlimited</code>.</li>
-<li><code>sensor_kind</code>: <code>generic</code>, <code>roller_blind</code> or <code>shock</code>, from the terminal's programming. It decides the next attributes:<ul>
-<li><code>alarm_pulse_duration</code> (generic sensors only), for example <code>300 ms</code> or <code>20 s</code> (the panel counts it in steps of 15 ms or of 10 s);</li>
-<li><code>shock_sensitivity</code> (shock sensors only), 0 to 40.</li>
+<li><strong>The button</strong> runs the scenario. If it fails (a zone not ready, or the panel refuses), an error and a persistent notification give the reason.</li>
+<li>For scenarios, <em>N</em> is the scenario number minus 1: scenario 1 is <code>scenario_0</code>. Area and zone numbers, and the <code>scenario</code> field of the <code>activate_scenario</code> action, start from 1.</li>
 </ul>
-</li>
-<li><code>pulse_window_time</code>, the time in which pulses are counted (for example <code>30 s</code> or <code>1 min</code>), and <code>pulse_count</code>, how many pulses in that time raise the alarm.</li>
-<li><code>balancing</code>: <code>normally_open</code>, <code>normally_closed</code>, <code>single_eol</code>, <code>double_eol</code>, <code>double_zone</code>, <code>double_zone_eol</code> or <code>personalized</code>.</li>
-<li><code>assigned_areas</code>, <code>terminal_index</code>, <code>terminal_type</code> (<code>input</code>, <code>in_out</code>, <code>double</code>, …), <code>second_zone</code> (the second zone of a double terminal) and <code>internal_index</code>.</li>
-<li>The programming options, each <code>true</code> or <code>false</code>: <code>interior</code>, <code>autobypass</code> (bypassed by the panel when its areas arm while it is open), <code>unbypassable</code>, <code>chime</code>, <code>test_programmed</code>, <code>autobypass_no_reinclude</code> (autobypassed and not re-included when back at rest), <code>no_arming_if_not_ready</code> (stops arming in every mode, when the panel refuses arming with zones not ready), <code>entry_time_2</code>, <code>last_exit_zone</code>, <code>reinclude_on_disarm</code>, <code>hold_up</code> and <code>fault_zone</code>. Options that only apply to wireless zones are not shown.</li>
-</ul>
-</li>
-<li>
-<p><em>binary_sensor.your_panel_name_zone_X_triggered</em> (named <em>Zone X Alarm memory</em>): Turns on if the zone has triggered the system, until the alarm memory is reset. The <code>tamper_memory</code> attribute tells whether the zone's terminal has a tamper memory (both zones of a double terminal share it).</p>
-</li>
-<li>
-<p><em>binary_sensor.your_panel_name_zone_X_tamper</em>: Turns on while the zone is in tamper or short circuit (<code>status_text</code> tells which).</p>
-</li>
-<li>
-<p><em>switch.your_panel_name_zone_X</em>: Lets you enable or disable (exclude) individual zones, including the second zone of double terminals.</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Scenarios</strong>:</p>
+<details class="note">
+<summary>Attributes of the scenario entities</summary>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>On</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scenario_index</code></td>
+<td>button, binary sensor</td>
+<td>the scenario number minus 1</td>
+</tr>
+<tr>
+<td><code>scenario_name</code></td>
+<td>button, binary sensor</td>
+<td>the scenario's name on the panel</td>
+</tr>
+<tr>
+<td><code>area_actions_details</code></td>
+<td>button</td>
+<td>what the scenario does to each area, by area number: <code>keep</code>, <code>total</code>, <code>partial</code>, <code>instant</code>, <code>disarm</code>, <code>unknown</code></td>
+</tr>
+</tbody>
+</table>
+</details>
+<h2 id="sensors">Sensors<a class="headerlink" href="#sensors" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>ID ends with</th>
+<th>Name</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sensor.…_event_log</code></td>
+<td><em>panel</em> Event Log</td>
+<td>the position of the newest event in the panel's log</td>
+</tr>
+<tr>
+<td><code>sensor.…_active_scenario</code></td>
+<td>Active Scenario Name</td>
+<td>the active scenario's name and index, for example <code>Night (Index 1)</code></td>
+</tr>
+<tr>
+<td><code>sensor.…_firmware_version</code></td>
+<td>Firmware Version</td>
+<td>the panel's firmware, for example <code>6.07</code></td>
+</tr>
+<tr>
+<td><code>sensor.…_system_type</code></td>
+<td>System Type</td>
+<td>the panel's model, for example <code>01050</code></td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li>
-<p><em>button.your_panel_name_scenario_X</em>: Allows direct activation of a specific scenario. If the activation fails (a zone not ready, or the panel refuses it), an error and a persistent notification with the reason appear in Home Assistant. The <code>area_actions_details</code> attribute tells what the scenario does to each area: <code>keep</code>, <code>total</code>, <code>partial</code>, <code>instant</code> or <code>disarm</code>. X is the scenario number minus 1 (scenario 1 is <code>scenario_0</code>), unlike area and zone numbers and the <code>scenario</code> field of <code>activate_scenario</code>.</p>
-</li>
-<li>
-<p><em>binary_sensor.your_panel_name_scenario_X_active</em>: A binary sensor that is 'on' if that specific scenario is currently the active one on the panel (X as for the buttons: the scenario number minus 1).</p>
-</li>
+<li><strong>The event log</strong> keeps the recent events, with the names programmed on the panel: who did it and where. It keeps its last events while the panel cannot be reached. To show it on a dashboard, see <a href="../actions-events/#the-event-log-on-a-dashboard">The event log on a dashboard</a>.</li>
+<li><strong>The firmware and system type sensors</strong> are created when the panel reports them.</li>
 </ul>
-</li>
-<li>
-<p><strong>Sensors</strong>:</p>
+<details class="note">
+<summary>The event log in detail</summary>
+<p>The state is the position of the newest event in the panel's event log: 0 to 999, or 0 to 499 on panels that keep 500 events (the SmartLiving 505 and 515, and the 1050 on firmware 5.1). It starts again from 0 when the log wraps around, so it changes with every new event. Before the first read it is <code>Unknown Index</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event_log</code></td>
+<td>the recent events, newest first (see below)</td>
+</tr>
+<tr>
+<td><code>event_log_count_current</code></td>
+<td>how many events are in <code>event_log</code> now</td>
+</tr>
+<tr>
+<td><code>event_log_size_configured</code></td>
+<td>the <strong>Number of Events to store in log</strong> option</td>
+</tr>
+<tr>
+<td><code>latest_event_description</code></td>
+<td>the newest event's description</td>
+</tr>
+<tr>
+<td><code>latest_event_timestamp</code></td>
+<td>the newest event's time</td>
+</tr>
+</tbody>
+</table>
+<p>Each event in <code>event_log</code> has:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>timestamp</code></td>
+<td>the event's time: the panel's clock read in Home Assistant's time zone, with daylight saving time</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>what happened, for example <code>Area(s) Armed</code></td>
+</tr>
+<tr>
+<td><code>authorized_by</code></td>
+<td>the user code or key that did it, by name</td>
+</tr>
+<tr>
+<td><code>device</code></td>
+<td>the keypad or reader, by name; <code>Remote</code> for commands from the app, the cloud, Home Assistant or the installer software</td>
+</tr>
+<tr>
+<td><code>affected_areas</code></td>
+<td>the areas, by name</td>
+</tr>
+<tr>
+<td><code>area</code></td>
+<td>the area, for events about one area</td>
+</tr>
+<tr>
+<td><code>zone</code></td>
+<td>the zone, for zone events</td>
+</tr>
+<tr>
+<td><code>scenario</code></td>
+<td>the scenario, for scenario events</td>
+</tr>
+<tr>
+<td><code>authorized_id</code>, <code>device_id</code></td>
+<td>the numbers of the user code or key, and of the keypad or reader (hexadecimal)</td>
+</tr>
+<tr>
+<td><code>raw_hex_data</code></td>
+<td>the event as stored by the panel</td>
+</tr>
+</tbody>
+</table>
+<p>Keys that do not apply to an event are left out.</p>
+</details>
+<details class="note">
+<summary>The active scenario in detail</summary>
+<p>The state is the active scenario's name followed by its index (0-based). It is <code>Unknown Scenario (Index n)</code> for an index without a scenario name, and <code>Unknown (No data)</code> or <code>Unknown (No active index)</code> when the panel reports none.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>active_scenario_index</code></td>
+<td>the index alone</td>
+</tr>
+<tr>
+<td><code>raw_active_scenario_hex</code></td>
+<td>the panel's raw value</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h2 id="diagnostic-and-configuration-entities">Diagnostic and configuration entities<a class="headerlink" href="#diagnostic-and-configuration-entities" title="Permanent link">&para;</a></h2>
+<p>These are shown in the <em>Diagnostic</em> and <em>Configuration</em> sections of the device page.</p>
+<table>
+<thead>
+<tr>
+<th>ID ends with</th>
+<th>Name</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>button.…_reread_panel_configuration</code></td>
+<td>Re-read panel configuration</td>
+<td>reads the panel configuration again and reloads (see <a href="../setup/#re-reading-the-panel-configuration">Setup</a>)</td>
+</tr>
+<tr>
+<td><code>sensor.…_user_code</code></td>
+<td>User code</td>
+<td>the name of the user code the PIN belongs to (never the PIN)</td>
+</tr>
+<tr>
+<td><code>sensor.…_peripherals</code></td>
+<td>Peripherals</td>
+<td>how many keypads, readers, expanders and sirens are enabled</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_programming_mode</code></td>
+<td>Programming mode</td>
+<td>on while the panel is in programming mode</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_refuses_arming_with_zones_not_ready</code></td>
+<td>Refuses arming with zones not ready</td>
+<td>on when the installer set the panel to refuse arming with zones not ready</td>
+</tr>
+<tr>
+<td><code>select.…_diagnostics_level</code></td>
+<td>Diagnostics level</td>
+<td>Redacted, Full, Full confidential; disabled by default</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Details and attributes</summary>
 <ul>
-<li>
-<p><em>sensor.your_panel_name_event_log</em>: The state is the position of the newest event in the panel's event log (0 to 999, or 0 to 499 on panels that keep 500 events: the SmartLiving 505 and 515, and the 1050 on firmware 5.1; it starts again from 0 when the log wraps around), so it changes with every new event. The attributes contain a human-readable log of recent events: <code>authorized_by</code> is the name of the user code or key, <code>device</code> the name of the keypad or reader (<em>Remote</em> for commands from the app, the cloud, Home Assistant or the installer software). Event times are the panel's clock read in Home Assistant's time zone, with daylight saving time.</p>
-</li>
-<li>
-<p><em>sensor.your_panel_name_active_scenario</em>: The active scenario's name followed by its index (0-based), for example <code>Night (Index 2)</code>; the attribute <code>active_scenario_index</code> gives the index alone.</p>
-</li>
-<li>
-<p><em>sensor.your_panel_name_firmware_version</em> &amp; <em>sensor.your_panel_name_system_type</em>: Provide static information about your alarm panel.</p>
-</li>
+<li><strong>User code</strong>: commands only work on the areas of this user code. Unknown if the PIN matches no user code: commands are refused then. Checked again whenever the integration reloads.</li>
+<li><strong>Peripherals</strong>: it does not tell whether a device is answering.</li>
+<li><strong>Programming mode</strong>: on while the panel is being programmed from a keypad, or reloading its configuration. Commands are not sent then. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5.0x).</li>
+<li><strong>Refuses arming with zones not ready</strong>: read with the panel configuration; unknown until the configuration is read again by this version. See <a href="../actions-events/#zones-not-ready">Zones not ready</a>.</li>
+<li><strong>Diagnostics level</strong>: how much the next diagnostics download shows (see <a href="../system-report/">System report</a>). It goes back to <em>Redacted</em> when the integration restarts or reloads, after the readable copy of a Full report has been downloaded, and 10 minutes after a Full report's first download.</li>
 </ul>
-</li>
-<li>
-<p><strong>Outputs</strong> (only the ones you tick; see <a href="#outputs">Outputs</a> below):</p>
-<ul>
-<li>
-<p><em>switch.your_panel_name_output_name</em>: An on/off or monostable output. It is on while the panel shows the output active (read at every poll). A monostable output switches itself off after its time; the switch shows it off at the next poll.</p>
-</li>
-<li>
-<p><em>light.your_panel_name_output_name</em>: A dimmer output, with brightness. On firmware 6 the level is read from the panel at every poll and after each change; on firmware 5.1 the panel does not report it, so the brightness is the last one set from Home Assistant.</p>
-</li>
-<li>
-<p>Both are named with the output's name on the panel (<em>Output n</em> or <em>O1</em> to <em>O3</em> without one). Attributes: <code>output_number</code>, <code>kind</code> (<code>on_off</code>, <code>monostable</code> or <code>dimmer</code>), <code>terminal_index</code> or <code>fixed_output</code> (1 to 3), <code>monostable_time</code> (for example <code>30 s</code>), <code>home_automation</code> (<code>true</code> if the installer marked it as a home automation output; not shown on firmware 5.1) and the output's options <code>normally_closed</code>, <code>flashing</code>, <code>buzzer</code>, <code>keep_on_restoral</code>, <code>toggle</code> and <code>relay_use</code> (<code>true</code> or <code>false</code>).</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Maintenance</strong>:</p>
-<ul>
-<li>
-<p><em>button.your_panel_name_reread_panel_configuration</em>: Reads the panel configuration again and reloads the integration (see <a href="../setup/#re-reading-the-panel-configuration">Re-reading the panel configuration</a>). Shown in the <em>Configuration</em> section of the device page.</p>
-</li>
-<li>
-<p><em>sensor.your_panel_name_peripherals</em> (named <em>Peripherals</em>): How many keypads, readers, expanders and sirens are enabled on the panel; the <code>keypads</code>, <code>readers</code>, <code>expanders</code> and <code>sirens</code> attributes list their names. It does not tell whether a device is answering. Shown in the <em>Diagnostic</em> section of the device page.</p>
-</li>
-<li>
-<p><em>sensor.your_panel_name_user_code</em> (named <em>User code</em>): The name of the user code the PIN belongs to (never the PIN); the <code>number</code>, <code>areas</code> (the areas it controls, by name) and <code>type</code> (standard, manager or master) attributes give more. Commands only work on those areas. Unknown if the PIN matches no user code: commands are refused then. Checked again whenever the integration reloads. Shown in the <em>Diagnostic</em> section of the device page.</p>
-</li>
-<li>
-<p><em>binary_sensor.your_panel_name_refuses_arming_with_zones_not_ready</em> (named <em>Refuses arming with zones not ready</em>): On when the installer set the panel to refuse arming with zones not ready (see <a href="../actions-events/#zones-not-ready">Zones not ready</a>). Read with the panel configuration; unknown until the configuration is read again by this version. Shown in the <em>Diagnostic</em> section of the device page.</p>
-</li>
-<li>
-<p><em>binary_sensor.your_panel_name_programming_mode</em> (named <em>Programming mode</em>): On while the panel is in programming mode (being programmed from a keypad, or reloading its configuration). Commands are not sent then. Shown in the <em>Diagnostic</em> section of the device page. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5.0x).</p>
-</li>
-<li>
-<p><em>select.your_panel_name_diagnostics_level</em> (named <em>Diagnostics level</em>): How much the next diagnostics download shows: <em>Redacted</em>, <em>Full</em> or <em>Full confidential</em> (see <a href="../system-report/">Sharing a system report</a>). Disabled by default; it goes back to <em>Redacted</em> when the integration restarts or reloads, after the readable copy of a Full report has been downloaded, and 10 minutes after a Full report's first download. Shown in the <em>Diagnostic</em> section of the device page.</p>
-</li>
-</ul>
-</li>
-</ul>
-<p><em>(Replace your_panel_name, with actual value based on your setup).</em></p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>On</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>number</code></td>
+<td>User code</td>
+<td>the user code's number</td>
+</tr>
+<tr>
+<td><code>areas</code></td>
+<td>User code</td>
+<td>the areas it controls, by name</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>User code</td>
+<td><code>standard</code>, <code>manager</code>, <code>master</code></td>
+</tr>
+<tr>
+<td><code>keypads</code>, <code>readers</code>, <code>expanders</code>, <code>sirens</code></td>
+<td>Peripherals</td>
+<td>the names of the enabled devices</td>
+</tr>
+</tbody>
+</table>
+</details>
 <h2 id="outputs">Outputs<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>An output switches whatever is wired to it: a siren, a lock, a gate, heating. Switching it from Home Assistant, or from an automation, acts on the real device. Before ticking an output, check what it drives; when you first try the integration's outputs, use one that is harmless to switch.</p>
+<p>An output switches whatever is wired to it: a siren, a lock, a gate, heating. Switching it from Home Assistant, or from an automation, acts on the real device. Before ticking an output, check what it drives.</p>
 </div>
+<table>
+<thead>
+<tr>
+<th>ID ends with</th>
+<th>Name</th>
+<th>States</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>switch.…_</code><em>output name</em></td>
+<td>the output's name on the panel</td>
+<td>on while the panel shows the output active</td>
+</tr>
+<tr>
+<td><code>light.…_</code><em>output name</em></td>
+<td>the output's name on the panel</td>
+<td>on or off, with brightness (dimmers)</td>
+</tr>
+</tbody>
+</table>
 <ul>
-<li>
-<p><strong>What is offered</strong>: outputs programmed on the panel as on/off, monostable or dimmer outputs (terminal outputs and O1 to O3) that your user code may switch. Analogue outputs are not offered. A terminal output on one of the panel's first three terminal positions cannot be switched remotely (the panel reserves those numbers for O1 to O3), so it is not listed.</p>
-</li>
-<li>
-<p><strong>What is ticked for you</strong>: only the outputs the installer marked as <em>home automation</em> outputs in the panel's programming (firmware 6; on firmware 5.1 the integration cannot read this mark, so nothing is ticked). The panel cannot tell what an output drives, so check them, and pick any other outputs yourself, in the setup or later in the options under <strong>Areas, zones, scenarios and outputs</strong>. The first time an existing installation shows the outputs in the options, the home automation outputs are ticked there too; after you save, your choice is kept.</p>
-</li>
-<li>
-<p><strong>Nothing is switched by itself</strong>: no output is switched at setup, at start, at a reload or when Home Assistant restores its state.</p>
-</li>
-<li>
-<p><strong>When the panel refuses</strong>: an output your user code may not switch, or one locked while its areas are armed, gives an error with the reason (see <a href="../troubleshooting/#when-the-panel-refuses-a-command">When the panel refuses a command</a>). While the panel is in programming mode, no command is sent.</p>
-</li>
+<li><strong>On/off and monostable outputs</strong> are switches. A monostable output switches itself off after its time; the switch shows it off at the next poll.</li>
+<li><strong>Dimmers</strong> are lights with brightness. On firmware 6 the level is read from the panel at every poll and after each change; on firmware 5.1 the panel does not report it, so the brightness is the last one set from Home Assistant.</li>
+<li>Outputs without a name on the panel are called <em>Output n</em>, or <em>O1</em> to <em>O3</em> for the fixed outputs.</li>
 </ul>
+<details class="note">
+<summary>Which outputs are offered and ticked</summary>
+<ul>
+<li><strong>What is offered</strong>: outputs programmed on the panel as on/off, monostable or dimmer outputs (terminal outputs and O1 to O3) that your user code may switch. Analogue outputs are not offered. A terminal output on one of the panel's first three terminal positions cannot be switched remotely (the panel reserves those numbers for O1 to O3), so it is not listed.</li>
+<li><strong>What is ticked for you</strong>: only the outputs the installer marked as <em>home automation</em> outputs in the panel's programming (firmware 6; on firmware 5.1 the integration cannot read this mark, so nothing is ticked). The panel cannot tell what an output drives, so check them, and pick any other outputs yourself, in the setup or later in the options under <strong>Areas, zones, scenarios and outputs</strong>. The first time an existing installation shows the outputs in the options, the home automation outputs are ticked there too; after you save, your choice is kept.</li>
+<li><strong>Nothing is switched by itself</strong>: no output is switched at setup, at start, at a reload or when Home Assistant restores its state.</li>
+<li><strong>When the panel refuses</strong>: an output your user code may not switch, or one locked while its areas are armed, gives an error with the reason (see <a href="../troubleshooting/#when-the-panel-refuses-a-command">When the panel refuses a command</a>). While the panel is in programming mode, no command is sent.</li>
+</ul>
+</details>
+<details class="note">
+<summary>Attributes of the outputs</summary>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>output_number</code></td>
+<td>the output's number</td>
+</tr>
+<tr>
+<td><code>kind</code></td>
+<td><code>on_off</code>, <code>monostable</code>, <code>dimmer</code></td>
+</tr>
+<tr>
+<td><code>terminal_index</code></td>
+<td>terminal outputs: the terminal (0-based)</td>
+</tr>
+<tr>
+<td><code>fixed_output</code></td>
+<td>fixed outputs: 1 to 3</td>
+</tr>
+<tr>
+<td><code>monostable_time</code></td>
+<td>monostable outputs: for example <code>30 s</code></td>
+</tr>
+<tr>
+<td><code>home_automation</code></td>
+<td><code>true</code> if the installer marked it as a home automation output; not shown on firmware 5.1</td>
+</tr>
+<tr>
+<td><code>normally_closed</code></td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>flashing</code></td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>buzzer</code></td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>keep_on_restoral</code></td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>toggle</code></td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+<tr>
+<td><code>relay_use</code></td>
+<td><code>true</code> or <code>false</code></td>
+</tr>
+</tbody>
+</table>
+</details>
 
 
 

@@ -345,6 +345,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-panels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported panels
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -628,6 +645,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-panels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported panels
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -670,16 +704,17 @@
 
 
 <h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
+<p>This page says what you need, and how to install the integration in Home Assistant.</p>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
+<p>You need:</p>
 <ul>
-<li>
-<p>An Inim SmartLiving alarm control panel.</p>
-</li>
-<li>
-<p>The panel must be equipped with a SmartLAN/SI or SmartLAN/G network interface module. SmartLAN/G support is <strong>experimental</strong>: it has only been tested against a simulated panel so far, so please report how it works for you.</p>
-</li>
-<li>
-<p>A supported panel, with firmware 6.x or 5.1x:</p>
+<li><strong>Home Assistant 2026.1 or later.</strong></li>
+<li><strong>A supported Inim SmartLiving panel</strong>, on firmware 6.x or 5.1x (see the table below).</li>
+<li><strong>A SmartLAN/SI or SmartLAN/G board</strong> in the panel, connected to your network, that Home Assistant can reach.</li>
+<li><strong>The board's address and port</strong> (usually 5004). For a SmartLAN/G board, also the user name and password of the board's web page.</li>
+<li><strong>A user code (PIN) of the panel.</strong> Commands are sent with it, so it must control the areas you want to arm and disarm.</li>
+</ul>
+<h3 id="supported-panels">Supported panels<a class="headerlink" href="#supported-panels" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -716,11 +751,12 @@
 </tr>
 </tbody>
 </table>
-<p>Experimental models use the panel's memory map but have not been tested on a real panel yet; a warning in the log says so. Please report how it works for you. Zone numbers above the number of terminals are the second zones of double terminals.</p>
+<p>Zone numbers above the number of terminals are the second zones of double terminals.</p>
+<details class="note">
+<summary>What experimental means, and other firmware versions</summary>
 <ul>
-<li>
-<p><strong>Firmware 6.x</strong> is supported as in the table above.</p>
-</li>
+<li><strong>Experimental models</strong> use the panel's memory map but have not been tested on a real panel yet; a warning in the log says so. Please report how it works for you.</li>
+<li><strong>Firmware 6.x</strong> is supported as in the table above.</li>
 <li>
 <p><strong>Firmware 5.1x is supported experimentally, and with limits</strong>, on all four models:</p>
 <ul>
@@ -734,66 +770,64 @@
 <li>
 <p><strong>Firmware 5.0x and older</strong> cannot be set up ("The panel's firmware is not supported: firmware 5.1 or newer is needed").</p>
 </li>
-<li>
-<p><strong>Other SmartLiving models</strong> cannot be set up ("This SmartLiving model is not supported yet"); please report your model and firmware on GitHub.</p>
-</li>
+<li><strong>Other SmartLiving models</strong> cannot be set up ("This SmartLiving model is not supported yet"); please report your model and firmware on GitHub.</li>
 </ul>
-</li>
-<li>
-<p>The SmartLAN module must be connected to your local network and accessible from your Home Assistant instance.</p>
-</li>
-<li>
-<p>You will need the IP address, port (typically 5004), and a valid user PIN code for the alarm panel. For SmartLAN/G you also need the user name and password of the board's web page.</p>
-</li>
-</ul>
+</details>
+<details class="note">
+<summary>SmartLAN/SI and SmartLAN/G</summary>
+<p>Both boards are supported. The SmartLAN/G board is confirmed working on a SmartLiving 10100.</p>
+</details>
 <h2 id="installing">Installing<a class="headerlink" href="#installing" title="Permanent link">&para;</a></h2>
-<p>The integration is installed as a custom repository; it needs Home Assistant 2026.1 or later.</p>
+<p>The integration is installed as a custom repository. Use the button to open it in your Home Assistant, or follow the steps for your version below.</p>
 <p><a class="md-button" href="https://my.home-assistant.io/redirect/marketplace_repository/?owner=matteoraf&amp;repository=ha-inim_smartliving_alarm_panel&amp;category=integration">Open your Home Assistant instance and open this repository in the Marketplace.</a></p>
-<p>The button opens this repository in your Home Assistant: in the Marketplace on 2026.11 or later, in HACS on earlier versions (HACS must be installed). Download <strong>Inim Smartliving Alarm</strong> there and restart Home Assistant. Or add it yourself:</p>
-<p><strong>Home Assistant 2026.11 or later (Marketplace):</strong></p>
+<p>The button opens the repository in the Marketplace on Home Assistant 2026.11 or later, and in HACS on earlier versions (HACS must be installed). Download <strong>Inim Smartliving Alarm</strong> there and restart Home Assistant.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Marketplace (2026.11 or later)</label><label for="__tabbed_1_2">HACS (2026.1 to 2026.10)</label><label for="__tabbed_1_3">Manual</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <ol>
-<li>
-<p>Go to <strong>Settings</strong> -&gt; <strong>Marketplace</strong>.</p>
-</li>
-<li>
-<p>Add <code>https://github.com/matteoraf/ha-inim_smartliving_alarm_panel</code> as a custom repository of type <strong>Integration</strong>. Adding custom repositories needs the Marketplace's GitHub connection.</p>
-</li>
-<li>
-<p>Open <strong>Inim Smartliving Alarm</strong> in the Marketplace, install it and restart Home Assistant.</p>
-</li>
+<li>Go to <strong>Settings</strong> → <strong>Marketplace</strong>.</li>
+<li>Add <code>https://github.com/matteoraf/ha-inim_smartliving_alarm_panel</code> as a custom repository of type <strong>Integration</strong>. Adding custom repositories needs the Marketplace's GitHub connection.</li>
+<li>Open <strong>Inim Smartliving Alarm</strong> in the Marketplace and install it.</li>
+<li>Restart Home Assistant.</li>
 </ol>
-<p><strong>Home Assistant 2026.1 to 2026.10 (HACS):</strong></p>
+</div>
+<div class="tabbed-block">
 <ol>
-<li>
-<p>In HACS, open the menu (⋮) -&gt; <strong>Custom repositories</strong> and add the same URL with type <strong>Integration</strong>.</p>
-</li>
-<li>
-<p>Search for <strong>Inim Smartliving Alarm</strong>, download it and restart Home Assistant.</p>
-</li>
+<li>In HACS, open the menu (⋮) → <strong>Custom repositories</strong>.</li>
+<li>Add <code>https://github.com/matteoraf/ha-inim_smartliving_alarm_panel</code> with type <strong>Integration</strong>.</li>
+<li>Search for <strong>Inim Smartliving Alarm</strong> and download it.</li>
+<li>Restart Home Assistant.</li>
 </ol>
-<p><strong>Manual installation:</strong></p>
+</div>
+<div class="tabbed-block">
 <ol>
-<li>
-<p>Download the <code>inim_smartliving_alarm</code> folder of the latest release into your <code>config/custom_components</code> folder.</p>
-</li>
-<li>
-<p>Restart Home Assistant.</p>
-</li>
+<li>Download the <code>inim_smartliving_alarm</code> folder of the latest release.</li>
+<li>Copy it into your <code>config/custom_components</code> folder.</li>
+<li>Restart Home Assistant.</li>
 </ol>
+</div>
+</div>
+</div>
+<p>Then <a href="../setup/#adding-a-panel">add your panel</a>.</p>
 <h2 id="preview-versions">Preview versions<a class="headerlink" href="#preview-versions" title="Permanent link">&para;</a></h2>
-<p>Versions such as <code>0.4.0a1</code> (preview) or <code>0.4.0b1</code> (beta) are published as GitHub <em>pre-releases</em>. They are offered only to users who ask for them:</p>
-<ul>
-<li>
-<p><strong>Marketplace</strong> (Home Assistant 2026.11 or later): on the integration's page in the Marketplace, open the menu (⋮) and choose <strong>Include pre-releases</strong> to be offered pre-releases, or <strong>Install another version</strong> and pick the version.</p>
-</li>
-<li>
-<p><strong>HACS</strong> (Home Assistant 2026.1 to 2026.10): turn on the repository's <strong>Pre-release</strong> switch (it is disabled by default: enable it first), or use <strong>Redownload</strong> on the integration's page and pick the version.</p>
-</li>
-<li>
-<p><strong>Manual</strong>: download the <code>inim_smartliving_alarm</code> folder from the pre-release on GitHub.</p>
-</li>
-</ul>
-<p><strong>Take a Home Assistant backup before installing a preview or a beta</strong> (<strong>Settings</strong> -&gt; <strong>System</strong> -&gt; <strong>Backups</strong>). A preview or a beta updates your configuration entry to a newer format that the stable 0.3.x versions do not fully understand: installed over it, 0.3.x creates entities again for 10 areas, 50 zones and 30 scenarios (including those you had not imported), cannot connect to SmartLAN/G boards, and leaves the entities only 0.4 has (such as the arming mode selects, the outputs and the diagnostic sensors) as unavailable entities. To go back to a stable version, restore that backup; this also undoes any other change made in Home Assistant since the backup.</p>
+<p>Versions such as <code>0.4.0a1</code> (preview) or <code>0.4.0b1</code> (beta) are published as GitHub <em>pre-releases</em>. They are offered only to users who ask for them.</p>
+<div class="admonition warning">
+<p class="admonition-title">Take a backup first</p>
+<p><strong>Take a Home Assistant backup before installing a preview or a beta</strong> (<strong>Settings</strong> → <strong>System</strong> → <strong>Backups</strong>). A preview or a beta updates your configuration entry to a newer format that the stable 0.3.x versions do not fully understand: installed over it, 0.3.x creates entities again for 10 areas, 50 zones and 30 scenarios (including those you had not imported), cannot connect to SmartLAN/G boards, and leaves the entities only 0.4 has (such as the arming mode selects, the outputs and the diagnostic sensors) as unavailable entities. To go back to a stable version, restore that backup; this also undoes any other change made in Home Assistant since the backup.</p>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Marketplace (2026.11 or later)</label><label for="__tabbed_2_2">HACS (2026.1 to 2026.10)</label><label for="__tabbed_2_3">Manual</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>On the integration's page in the Marketplace, open the menu (⋮) and choose <strong>Include pre-releases</strong> to be offered pre-releases, or <strong>Install another version</strong> and pick the version.</p>
+</div>
+<div class="tabbed-block">
+<p>Turn on the repository's <strong>Pre-release</strong> switch (it is disabled by default: enable it first), or use <strong>Redownload</strong> on the integration's page and pick the version.</p>
+</div>
+<div class="tabbed-block">
+<p>Download the <code>inim_smartliving_alarm</code> folder from the pre-release on GitHub.</p>
+</div>
+</div>
+</div>
 <p>Please report problems with a preview or a beta with the <a href="https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/issues/new?template=beta_report.yml">Beta report</a> form, which asks for your panel model, firmware version and board type (SmartLAN/SI or SmartLAN/G).</p>
 
 

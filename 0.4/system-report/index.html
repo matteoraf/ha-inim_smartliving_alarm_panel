@@ -507,6 +507,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Sharing a report">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-much-the-report-shows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How much the report shows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -617,6 +634,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Sharing a report">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-much-the-report-shows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How much the report shows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -648,9 +682,22 @@
 
 
 <h1 id="system-report">System report<a class="headerlink" href="#system-report" title="Permanent link">&para;</a></h1>
+<p>When you report a problem, a system report tells what the integration knows about your panel: model and firmware, board, the panel's programming as read from it, status, the event log, the integration's options and entities, and connection statistics.</p>
 <h2 id="sharing-a-report">Sharing a report<a class="headerlink" href="#sharing-a-report" title="Permanent link">&para;</a></h2>
-<p>When you report a problem, a system report tells what the integration knows about your panel: model and firmware, board, the panel's programming as read from it, status, the event log, the integration's options and entities, and connection statistics. Download it from <strong>Settings</strong> -&gt; <strong>Devices &amp; services</strong> -&gt; <em>Inim SmartLiving</em> -&gt; the three dots of your panel -&gt; <strong>Download diagnostics</strong> (the panel's device page has the same entry). It takes about 40 seconds on SmartLAN/SI; commands are not held up meanwhile.</p>
-<p>The <em>Diagnostics level</em> select (enable it on the device page, in the <em>Diagnostic</em> section) chooses how much the report shows:</p>
+<ol>
+<li>Open your panel's device page: <strong>Settings</strong> → <strong>Devices &amp; services</strong> → <strong>Inim SmartLiving Alarm</strong> → your panel.</li>
+<li>
+<p>Click <strong>Download diagnostics</strong> in the <em>Device info</em> card.</p>
+<p><img alt="Download diagnostics on the device page" src="../images/download-diagnostics.webp" width="344" /></p>
+</li>
+<li>
+<p>Wait for the file: it takes about 40 seconds on SmartLAN/SI. Commands are not held up meanwhile.</p>
+</li>
+<li>Attach the file to your GitHub issue. If GitHub refuses the file, zip it first.</li>
+</ol>
+<p>The same entry is in the menu (⋮) of your panel on the integration's page.</p>
+<h3 id="how-much-the-report-shows">How much the report shows<a class="headerlink" href="#how-much-the-report-shows" title="Permanent link">&para;</a></h3>
+<p>The <em>Diagnostics level</em> select chooses how much the next report shows. It is disabled by default: enable it on the device page, in the <em>Diagnostic</em> section.</p>
 <table>
 <thead>
 <tr>
@@ -673,14 +720,20 @@
 </tr>
 </tbody>
 </table>
-<p>At <strong>Redacted</strong> one download gives a plain file you can attach to a GitHub issue as it is.</p>
+<p>At <strong>Redacted</strong>, one download gives a plain file you can attach to a GitHub issue as it is.</p>
+<details class="note">
+<summary>Full and Full confidential: two files</summary>
 <p>At <strong>Full</strong> and <strong>Full confidential</strong> you get two files from the same reading of the panel:</p>
 <ol>
 <li>The first download is <strong>encrypted</strong> to the maintainer's key: only the matching private key decrypts it. It also holds the Redacted view in clear. <strong>Attach this file to your GitHub issue</strong>; it is the only file to share.</li>
 <li>Download diagnostics once more within 10 minutes to get a <strong>readable copy</strong> of the same report (it holds <code>PRIVATE COPY</code>), to check what you are sharing. <strong>Do not share it</strong>: keep it private and delete it when you no longer need it. A notification reminds you of this after the first download. Both files get the same name, so your browser saves the second one with a number added (for example <code>(1)</code>): attach the first one, which holds <code>encrypted</code> and <code>redacted_view</code>, never the one that holds <code>PRIVATE COPY</code>.</li>
 </ol>
 <p>Then the level goes back to <em>Redacted</em>. Nothing is stored: the report is held in memory only until the second download, for 10 minutes at most.</p>
-<p>The board's own details (its network settings and firmware) are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys. If GitHub refuses the file, zip it first.</p>
+</details>
+<details class="note">
+<summary>What is and is not read</summary>
+<p>The board's own details (its network settings and firmware) are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys.</p>
+</details>
 <h2 id="reading-a-report">Reading a report<a class="headerlink" href="#reading-a-report" title="Permanent link">&para;</a></h2>
 <p>The repository has a small viewer for reports, <code>scripts/inim_report.py</code> (Python 3.13 or newer; nothing to install for reading). Download the repository from GitHub, then:</p>
 <ul>

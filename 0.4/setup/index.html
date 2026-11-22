@@ -372,6 +372,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Adding a panel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-items-step-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the items step lists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-setup-can-be-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the setup can be refused
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -628,6 +667,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Adding a panel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-the-items-step-lists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the items step lists
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-the-setup-can-be-refused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the setup can be refused
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -670,99 +748,166 @@
 
 
 <h1 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h1>
+<p>This page shows how to add your panel to Home Assistant, how to change its connection details later, and how to read its configuration again after a change on the panel.</p>
 <h2 id="adding-a-panel">Adding a panel<a class="headerlink" href="#adding-a-panel" title="Permanent link">&para;</a></h2>
-<p>After installation and restarting Home Assistant:</p>
+<p>After <a href="../installation/#installing">installing</a> the integration and restarting Home Assistant:</p>
 <ol>
+<li>Go to <strong>Settings</strong> → <strong>Devices &amp; services</strong>.</li>
+<li>Click <strong>Add integration</strong>, search for <strong>Inim SmartLiving Alarm</strong> and select it.</li>
 <li>
-<p>Go to <strong>Settings</strong> -&gt; <strong>Devices</strong> &amp; <strong>Services</strong>.</p>
-</li>
-<li>
-<p>Click the <strong>+ ADD INTEGRATION</strong> button in the bottom right.</p>
-</li>
-<li>
-<p>Search for "Inim SmartLiving Alarm" and select it.</p>
-</li>
-<li>
-<p>Choose <strong>Search the network</strong> to look for SmartLAN boards: the boards that answer (and are not set up yet) are listed, and the one you pick has its address and port filled in on the next page. The search only finds boards on the <strong>same subnet as Home Assistant</strong>. Otherwise, or if your board is not found, choose how the panel is connected, <strong>SmartLAN/SI board</strong> or <strong>SmartLAN/G board (experimental)</strong>, and enter its details yourself.</p>
-</li>
-<li>
-<p>A configuration dialog will appear. Enter the following details:</p>
+<p>Choose how to find the panel:</p>
+<p><img alt="Choosing the connection type" src="../images/setup-connection-type.webp" width="480" /></p>
 <ul>
-<li>
-<p><strong>Host</strong>: The IP address of your Inim SmartLAN module (e.g., 192.168.1.100).</p>
-</li>
-<li>
-<p><strong>Port</strong>: The TCP port your SmartLAN module is listening on (default is 5004).</p>
-</li>
-<li>
-<p><strong>Board user name</strong> and <strong>Board password</strong> (SmartLAN/G only): the credentials of the board's web page. The SmartLAN/G board encrypts the connection with them.</p>
-</li>
-<li>
-<p><strong>PIN</strong>: A valid user PIN code for your alarm panel (1 to 6 digits). Commands are sent with this code, so it needs access to the areas you want to control.</p>
-</li>
-<li>
-<p><strong>Panel Name</strong> (Optional): A friendly name for your alarm panel in Home Assistant (e.g., "Home Alarm").</p>
-</li>
+<li><strong>Search the network</strong> lists the SmartLAN boards that answer and are not set up yet. Pick yours, and its address and port are filled in for you. The search only finds boards on the <strong>same subnet as Home Assistant</strong>.</li>
+<li><strong>SmartLAN/SI board</strong> or <strong>SmartLAN/G board</strong>: enter the details yourself. Use these when the search does not find your board.</li>
 </ul>
 </li>
 <li>
-<p>Click <strong>Submit</strong>. The integration connects to your panel, checks it and reads its configuration. The setup is refused, with a message, if the panel cannot be reached, if the PIN does not match any user code of the panel, if the panel's firmware is older than 5.1, or if the panel is a SmartLiving model without its own layout (see the supported models above).</p>
+<p>Enter the board's address, the port and your PIN, and give the panel a name. The fields are described <a href="#connection-fields">below</a>.</p>
+<p><img alt="The SmartLAN/SI connection form" src="../images/setup-connection.webp" width="480" /></p>
 </li>
 <li>
-<p>If successful, choose the <strong>areas, zones, scenarios and outputs</strong> to import, in sections of checkboxes (each can be folded). Each one you tick gets its entities; they are listed with their number and the name programmed on the panel:</p>
-<ul>
-<li>
-<p><strong>Areas</strong>: every area of the panel (5 on a SmartLiving 505 or 515, 10 on a 1050, 15 on a 10100).</p>
+<p>Click <strong>Submit</strong>. The integration connects to the panel, checks it and reads its configuration. If the setup is refused, the message says why (see <a href="#why-the-setup-can-be-refused">below</a>).</p>
 </li>
 <li>
-<p><strong>Zones</strong>: the zones of the panel. Only terminals programmed as zones are listed (outputs and unused terminals are not), including the second zones of double terminals (11 to 20 on the 505, 21 to 40 on the 515, 51 to 100 on the 1050, 101 to 200 on the 10100).</p>
+<p>Choose the <strong>areas, zones, scenarios and outputs</strong> to import. Each one you tick gets its entities. What the panel shows in use is already ticked; change it if you like.</p>
+<p><img alt="Choosing the areas, zones, scenarios and outputs" src="../images/setup-items.webp" width="560" /></p>
 </li>
 <li>
-<p><strong>Scenarios</strong>: every scenario of the panel (30).</p>
+<p>Set the <strong>Initial Options</strong>: how often to read the panel, how many events to keep, and which scenarios the alarm panel card uses. See <a href="../options/#initial-options">Options</a>.</p>
+<p><img alt="The initial options" src="../images/setup-initial-options.webp" width="480" /></p>
 </li>
 <li>
-<p><strong>Outputs</strong>: the outputs your user code may switch, with their kind (on/off, monostable with its time, or dimmer); the section is shown only if there are some. <strong>Only the outputs the installer marked as home automation outputs are ticked</strong> (firmware 6): an output can drive a siren, a lock or a gate, so tick only the ones you mean to switch from Home Assistant (see <a href="../entities/#outputs">Outputs</a>).</p>
-</li>
-</ul>
-<p>The setup ticks what the panel shows in use: the zones that belong to an area, the areas of those zones, and the scenarios that change at least one area, and the outputs the installer marked as home automation outputs. Tick or untick anything you like.</p>
-<p>The same step lists, for reference, the keypads, readers, expanders and sirens enabled on the panel, by name.</p>
-</li>
-<li>
-<p>Then the <strong>Initial Options</strong>: see <a href="../options/#initial-options">Options</a>.</p>
-</li>
-<li>
-<p>Click <strong>Submit</strong> to complete the setup.</p>
+<p>Click <strong>Submit</strong>. The panel appears as a device with its entities: see <a href="../entities/">Entities</a>.</p>
 </li>
 </ol>
+<h3 id="connection-fields">Connection fields<a class="headerlink" href="#connection-fields" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Needed for</th>
+<th>What to enter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Host</strong></td>
+<td>both boards</td>
+<td>The board's IP address, for example <code>192.168.1.100</code>.</td>
+</tr>
+<tr>
+<td><strong>Port</strong></td>
+<td>both boards</td>
+<td>The board's TCP port: 5004 unless it was changed in the board's settings.</td>
+</tr>
+<tr>
+<td><strong>Board user name</strong> and <strong>Board password</strong></td>
+<td>SmartLAN/G only</td>
+<td>The user name and password of the board's web page. The board encrypts the connection with them.</td>
+</tr>
+<tr>
+<td><strong>PIN Code</strong></td>
+<td>both boards</td>
+<td>A user PIN of the panel, 1 to 6 digits. Commands are sent with it, so it needs the areas you want to control.</td>
+</tr>
+<tr>
+<td><strong>Panel Name</strong></td>
+<td>optional</td>
+<td>The name of the panel in Home Assistant, for example <code>Home</code>. Entity IDs start with it.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-the-items-step-lists">What the items step lists<a class="headerlink" href="#what-the-items-step-lists" title="Permanent link">&para;</a></h3>
+<details class="note">
+<summary>Areas, zones, scenarios, outputs and devices</summary>
+<ul>
+<li><strong>Areas</strong>: every area of the panel (5 on a SmartLiving 505 or 515, 10 on a 1050, 15 on a 10100).</li>
+<li><strong>Zones</strong>: the zones of the panel. Only terminals programmed as zones are listed (outputs and unused terminals are not), including the second zones of double terminals (11 to 20 on the 505, 21 to 40 on the 515, 51 to 100 on the 1050, 101 to 200 on the 10100).</li>
+<li><strong>Scenarios</strong>: every scenario of the panel (30).</li>
+<li><strong>Outputs</strong>: the outputs your user code may switch, with their kind (on/off, monostable with its time, or dimmer); the section is shown only if there are some. <strong>Only the outputs the installer marked as home automation outputs are ticked</strong> (firmware 6): an output can drive a siren, a lock or a gate, so tick only the ones you mean to switch from Home Assistant (see <a href="../entities/#outputs">Outputs</a>).</li>
+<li><strong>Found on the panel</strong>: the keypads, readers, expanders and sirens enabled on the panel, by name, for reference.</li>
+</ul>
+<p>The setup ticks what the panel shows in use: the zones that belong to an area, the areas of those zones, the scenarios that change at least one area, and the outputs the installer marked as home automation outputs. Each section can be folded.</p>
+</details>
+<h3 id="why-the-setup-can-be-refused">Why the setup can be refused<a class="headerlink" href="#why-the-setup-can-be-refused" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Message</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Failed to connect. Please check the Host and Port …</td>
+<td>Check the address and port, that Home Assistant can reach the board, and that no other program is connected to it (see <a href="../troubleshooting/#common-problems">Troubleshooting</a>).</td>
+</tr>
+<tr>
+<td>The PIN must be 1 to 6 digits.</td>
+<td>Enter the PIN as digits only.</td>
+</tr>
+<tr>
+<td>The PIN does not match any user code of the panel.</td>
+<td>Enter the PIN of a user code programmed on the panel.</td>
+</tr>
+<tr>
+<td>The SmartLAN/G board did not accept the connection.</td>
+<td>Check the board's user name and password.</td>
+</tr>
+<tr>
+<td>The SmartLAN/G board answered, but its reply was not in the expected format.</td>
+<td>If the user name and password are right, your board may answer in a way the integration does not handle yet: see <a href="../troubleshooting/#common-problems">Troubleshooting</a>.</td>
+</tr>
+<tr>
+<td>The panel is in programming mode …</td>
+<td>Try again when programming has ended.</td>
+</tr>
+<tr>
+<td>The panel's firmware is not supported: firmware 5.1 or newer is needed.</td>
+<td>Firmware older than 5.1 cannot be set up.</td>
+</tr>
+<tr>
+<td>This SmartLiving model is not supported yet.</td>
+<td>Please report the model and firmware on GitHub.</td>
+</tr>
+<tr>
+<td>This Inim Alarm panel is already configured.</td>
+<td>The panel is already set up in Home Assistant.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="changing-the-connection-details-reconfigure">Changing the connection details (Reconfigure)<a class="headerlink" href="#changing-the-connection-details-reconfigure" title="Permanent link">&para;</a></h2>
-<p>If the IP address, port or PIN of your panel (or, for SmartLAN/G, the board's user name or password) changes, you don't need to remove and re-add the integration:</p>
+<p>If the address, port or PIN of your panel change (or, for SmartLAN/G, the board's user name or password), you do not need to remove and add the integration again:</p>
 <ol>
-<li>
-<p>Go to <strong>Settings</strong> -&gt; <strong>Devices &amp; Services</strong> and open <strong>Inim SmartLiving Alarm</strong>.</p>
-</li>
-<li>
-<p>Open the menu (⋮) of your panel's entry and choose <strong>Reconfigure</strong>.</p>
-</li>
-<li>
-<p>Enter the new <strong>Host</strong>, <strong>Port</strong>, <strong>PIN</strong> (and, for SmartLAN/G, <strong>Board user name</strong> and <strong>Board password</strong>) and click <strong>Submit</strong>. The PIN and the board password are not filled in: leave them empty to keep the current ones.</p>
-</li>
+<li>Go to <strong>Settings</strong> → <strong>Devices &amp; services</strong> and open <strong>Inim SmartLiving Alarm</strong>.</li>
+<li>Open the menu (⋮) of your panel's entry and choose <strong>Reconfigure</strong>.</li>
+<li>Enter the new details and click <strong>Submit</strong>. The PIN and the board password are not filled in: leave them empty to keep the current ones.</li>
 </ol>
-<p>The integration contacts the panel with the new details, reads its configuration again and reloads. Your options (polling interval, imported areas, zones and scenarios, scenario mappings), entities and entity IDs are kept. If the panel cannot be reached, an error is shown and nothing is changed. An address already used by another configured panel is refused, and so is a PIN that does not match any user code of the panel. The board type (SmartLAN/SI or SmartLAN/G) cannot be changed here: remove the integration and add it again for that.</p>
-<h2 id="re-reading-the-panel-configuration">Re-reading the panel configuration<a class="headerlink" href="#re-reading-the-panel-configuration" title="Permanent link">&para;</a></h2>
-<p>The names of areas, zones, scenarios, user codes, keys, keypads, readers, expanders, timers and sirens, which keypads, readers, expanders and sirens are enabled, the zone setup and the scenario definitions are read from the panel when the integration is set up. If you change them on the panel later (from a keypad or the installer software), read them again with either:</p>
+<p>The integration contacts the panel with the new details, reads its configuration again and reloads. Your options, entities and entity IDs are kept.</p>
+<details class="note">
+<summary>What Reconfigure checks</summary>
 <ul>
-<li>
-<p>the <strong>Re-read panel configuration</strong> button, in the <em>Configuration</em> section of your panel's device page, or</p>
-</li>
-<li>
-<p>the <strong>Re-read panel configuration</strong> action (<code>inim_smartliving_alarm.reread_panel_configuration</code>), for example from an automation or from <strong>Developer tools</strong> -&gt; <strong>Actions</strong>, where you pick the panel from a list:</p>
-</li>
+<li>If the panel cannot be reached, an error is shown and nothing is changed.</li>
+<li>An address already used by another configured panel is refused, and so is a PIN that does not match any user code of the panel.</li>
+<li>The board type (SmartLAN/SI or SmartLAN/G) cannot be changed here: remove the integration and add it again for that.</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inim_smartliving_alarm.reread_panel_configuration</span>
-<span class="nt">data</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">config_entry_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;the panel's config entry ID&gt;</span>
-</code></pre></div>
-<p>The integration then reloads with the new configuration. Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel. The areas, zones and scenarios you import are not changed either: a zone wired later or a new scenario is listed, unticked, in the options under <strong>Areas, zones, scenarios and outputs</strong>. If the panel cannot be reached, or it is in programming mode, an error is shown and the stored configuration is kept: in programming mode, try again when programming has ended.</p>
+</details>
+<h2 id="re-reading-the-panel-configuration">Re-reading the panel configuration<a class="headerlink" href="#re-reading-the-panel-configuration" title="Permanent link">&para;</a></h2>
+<p>The integration reads the panel's names and programming when you add it: the names of areas, zones, scenarios, user codes, keys, keypads, readers, expanders, timers and sirens; which keypads, readers, expanders and sirens are enabled; the zone setup and the scenario definitions. If you change them on the panel later (from a keypad or the installer software), read them again with either:</p>
+<ul>
+<li>the <strong>Re-read panel configuration</strong> button, in the <em>Configuration</em> section of your panel's device page, or</li>
+<li>the <strong>Re-read panel configuration</strong> action, <code>inim_smartliving_alarm.reread_panel_configuration</code> (see <a href="../actions-events/#action-reread-panel-configuration">Actions</a>).</li>
+</ul>
+<p>The integration then reloads with the new configuration.</p>
+<details class="note">
+<summary>What changes after a re-read</summary>
+<ul>
+<li>Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel.</li>
+<li>The areas, zones and scenarios you import are not changed either: a zone wired later or a new scenario is listed, unticked, in the options under <strong>Areas, zones, scenarios and outputs</strong>.</li>
+<li>If the panel cannot be reached, or it is in programming mode, an error is shown and the stored configuration is kept: in programming mode, try again when programming has ended.</li>
+</ul>
+</details>
 
 
 
