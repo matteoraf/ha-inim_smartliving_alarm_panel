@@ -11,7 +11,7 @@
     | Model | Areas | Zone numbers | Status |
     |---|---|---|---|
     | SmartLiving 1050 | 10 | 1-100 | developed and tested on it |
-    | SmartLiving 10100 | 15 | 1-200 | **experimental** |
+    | SmartLiving 10100 | 15 | 1-200 | confirmed working (SmartLAN/G) |
     | SmartLiving 515 | 5 | 1-40 | **experimental** |
     | SmartLiving 505 | 5 | 1-20 | **experimental** |
     
