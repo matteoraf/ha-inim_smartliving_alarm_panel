@@ -1,0 +1,859 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/0.4/upgrading/">
+      
+      
+        <link rel="prev" href="../system-report/">
+      
+      
+        <link rel="next" href="../limitations/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/icon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
+    
+    
+      
+        <title>Upgrading - Inim SmartLiving Alarm for Home Assistant</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#upgrading" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            This is the documentation of the 0.4 beta, a pre-release. Choose your version from the menu at the top.
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  This is the documentation of another version.
+  <a href="../.."><strong>Go to the current version.</strong></a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Inim SmartLiving Alarm for Home Assistant" class="md-header__button md-logo" aria-label="Inim SmartLiving Alarm for Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Inim SmartLiving Alarm for Home Assistant
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Upgrading
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Inim SmartLiving Alarm for Home Assistant" class="md-nav__button md-logo" aria-label="Inim SmartLiving Alarm for Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    Inim SmartLiving Alarm for Home Assistant
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../options/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Options
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entities
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Actions and events
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrading
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrading
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#from-03x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 0.3.x
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known limitations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#from-03x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        From 0.3.x
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="upgrading">Upgrading<a class="headerlink" href="#upgrading" title="Permanent link">&para;</a></h1>
+<h2 id="from-03x">From 0.3.x<a class="headerlink" href="#from-03x" title="Permanent link">&para;</a></h2>
+<p>Version 0.4 reworks how the integration talks to the panel; your entity IDs and options stay as they are:</p>
+<ul>
+<li>
+<p>Your configuration entry is updated automatically (it is marked as a SmartLAN/SI connection). Entity IDs and options do not change.</p>
+</li>
+<li>
+<p>Home Assistant now keeps one connection to the panel and reuses it, so updates are faster. The SmartLAN/SI module accepts only one local connection: see <a href="../troubleshooting/#common-problems">the Inim app</a> under Troubleshooting.</p>
+</li>
+<li>
+<p>The PIN is checked from now on when you <strong>Reconfigure</strong>: a PIN that matches no user code of the panel is refused. If your current PIN matches none, the log shows a warning at every connection.</p>
+</li>
+<li>
+<p>New: SmartLAN/G boards (experimental), a network search when adding a panel, and the active scenario now takes all areas of your user code into account (previously areas 8 to 10 were ignored).</p>
+</li>
+<li>
+<p><strong>Area switches</strong> are now on for an area armed in partial or instant mode too (before, such an area showed as unknown and its switch was off). Turning a switch on still arms in total mode, unless you choose another mode with the new <strong>Area switches default arm mode</strong> option. The new <code>arming_mode</code> attribute tells the mode (<code>total</code>, <code>partial</code>, <code>instant</code> or <code>disarmed</code>); <code>status_text</code> stays <code>armed</code> or <code>disarmed</code>.</p>
+</li>
+<li>
+<p><strong>"Area X Triggered" is now called "Area X Alarm memory"</strong>: same entity ID, same meaning (on after an alarm until the memory is reset), now also for areas 9 and 10, with a <code>tamper_memory</code> attribute. Two new binary sensors per area show the <strong>live</strong> state: <em>Area X Alarm</em> and <em>Area X Tamper</em>.</p>
+</li>
+<li>
+<p><strong>The alarm panel shows Triggered only while an area is in alarm.</strong> Before, it stayed Triggered until the alarm memory was reset; now it returns to its armed or disarmed state when the alarm ends, and the <em>Alarm memory</em> sensors keep the memory. Automations that relied on Triggered lasting until the reset should use the <em>Alarm memory</em> sensors instead.</p>
+</li>
+<li>
+<p><strong>Zones follow the panel's terminal types.</strong> Output terminals (for example a siren) and unused terminals no longer get zone entities, and the second zones of double terminals (51 to 100 on the 1050) can be added: tick them in the options under <strong>Areas, zones, scenarios and outputs</strong> (existing installations keep the zones they had). Entities that earlier versions created for terminals that are not zones are <strong>not deleted automatically</strong>: they stay as unavailable entities, and the log lists them at every start (<em>"these entities belong to terminals that are not zones on the panel"</em>). Delete them in <strong>Settings</strong> -&gt; <strong>Devices &amp; services</strong> -&gt; <strong>Entities</strong>.</p>
+</li>
+<li>
+<p><strong>"Zone X Triggered" is now called "Zone X Alarm memory"</strong> (same entity ID). Zones in short circuit or tamper are no longer shown as unknown: a new <em>Zone X Tamper</em> sensor turns on, and the zone's <code>status_text</code> says <code>short</code> or <code>tamper</code>. Such zones are also listed when they prevent a scenario from being activated.</p>
+</li>
+<li>
+<p><strong>SmartLiving 10100 (experimental):</strong> a 10100 now uses its own memory layout. Earlier versions read it as if it were a 1050, so its names and zones were wrong: at the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs of areas and zones stay the same; areas 11 to 15 and zones above 50 can be ticked in the options under <strong>Areas, zones, scenarios and outputs</strong>.</p>
+</li>
+<li>
+<p><strong>Event log:</strong> event times are now shown in Home Assistant's time zone, with daylight saving time (before, always UTC+1), and new events keep appearing after the panel's event log wraps around. The event log sensor's state is now the newest event's position in the panel's log (0 to 999, or 0 to 499 on panels that keep 500 events: the SmartLiving 505 and 515, and the 1050 on firmware 5.1) instead of a memory address: automations that only trigger on a change keep working, but compare the new numbers if you used the value itself.</p>
+</li>
+<li>
+<p>Your configuration entry is updated once more (version 1.3): the zone list is completed from the panel data already stored, without contacting the panel. If that data is incomplete, a warning asks you to use <strong>Re-read panel configuration</strong>.</p>
+</li>
+<li>
+<p><strong>SmartLAN/G:</strong> the board's replies are now read the way the board sends them (the data alone, without the panel's checksum). Before, every read failed and setup reported a wrong user name or password even with the right credentials. A wrong user name or password is now reported only when the board's reply cannot be decrypted; any other unexpected reply has its own message (see <a href="../troubleshooting/#common-problems">Troubleshooting</a>).</p>
+</li>
+<li>
+<p><strong>Commands that are not carried out now show an error.</strong> Before, a refused arm, disarm, bypass or reset was only written to the log, and the alarm panel's error notifications did not appear at all. Now the action fails with a message that tells why (for example a PIN the panel no longer accepts, or a PIN not enabled for that area), in the dashboard and in automation traces; see <a href="../troubleshooting/#when-the-panel-refuses-a-command">When the panel refuses a command</a>. An automation step that fails stops that automation unless the step has <code>continue_on_error: true</code>. The <code>inim_smartliving_alarm_scenario_activation_failed</code> event has a new <code>panel_result</code> field (the panel's answer, or <code>null</code> when the panel did not refuse the command), and its <code>reason</code> can now also be <code>command_failed</code> or <code>invalid_code</code>.</p>
+</li>
+<li>
+<p><strong>New: an arming mode select per area</strong> (<em>Area X arming mode</em>: disarmed, total, partial or instant) and the <strong><code>arm_area</code> action</strong>, which arms or disarms several areas in one command (see <a href="../actions-events/#arming-areas-from-automations">Arming areas from automations</a>).</p>
+</li>
+<li>
+<p><strong>Programming mode is now detected.</strong> While the panel is being programmed from a keypad, it ignores commands, and earlier versions reported such a command as carried out. Now no command is sent while the panel is in programming mode: the action fails with a message instead, and setup, <strong>Reconfigure</strong> and <strong>Re-read panel configuration</strong> are refused with a message: try again when programming has ended. A new diagnostic sensor, <em>Programming mode</em>, shows it. The <code>reason</code> of the <code>inim_smartliving_alarm_scenario_activation_failed</code> event can now also be <code>panel_programming</code>.</p>
+</li>
+<li>
+<p><strong>A scenario stopped by zones not ready lists the zones the panel reported.</strong> The persistent notification and the <code>blocking_zones</code> of the <code>inim_smartliving_alarm_scenario_activation_failed</code> event now list the same zones as the error message, including zones at rest that the panel counts as not ready (delayed zones, for example), each with <code>status</code> <code>not_ready</code>. Before, they listed only the zones in alarm or tamper, and could say that no zones were found.</p>
+</li>
+<li>
+<p><strong>Names with accented letters now show them in full.</strong> Area, zone, scenario and keypad names programmed with letters such as à, è, é or ù lost them before; they are now read with the panel's own character set, like the names of user codes, keys and other devices. The names come from the panel data already stored, so nothing is read again. Entity IDs do not change, and names you changed in Home Assistant stay as you set them.</p>
+</li>
+<li>
+<p><strong>More of the integration is translated.</strong> The notifications (a scenario blocked or failed, an area armed with zones not ready), the scenario choices of the alarm panel's modes in the options, and the names and fields of the actions now follow Home Assistant's language (English or Italian). The <code>message</code> of the <code>inim_smartliving_alarm_scenario_activation_failed</code> event stays in English. The <code>alarm_reset</code> action on a panel whose integration is not loaded now fails with a message, instead of doing nothing.</p>
+</li>
+<li>
+<p><strong>You now pick the areas, zones and scenarios to import from lists</strong>, by name, instead of giving how many of each. Your configuration entry is updated once more (version 1.4): the counts you had become the same items (for example, 7 areas become areas 1 to 7), so your entities do not change. A scenario used by an alarm panel mode beyond your scenario count is added, so that the mode keeps working. The options now open a menu: <strong>Areas, zones, scenarios and outputs</strong> or <strong>General settings</strong>. Unticking an item there <strong>removes its entities</strong>; ticking it again brings them back with the same entity IDs. Entities left over from areas, zones or scenarios above your old counts are removed at the first start.</p>
+</li>
+<li>
+<p><strong>The <code>arm_area</code> action lists the imported areas only, by name</strong>, and refuses areas that are not imported. The alarm panel's modes can be mapped only to imported scenarios.</p>
+</li>
+<li>
+<p><strong>The event log shows the names programmed on the panel</strong>: who caused an event (the user code's or key's name, instead of <em>User 3</em> or <em>Key 5</em>) and where (the keypad's or reader's name). Commands sent remotely, from the app, the cloud, Home Assistant or the installer software, show <em>Remote</em> (before, <em>Mobile App</em>). The <strong>Reader names</strong> option is removed: reader names now come from the panel, and names typed in that option are no longer used. Your configuration entry is updated once more (version 1.5), and at the first start the integration reads the panel configuration again by itself to get the names (the log says so). A new diagnostic sensor, <em>Peripherals</em>, lists the keypads, readers, expanders and sirens enabled on the panel, and so does the <strong>Areas, zones, scenarios and outputs</strong> step.</p>
+</li>
+<li>
+<p><strong>Changing the PIN in the options works again</strong>, and the PIN is no longer shown. The <strong>New PIN Code</strong> field in <strong>General settings</strong> is now empty: leave it empty to keep the current PIN, or enter a new one, which is checked with the panel as at setup. Before, the field showed the current PIN in clear text and any new PIN was refused. The PIN (and, for SmartLAN/G, the board password) is now a password field at setup and in <strong>Reconfigure</strong>, where it is no longer filled in: leave it empty to keep the current one. A new diagnostic sensor, <em>User code</em>, names the user code the PIN belongs to, and <strong>General settings</strong> says it too.</p>
+</li>
+<li>
+<p><strong>New setups propose the Arm Away and Disarm scenarios</strong> from what your scenarios do to the areas you import. Existing installations keep their mappings.</p>
+</li>
+<li>
+<p><strong>Scenarios that arm partially or instantly are read correctly.</strong> The <code>area_actions_details</code> attribute of the scenario buttons now says <code>total</code>, <code>partial</code> or <code>instant</code> for the areas a scenario arms (before, <code>arm</code> for total and <code>unknown</code> for the other two). A scenario that disarms some areas and arms others partially or instantly was treated as a disarm scenario, so if the panel refused it, the message did not list the zones that blocked it; now it does.</p>
+</li>
+<li>
+<p><strong>Each area switch can arm in its own mode</strong>: the new options step <strong>Area switches arm mode per area</strong> has one choice per imported area (use the default, total, partial or instant). Areas left at <em>Use the default</em> follow <strong>Area switches default arm mode</strong>, as before. The general option, called <strong>Area switches arm in</strong> in the 0.4.0a3 preview, is now <strong>Area switches default arm mode</strong>: if you changed it in that preview, set it again (it is back to total).</p>
+</li>
+<li>
+<p><strong>Zones are checked before arming areas too.</strong> The area switches, the arming mode selects and the <code>arm_area</code> action now ask the panel which zones are not ready, as scenarios already did, and by default <strong>refuse to arm</strong> when there are some (before, they armed with zones open). The new option <strong>When zones are not ready</strong> (General settings) can arm anyway with a warning instead; <code>force: true</code> does it for one action call. A new action, <code>activate_scenario</code>, activates a scenario from automations, and a new event, <code>inim_smartliving_alarm_zones_not_ready</code>, lists the zones each time. The integration also reads whether the panel itself refuses arming with zones not ready (new diagnostic sensor <em>Refuses arming with zones not ready</em>): at the first start it reads the panel configuration again once by itself (the log says so). Zone sensors show each zone's programming options (<code>autobypass</code>, <code>no_arming_if_not_ready</code>, <code>interior</code> and more) as attributes.</p>
+</li>
+<li>
+<p><strong>Zone attributes now show the zone's real programming</strong>, read from the panel configuration already stored (nothing is read again). Before, most zone types and balancings showed as <em>Unknown</em>, and two times were read wrongly. Some attributes are renamed, so check templates and automations that use them: <code>activation_type</code> is now <code>zone_type</code>, <code>balancing_type</code> is <code>balancing</code>, <code>sensor_type</code> is <code>sensor_kind</code>, <code>duration_ms</code> is now <code>alarm_pulse_duration</code> (or <code>shock_sensitivity</code> for shock sensors), <code>time</code> is <code>pulse_window_time</code> and <code>pulses</code> is <code>pulse_count</code>. New: <code>alarm_cycles</code>. Values are now lower-case English keys (for example <code>delayed</code>, <code>double_eol</code>, <code>input</code> instead of <em>Delayed</em>, <em>Double Balancing</em>, <em>Input</em>).</p>
+</li>
+<li>
+<p><strong>Zone device classes follow the zone's programming.</strong> Single EOL zones are now <em>opening</em> (before, no class), shock sensors are <em>vibration</em> (before, <em>opening</em> or none), and roller-blind sensors are <em>opening</em> (before, <em>motion</em>). Normally open, normally closed and double EOL zones keep their class. To keep the old class on a zone, set it with <strong>Show as</strong> in the entity's settings.</p>
+</li>
+<li>
+<p><strong>Each area's delays are shown</strong>: the <em>Area X arming mode</em> select's attributes now include the area's exit and entry times, entry time 2, pre-arm warning and patrol times, timer program and three options, read from the panel. At the first start the integration reads the panel configuration again once by itself to get them (the log says so); if it cannot, they appear after the next start or a <strong>Re-read panel configuration</strong>.</p>
+</li>
+<li>
+<p><strong>SmartLiving 505 and 515 (experimental):</strong> they now use their own memory layout. Earlier versions read them as if they were a 1050, so their names, zones, scenarios and event log were wrong. At the first start after the update the integration reads the panel configuration again by itself (the log says so). Entity IDs stay the same; zones and areas the panel does not have stay as unavailable entities and are listed in the log, as for the 10100: delete them in <strong>Settings</strong> -&gt; <strong>Devices &amp; services</strong> -&gt; <strong>Entities</strong>. Please report how it works.</p>
+</li>
+<li>
+<p><strong>Firmware 5.1 (experimental):</strong> panels on firmware 5.1 now use their own memory layout. Earlier versions read them as if they were a 1050 on firmware 6, so their names, zones, scenarios and event log were wrong. At the first start after the update the integration reads the panel configuration again by itself (the log says so), and the "panel not supported" repair notice goes away. Event log descriptions are now right on these panels. See the <a href="../limitations/">limits of firmware 5.1 support</a>. Please report how it works.</p>
+</li>
+<li>
+<p><strong>Firmware 5.0x and other models cannot be set up any more</strong>: a new setup of a panel on firmware older than 5.1, or of a SmartLiving model without its own layout, is refused with a message. A panel of such a model, or one on firmware 5.0x, that is already set up keeps working as before and shows a repair notice, as its data may be wrong.</p>
+</li>
+<li>
+<p><strong>Outputs are new</strong>: terminal outputs and the fixed outputs O1 to O3 can be switched, and dimmers dimmed, from Home Assistant. At the first start the integration reads the panel configuration again once by itself to get the outputs' programming and names (the log says so). No output is imported until you save the options under <strong>Areas, zones, scenarios and outputs</strong>, where the outputs the installer marked as home automation outputs are ticked for you. Please try a harmless output first.</p>
+</li>
+<li>
+<p><strong>System reports are new</strong>: downloading the integration's diagnostics now gives a system report for bug reports, at the level chosen with the new <em>Diagnostics level</em> select (disabled by default). See <a href="../system-report/">Sharing a system report</a>.</p>
+</li>
+<li>
+<p><strong>The integration has its own icon</strong>, shown on Home Assistant 2026.3 or later; earlier versions show none, as before.</p>
+</li>
+<li>
+<p>Limits of this version: see <a href="../limitations/">Known limitations</a>.</p>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../system-report/" class="md-footer__link md-footer__link--prev" aria-label="Previous: System report">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                System report
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../limitations/" class="md-footer__link md-footer__link--next" aria-label="Next: Known limitations">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Known limitations
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/matteoraf/ha-inim_smartliving_alarm_panel" target="_blank" rel="noopener" title="The integration on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.highlight", "search.suggest", "content.code.copy"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "^0\\.4$", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>
