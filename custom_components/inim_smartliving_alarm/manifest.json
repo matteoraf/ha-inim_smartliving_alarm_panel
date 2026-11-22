@@ -5,7 +5,7 @@
     "codeowners": ["@matteoraf"],
     "config_flow": true,
     "dependencies": [],
-    "documentation": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/blob/main/README.md",
+    "documentation": "https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/",
     "integration_type": "device",
     "iot_class": "local_polling",
     "issue_tracker": "https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/issues",

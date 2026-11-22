@@ -5,3 +5,14 @@ updates:
     target-branch: next
     schedule:
       interval: weekly
+  - package-ecosystem: pip
+    directory: /
+    target-branch: next
+    schedule:
+      interval: weekly
+    # Only the documentation site's packages: the test requirements pin
+    # Home Assistant releases on purpose.
+    allow:
+      - dependency-name: mkdocs
+      - dependency-name: mkdocs-material
+      - dependency-name: mike

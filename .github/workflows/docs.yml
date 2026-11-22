@@ -1,0 +1,93 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main, next, "release/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements_docs.txt
+      - name: Install dependencies
+        run: pip install -r requirements_docs.txt
+      - name: Build (warnings, broken links and anchors fail)
+        run: mkdocs build --strict
+
+  publish:
+    name: Publish
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # mike commits this branch's version to gh-pages
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements_docs.txt
+      - name: Install dependencies
+        run: pip install -r requirements_docs.txt
+      - name: Publish this branch's version
+        run: |
+          # NAME (dev or X.Y), TITLE, STABLE, BETA and NOTICE, from the manifest version.
+          eval "$(python3 scripts/docs_version.py --shell)"
+          echo "Publishing $NAME as \"$TITLE\""
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          has_latest() {
+            mike list --json | python3 -c 'import json, sys; sys.exit(not any("latest" in v["aliases"] for v in json.load(sys.stdin)))'
+          }
+
+          publish() {
+            # Start from the published site; gh-pages does not exist before the first run.
+            if git fetch --depth=1 origin +gh-pages:refs/remotes/origin/gh-pages; then
+              git update-ref refs/heads/gh-pages refs/remotes/origin/gh-pages || return 1
+            fi
+            # Until a stable version is published, a beta is the site's default.
+            if has_latest; then published=latest-published; else published=no-latest; fi
+            DEFAULT="$(python3 scripts/docs_version.py --default "$published")" || return 1
+            PATTERN="$(python3 scripts/docs_version.py --default "$published" --pattern)" || return 1
+            export DOCS_NOTICE="$NOTICE" DOCS_DEFAULT_VERSION="$PATTERN"
+            if [ "$STABLE" = true ]; then
+              # latest/ as redirects, not a symbolic link: Pages does not serve symlinks.
+              mike deploy --title "$TITLE" --alias-type redirect --update-aliases "$NAME" latest || return 1
+            else
+              mike deploy --title "$TITLE" "$NAME" || return 1
+            fi
+            if [ "$STABLE" = true ] || [ "$DEFAULT" = "$NAME" ]; then
+              mike set-default "$DEFAULT" || return 1
+            fi
+            git push origin gh-pages || return 1
+          }
+
+          # Another branch may publish at the same time: start again from its result.
+          for attempt in 1 2 3; do
+            if publish; then
+              exit 0
+            fi
+            echo "::warning::Publishing failed (attempt $attempt), trying again from the published site."
+            sleep 10
+          done
+          exit 1
