@@ -1,0 +1,1433 @@
+{
+ "release": "0.3.2",
+ "version": 1,
+ "minor_version": 1,
+ "title": "Test Panel",
+ "data": {
+  "host": "192.0.2.10",
+  "port": 5004,
+  "pin": "1234",
+  "panel_name": "Test Panel",
+  "initial_panel_config": {
+   "errors": [],
+   "system_info": {
+    "raw_hex": "362e30372030313035302020",
+    "ascii": "6.07 01050  ",
+    "version": "6.07",
+    "type": "01050"
+   },
+   "areas": {
+    "raw_hex": "41726561203120202020202020202020417265612032202020202020202020204172656120332020202020202020202041726561203420202020202020202020417265612035202020202020202020204172656120362020202020202020202041726561203720202020202020202020417265612038202020202020202020204172656120392020202020202020202041726561203130202020202020202020",
+    "names": [
+     "Area 1",
+     "Area 2",
+     "Area 3",
+     "Area 4",
+     "Area 5",
+     "Area 6",
+     "Area 7",
+     "Area 8",
+     "Area 9",
+     "Area 10"
+    ]
+   },
+   "zones": {
+    "raw_hex_full": "5a6f6e652031202020202020202020205a6f6e652032202020202020202020205a6f6e652033202020202020202020205a6f6e652034202020202020202020205a6f6e652035202020202020202020205a6f6e652036202020202020202020205a6f6e652037202020202020202020205a6f6e652038202020202020202020205a6f6e652039202020202020202020205a6f6e652031302020202020202020205a6f6e652031312020202020202020205a6f6e652031322020202020202020205a6f6e652031332020202020202020205a6f6e652031342020202020202020205a6f6e652031352020202020202020205a6f6e652031362020202020202020205a6f6e652031372020202020202020205a6f6e652031382020202020202020205a6f6e652031392020202020202020205a6f6e652032302020202020202020205a6f6e652032312020202020202020205a6f6e652032322020202020202020205a6f6e652032332020202020202020205a6f6e652032342020202020202020205a6f6e652032352020202020202020205a6f6e652032362020202020202020205a6f6e652032372020202020202020205a6f6e652032382020202020202020205a6f6e652032392020202020202020205a6f6e652033302020202020202020205a6f6e652033312020202020202020205a6f6e652033322020202020202020205a6f6e652033332020202020202020205a6f6e652033342020202020202020205a6f6e652033352020202020202020205a6f6e652033362020202020202020205a6f6e652033372020202020202020205a6f6e652033382020202020202020205a6f6e652033392020202020202020205a6f6e652034302020202020202020205a6f6e652034312020202020202020205a6f6e652034322020202020202020205a6f6e652034332020202020202020205a6f6e652034342020202020202020205a6f6e652034352020202020202020205a6f6e652034362020202020202020205a6f6e652034372020202020202020205a6f6e652034382020202020202020205a6f6e652034392020202020202020205a6f6e652035302020202020202020205a6f6e652035312020202020202020205a6f6e652035322020202020202020205a6f6e652035332020202020202020205a6f6e652035342020202020202020205a6f6e652035352020202020202020205a6f6e652035362020202020202020205a6f6e652035372020202020202020205a6f6e652035382020202020202020205a6f6e652035392020202020202020205a6f6e652036302020202020202020205a6f6e652036312020202020202020205a6f6e652036322020202020202020205a6f6e652036332020202020202020205a6f6e652036342020202020202020205a6f6e652036352020202020202020205a6f6e652036362020202020202020205a6f6e652036372020202020202020205a6f6e652036382020202020202020205a6f6e652036392020202020202020205a6f6e652037302020202020202020205a6f6e652037312020202020202020205a6f6e652037322020202020202020205a6f6e652037332020202020202020205a6f6e652037342020202020202020205a6f6e652037352020202020202020205a6f6e652037362020202020202020205a6f6e652037372020202020202020205a6f6e652037382020202020202020205a6f6e652037392020202020202020205a6f6e652038302020202020202020205a6f6e652038312020202020202020205a6f6e652038322020202020202020205a6f6e652038332020202020202020205a6f6e652038342020202020202020205a6f6e652038352020202020202020205a6f6e652038362020202020202020205a6f6e652038372020202020202020205a6f6e652038382020202020202020205a6f6e652038392020202020202020205a6f6e652039302020202020202020205a6f6e652039312020202020202020205a6f6e652039322020202020202020205a6f6e652039332020202020202020205a6f6e652039342020202020202020205a6f6e652039352020202020202020205a6f6e652039362020202020202020205a6f6e652039372020202020202020205a6f6e652039382020202020202020205a6f6e652039392020202020202020205a6f6e65203130302020202020202020",
+    "zone_names": [
+     "Zone 1",
+     "Zone 2",
+     "Zone 3",
+     "Zone 4",
+     "Zone 5",
+     "Zone 6",
+     "Zone 7",
+     "Zone 8",
+     "Zone 9",
+     "Zone 10",
+     "Zone 11",
+     "Zone 12",
+     "Zone 13",
+     "Zone 14",
+     "Zone 15",
+     "Zone 16",
+     "Zone 17",
+     "Zone 18",
+     "Zone 19",
+     "Zone 20",
+     "Zone 21",
+     "Zone 22",
+     "Zone 23",
+     "Zone 24",
+     "Zone 25",
+     "Zone 26",
+     "Zone 27",
+     "Zone 28",
+     "Zone 29",
+     "Zone 30",
+     "Zone 31",
+     "Zone 32",
+     "Zone 33",
+     "Zone 34",
+     "Zone 35",
+     "Zone 36",
+     "Zone 37",
+     "Zone 38",
+     "Zone 39",
+     "Zone 40",
+     "Zone 41",
+     "Zone 42",
+     "Zone 43",
+     "Zone 44",
+     "Zone 45",
+     "Zone 46",
+     "Zone 47",
+     "Zone 48",
+     "Zone 49",
+     "Zone 50"
+    ]
+   },
+   "zones_config": {
+    "raw_hex_part1_full_response": "010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000010000000000000000020000000000000000020000000000000000020000000000000000080000000000000000080000000000000000080000000000000000080000000000000000080000000000000000100000000000000000100000000000000000100000000000000000100000000000000000200000000000000000200000000000000000200000000000000000400000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "raw_hex_part2_full_response": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004000000000000000000000004",
+    "zones_config_detailed": [
+     {
+      "zone_index": 0,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 0
+     },
+     {
+      "zone_index": 1,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 1
+     },
+     {
+      "zone_index": 2,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 2
+     },
+     {
+      "zone_index": 3,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 3
+     },
+     {
+      "zone_index": 4,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 4
+     },
+     {
+      "zone_index": 5,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 5
+     },
+     {
+      "zone_index": 6,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 6
+     },
+     {
+      "zone_index": 7,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 7
+     },
+     {
+      "zone_index": 8,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 8
+     },
+     {
+      "zone_index": 9,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 9
+     },
+     {
+      "zone_index": 10,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 10
+     },
+     {
+      "zone_index": 11,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 11
+     },
+     {
+      "zone_index": 12,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 12
+     },
+     {
+      "zone_index": 13,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 13
+     },
+     {
+      "zone_index": 14,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 14
+     },
+     {
+      "zone_index": 15,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 15
+     },
+     {
+      "zone_index": 16,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 16
+     },
+     {
+      "zone_index": 17,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 17
+     },
+     {
+      "zone_index": 18,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 18
+     },
+     {
+      "zone_index": 19,
+      "assigned_areas": [
+       1
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 19
+     },
+     {
+      "zone_index": 20,
+      "assigned_areas": [
+       2
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 20
+     },
+     {
+      "zone_index": 21,
+      "assigned_areas": [
+       2
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 21
+     },
+     {
+      "zone_index": 22,
+      "assigned_areas": [
+       2
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 22
+     },
+     {
+      "zone_index": 23,
+      "assigned_areas": [
+       4
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 23
+     },
+     {
+      "zone_index": 24,
+      "assigned_areas": [
+       4
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 24
+     },
+     {
+      "zone_index": 25,
+      "assigned_areas": [
+       4
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 25
+     },
+     {
+      "zone_index": 26,
+      "assigned_areas": [
+       4
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 26
+     },
+     {
+      "zone_index": 27,
+      "assigned_areas": [
+       4
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 27
+     },
+     {
+      "zone_index": 28,
+      "assigned_areas": [
+       5
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 28
+     },
+     {
+      "zone_index": 29,
+      "assigned_areas": [
+       5
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 29
+     },
+     {
+      "zone_index": 30,
+      "assigned_areas": [
+       5
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 30
+     },
+     {
+      "zone_index": 31,
+      "assigned_areas": [
+       5
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 31
+     },
+     {
+      "zone_index": 32,
+      "assigned_areas": [
+       6
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 32
+     },
+     {
+      "zone_index": 33,
+      "assigned_areas": [
+       6
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 33
+     },
+     {
+      "zone_index": 34,
+      "assigned_areas": [
+       6
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 34
+     },
+     {
+      "zone_index": 35,
+      "assigned_areas": [
+       7
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 110
+     },
+     {
+      "zone_index": 36,
+      "assigned_areas": [
+       3
+      ],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone",
+      "internal_index": 112
+     },
+     {
+      "zone_index": 37,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 38,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 39,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 40,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 41,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 42,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 43,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 44,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 45,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 46,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 47,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 48,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     },
+     {
+      "zone_index": 49,
+      "assigned_areas": [],
+      "activation_type_val": 0,
+      "activation_type_desc": "Immediate",
+      "duration_ms": 0,
+      "time": "0 seconds",
+      "pulses": 0,
+      "balancing_type_val": 0,
+      "balancing_type_desc": "Normally Open",
+      "sensor_type_val": 0,
+      "sensor_type_desc": "Generic zone"
+     }
+    ]
+   },
+   "scenarios": {
+    "raw_hex": "5363656e6172696f20312020202020205363656e6172696f20322020202020205363656e6172696f20332020202020205363656e6172696f20342020202020205363656e6172696f20352020202020205363656e6172696f20362020202020205363656e6172696f20372020202020205363656e6172696f20382020202020205363656e6172696f20392020202020205363656e6172696f20313020202020205363656e6172696f20313120202020205363656e6172696f20313220202020205363656e6172696f20313320202020205363656e6172696f20313420202020205363656e6172696f20313520202020205363656e6172696f20313620202020205363656e6172696f20313720202020205363656e6172696f20313820202020205363656e6172696f20313920202020205363656e6172696f20323020202020205363656e6172696f20323120202020205363656e6172696f20323220202020205363656e6172696f20323320202020205363656e6172696f20323420202020205363656e6172696f20323520202020205363656e6172696f20323620202020205363656e6172696f20323720202020205363656e6172696f20323820202020205363656e6172696f20323920202020205363656e6172696f2033302020202020",
+    "names": [
+     "Scenario 1",
+     "Scenario 2",
+     "Scenario 3",
+     "Scenario 4",
+     "Scenario 5",
+     "Scenario 6",
+     "Scenario 7",
+     "Scenario 8",
+     "Scenario 9",
+     "Scenario 10",
+     "Scenario 11",
+     "Scenario 12",
+     "Scenario 13",
+     "Scenario 14",
+     "Scenario 15",
+     "Scenario 16",
+     "Scenario 17",
+     "Scenario 18",
+     "Scenario 19",
+     "Scenario 20",
+     "Scenario 21",
+     "Scenario 22",
+     "Scenario 23",
+     "Scenario 24",
+     "Scenario 25",
+     "Scenario 26",
+     "Scenario 27",
+     "Scenario 28",
+     "Scenario 29",
+     "Scenario 30"
+    ]
+   },
+   "scenario_activations": [
+    {
+     "scenario_index": 0,
+     "raw_activation_hex": "1111110100000000",
+     "area_actions": {
+      "1": "arm",
+      "2": "arm",
+      "3": "arm",
+      "4": "arm",
+      "5": "arm",
+      "6": "arm",
+      "7": "arm",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 1,
+     "raw_activation_hex": "4444444400002400",
+     "area_actions": {
+      "1": "disarm",
+      "2": "disarm",
+      "3": "disarm",
+      "4": "disarm",
+      "5": "disarm",
+      "6": "disarm",
+      "7": "disarm",
+      "8": "disarm",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "002400"
+    },
+    {
+     "scenario_index": 2,
+     "raw_activation_hex": "0100000100002700",
+     "area_actions": {
+      "1": "arm",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "arm",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "002700"
+    },
+    {
+     "scenario_index": 3,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 4,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 5,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 6,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 7,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 8,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 9,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 10,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 11,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 12,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 13,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 14,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 15,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 16,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 17,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 18,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 19,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 20,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 21,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 22,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 23,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 24,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 25,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 26,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 27,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 28,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    },
+    {
+     "scenario_index": 29,
+     "raw_activation_hex": "0000000000000000",
+     "area_actions": {
+      "1": "keep",
+      "2": "keep",
+      "3": "keep",
+      "4": "keep",
+      "5": "keep",
+      "6": "keep",
+      "7": "keep",
+      "8": "keep",
+      "9": "keep",
+      "10": "keep"
+     },
+     "unknown_trailing_bytes_hex": "000000"
+    }
+   ],
+   "keyboard_names": {
+    "raw_hex": "54617374205a6f6e612047696f726e6f546173742047617261676520202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020202020",
+    "names": [
+     "Tast Zona Giorno",
+     "Tast Garage",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ]
+   }
+  }
+ },
+ "options": {
+  "polling_interval": 30,
+  "limit_areas": 10,
+  "limit_zones": 50,
+  "limit_scenarios": 30,
+  "event_log_size": 5,
+  "reader_names": "",
+  "scenario_arm_home": null,
+  "scenario_arm_away": 0,
+  "scenario_arm_night": null,
+  "scenario_arm_vacation": null,
+  "scenario_disarm": 1
+ }
+}
