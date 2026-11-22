@@ -1,4 +1,4 @@
-"""The SmartLiving 10100 (firmware 6.x, experimental) against a fake 10100.
+"""The SmartLiving 10100 (firmware 6.x) against a fake 10100.
 
 The fake's 10100 layout is typed independently of the integration's model
 profile.
@@ -55,13 +55,13 @@ async def entry(hass: HomeAssistant, panel: FakePanel) -> AsyncGenerator[ConfigE
 async def test_identified_as_10100(
     panel: FakePanel, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """The 10100 profile is used, with a warning that it is experimental."""
+    """The 10100 profile is used, without a warning that it is experimental."""
     client = create_client(panel.host, panel.port, "1234")
     try:
         with caplog.at_level(logging.WARNING):
             config = await client.get_initial_panel_configuration()
         assert client.panel.model is SMARTLIVING_10100_FW6
-        assert "SmartLiving 10100 is experimental" in caplog.text
+        assert "is experimental" not in caplog.text
         assert client.panel.user_code_found
         assert config["errors"] == []
         assert config["system_info"]["type"] == "10100"

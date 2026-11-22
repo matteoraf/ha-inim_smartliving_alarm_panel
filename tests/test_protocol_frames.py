@@ -173,10 +173,10 @@ def test_model_string() -> None:
 
 
 def test_10100_on_firmware_6() -> None:
-    """The 10100 on firmware 6.x has its own profile, marked experimental."""
+    """The 10100 on firmware 6.x has its own profile, no longer experimental."""
     model = model_for(parse_model_string(b"6.08 10100  "))
     assert model is SL10100
-    assert model.experimental
+    assert not model.experimental
     assert not SL1050.experimental
 
 
