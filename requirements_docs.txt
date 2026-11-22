@@ -1,0 +1,6 @@
+# Documentation site dependencies (not needed by Home Assistant at runtime).
+# Build locally with: mkdocs build --strict (or mkdocs serve to preview).
+# Versions of the site are published with mike by the Documentation workflow.
+mkdocs==1.6.1
+mkdocs-material==9.8.2
+mike==2.2.0

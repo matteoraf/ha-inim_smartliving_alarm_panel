@@ -1,0 +1,104 @@
+# The documentation site, built with MkDocs and the Material theme.
+#
+# Writing the pages (syntax enabled below):
+#   !!! note "Title"            a box (note, tip, warning, danger, ...)
+#   ??? note "Title"            a collapsible box, closed (???+ open)
+#   === "Tab"                   content tabs (indent the content by 4 spaces)
+#   | a | b |                   tables
+#   ![Text](images/x.png){ width="600" }          image size; { align=right } to float
+#   ![Text](images/x-light.png#only-light)        light and dark versions of an image
+#   ## Heading { #stable-id }   a heading id that stays when the text changes
+# Screenshots go in docs/images/: PNG or WebP, at most 200 kB and 1600 px wide.
+# Only the extensions and theme features below are used: Zensical reads them
+# too. New pages need a line in nav (the build fails without it).
+
+site_name: Inim SmartLiving Alarm for Home Assistant
+site_url: https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/
+# No repo_url: the theme's repository widget asks the GitHub API for star and
+# fork counts. The repository is linked in the footer instead (extra.social).
+edit_uri: ""
+docs_dir: docs
+
+theme:
+  name: material
+  custom_dir: overrides
+  language: en
+  logo: assets/icon.png
+  favicon: assets/icon.png
+  font: false
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra:
+  version:
+    provider: mike
+    # Pages of other versions say so. Set by the Documentation workflow:
+    # a beta while no stable version is published, latest otherwise, as an
+    # anchored pattern (^0\.4$), which the theme reads as a regular expression.
+    default: !ENV [DOCS_DEFAULT_VERSION, "^latest$"]
+  # The banner on every page: set by the Documentation workflow for the
+  # version under development and for betas, empty otherwise.
+  notice: !ENV [DOCS_NOTICE, ""]
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/matteoraf/ha-inim_smartliving_alarm_panel
+      name: The integration on GitHub
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    anchors: warn
+    absolute_links: warn
+    unrecognized_links: warn
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Setup: setup.md
+  - Options: options.md
+  - Entities: entities.md
+  - Actions and events: actions-events.md
+  - Troubleshooting: troubleshooting.md
+  - System report: system-report.md
+  - Upgrading: upgrading.md
+  - Known limitations: limitations.md
