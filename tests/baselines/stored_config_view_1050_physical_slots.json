@@ -4936,7 +4936,7 @@
    "exists": true,
    "number": 6,
    "second_zone": false,
-   "slot": 120,
+   "slot": 5,
    "terminal": 5,
    "terminal_type": 0
   },
@@ -5288,7 +5288,7 @@
    "exists": true,
    "number": 38,
    "second_zone": false,
-   "slot": null,
+   "slot": 129,
    "terminal": 37,
    "terminal_type": 0
   },
@@ -5450,7 +5450,7 @@
    "exists": false,
    "number": 56,
    "second_zone": true,
-   "slot": 120,
+   "slot": 5,
    "terminal": 5,
    "terminal_type": 0
   },
@@ -5738,7 +5738,7 @@
    "exists": false,
    "number": 88,
    "second_zone": true,
-   "slot": null,
+   "slot": 129,
    "terminal": 37,
    "terminal_type": 0
   },

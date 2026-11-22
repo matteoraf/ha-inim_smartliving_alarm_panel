@@ -9,14 +9,14 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
+from . import stored_config
 from .const import (
     CONF_PANEL_NAME,
-    DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_SYSTEM_INFO,
 )
 from .outputs import InimOutputEntity, is_dimmer, output_level
 from .protocol.errors import ProtocolError
@@ -50,10 +50,10 @@ async def async_setup_entry(
     lights = [
         InimDimmerLight(
             data[DATA_COORDINATOR],
-            data[DATA_API_CLIENT],
+            data[DATA_PANEL],
             entry,
             entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME),
-            config.get(KEY_INIT_SYSTEM_INFO, {}),
+            stored_config.system_info(config),
             item,
         )
         for item in imported_outputs(entry.options, config)
@@ -124,9 +124,7 @@ class InimDimmerLight(InimOutputEntity, LightEntity, RestoreEntity):
     async def _async_read_level(self) -> None:
         """Read the level once after a command, if the panel reports it."""
         try:
-            levels = await self.api_client.panel.read_output_levels(
-                [self._item.terminal]
-            )
+            levels = await self.panel.read_output_levels([self._item.terminal])
         except (TransportError, ProtocolError, ValueError, RuntimeError) as err:
             _LOGGER.debug("%s: level not read after the command: %s", self._target, err)
             return

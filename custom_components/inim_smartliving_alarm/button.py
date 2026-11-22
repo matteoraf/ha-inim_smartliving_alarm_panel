@@ -11,26 +11,28 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
+from . import stored_config
+from .api import SmartLivingPanel
 from .const import (
     CONF_PANEL_NAME,
     CONF_SCENARIOS,
-    DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_SYSTEM_INFO,
-    KEY_INIT_SYSTEM_INFO_TYPE,
-    KEY_INIT_SYSTEM_INFO_VERSION,
 )
-from .legacy import LegacyPanelClient
 from .panel_config import async_reread_panel_configuration
 from .selection import (
     is_disarm_scenario,
     scenario_actions,
-    scenario_label,
-    scenario_names,
     selected,
+)
+from .stored_config import (
+    SystemInfo,
+    device_model,
+    device_sw_version,
+    scenario_label,
 )
 from .utils import async_activate_scenario
 
@@ -47,15 +49,14 @@ async def async_setup_entry(
         "Setting up Inim Alarm 'button' platform entities for entry: %s", entry.title
     )
 
-    api_client: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    panel: SmartLivingPanel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
 
     coordinator: DataUpdateCoordinator | None = hass.data[DOMAIN][entry.entry_id].get(
         DATA_COORDINATOR
     )
 
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
-    system_info = initial_panel_config.get(KEY_INIT_SYSTEM_INFO, {})
-    all_scenario_names = scenario_names(initial_panel_config)
+    system_info = stored_config.system_info(initial_panel_config)
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
     async_add_entities(
@@ -63,13 +64,6 @@ async def async_setup_entry(
     )
 
     buttons_to_add = []
-
-    if not all_scenario_names:
-        _LOGGER.warning(
-            "No scenario names found in initial config for %s. Cannot create scenario buttons",
-            entry.title,
-        )
-        return
 
     scenarios = selected(entry.options, initial_panel_config, CONF_SCENARIOS)
     _LOGGER.debug("Setting up scenario buttons for %s", scenarios)
@@ -79,7 +73,7 @@ async def async_setup_entry(
         scenario_name = scenario_label(initial_panel_config, number)
         buttons_to_add.append(
             InimScenarioActivationButton(
-                api_client,
+                panel,
                 coordinator,
                 entry,
                 initial_panel_config,
@@ -104,17 +98,17 @@ class InimScenarioActivationButton(ButtonEntity):
 
     def __init__(
         self,
-        api_client: LegacyPanelClient,
+        panel: SmartLivingPanel,
         coordinator: DataUpdateCoordinator | None,
         config_entry: ConfigEntry,
         initial_panel_config: dict[str, Any],
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         scenario_index_0_based: int,
         scenario_name: str,
     ) -> None:
         """Initialize the Inim Scenario activation button."""
-        self.api_client = api_client
+        self.panel = panel
         self._coordinator = coordinator
         self.config_entry = config_entry
         self._initial_panel_config = initial_panel_config
@@ -141,8 +135,8 @@ class InimScenarioActivationButton(ButtonEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
     async def async_press(self) -> None:
@@ -160,7 +154,7 @@ class InimScenarioActivationButton(ButtonEntity):
             self.hass,
             self.config_entry,
             self._coordinator,
-            self.api_client,
+            self.panel,
             self._initial_panel_config,
             self.unique_id,
             self.name,
@@ -195,7 +189,7 @@ class InimRereadConfigurationButton(ButtonEntity):
         self,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the button."""
         self.config_entry = config_entry
@@ -216,8 +210,8 @@ class InimRereadConfigurationButton(ButtonEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
     async def async_press(self) -> None:

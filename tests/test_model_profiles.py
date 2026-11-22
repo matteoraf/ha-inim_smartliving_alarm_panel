@@ -27,6 +27,10 @@ from custom_components.inim_smartliving_alarm.protocol.model import (
     model_for,
     parse_model_string,
 )
+from custom_components.inim_smartliving_alarm.stored_config import (
+    area_names,
+    zone_names,
+)
 
 from .conftest import add_entry
 from .fake_panel import FakePanel, panel_505, panel_515
@@ -175,8 +179,8 @@ async def test_setup(
     terminals = small_panel.state.layout.terminals
     assert entry.state is ConfigEntryState.LOADED
     config = entry.data[DATA_INITIAL_PANEL_CONFIG]
-    assert len(config["areas"]["names"]) == 5
-    assert len(config["zones"]["zone_names"]) == 2 * terminals  # 2L labels
+    assert len(area_names(config)) == 5
+    assert len(zone_names(config)) == 2 * terminals  # 2L labels
     assert entry.options["areas"] == [1, 2, 3, 4, 5]
     # Every terminal is an input, none double: zones 1-L only
     assert entry.options["zones"] == list(range(1, terminals + 1))
@@ -224,8 +228,8 @@ async def test_reconfigure_refuses_unsupported_panels(
 def entry_for(panel: FakePanel, config: dict) -> MockConfigEntry:
     return MockConfigEntry(
         domain=DOMAIN,
-        version=1,
-        minor_version=5,
+        version=2,
+        minor_version=1,
         title="Old",
         data={
             "host": panel.host,
@@ -254,8 +258,8 @@ async def test_existing_515_entry_is_read_again(
             await hass.async_block_till_done()
         assert "does not fit the SmartLiving 515" in caplog.text
         config = entry.data[DATA_INITIAL_PANEL_CONFIG]
-        assert len(config["zones"]["zone_names"]) == 40
-        assert len(config["areas"]["names"]) == 5
+        assert len(zone_names(config)) == 40
+        assert len(area_names(config)) == 5
         assert entry.options["zones"] == [1, 2, 45]  # the selection is kept
         await unload_all(hass)
     finally:

@@ -171,9 +171,7 @@ async def test_installer_option_stored(
     entry = await add_entry(hass, panel)
     stored = entry.data[DATA_INITIAL_PANEL_CONFIG]
     # Raw bytes only, decoded where they are used
-    assert stored["general_options"] == {
-        "raw_hex": "002000000000" if block else "000000000000"
-    }
+    assert stored["general_options"] == ("002000000000" if block else "000000000000")
     assert readiness.panel_refuses_not_ready(stored) is block
     assert await hass.config_entries.async_unload(entry.entry_id)
 
@@ -465,9 +463,9 @@ async def test_zone_option_attributes(hass: HomeAssistant, panel: FakePanel) -> 
     "stored",
     [
         {},
-        {"general_options": {}},
-        {"general_options": {"raw_hex": "zz"}},
-        {"general_options": {"raw_hex": "00"}},
+        {"general_options": None},
+        {"general_options": "zz"},
+        {"general_options": "00"},
     ],
 )
 def test_general_options_unknown(stored: dict[str, Any]) -> None:
@@ -478,18 +476,17 @@ def test_general_options_unknown(stored: dict[str, Any]) -> None:
 def test_zone_flags_decoded_from_stored_records() -> None:
     """The stored model string gives the layout of the stored zone records."""
     from custom_components.inim_smartliving_alarm.selection import (
-        stored_model,
         zone_option_flags,
+    )
+    from custom_components.inim_smartliving_alarm.stored_config import (
+        stored_model,
     )
 
     model = SMARTLIVING_1050_FW6
     records = bytearray(model.zones * model.zone_record_length)
     records[3:5] = b"\x02\x02"  # zone 1: autobypass, no arming if not ready
     records[9 + 3] = 0x01  # zone 2: interior
-    config = {
-        "system_info": {"raw_hex": b"6.07 01050  ".hex()},
-        "zones_config": {"raw_hex_part1_full_response": records.hex()},
-    }
+    config = {"model_string": b"6.07 01050  ".hex(), "zone_records": records.hex()}
     assert stored_model(config) is model
     flags = zone_option_flags(config)
     assert len(flags) == model.zones
@@ -498,13 +495,13 @@ def test_zone_flags_decoded_from_stored_records() -> None:
     assert flags[2]["interior"] and not flags[2]["autobypass"]
 
     # Records that do not fit the model, an unknown model, nothing stored
-    config["zones_config"]["raw_hex_part1_full_response"] = records[:-9].hex()
+    config["zone_records"] = records[:-9].hex()
     assert zone_option_flags(config) == {}
     # A model without its own profile, or firmware 5: the fallback layout,
     # as the configuration was read with it
     for model_string in (b"6.07 00999  ", b"5.07 01050  "):
-        config["system_info"]["raw_hex"] = model_string.hex()
+        config["model_string"] = model_string.hex()
         assert stored_model(config) is FALLBACK_MODEL
-    config["system_info"]["raw_hex"] = b"not a model ".hex()
+    config["model_string"] = b"not a model ".hex()
     assert stored_model(config) is None
     assert zone_option_flags({}) == {}

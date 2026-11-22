@@ -1,7 +1,7 @@
 """Shared fixtures for the Inim SmartLiving Alarm tests."""
 
 import asyncio
-from collections.abc import AsyncGenerator, Callable, Iterable, Iterator
+from collections.abc import AsyncGenerator, Awaitable, Callable, Iterable, Iterator
 import socket
 from typing import Any
 
@@ -12,6 +12,8 @@ import pytest
 
 from custom_components.inim_smartliving_alarm import api
 from custom_components.inim_smartliving_alarm.const import DOMAIN
+from custom_components.inim_smartliving_alarm.protocol.commands import CommandResult
+from custom_components.inim_smartliving_alarm.protocol.errors import ProtocolError
 from custom_components.inim_smartliving_alarm.transport import (
     base as transport_base,
 )
@@ -63,6 +65,19 @@ async def panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
 def fresh_reconnect_pauses(monkeypatch: pytest.MonkeyPatch) -> None:
     """Each test starts without the pauses earlier tests' connections left."""
     monkeypatch.setattr(transport_base, "_last_close", {})
+
+
+def label_block(names: Iterable[str]) -> str:
+    """A label table as stored: 16 bytes per name, space padded, as hex."""
+    return b"".join(name.encode("ascii").ljust(16) for name in names).hex()
+
+
+async def accepted(command: Awaitable[CommandResult]) -> bool:
+    """Whether the panel accepted a command (False if it was not sent)."""
+    try:
+        return (await command).ok
+    except (transport_base.TransportError, ProtocolError, api.NotReadyError):
+        return False
 
 
 async def wait_until(condition: Callable[[], bool], seconds: float = 2.0) -> None:

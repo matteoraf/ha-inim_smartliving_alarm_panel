@@ -128,307 +128,25 @@
     "number": 10
    }
   ],
-  "codes": [
-   {
-    "label": "Master",
-    "number": 1
-   },
-   {
-    "label": "User 2",
-    "number": 2
-   },
-   {
-    "label": "User 3",
-    "number": 3
-   },
-   {
-    "label": "User 4",
-    "number": 4
-   },
-   {
-    "label": "User 5",
-    "number": 5
-   },
-   {
-    "label": "User 6",
-    "number": 6
-   },
-   {
-    "label": "User 7",
-    "number": 7
-   },
-   {
-    "label": "User 8",
-    "number": 8
-   },
-   {
-    "label": "User 9",
-    "number": 9
-   },
-   {
-    "label": "User 10",
-    "number": 10
-   },
-   {
-    "label": "User 11",
-    "number": 11
-   },
-   {
-    "label": "User 12",
-    "number": 12
-   },
-   {
-    "label": "User 13",
-    "number": 13
-   },
-   {
-    "label": "User 14",
-    "number": 14
-   },
-   {
-    "label": "User 15",
-    "number": 15
-   },
-   {
-    "label": "User 16",
-    "number": 16
-   },
-   {
-    "label": "User 17",
-    "number": 17
-   },
-   {
-    "label": "User 18",
-    "number": 18
-   },
-   {
-    "label": "User 19",
-    "number": 19
-   },
-   {
-    "label": "User 20",
-    "number": 20
-   },
-   {
-    "label": "User 21",
-    "number": 21
-   },
-   {
-    "label": "User 22",
-    "number": 22
-   },
-   {
-    "label": "User 23",
-    "number": 23
-   },
-   {
-    "label": "User 24",
-    "number": 24
-   },
-   {
-    "label": "User 25",
-    "number": 25
-   },
-   {
-    "label": "User 26",
-    "number": 26
-   },
-   {
-    "label": "User 27",
-    "number": 27
-   },
-   {
-    "label": "User 28",
-    "number": 28
-   },
-   {
-    "label": "User 29",
-    "number": 29
-   },
-   {
-    "label": "User 30",
-    "number": 30
-   },
-   {
-    "label": "User 31",
-    "number": 31
-   },
-   {
-    "label": "User 32",
-    "number": 32
-   },
-   {
-    "label": "User 33",
-    "number": 33
-   },
-   {
-    "label": "User 34",
-    "number": 34
-   },
-   {
-    "label": "User 35",
-    "number": 35
-   },
-   {
-    "label": "User 36",
-    "number": 36
-   },
-   {
-    "label": "User 37",
-    "number": 37
-   },
-   {
-    "label": "User 38",
-    "number": 38
-   },
-   {
-    "label": "User 39",
-    "number": 39
-   },
-   {
-    "label": "User 40",
-    "number": 40
-   },
-   {
-    "label": "User 41",
-    "number": 41
-   },
-   {
-    "label": "User 42",
-    "number": 42
-   },
-   {
-    "label": "User 43",
-    "number": 43
-   },
-   {
-    "label": "User 44",
-    "number": 44
-   },
-   {
-    "label": "User 45",
-    "number": 45
-   },
-   {
-    "label": "User 46",
-    "number": 46
-   },
-   {
-    "label": "User 47",
-    "number": 47
-   },
-   {
-    "label": "User 48",
-    "number": 48
-   },
-   {
-    "label": "User 49",
-    "number": 49
-   },
-   {
-    "label": "User 50",
-    "number": 50
-   }
-  ],
+  "codes": [],
   "enabled_devices": {
    "expanders": [
-    "Exp Kitchen"
+    "Expander 1"
    ],
    "keypads": [
     "Tast Zona Giorno",
     "Tast Garage"
    ],
    "readers": [
-    "PK Giorno",
-    "PK Garage",
+    "Reader 1",
+    "Reader 2",
     "Reader 3"
    ],
    "sirens": [
-    "Outdoor siren"
+    "Siren 1"
    ]
   },
-  "expanders": [
-   {
-    "label": "Exp Kitchen",
-    "number": 1
-   },
-   {
-    "label": "",
-    "number": 2
-   },
-   {
-    "label": "",
-    "number": 3
-   },
-   {
-    "label": "",
-    "number": 4
-   },
-   {
-    "label": "",
-    "number": 5
-   },
-   {
-    "label": "",
-    "number": 6
-   },
-   {
-    "label": "",
-    "number": 7
-   },
-   {
-    "label": "",
-    "number": 8
-   },
-   {
-    "label": "",
-    "number": 9
-   },
-   {
-    "label": "",
-    "number": 10
-   },
-   {
-    "label": "",
-    "number": 11
-   },
-   {
-    "label": "",
-    "number": 12
-   },
-   {
-    "label": "",
-    "number": 13
-   },
-   {
-    "label": "",
-    "number": 14
-   },
-   {
-    "label": "",
-    "number": 15
-   },
-   {
-    "label": "",
-    "number": 16
-   },
-   {
-    "label": "",
-    "number": 17
-   },
-   {
-    "label": "",
-    "number": 18
-   },
-   {
-    "label": "",
-    "number": 19
-   },
-   {
-    "label": "",
-    "number": 20
-   }
-  ],
+  "expanders": [],
   "keypads": [
    {
     "label": "Tast Zona Giorno",
@@ -471,492 +189,10 @@
     "number": 10
    }
   ],
-  "keys": [
-   {
-    "label": "Key Anna",
-    "number": 1
-   },
-   {
-    "label": "Key Marco",
-    "number": 2
-   },
-   {
-    "label": "",
-    "number": 3
-   },
-   {
-    "label": "",
-    "number": 4
-   },
-   {
-    "label": "",
-    "number": 5
-   },
-   {
-    "label": "",
-    "number": 6
-   },
-   {
-    "label": "",
-    "number": 7
-   },
-   {
-    "label": "",
-    "number": 8
-   },
-   {
-    "label": "",
-    "number": 9
-   },
-   {
-    "label": "",
-    "number": 10
-   },
-   {
-    "label": "",
-    "number": 11
-   },
-   {
-    "label": "",
-    "number": 12
-   },
-   {
-    "label": "",
-    "number": 13
-   },
-   {
-    "label": "",
-    "number": 14
-   },
-   {
-    "label": "",
-    "number": 15
-   },
-   {
-    "label": "",
-    "number": 16
-   },
-   {
-    "label": "",
-    "number": 17
-   },
-   {
-    "label": "",
-    "number": 18
-   },
-   {
-    "label": "",
-    "number": 19
-   },
-   {
-    "label": "",
-    "number": 20
-   },
-   {
-    "label": "",
-    "number": 21
-   },
-   {
-    "label": "",
-    "number": 22
-   },
-   {
-    "label": "",
-    "number": 23
-   },
-   {
-    "label": "",
-    "number": 24
-   },
-   {
-    "label": "",
-    "number": 25
-   },
-   {
-    "label": "",
-    "number": 26
-   },
-   {
-    "label": "",
-    "number": 27
-   },
-   {
-    "label": "",
-    "number": 28
-   },
-   {
-    "label": "",
-    "number": 29
-   },
-   {
-    "label": "",
-    "number": 30
-   },
-   {
-    "label": "",
-    "number": 31
-   },
-   {
-    "label": "",
-    "number": 32
-   },
-   {
-    "label": "",
-    "number": 33
-   },
-   {
-    "label": "",
-    "number": 34
-   },
-   {
-    "label": "",
-    "number": 35
-   },
-   {
-    "label": "",
-    "number": 36
-   },
-   {
-    "label": "",
-    "number": 37
-   },
-   {
-    "label": "",
-    "number": 38
-   },
-   {
-    "label": "",
-    "number": 39
-   },
-   {
-    "label": "",
-    "number": 40
-   },
-   {
-    "label": "",
-    "number": 41
-   },
-   {
-    "label": "",
-    "number": 42
-   },
-   {
-    "label": "",
-    "number": 43
-   },
-   {
-    "label": "",
-    "number": 44
-   },
-   {
-    "label": "",
-    "number": 45
-   },
-   {
-    "label": "",
-    "number": 46
-   },
-   {
-    "label": "",
-    "number": 47
-   },
-   {
-    "label": "",
-    "number": 48
-   },
-   {
-    "label": "",
-    "number": 49
-   },
-   {
-    "label": "",
-    "number": 50
-   },
-   {
-    "label": "",
-    "number": 51
-   },
-   {
-    "label": "",
-    "number": 52
-   },
-   {
-    "label": "",
-    "number": 53
-   },
-   {
-    "label": "",
-    "number": 54
-   },
-   {
-    "label": "",
-    "number": 55
-   },
-   {
-    "label": "",
-    "number": 56
-   },
-   {
-    "label": "",
-    "number": 57
-   },
-   {
-    "label": "",
-    "number": 58
-   },
-   {
-    "label": "",
-    "number": 59
-   },
-   {
-    "label": "",
-    "number": 60
-   },
-   {
-    "label": "",
-    "number": 61
-   },
-   {
-    "label": "",
-    "number": 62
-   },
-   {
-    "label": "",
-    "number": 63
-   },
-   {
-    "label": "",
-    "number": 64
-   },
-   {
-    "label": "",
-    "number": 65
-   },
-   {
-    "label": "",
-    "number": 66
-   },
-   {
-    "label": "",
-    "number": 67
-   },
-   {
-    "label": "",
-    "number": 68
-   },
-   {
-    "label": "",
-    "number": 69
-   },
-   {
-    "label": "",
-    "number": 70
-   },
-   {
-    "label": "",
-    "number": 71
-   },
-   {
-    "label": "",
-    "number": 72
-   },
-   {
-    "label": "",
-    "number": 73
-   },
-   {
-    "label": "",
-    "number": 74
-   },
-   {
-    "label": "",
-    "number": 75
-   },
-   {
-    "label": "",
-    "number": 76
-   },
-   {
-    "label": "",
-    "number": 77
-   },
-   {
-    "label": "",
-    "number": 78
-   },
-   {
-    "label": "",
-    "number": 79
-   },
-   {
-    "label": "",
-    "number": 80
-   },
-   {
-    "label": "",
-    "number": 81
-   },
-   {
-    "label": "",
-    "number": 82
-   },
-   {
-    "label": "",
-    "number": 83
-   },
-   {
-    "label": "",
-    "number": 84
-   },
-   {
-    "label": "",
-    "number": 85
-   },
-   {
-    "label": "",
-    "number": 86
-   },
-   {
-    "label": "",
-    "number": 87
-   },
-   {
-    "label": "",
-    "number": 88
-   },
-   {
-    "label": "",
-    "number": 89
-   },
-   {
-    "label": "",
-    "number": 90
-   },
-   {
-    "label": "",
-    "number": 91
-   },
-   {
-    "label": "",
-    "number": 92
-   },
-   {
-    "label": "",
-    "number": 93
-   },
-   {
-    "label": "",
-    "number": 94
-   },
-   {
-    "label": "",
-    "number": 95
-   },
-   {
-    "label": "",
-    "number": 96
-   },
-   {
-    "label": "",
-    "number": 97
-   },
-   {
-    "label": "",
-    "number": 98
-   },
-   {
-    "label": "",
-    "number": 99
-   },
-   {
-    "label": "",
-    "number": 100
-   }
-  ],
+  "keys": [],
   "model": "SmartLiving 1050",
   "outputs": [],
-  "readers": [
-   {
-    "label": "PK Giorno",
-    "number": 1
-   },
-   {
-    "label": "PK Garage",
-    "number": 2
-   },
-   {
-    "label": "",
-    "number": 3
-   },
-   {
-    "label": "",
-    "number": 4
-   },
-   {
-    "label": "",
-    "number": 5
-   },
-   {
-    "label": "",
-    "number": 6
-   },
-   {
-    "label": "",
-    "number": 7
-   },
-   {
-    "label": "",
-    "number": 8
-   },
-   {
-    "label": "",
-    "number": 9
-   },
-   {
-    "label": "",
-    "number": 10
-   },
-   {
-    "label": "",
-    "number": 11
-   },
-   {
-    "label": "",
-    "number": 12
-   },
-   {
-    "label": "",
-    "number": 13
-   },
-   {
-    "label": "",
-    "number": 14
-   },
-   {
-    "label": "",
-    "number": 15
-   },
-   {
-    "label": "",
-    "number": 16
-   },
-   {
-    "label": "",
-    "number": 17
-   },
-   {
-    "label": "",
-    "number": 18
-   },
-   {
-    "label": "",
-    "number": 19
-   },
-   {
-    "label": "",
-    "number": 20
-   }
-  ],
+  "readers": [],
   "refuses_arming_with_zones_not_ready": null,
   "scenarios": [
    {
@@ -1440,90 +676,8 @@
     "number": 30
    }
   ],
-  "sirens": [
-   {
-    "label": "Outdoor siren",
-    "number": 1
-   },
-   {
-    "label": "",
-    "number": 2
-   },
-   {
-    "label": "",
-    "number": 3
-   },
-   {
-    "label": "",
-    "number": 4
-   },
-   {
-    "label": "",
-    "number": 5
-   },
-   {
-    "label": "",
-    "number": 6
-   },
-   {
-    "label": "",
-    "number": 7
-   },
-   {
-    "label": "",
-    "number": 8
-   },
-   {
-    "label": "",
-    "number": 9
-   },
-   {
-    "label": "",
-    "number": 10
-   }
-  ],
-  "timers": [
-   {
-    "label": "Timer 1",
-    "number": 1
-   },
-   {
-    "label": "",
-    "number": 2
-   },
-   {
-    "label": "",
-    "number": 3
-   },
-   {
-    "label": "",
-    "number": 4
-   },
-   {
-    "label": "",
-    "number": 5
-   },
-   {
-    "label": "",
-    "number": 6
-   },
-   {
-    "label": "",
-    "number": 7
-   },
-   {
-    "label": "",
-    "number": 8
-   },
-   {
-    "label": "",
-    "number": 9
-   },
-   {
-    "label": "",
-    "number": 10
-   }
-  ],
+  "sirens": [],
+  "timers": [],
   "zones": [
    {
     "alarm_cycles": 0,
@@ -4736,7 +3890,7 @@
    "exists": true,
    "number": 1,
    "second_zone": false,
-   "slot": 0,
+   "slot": null,
    "terminal": 0,
    "terminal_type": 0
   },
@@ -4747,7 +3901,7 @@
    "exists": true,
    "number": 2,
    "second_zone": false,
-   "slot": 1,
+   "slot": null,
    "terminal": 1,
    "terminal_type": 0
   },
@@ -4758,7 +3912,7 @@
    "exists": true,
    "number": 3,
    "second_zone": false,
-   "slot": 2,
+   "slot": null,
    "terminal": 2,
    "terminal_type": 0
   },
@@ -4769,7 +3923,7 @@
    "exists": true,
    "number": 4,
    "second_zone": false,
-   "slot": 3,
+   "slot": null,
    "terminal": 3,
    "terminal_type": 0
   },
@@ -4780,7 +3934,7 @@
    "exists": true,
    "number": 5,
    "second_zone": false,
-   "slot": 4,
+   "slot": null,
    "terminal": 4,
    "terminal_type": 0
   },
@@ -4791,7 +3945,7 @@
    "exists": true,
    "number": 6,
    "second_zone": false,
-   "slot": 5,
+   "slot": null,
    "terminal": 5,
    "terminal_type": 0
   },
@@ -4802,7 +3956,7 @@
    "exists": true,
    "number": 7,
    "second_zone": false,
-   "slot": 6,
+   "slot": null,
    "terminal": 6,
    "terminal_type": 0
   },
@@ -4813,7 +3967,7 @@
    "exists": true,
    "number": 8,
    "second_zone": false,
-   "slot": 7,
+   "slot": null,
    "terminal": 7,
    "terminal_type": 0
   },
@@ -4824,7 +3978,7 @@
    "exists": true,
    "number": 9,
    "second_zone": false,
-   "slot": 8,
+   "slot": null,
    "terminal": 8,
    "terminal_type": 0
   },
@@ -4835,7 +3989,7 @@
    "exists": true,
    "number": 10,
    "second_zone": false,
-   "slot": 9,
+   "slot": null,
    "terminal": 9,
    "terminal_type": 0
   },
@@ -4846,7 +4000,7 @@
    "exists": true,
    "number": 11,
    "second_zone": false,
-   "slot": 10,
+   "slot": null,
    "terminal": 10,
    "terminal_type": 0
   },
@@ -4857,7 +4011,7 @@
    "exists": true,
    "number": 12,
    "second_zone": false,
-   "slot": 11,
+   "slot": null,
    "terminal": 11,
    "terminal_type": 0
   },
@@ -4868,7 +4022,7 @@
    "exists": true,
    "number": 13,
    "second_zone": false,
-   "slot": 12,
+   "slot": null,
    "terminal": 12,
    "terminal_type": 0
   },
@@ -4879,7 +4033,7 @@
    "exists": true,
    "number": 14,
    "second_zone": false,
-   "slot": 13,
+   "slot": null,
    "terminal": 13,
    "terminal_type": 0
   },
@@ -4890,7 +4044,7 @@
    "exists": true,
    "number": 15,
    "second_zone": false,
-   "slot": 14,
+   "slot": null,
    "terminal": 14,
    "terminal_type": 0
   },
@@ -4901,7 +4055,7 @@
    "exists": true,
    "number": 16,
    "second_zone": false,
-   "slot": 15,
+   "slot": null,
    "terminal": 15,
    "terminal_type": 0
   },
@@ -4912,7 +4066,7 @@
    "exists": true,
    "number": 17,
    "second_zone": false,
-   "slot": 16,
+   "slot": null,
    "terminal": 16,
    "terminal_type": 0
   },
@@ -4923,7 +4077,7 @@
    "exists": true,
    "number": 18,
    "second_zone": false,
-   "slot": 17,
+   "slot": null,
    "terminal": 17,
    "terminal_type": 0
   },
@@ -4934,7 +4088,7 @@
    "exists": true,
    "number": 19,
    "second_zone": false,
-   "slot": 18,
+   "slot": null,
    "terminal": 18,
    "terminal_type": 0
   },
@@ -4945,7 +4099,7 @@
    "exists": true,
    "number": 20,
    "second_zone": false,
-   "slot": 19,
+   "slot": null,
    "terminal": 19,
    "terminal_type": 0
   },
@@ -4956,7 +4110,7 @@
    "exists": true,
    "number": 21,
    "second_zone": false,
-   "slot": 20,
+   "slot": null,
    "terminal": 20,
    "terminal_type": 0
   },
@@ -4967,7 +4121,7 @@
    "exists": true,
    "number": 22,
    "second_zone": false,
-   "slot": 21,
+   "slot": null,
    "terminal": 21,
    "terminal_type": 0
   },
@@ -4978,7 +4132,7 @@
    "exists": true,
    "number": 23,
    "second_zone": false,
-   "slot": 22,
+   "slot": null,
    "terminal": 22,
    "terminal_type": 0
   },
@@ -4989,7 +4143,7 @@
    "exists": true,
    "number": 24,
    "second_zone": false,
-   "slot": 23,
+   "slot": null,
    "terminal": 23,
    "terminal_type": 0
   },
@@ -5000,7 +4154,7 @@
    "exists": true,
    "number": 25,
    "second_zone": false,
-   "slot": 24,
+   "slot": null,
    "terminal": 24,
    "terminal_type": 0
   },
@@ -5011,7 +4165,7 @@
    "exists": true,
    "number": 26,
    "second_zone": false,
-   "slot": 25,
+   "slot": null,
    "terminal": 25,
    "terminal_type": 0
   },
@@ -5022,7 +4176,7 @@
    "exists": true,
    "number": 27,
    "second_zone": false,
-   "slot": 26,
+   "slot": null,
    "terminal": 26,
    "terminal_type": 0
   },
@@ -5033,7 +4187,7 @@
    "exists": true,
    "number": 28,
    "second_zone": false,
-   "slot": 27,
+   "slot": null,
    "terminal": 27,
    "terminal_type": 0
   },
@@ -5044,7 +4198,7 @@
    "exists": true,
    "number": 29,
    "second_zone": false,
-   "slot": 28,
+   "slot": null,
    "terminal": 28,
    "terminal_type": 0
   },
@@ -5055,7 +4209,7 @@
    "exists": true,
    "number": 30,
    "second_zone": false,
-   "slot": 29,
+   "slot": null,
    "terminal": 29,
    "terminal_type": 0
   },
@@ -5066,7 +4220,7 @@
    "exists": true,
    "number": 31,
    "second_zone": false,
-   "slot": 30,
+   "slot": null,
    "terminal": 30,
    "terminal_type": 0
   },
@@ -5077,7 +4231,7 @@
    "exists": true,
    "number": 32,
    "second_zone": false,
-   "slot": 31,
+   "slot": null,
    "terminal": 31,
    "terminal_type": 0
   },
@@ -5088,7 +4242,7 @@
    "exists": true,
    "number": 33,
    "second_zone": false,
-   "slot": 32,
+   "slot": null,
    "terminal": 32,
    "terminal_type": 0
   },
@@ -5099,7 +4253,7 @@
    "exists": true,
    "number": 34,
    "second_zone": false,
-   "slot": 33,
+   "slot": null,
    "terminal": 33,
    "terminal_type": 0
   },
@@ -5110,7 +4264,7 @@
    "exists": true,
    "number": 35,
    "second_zone": false,
-   "slot": 34,
+   "slot": null,
    "terminal": 34,
    "terminal_type": 0
   },
@@ -5121,7 +4275,7 @@
    "exists": true,
    "number": 36,
    "second_zone": false,
-   "slot": 110,
+   "slot": null,
    "terminal": 35,
    "terminal_type": 0
   },
@@ -5132,7 +4286,7 @@
    "exists": true,
    "number": 37,
    "second_zone": false,
-   "slot": 112,
+   "slot": null,
    "terminal": 36,
    "terminal_type": 0
   },
@@ -5258,7 +4412,7 @@
    "exists": false,
    "number": 51,
    "second_zone": true,
-   "slot": 0,
+   "slot": null,
    "terminal": 0,
    "terminal_type": 0
   },
@@ -5267,7 +4421,7 @@
    "exists": false,
    "number": 52,
    "second_zone": true,
-   "slot": 1,
+   "slot": null,
    "terminal": 1,
    "terminal_type": 0
   },
@@ -5276,7 +4430,7 @@
    "exists": false,
    "number": 53,
    "second_zone": true,
-   "slot": 2,
+   "slot": null,
    "terminal": 2,
    "terminal_type": 0
   },
@@ -5285,7 +4439,7 @@
    "exists": false,
    "number": 54,
    "second_zone": true,
-   "slot": 3,
+   "slot": null,
    "terminal": 3,
    "terminal_type": 0
   },
@@ -5294,7 +4448,7 @@
    "exists": false,
    "number": 55,
    "second_zone": true,
-   "slot": 4,
+   "slot": null,
    "terminal": 4,
    "terminal_type": 0
   },
@@ -5303,7 +4457,7 @@
    "exists": false,
    "number": 56,
    "second_zone": true,
-   "slot": 5,
+   "slot": null,
    "terminal": 5,
    "terminal_type": 0
   },
@@ -5312,7 +4466,7 @@
    "exists": false,
    "number": 57,
    "second_zone": true,
-   "slot": 6,
+   "slot": null,
    "terminal": 6,
    "terminal_type": 0
   },
@@ -5321,7 +4475,7 @@
    "exists": false,
    "number": 58,
    "second_zone": true,
-   "slot": 7,
+   "slot": null,
    "terminal": 7,
    "terminal_type": 0
   },
@@ -5330,7 +4484,7 @@
    "exists": false,
    "number": 59,
    "second_zone": true,
-   "slot": 8,
+   "slot": null,
    "terminal": 8,
    "terminal_type": 0
   },
@@ -5339,7 +4493,7 @@
    "exists": false,
    "number": 60,
    "second_zone": true,
-   "slot": 9,
+   "slot": null,
    "terminal": 9,
    "terminal_type": 0
   },
@@ -5348,7 +4502,7 @@
    "exists": false,
    "number": 61,
    "second_zone": true,
-   "slot": 10,
+   "slot": null,
    "terminal": 10,
    "terminal_type": 0
   },
@@ -5357,7 +4511,7 @@
    "exists": false,
    "number": 62,
    "second_zone": true,
-   "slot": 11,
+   "slot": null,
    "terminal": 11,
    "terminal_type": 0
   },
@@ -5366,7 +4520,7 @@
    "exists": false,
    "number": 63,
    "second_zone": true,
-   "slot": 12,
+   "slot": null,
    "terminal": 12,
    "terminal_type": 0
   },
@@ -5375,7 +4529,7 @@
    "exists": false,
    "number": 64,
    "second_zone": true,
-   "slot": 13,
+   "slot": null,
    "terminal": 13,
    "terminal_type": 0
   },
@@ -5384,7 +4538,7 @@
    "exists": false,
    "number": 65,
    "second_zone": true,
-   "slot": 14,
+   "slot": null,
    "terminal": 14,
    "terminal_type": 0
   },
@@ -5393,7 +4547,7 @@
    "exists": false,
    "number": 66,
    "second_zone": true,
-   "slot": 15,
+   "slot": null,
    "terminal": 15,
    "terminal_type": 0
   },
@@ -5402,7 +4556,7 @@
    "exists": false,
    "number": 67,
    "second_zone": true,
-   "slot": 16,
+   "slot": null,
    "terminal": 16,
    "terminal_type": 0
   },
@@ -5411,7 +4565,7 @@
    "exists": false,
    "number": 68,
    "second_zone": true,
-   "slot": 17,
+   "slot": null,
    "terminal": 17,
    "terminal_type": 0
   },
@@ -5420,7 +4574,7 @@
    "exists": false,
    "number": 69,
    "second_zone": true,
-   "slot": 18,
+   "slot": null,
    "terminal": 18,
    "terminal_type": 0
   },
@@ -5429,7 +4583,7 @@
    "exists": false,
    "number": 70,
    "second_zone": true,
-   "slot": 19,
+   "slot": null,
    "terminal": 19,
    "terminal_type": 0
   },
@@ -5438,7 +4592,7 @@
    "exists": false,
    "number": 71,
    "second_zone": true,
-   "slot": 20,
+   "slot": null,
    "terminal": 20,
    "terminal_type": 0
   },
@@ -5447,7 +4601,7 @@
    "exists": false,
    "number": 72,
    "second_zone": true,
-   "slot": 21,
+   "slot": null,
    "terminal": 21,
    "terminal_type": 0
   },
@@ -5456,7 +4610,7 @@
    "exists": false,
    "number": 73,
    "second_zone": true,
-   "slot": 22,
+   "slot": null,
    "terminal": 22,
    "terminal_type": 0
   },
@@ -5465,7 +4619,7 @@
    "exists": false,
    "number": 74,
    "second_zone": true,
-   "slot": 23,
+   "slot": null,
    "terminal": 23,
    "terminal_type": 0
   },
@@ -5474,7 +4628,7 @@
    "exists": false,
    "number": 75,
    "second_zone": true,
-   "slot": 24,
+   "slot": null,
    "terminal": 24,
    "terminal_type": 0
   },
@@ -5483,7 +4637,7 @@
    "exists": false,
    "number": 76,
    "second_zone": true,
-   "slot": 25,
+   "slot": null,
    "terminal": 25,
    "terminal_type": 0
   },
@@ -5492,7 +4646,7 @@
    "exists": false,
    "number": 77,
    "second_zone": true,
-   "slot": 26,
+   "slot": null,
    "terminal": 26,
    "terminal_type": 0
   },
@@ -5501,7 +4655,7 @@
    "exists": false,
    "number": 78,
    "second_zone": true,
-   "slot": 27,
+   "slot": null,
    "terminal": 27,
    "terminal_type": 0
   },
@@ -5510,7 +4664,7 @@
    "exists": false,
    "number": 79,
    "second_zone": true,
-   "slot": 28,
+   "slot": null,
    "terminal": 28,
    "terminal_type": 0
   },
@@ -5519,7 +4673,7 @@
    "exists": false,
    "number": 80,
    "second_zone": true,
-   "slot": 29,
+   "slot": null,
    "terminal": 29,
    "terminal_type": 0
   },
@@ -5528,7 +4682,7 @@
    "exists": false,
    "number": 81,
    "second_zone": true,
-   "slot": 30,
+   "slot": null,
    "terminal": 30,
    "terminal_type": 0
   },
@@ -5537,7 +4691,7 @@
    "exists": false,
    "number": 82,
    "second_zone": true,
-   "slot": 31,
+   "slot": null,
    "terminal": 31,
    "terminal_type": 0
   },
@@ -5546,7 +4700,7 @@
    "exists": false,
    "number": 83,
    "second_zone": true,
-   "slot": 32,
+   "slot": null,
    "terminal": 32,
    "terminal_type": 0
   },
@@ -5555,7 +4709,7 @@
    "exists": false,
    "number": 84,
    "second_zone": true,
-   "slot": 33,
+   "slot": null,
    "terminal": 33,
    "terminal_type": 0
   },
@@ -5564,7 +4718,7 @@
    "exists": false,
    "number": 85,
    "second_zone": true,
-   "slot": 34,
+   "slot": null,
    "terminal": 34,
    "terminal_type": 0
   },
@@ -5573,7 +4727,7 @@
    "exists": false,
    "number": 86,
    "second_zone": true,
-   "slot": 110,
+   "slot": null,
    "terminal": 35,
    "terminal_type": 0
   },
@@ -5582,7 +4736,7 @@
    "exists": false,
    "number": 87,
    "second_zone": true,
-   "slot": 112,
+   "slot": null,
    "terminal": 36,
    "terminal_type": 0
   },

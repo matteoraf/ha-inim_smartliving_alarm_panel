@@ -12,12 +12,18 @@ import pytest
 from custom_components.inim_smartliving_alarm import button
 from custom_components.inim_smartliving_alarm.const import DOMAIN
 from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
+from custom_components.inim_smartliving_alarm.protocol.model import (
+    SMARTLIVING_505_FW6,
+    SMARTLIVING_1050_FW6,
+)
 from custom_components.inim_smartliving_alarm.selection import (
     is_disarm_scenario,
     scenario_actions,
-    scenario_area_modes,
     scenario_armed_areas,
     suggested_mappings,
+)
+from custom_components.inim_smartliving_alarm.stored_config import (
+    scenario_area_modes,
 )
 
 from .conftest import items_form
@@ -36,21 +42,24 @@ AWAY, STAY, INSTANT, DISARM = (
 
 
 def config(*scenarios: dict[int, int], areas: int = 10) -> dict[str, Any]:
-    """A stored configuration with these scenarios (area -> mode), numbered 1-N."""
+    """A stored 1050 configuration (a 505 with 5 areas) with these scenarios
+    (area -> mode) numbered from 1; the others keep every area."""
+    model, text = (
+        (SMARTLIVING_1050_FW6, b"6.07 01050  ")
+        if areas == 10
+        else (SMARTLIVING_505_FW6, b"6.07 00505  ")
+    )
+    size = model.scenario_record_length
 
-    def record(modes: dict[int, int]) -> str:
-        data = bytearray(8)
+    def record(modes: dict[int, int]) -> bytes:
+        data = bytearray(size)
         for area, mode in modes.items():
             data[(area - 1) // 2] |= mode << (4 * ((area - 1) % 2))
-        return data.hex()
+        return bytes(data)
 
-    return {
-        "areas": {"names": [f"Area {n}" for n in range(1, areas + 1)]},
-        "scenario_activations": [
-            {"scenario_index": index, "raw_activation_hex": record(modes)}
-            for index, modes in enumerate(scenarios)
-        ],
-    }
+    records = [record(modes) for modes in scenarios]
+    records += [bytes(size)] * (model.scenarios - len(records))
+    return {"model_string": text.hex(), "scenario_records": b"".join(records).hex()}
 
 
 def presets(
@@ -131,7 +140,7 @@ def test_nothing_to_propose() -> None:
     """No imported areas, or no scenario records stored: nothing."""
     stored = config({1: AWAY}, {1: DISARM})
     assert presets(stored, [], [1, 2]) == (None, None)
-    assert presets({"areas": {"names": ["A"]}}, [1], [1, 2]) == (None, None)
+    assert presets({}, [1], [1, 2]) == (None, None)
 
 
 # ------------------------------------------------------------------ setup
@@ -223,7 +232,7 @@ def test_scenario_actions_name_every_mode() -> None:
         "4": "disarm",
         "5": "keep",
     }
-    assert scenario_actions(stored, 2) == {}  # no record stored
+    assert scenario_actions({}, 1) == {}  # no records stored
     assert scenario_armed_areas(stored, 1) == [1, 2, 3]
 
 

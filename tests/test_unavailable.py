@@ -8,10 +8,8 @@ from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 import pytest
 
-from custom_components.inim_smartliving_alarm import (
-    _ACTION_DESCRIPTIONS as ACTION_DESCRIPTIONS,
-)
 from custom_components.inim_smartliving_alarm.const import DATA_COORDINATOR, DOMAIN
+from custom_components.inim_smartliving_alarm.services import ACTION_DESCRIPTIONS
 
 from .conftest import wait_until
 from .fake_panel import FakePanel

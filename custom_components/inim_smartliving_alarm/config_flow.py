@@ -20,6 +20,7 @@ from homeassistant.helpers.selector import (
 )
 import voluptuous as vol
 
+from .api import create_panel
 from .const import (
     AREA_SWITCH_USE_DEFAULT,
     ARM_MODE_INSTANT,
@@ -49,8 +50,8 @@ from .const import (
     CONF_USERNAME,
     CONF_ZONES,
     CONF_ZONES_NOT_READY,
-    DATA_API_CLIENT,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DEFAULT_AREA_SWITCHES_ARM_MODE,
     DEFAULT_EVENT_LOG_SIZE,
     DEFAULT_PANEL_NAME,
@@ -63,9 +64,8 @@ from .const import (
     ZONES_NOT_READY_WARN,
 )
 from .discovery import DiscoveredBoard, DiscoveryError, discover
-from .legacy import create_client
 from .notifications import Texts, async_texts
-from .panel_config import async_fetch_panel_configuration
+from .panel_config import PanelConfigError, async_fetch_panel_configuration
 from .peripherals import peripheral_placeholders
 from .protocol.errors import (
     DecryptionError,
@@ -77,17 +77,19 @@ from .protocol.model import model_for
 from .selection import (
     AVAILABLE,
     SELECTION_KEYS,
-    area_label,
-    area_names,
     mapped_scenarios,
     numbers,
     output_label,
     outputs_shown,
-    scenario_label,
-    scenario_names,
     selected,
     suggested_mappings,
     suggested_selection,
+)
+from .stored_config import (
+    area_label,
+    area_names,
+    scenario_label,
+    scenario_names,
     zone_names,
 )
 from .transport.base import TransportError
@@ -114,7 +116,8 @@ _ERROR_KEYS = frozenset(
 
 
 def _error_key(err: ValueError) -> str:
-    return str(err) if str(err) in _ERROR_KEYS else "validation_error_detail"
+    key = err.key if isinstance(err, PanelConfigError) else str(err)
+    return key if key in _ERROR_KEYS else "validation_error_detail"
 
 
 async def _validate_for_entry(
@@ -127,7 +130,7 @@ async def _validate_for_entry(
     A loaded entry holds the board's only connection: it is paused
     meanwhile. Raises as _validate_connection_and_fetch_initial_config.
     """
-    running = hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get(DATA_API_CLIENT)
+    running = hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get(DATA_PANEL)
     async with running.released() if running is not None else contextlib.nullcontext():
         return await _validate_connection_and_fetch_initial_config(hass, data)
 
@@ -174,7 +177,7 @@ async def _validate_connection_and_fetch_initial_config(
     """
     board = data.get(CONF_BOARD, BOARD_SMARTLAN_SI)
     try:
-        api = create_client(
+        panel = create_panel(
             data[CONF_HOST],
             data[CONF_PORT],
             data[CONF_PIN],
@@ -186,7 +189,7 @@ async def _validate_connection_and_fetch_initial_config(
         raise ValueError("invalid_pin_format") from err
     try:
         try:
-            firmware = await api.panel.identify()
+            firmware = await panel.identify()
         except TransportError as err:
             raise ConnectionError(str(err)) from err
         except DecryptionError as err:
@@ -209,11 +212,11 @@ async def _validate_connection_and_fetch_initial_config(
         except UnsupportedPanelError as err:
             _LOGGER.warning("Not set up: %s", err)
             raise ValueError(f"unsupported_{err.reason}") from err
-        if not api.panel.user_code_found:
+        if not panel.user_code_found:
             raise ValueError("invalid_pin")
-        return await async_fetch_panel_configuration(hass, api)
+        return await async_fetch_panel_configuration(hass, panel)
     finally:
-        await api.close()  # the board may accept only one connection
+        await panel.close()  # the board may accept only one connection
 
 
 # Per kind of item: the panel's labels and the word for an unnamed one
@@ -334,8 +337,8 @@ def _board_label(board: DiscoveredBoard) -> str:
 class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Inim Alarm."""
 
-    VERSION = 1
-    MINOR_VERSION = 5
+    VERSION = 2
+    MINOR_VERSION = 1
 
     def __init__(self) -> None:
         """Start with no data (kept per flow, between the steps)."""
@@ -940,15 +943,13 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
         else:
             _LOGGER.info("No scenarios available to map in options flow")
 
-        running = (
-            self.hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get(DATA_API_CLIENT)
-        )
+        running = self.hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get(DATA_PANEL)
         return self.async_show_form(
             step_id="general",
             data_schema=vol.Schema(options_schema_dict),
             errors=errors,
             description_placeholders=user_code_placeholders(
-                running.panel if running is not None else None,
+                running,
                 self.initial_panel_config,
             ),
         )

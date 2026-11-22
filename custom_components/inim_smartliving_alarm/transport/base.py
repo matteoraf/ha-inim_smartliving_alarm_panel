@@ -373,6 +373,17 @@ class PanelTransport:
         async with self.session(Priority.COMMAND):
             await self.disconnect()
 
+    @contextlib.asynccontextmanager
+    async def released(self) -> AsyncIterator[None]:
+        """Hold this transport's requests and free its connection meanwhile.
+
+        For another client that must reach the same board, which may accept
+        only one connection; this transport reconnects on its next request.
+        """
+        async with self.session(Priority.COMMAND):
+            await self.disconnect()
+            yield
+
     # ------------------------------------------------- with the lock held
 
     async def exchange(

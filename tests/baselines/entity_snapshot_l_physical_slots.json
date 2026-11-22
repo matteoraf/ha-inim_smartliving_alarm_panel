@@ -2599,6 +2599,7 @@
     "friendly_name": "Test Panel Zone 38 (Zone 38)",
     "hold_up": false,
     "interior": false,
+    "internal_index": 129,
     "last_exit_zone": false,
     "no_arming_if_not_ready": false,
     "pulse_count": 0,
@@ -2736,7 +2737,7 @@
     "friendly_name": "Test Panel Zone 6 (Zone 6)",
     "hold_up": false,
     "interior": false,
-    "internal_index": 120,
+    "internal_index": 5,
     "last_exit_zone": false,
     "no_arming_if_not_ready": false,
     "pulse_count": 0,
@@ -6565,6 +6566,25 @@
   },
   {
    "attributes": {
+    "friendly_name": "Test Panel Zone 38 Enabled (Zone 38)",
+    "icon": "mdi:shield-check",
+    "internal_index": 129,
+    "zone_id": 38,
+    "zone_name": "Zone 38"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_38",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 38 Enabled (Zone 38)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_38"
+  },
+  {
+   "attributes": {
     "friendly_name": "Test Panel Zone 4 Enabled (Zone 4)",
     "icon": "mdi:shield-check",
     "internal_index": 3,
@@ -6605,7 +6625,7 @@
    "attributes": {
     "friendly_name": "Test Panel Zone 6 Enabled (Zone 6)",
     "icon": "mdi:shield-check",
-    "internal_index": 120,
+    "internal_index": 5,
     "zone_id": 6,
     "zone_name": "Zone 6"
    },

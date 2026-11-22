@@ -14,15 +14,16 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 import pytest
 
-from custom_components.inim_smartliving_alarm.legacy import (
-    LegacyPanelClient,
-    create_client,
+from custom_components.inim_smartliving_alarm.api import (
+    SmartLivingPanel,
+    create_panel,
 )
 from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
 from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
+from .conftest import accepted
 from .fake_panel import FakePanel, checksum
 from .real_panel.proxy import (
     RECONNECT_PAUSE,
@@ -62,18 +63,18 @@ async def make_proxy(panel: FakePanel) -> AsyncGenerator[ProxyFactory]:
 
 
 @pytest.fixture
-async def api_for() -> AsyncGenerator[Callable[[PanelProxy], LegacyPanelClient]]:
-    """Clients connected through a proxy, closed after the test."""
-    clients: list[LegacyPanelClient] = []
+async def api_for() -> AsyncGenerator[Callable[[PanelProxy], SmartLivingPanel]]:
+    """Panels connected through a proxy, closed after the test."""
+    connections: list[SmartLivingPanel] = []
 
-    def make(proxy: PanelProxy) -> LegacyPanelClient:
-        client = create_client(proxy.host, proxy.port, PIN)
-        clients.append(client)
-        return client
+    def make(proxy: PanelProxy) -> SmartLivingPanel:
+        connection = create_panel(proxy.host, proxy.port, PIN)
+        connections.append(connection)
+        return connection
 
     yield make
-    for client in clients:
-        await client.close()
+    for connection in connections:
+        await connection.close()
 
 
 async def read_system_info(proxy: PanelProxy) -> str:
@@ -169,7 +170,7 @@ async def test_writes_are_refused_in_read_only_mode(
     """Without a guard no write reaches the panel."""
     proxy = await make_proxy(None)
 
-    assert not await api_for(proxy).execute_arm_disarm_areas(areas_to_arm=[AREA])
+    assert not await accepted(api_for(proxy).arm_areas({AREA: ArmMode.AWAY}))
 
     assert panel.state.armed_areas() == []
     assert writes(panel) == []
@@ -219,46 +220,47 @@ async def test_guard_allows_the_chosen_area_and_zone(
     """Area 4 and zone 18 can be changed and restored."""
     api = api_for(await make_proxy(WriteGuard(area=AREA, zone_slot=ZONE_SLOT)))
 
-    assert await api.execute_arm_disarm_areas(areas_to_arm=[AREA])
+    assert await accepted(api.arm_areas({AREA: ArmMode.AWAY}))
     assert panel.state.armed_areas() == [AREA]
-    assert await api.execute_arm_disarm_areas(areas_to_disarm=[AREA])
+    assert await accepted(api.arm_areas({AREA: ArmMode.DISARM}))
     assert panel.state.armed_areas() == []
     for mode in (ArmMode.STAY, ArmMode.INSTANT):
-        assert (await api.panel.arm_areas({AREA: mode})).ok
+        assert (await api.arm_areas({AREA: mode})).ok
         assert panel.state.area_modes[AREA - 1] == mode
-        assert await api.execute_arm_disarm_areas(areas_to_disarm=[AREA])
+        assert await accepted(api.arm_areas({AREA: ArmMode.DISARM}))
 
-    assert await api.execute_set_zone_excluded_status(ZONE_SLOT, True)
+    assert await accepted(api.bypass_zone(ZONE_SLOT, bypass=True))
     assert panel.state.zone_included[17] is False
-    assert await api.execute_set_zone_excluded_status(ZONE_SLOT, False)
+    assert await accepted(api.bypass_zone(ZONE_SLOT, bypass=False))
     assert panel.state.zone_included[17] is True
 
 
-@pytest.mark.parametrize(
-    ("command", "args", "kwargs"),
-    [
-        ("execute_arm_disarm_areas", (), {"areas_to_arm": [3]}),
-        ("execute_arm_disarm_areas", (), {"areas_to_arm": [3, AREA]}),
-        ("execute_arm_disarm_areas", (), {"areas_to_disarm": [1]}),
-        ("execute_set_zone_excluded_status", (16, True), {}),
-        ("execute_activate_scenario", (0,), {}),
-        ("execute_reset_area_alarm", (AREA,), {}),
-    ],
-)
+# Commands the guard refuses: other areas, other zones, other commands
+REFUSED: dict[str, Callable[[SmartLivingPanel], Awaitable[Any]]] = {
+    "arm another area": lambda panel: panel.arm_areas({3: ArmMode.AWAY}),
+    "arm with another area": lambda panel: panel.arm_areas(
+        {3: ArmMode.AWAY, AREA: ArmMode.AWAY}
+    ),
+    "disarm another area": lambda panel: panel.arm_areas({1: ArmMode.DISARM}),
+    "bypass another zone": lambda panel: panel.bypass_zone(16, bypass=True),
+    "activate a scenario": lambda panel: panel.activate_scenario(0),
+    "reset alarm memory": lambda panel: panel.reset_alarm_memory(frozenset({AREA})),
+}
+
+
+@pytest.mark.parametrize("command", REFUSED)
 async def test_guard_refuses_everything_else(
     hass: HomeAssistant,
     make_proxy: ProxyFactory,
     panel: FakePanel,
     command: str,
-    args: tuple[Any, ...],
-    kwargs: dict[str, Any],
     api_for,
 ) -> None:
     """Other areas, other zones and other commands never reach the panel."""
     proxy = await make_proxy(WriteGuard(area=AREA, zone_slot=ZONE_SLOT))
     panel.state.area_alarm_memory = 1 << (AREA - 1)  # something to reset
 
-    await getattr(api_for(proxy), command)(*args, **kwargs)
+    await accepted(REFUSED[command](api_for(proxy)))
 
     assert writes(panel) == []
     assert len(proxy.blocked) == 1
@@ -271,8 +273,8 @@ async def test_recordings_do_not_contain_the_pin(
     table read at startup without its bytes."""
     proxy = await make_proxy(WriteGuard(area=AREA, zone_slot=ZONE_SLOT))
     api = api_for(proxy)
-    assert await api.execute_arm_disarm_areas(areas_to_arm=[AREA])
-    assert await api.execute_arm_disarm_areas(areas_to_disarm=[AREA])
+    assert await accepted(api.arm_areas({AREA: ArmMode.AWAY}))
+    assert await accepted(api.arm_areas({AREA: ArmMode.DISARM}))
 
     path = tmp_path / "recording.json"
     proxy.save(path)

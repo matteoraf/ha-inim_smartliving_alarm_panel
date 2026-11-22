@@ -503,7 +503,7 @@ async def test_existing_entry_is_read_again_and_imports_none(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     config = entry.data[DATA_INITIAL_PANEL_CONFIG]
-    assert config["fixed_output_records"]["raw_hex"] == "1e0300000000"
+    assert config["fixed_output_records"] == "1e0300000000"
     assert available_outputs(config) == [41, 42, 43, 51, 52, 53]
     assert "outputs" not in entry.options
     assert not hass.states.async_all("light")
@@ -603,7 +603,7 @@ async def test_no_home_automation_on_firmware_51(
     await fake.start()
     try:
         config = await stored_configuration(fake)
-        assert config["extra_output_options"]["raw_hex"] == ""
+        assert config["extra_output_options"] == ""
         assert available_outputs(config) == [41, 42, 43, 51, 52, 53]
         entry = await add_entry(hass, fake)
         await import_outputs(hass, entry, [41])

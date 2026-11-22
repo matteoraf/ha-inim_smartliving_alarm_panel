@@ -6,13 +6,13 @@ panel are offered: every area and scenario of the model, and the zone numbers
 whose terminal is programmed as a zone.
 """
 
-from collections.abc import Callable, Collection, Iterable, Mapping
+from collections.abc import Collection, Iterable, Mapping
 from dataclasses import dataclass
-from functools import lru_cache
 import re
 from typing import Any
 
-from .attribute_values import time_text
+from . import stored_config
+from .attribute_values import ARM_MODE_TEXT, time_text
 from .const import (
     CONF_AREAS,
     CONF_LIMIT_AREAS,
@@ -30,64 +30,28 @@ from .const import (
     DEFAULT_LIMIT_AREAS,
     DEFAULT_LIMIT_SCENARIOS,
     DEFAULT_LIMIT_ZONES,
-    KEY_INIT_AREA_NAMES,
-    KEY_INIT_AREA_RECORDS,
-    KEY_INIT_AREAS,
-    KEY_INIT_EXTRA_OUTPUT_OPTIONS,
-    KEY_INIT_FIXED_OUTPUT_LABELS,
-    KEY_INIT_FIXED_OUTPUT_RECORDS,
-    KEY_INIT_KEYBOARD_NAMES,
-    KEY_INIT_KEYBOARDS,
-    KEY_INIT_PERIPHERALS,
-    KEY_INIT_PHYSICAL_MAP,
-    KEY_INIT_RAW_HEX,
-    KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS,
-    KEY_INIT_SCENARIO_ACTIVATION_INDEX,
-    KEY_INIT_SCENARIO_ACTIVATION_RAW,
-    KEY_INIT_SCENARIO_ACTIVATIONS,
-    KEY_INIT_SCENARIO_NAMES,
-    KEY_INIT_SCENARIOS,
-    KEY_INIT_SYSTEM_INFO,
-    KEY_INIT_TERMINAL_RECORDS_RAW,
-    KEY_INIT_USER_CODE_OUTPUTS,
-    KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS,
-    KEY_INIT_ZONE_CONFIG_INDEX,
-    KEY_INIT_ZONE_LABELS_RAW,
-    KEY_INIT_ZONE_NAMES,
-    KEY_INIT_ZONE_RECORDS_RAW,
-    KEY_INIT_ZONES,
-    KEY_INIT_ZONES_CONFIG,
-    KEY_INIT_ZONES_CONFIG_DETAILED,
     MAX_LIMIT_AREAS,
     MAX_LIMIT_ZONES,
 )
-from .legacy import SCENARIO_ACTIONS, zone_exists
 from .protocol.commands import ArmMode
 from .protocol.config import (
-    AreaConfig,
     OutputConfig,
-    Terminal,
-    ZoneConfig,
-    decode_area_records,
-    decode_fixed_outputs,
-    decode_home_automation,
-    decode_labels,
-    decode_output_mask,
-    decode_physical_map,
-    decode_terminals,
-    decode_zone_records,
     fixed_output_number,
     output_address,
-    scenario_record_modes,
     terminal_output_number,
 )
-from .protocol.errors import ProtocolError
-from .protocol.model import (
-    FIXED_OUTPUTS,
-    LABEL_LENGTH,
-    PanelModel,
-    model_for_or_fallback,
-    parse_model_string,
+from .stored_config import (
+    fixed_output_names,
+    fixed_outputs,
+    home_automation_flags,
+    physical_map,
+    scenario_area_modes,
+    stored_model,
+    stored_output_mask,
+    stored_zones,
+    terminal_records,
+    zone_names,
+    zone_records,
 )
 
 SELECTION_KEYS = (CONF_AREAS, CONF_ZONES, CONF_SCENARIOS, CONF_OUTPUTS)
@@ -129,113 +93,26 @@ def panel_config(entry_data: Mapping[str, Any]) -> Mapping[str, Any]:
     return entry_data.get(DATA_INITIAL_PANEL_CONFIG) or {}
 
 
-@lru_cache(maxsize=32)
-def _decoded_labels(raw_hex: str, count: int) -> tuple[str, ...] | None:
-    """The first count labels of a stored label table; None if unreadable."""
-    try:
-        data = bytes.fromhex(raw_hex)
-    except ValueError:
-        return None
-    if len(data) < count * LABEL_LENGTH:
-        return None
-    return tuple(decode_labels(data[: count * LABEL_LENGTH], count))
-
-
-def _labels(config: Mapping[str, Any], table: str, names: str, raw: str) -> list[str]:
-    """A label table, decoded with the panel's charset from the stored bytes.
-
-    As many labels as the stored list has; that list itself when the bytes
-    are missing or cannot be read (an entry saved before they were kept).
-    """
-    stored = config.get(table) or {}
-    listed = stored.get(names) or []
-    raw_hex = stored.get(raw)
-    if not listed or not isinstance(raw_hex, str):
-        return listed
-    decoded = _decoded_labels(raw_hex, len(listed))
-    return listed if decoded is None else list(decoded)
-
-
-def area_names(config: Mapping[str, Any]) -> list[str]:
-    """The area labels, one per area of the model."""
-    return _labels(config, KEY_INIT_AREAS, KEY_INIT_AREA_NAMES, KEY_INIT_RAW_HEX)
-
-
-def zone_names(config: Mapping[str, Any]) -> list[str]:
-    """The zone labels, one per zone number."""
-    return _labels(
-        config, KEY_INIT_ZONES, KEY_INIT_ZONE_NAMES, KEY_INIT_ZONE_LABELS_RAW
-    )
-
-
-def scenario_names(config: Mapping[str, Any]) -> list[str]:
-    """The scenario labels, one per scenario of the model."""
-    return _labels(
-        config, KEY_INIT_SCENARIOS, KEY_INIT_SCENARIO_NAMES, KEY_INIT_RAW_HEX
-    )
-
-
-def keypad_names(config: Mapping[str, Any]) -> list[str]:
-    """The keypad labels, one per keypad of the model."""
-    return _labels(
-        config, KEY_INIT_KEYBOARDS, KEY_INIT_KEYBOARD_NAMES, KEY_INIT_RAW_HEX
-    )
-
-
-def zone_details(config: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """The stored setup of every zone number."""
-    return (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(
-        KEY_INIT_ZONES_CONFIG_DETAILED
-    ) or []
-
-
-def _label(names: list[str], number: int, kind: str) -> str:
-    name = names[number - 1] if number <= len(names) else ""
-    return name or f"{kind} {number}"
-
-
-def area_label(config: Mapping[str, Any], number: int) -> str:
-    """The panel's label of an area, or "Area N" if it has none."""
-    return _label(area_names(config), number, "Area")
-
-
-def zone_label(config: Mapping[str, Any], number: int) -> str:
-    """The panel's label of a zone, or "Zone N" if it has none."""
-    return _label(zone_names(config), number, "Zone")
-
-
-def scenario_label(config: Mapping[str, Any], number: int) -> str:
-    """The panel's label of a scenario, or "Scenario N" if it has none."""
-    return _label(scenario_names(config), number, "Scenario")
-
-
 # ------------------------------------------------------------- what is offered
 
 
 def available_areas(config: Mapping[str, Any]) -> list[int]:
     """Every area of the model."""
-    return list(range(1, len(area_names(config)) + 1))
+    return list(range(1, stored_config.area_count(config) + 1))
 
 
 def available_zones(config: Mapping[str, Any]) -> list[int]:
     """The zone numbers that are zones on the panel.
 
-    Without stored zone details (a configuration from an early version)
-    every zone number is offered, as such entries always worked.
+    Without the stored zone and terminal records every zone number with a
+    label is offered.
     """
-    details = zone_details(config)
-    if not details:
-        return list(range(1, len(zone_names(config)) + 1))
-    return sorted(
-        detail[KEY_INIT_ZONE_CONFIG_INDEX] + 1
-        for detail in details
-        if KEY_INIT_ZONE_CONFIG_INDEX in detail and zone_exists(detail)
-    )
+    return [zone.number for zone in stored_zones(config) if zone.exists]
 
 
 def available_scenarios(config: Mapping[str, Any]) -> list[int]:
     """Every scenario of the model."""
-    return list(range(1, len(scenario_names(config)) + 1))
+    return list(range(1, stored_config.scenario_count(config) + 1))
 
 
 def available_outputs(config: Mapping[str, Any]) -> list[int]:
@@ -293,22 +170,14 @@ def suggested_selection(config: Mapping[str, Any]) -> dict[str, list[int]]:
     """
     zones: list[int] = []
     areas: set[int] = set()
-    for detail in zone_details(config):
-        if KEY_INIT_ZONE_CONFIG_INDEX not in detail or not zone_exists(detail):
-            continue
-        assigned = detail.get(KEY_INIT_ZONE_CONFIG_ASSIGNED_AREAS) or []
-        if assigned:
-            zones.append(detail[KEY_INIT_ZONE_CONFIG_INDEX] + 1)
-            areas.update(int(area) for area in assigned)
+    for zone in stored_zones(config):
+        if zone.exists and zone.areas:
+            zones.append(zone.number)
+            areas.update(zone.areas)
     scenarios = [
-        activation[KEY_INIT_SCENARIO_ACTIVATION_INDEX] + 1
-        for activation in config.get(KEY_INIT_SCENARIO_ACTIVATIONS) or []
-        if any(
-            action != "keep"
-            for action in (
-                activation.get(KEY_INIT_SCENARIO_ACTIVATION_AREA_ACTIONS) or {}
-            ).values()
-        )
+        number
+        for number, modes in scenario_area_modes(config).items()
+        if any(mode != ArmMode.KEEP for mode in modes.values())
     ]
     return {
         CONF_AREAS: [area for area in available_areas(config) if area in areas],
@@ -330,107 +199,6 @@ def mapped_scenarios(options: Mapping[str, Any]) -> dict[str, int]:
         if value is not None and str(value).isdigit():
             mapped[key] = int(value) + 1
     return mapped
-
-
-def stored_layout_fits(config: Mapping[str, Any], model: PanelModel) -> bool:
-    """Whether the stored configuration was read with this model's layout.
-
-    Told by the length of two stored raw blocks: the logical terminal
-    records (L x 12 bytes, which differs between models) and the enabled
-    peripherals (which differs between firmware families). A block that is
-    not stored does not count against it.
-    """
-    terminals = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(
-        KEY_INIT_TERMINAL_RECORDS_RAW
-    )
-    peripherals = (config.get(KEY_INIT_PERIPHERALS) or {}).get(KEY_INIT_RAW_HEX)
-    return all(
-        not isinstance(raw, str) or len(raw) // 2 == expected
-        for raw, expected in (
-            (terminals, model.terminals * model.terminal_record_length),
-            (peripherals, model.peripherals_length),
-        )
-    )
-
-
-def _stored_model_and_fallback(
-    config: Mapping[str, Any],
-) -> tuple[PanelModel, bool] | None:
-    """(layout, whether it is the fallback) of the stored model string.
-
-    None when the stored blocks were read with another layout.
-    """
-    raw = (config.get(KEY_INIT_SYSTEM_INFO) or {}).get(KEY_INIT_RAW_HEX)
-    try:
-        model, unsupported = model_for_or_fallback(
-            parse_model_string(bytes.fromhex(raw))
-        )
-    except (TypeError, ValueError, ProtocolError):
-        return None
-    if not stored_layout_fits(config, model):
-        return None
-    return model, unsupported is not None
-
-
-def stored_model(config: Mapping[str, Any]) -> PanelModel | None:
-    """The layout the stored configuration was read with.
-
-    The model profile of the stored model string, or the fallback profile
-    for a panel without its own (as the panel connection uses); None when
-    no valid model string is stored, or the stored blocks were read with
-    another layout (e.g. before the panel's firmware had its own profile,
-    until they are read again).
-    """
-    found = _stored_model_and_fallback(config)
-    return found[0] if found else None
-
-
-def area_records(config: Mapping[str, Any]) -> list[AreaConfig] | None:
-    """The stored area records (A, by 0-based area), decoded.
-
-    None when they are not stored or do not fit, and for a panel handled
-    with the fallback layout: on another model the fallback's address is not
-    the area record, so its times would be wrong.
-    """
-    found = _stored_model_and_fallback(config)
-    raw = (config.get(KEY_INIT_AREA_RECORDS) or {}).get(KEY_INIT_RAW_HEX)
-    if found is None or found[1]:
-        return None
-    try:
-        return decode_area_records(bytes.fromhex(raw), found[0])
-    except (TypeError, ValueError, ProtocolError):
-        return None
-
-
-def _stored_records[T](
-    config: Mapping[str, Any],
-    key: str,
-    decode: Callable[[bytes, PanelModel], list[T]],
-) -> list[T] | None:
-    model = stored_model(config)
-    raw = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(key)
-    if model is None:
-        return None
-    try:
-        return decode(bytes.fromhex(raw), model)
-    except (TypeError, ValueError, ProtocolError):
-        return None
-
-
-def zone_records(config: Mapping[str, Any]) -> list[ZoneConfig] | None:
-    """The stored zone records (2L, by 0-based zone), decoded.
-
-    None when they or the model string are not stored, or do not fit.
-    """
-    return _stored_records(config, KEY_INIT_ZONE_RECORDS_RAW, decode_zone_records)
-
-
-def terminal_records(config: Mapping[str, Any]) -> list[Terminal] | None:
-    """The stored logical terminal records (L, by 0-based terminal), decoded.
-
-    None when they or the model string are not stored, or do not fit.
-    """
-    return _stored_records(config, KEY_INIT_TERMINAL_RECORDS_RAW, decode_terminals)
 
 
 # ----------------------------------------------------------------- outputs
@@ -457,13 +225,6 @@ class OutputItem:
         return f"terminal_output_{self.number}"
 
 
-def _raw(config: Mapping[str, Any], key: str) -> bytes | None:
-    try:
-        return bytes.fromhex((config.get(key) or {})[KEY_INIT_RAW_HEX])
-    except (KeyError, TypeError, ValueError):
-        return None
-
-
 def output_items(config: Mapping[str, Any]) -> list[OutputItem]:
     """Every switched output programmed on the panel, terminals then O1-O3.
 
@@ -472,30 +233,25 @@ def output_items(config: Mapping[str, Any]) -> list[OutputItem]:
     """
     model = stored_model(config)
     terminals = terminal_records(config)
-    physical = _raw(config, KEY_INIT_PHYSICAL_MAP)
-    fixed_raw = _raw(config, KEY_INIT_FIXED_OUTPUT_RECORDS)
-    labels_raw = _raw(config, KEY_INIT_FIXED_OUTPUT_LABELS)
-    if None in (model, terminals, physical, fixed_raw, labels_raw):
+    slots = physical_map(config)
+    fixed_configs = fixed_outputs(config)
+    fixed_names = fixed_output_names(config)
+    if (
+        model is None
+        or terminals is None
+        or slots is None
+        or fixed_configs is None
+        or fixed_names is None
+    ):
         return []
-    try:
-        physical_map = decode_physical_map(physical, model)
-        fixed_configs = decode_fixed_outputs(fixed_raw)
-        fixed_names = decode_labels(labels_raw, FIXED_OUTPUTS)
-    except ProtocolError:
-        return []
-    flags: tuple[bool, ...] | None = None
-    if extra := _raw(config, KEY_INIT_EXTRA_OUTPUT_OPTIONS):  # empty: unknown
-        try:
-            flags = decode_home_automation(extra, model)
-        except ProtocolError:
-            flags = None
+    flags = home_automation_flags(config)
 
     def home_automation(index: int) -> bool | None:
         return None if flags is None else flags[index]
 
     def address(number: int) -> int | None:
         try:
-            return output_address(number, physical_map, model)
+            return output_address(number, slots, model)
         except ValueError:
             return None
 
@@ -531,26 +287,6 @@ def output_items(config: Mapping[str, Any]) -> list[OutputItem]:
             )
         )
     return items
-
-
-def stored_output_mask(
-    config: Mapping[str, Any],
-) -> tuple[frozenset[int], frozenset[int]] | None:
-    """(terminals 0-based, fixed outputs 1-3) the stored user code may drive.
-
-    None when the mask is not stored; empty sets when the PIN matched no
-    user code.
-    """
-    model = stored_model(config)
-    raw = _raw(config, KEY_INIT_USER_CODE_OUTPUTS)
-    if model is None or raw is None:
-        return None
-    if not raw:
-        return frozenset(), frozenset()
-    try:
-        return decode_output_mask(raw, model)
-    except ProtocolError:
-        return None
 
 
 def imported_outputs(
@@ -608,23 +344,6 @@ def zone_option_flags(config: Mapping[str, Any]) -> dict[int, dict[str, bool]]:
     return {number: zone.flags for number, zone in enumerate(zones, start=1)}
 
 
-def scenario_area_modes(config: Mapping[str, Any]) -> dict[int, dict[int, int]]:
-    """What each scenario does to each area: number -> area -> mode.
-
-    Decoded from the stored scenario records (see ArmMode).
-    """
-    areas = len(area_names(config))
-    modes: dict[int, dict[int, int]] = {}
-    for activation in config.get(KEY_INIT_SCENARIO_ACTIVATIONS) or []:
-        raw = activation.get(KEY_INIT_SCENARIO_ACTIVATION_RAW)
-        if KEY_INIT_SCENARIO_ACTIVATION_INDEX not in activation or not raw:
-            continue
-        modes[activation[KEY_INIT_SCENARIO_ACTIVATION_INDEX] + 1] = (
-            scenario_record_modes(bytes.fromhex(raw), areas)
-        )
-    return modes
-
-
 _ARMED = frozenset((ArmMode.AWAY, ArmMode.STAY, ArmMode.INSTANT))
 
 
@@ -634,7 +353,7 @@ def scenario_actions(config: Mapping[str, Any], number: int) -> dict[str, str]:
     Keyed by area number as text; empty if its record is not stored.
     """
     return {
-        str(area): SCENARIO_ACTIONS.get(mode, "unknown")
+        str(area): ARM_MODE_TEXT.get(mode, "unknown")
         for area, mode in scenario_area_modes(config).get(number, {}).items()
     }
 

@@ -10,6 +10,8 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from . import stored_config
+from .api import SmartLivingPanel
 from .const import (
     ARM_MODE_INSTANT,
     ARM_MODE_PARTIAL,
@@ -19,17 +21,12 @@ from .const import (
     CONF_AREAS,
     CONF_PANEL_NAME,
     CONF_ZONES,
-    DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DEFAULT_AREA_SWITCHES_ARM_MODE,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_SYSTEM_INFO,
-    KEY_INIT_SYSTEM_INFO_TYPE,
-    KEY_INIT_SYSTEM_INFO_VERSION,
-    KEY_INIT_ZONES_CONFIG,
-    KEY_INIT_ZONES_CONFIG_DETAILED,
     KEY_LIVE_AREA_MODES_MAP,
     KEY_LIVE_AREA_STATUSES_MAP,
     KEY_LIVE_AREAS_STATUS,
@@ -37,16 +34,20 @@ from .const import (
     KEY_LIVE_ZONES_EXCLUDED_STATUS,
 )
 from .errors import async_send_command
-from .legacy import LegacyPanelClient, zones_to_create
 from .outputs import InimOutputEntity, is_dimmer
 from .protocol.commands import ArmMode
 from .readiness import async_arm
 from .selection import (
-    area_label,
-    area_names,
     imported_outputs,
     selected,
-    zone_names,
+)
+from .stored_config import (
+    SystemInfo,
+    area_label,
+    device_model,
+    device_sw_version,
+    zone_label,
+    zones_to_create,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -70,79 +71,56 @@ async def async_setup_entry(
     )
 
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
-    api_client: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    panel: SmartLivingPanel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
 
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
-    system_info = initial_panel_config.get(KEY_INIT_SYSTEM_INFO, {})
+    system_info = stored_config.system_info(initial_panel_config)
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
     switches_to_add = []
 
-    # --- Setup Area Switches ---
-    all_area_names = area_names(initial_panel_config)
-
-    if not all_area_names:
-        _LOGGER.warning(
-            "No area names found in initial config for %s. Cannot create area switches",
-            entry.title,
-        )
-        return
-
+    # --- Area switches: every selected area of the model ---
     areas = selected(entry.options, initial_panel_config, CONF_AREAS)
     _LOGGER.debug("Setting up area switches for areas %s", areas)
-
     for area_id_1_based in areas:
-        area_name = area_label(initial_panel_config, area_id_1_based)
         switches_to_add.append(
             InimAreaSwitch(
                 coordinator,
-                api_client,
+                panel,
                 entry,
                 panel_display_name,
                 system_info,
                 area_id_1_based,
-                area_name,
+                area_label(initial_panel_config, area_id_1_based),
             )
         )
 
-    # --- Setup Zone Enabled Switches ---
-    all_zone_names = zone_names(initial_panel_config)
-
-    zones_config = initial_panel_config.get(KEY_INIT_ZONES_CONFIG, {})
-    zones_config_detailed = (
-        zones_config.get(KEY_INIT_ZONES_CONFIG_DETAILED, []) if zones_config else []
+    # --- Zone bypass switches: a switch needs the terminal's physical slot ---
+    zones = zones_to_create(
+        initial_panel_config,
+        selected(entry.options, initial_panel_config, CONF_ZONES),
     )
-
-    # a switch needs the zone's physical slot from the zone details
-    zones = (
-        zones_to_create(
-            all_zone_names,
-            zones_config_detailed,
-            selected(entry.options, initial_panel_config, CONF_ZONES),
+    if without_slot := [zone.number for zone in zones if zone.slot is None]:
+        _LOGGER.debug(
+            "%s: no bypass switch for zones %s: their terminal is in no physical slot",
+            entry.title,
+            ", ".join(str(number) for number in without_slot),
         )
-        if zones_config_detailed
-        else []
-    )
     _LOGGER.debug("Setting up zone bypass switches for %s zones", len(zones))
-    for zone_index_0_based, display_zone_name, zone_detail in zones:
-        internal_index = zone_detail.get("internal_index") if zone_detail else None
-        if internal_index is None:
-            _LOGGER.warning(
-                "Skipping the bypass switch of zone %s: no physical terminal slot",
-                zone_index_0_based + 1,
-            )
+    for zone in zones:
+        if zone.slot is None:
             continue
         switches_to_add.append(
             InimZoneEnabledSwitch(
                 coordinator,
-                api_client,
+                panel,
                 entry,
                 panel_display_name,
                 system_info,
-                zone_index_0_based + 1,
-                display_zone_name,
-                internal_index,
-                second_zone=bool(zone_detail.get("second_zone")),
+                zone.number,
+                zone_label(initial_panel_config, zone.number),
+                zone.slot,
+                second_zone=zone.second_zone,
             )
         )
 
@@ -152,7 +130,7 @@ async def async_setup_entry(
             switches_to_add.append(
                 InimOutputSwitch(
                     coordinator,
-                    api_client,
+                    panel,
                     entry,
                     panel_display_name,
                     system_info,
@@ -180,16 +158,16 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
     def __init__(
         self,
         coordinator: Any,
-        api_client: LegacyPanelClient,
+        panel: SmartLivingPanel,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         area_id_1_based: int,
         area_name: str,
     ) -> None:
         """Initialize the Area Switch."""
         super().__init__(coordinator)
-        self.api_client = api_client
+        self.panel = panel
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
         self._system_info = system_info
@@ -215,8 +193,8 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
     @callback
@@ -258,7 +236,7 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         await async_arm(
             self.hass,
             self.config_entry,
-            lambda check: self.api_client.panel.arm_areas(
+            lambda check: self.panel.arm_areas(
                 {self._area_id_1_based: mode}, on_not_ready=check
             ),
             self._area_name,
@@ -273,7 +251,7 @@ class InimAreaSwitch(CoordinatorEntity, SwitchEntity):
         _LOGGER.info("Disarming Area %s (%s)", self._area_id_1_based, self._area_name)
 
         await async_send_command(
-            self.api_client.panel.arm_areas({self._area_id_1_based: ArmMode.DISARM}),
+            self.panel.arm_areas({self._area_id_1_based: ArmMode.DISARM}),
             self._area_name,
         )
         self._attr_is_on = False  # Optimistic update
@@ -303,10 +281,10 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
     def __init__(
         self,
         coordinator: Any,
-        api_client: LegacyPanelClient,
+        panel: SmartLivingPanel,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         zone_id_1_based: int,
         zone_name: str,
         zone_internal_index: int,
@@ -314,7 +292,7 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
         second_zone: bool = False,
     ) -> None:
         super().__init__(coordinator)
-        self.api_client = api_client
+        self.panel = panel
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
         self._system_info = system_info
@@ -340,8 +318,8 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=self._system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
     @callback
@@ -380,7 +358,7 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
             self._zone_internal_index,
         )
         await async_send_command(
-            self.api_client.panel.bypass_zone(
+            self.panel.bypass_zone(
                 self._zone_internal_index,
                 bypass=False,
                 second_zone=self._second_zone,
@@ -397,7 +375,7 @@ class InimZoneEnabledSwitch(CoordinatorEntity, SwitchEntity):
             self._zone_internal_index,
         )
         await async_send_command(
-            self.api_client.panel.bypass_zone(
+            self.panel.bypass_zone(
                 self._zone_internal_index,
                 bypass=True,
                 second_zone=self._second_zone,

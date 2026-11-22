@@ -1,6 +1,7 @@
 """The areas, zones and scenarios to import: setup, options, upgrade, arm_area."""
 
 import copy
+import json
 from pathlib import Path
 
 from homeassistant.config_entries import ConfigEntry
@@ -23,7 +24,9 @@ from .fake_panel import FakePanel, const as c
 from .test_area_modes import arm_area, arm_writes
 from .test_config_flow import board_form, open_options, si_input, submit, unload_all
 from .test_reconfigure_refresh import reread
-from .test_zones import has_entity, stored_configuration
+from .test_zones import has_entity
+
+ENTRIES = Path(__file__).parent / "fixtures" / "entries"
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
@@ -245,7 +248,8 @@ async def test_upgrade_keeps_the_entities(
     hass: HomeAssistant, panel: FakePanel
 ) -> None:
     """Counts become the first N items; a mapped scenario beyond them is kept."""
-    stored = await stored_configuration(panel)
+    fixture = json.loads((ENTRIES / "0.4.0a2.json").read_text(encoding="utf-8"))
+    stored = fixture["data"][DATA_INITIAL_PANEL_CONFIG]  # stored by version 1.3
     entry = MockConfigEntry(
         domain=DOMAIN,
         version=1,
@@ -272,7 +276,7 @@ async def test_upgrade_keeps_the_entities(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    assert entry.minor_version == 5
+    assert (entry.version, entry.minor_version) == (2, 1)
     assert not {"limit_areas", "limit_zones", "limit_scenarios"} & set(entry.options)
     assert entry.options["areas"] == [1, 2, 3, 4]
     assert entry.options["zones"] == list(range(1, 21))

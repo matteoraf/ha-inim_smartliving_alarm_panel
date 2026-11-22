@@ -17,7 +17,7 @@ import pytest
 from pytest_homeassistant_custom_component.common import async_fire_time_changed
 
 from custom_components.inim_smartliving_alarm import diagnostics, report_crypto
-from custom_components.inim_smartliving_alarm.const import DATA_API_CLIENT, DOMAIN
+from custom_components.inim_smartliving_alarm.const import DATA_PANEL, DOMAIN
 from custom_components.inim_smartliving_alarm.diagnostics import (
     PRIVATE_COPY,
     SNAPSHOT_LIFETIME,
@@ -331,10 +331,10 @@ async def test_report_while_the_entry_is_not_loaded(
 ) -> None:
     """Without the entry's client a connection of its own reads the panel."""
     data = hass.data[DOMAIN][entry.entry_id]
-    client = data[DATA_API_CLIENT]
-    await client.close()  # the board takes one client
-    monkeypatch.delitem(data, DATA_API_CLIENT)
+    panel = data[DATA_PANEL]
+    await panel.close()  # the board takes one client
+    monkeypatch.delitem(data, DATA_PANEL)
     report = await async_get_config_entry_diagnostics(hass, entry)
     assert report["blocks"]
     assert report["errors"] == []
-    monkeypatch.setitem(data, DATA_API_CLIENT, client)
+    monkeypatch.setitem(data, DATA_PANEL, panel)

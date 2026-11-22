@@ -15,6 +15,8 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from . import stored_config
+from .api import SmartLivingPanel
 from .const import (
     CONF_PANEL_NAME,
     CONF_SCENARIO_ARM_AWAY,
@@ -23,12 +25,11 @@ from .const import (
     CONF_SCENARIO_ARM_VACATION,
     CONF_SCENARIO_DISARM,
     DATA_ALARM_PANEL,
-    DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_SYSTEM_INFO,
     KEY_LIVE_ACTIVE_SCENARIO,
     KEY_LIVE_ACTIVE_SCENARIO_NUMBER,
     KEY_LIVE_ALARM_AREAS_LIST,
@@ -37,8 +38,12 @@ from .const import (
     KEY_LIVE_TRIGGERED_AREAS_LIST,
 )
 from .errors import InimCommandError, async_send_command
-from .legacy import LegacyPanelClient
-from .selection import area_names
+from .stored_config import (
+    SystemInfo,
+    area_names,
+    device_model,
+    device_sw_version,
+)
 from .utils import async_activate_scenario
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,12 +57,12 @@ async def async_setup_entry(
     """Set up the Inim Alarm Control Panel from a config entry."""
     _LOGGER.debug("Setting up Inim Alarm Control Panel for entry: %s", entry.title)
 
-    api_client = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    panel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
 
     # Initial config fetched by config_flow and stored in entry.data
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
-    system_info = initial_panel_config.get(KEY_INIT_SYSTEM_INFO, {})
+    system_info = stored_config.system_info(initial_panel_config)
 
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
 
@@ -66,7 +71,7 @@ async def async_setup_entry(
 
     alarm_panel = InimAlarmControlPanel(
         coordinator,
-        api_client,
+        panel,
         entry,
         initial_panel_config,
         panel_display_name,
@@ -86,16 +91,16 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
     def __init__(
         self,
         coordinator: Any,
-        api_client: LegacyPanelClient,
+        panel: SmartLivingPanel,
         config_entry: ConfigEntry,
         initial_panel_config: dict[str, Any],
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         scenario_mappings: dict[str, int | None],
     ) -> None:
         """Initialize the alarm control panel entity."""
         super().__init__(coordinator)
-        self.api_client = api_client
+        self.panel = panel
         self.config_entry = config_entry
         self._initial_panel_config = initial_panel_config
         self._panel_display_name = panel_display_name
@@ -150,8 +155,8 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
             identifiers={(DOMAIN, self.config_entry.entry_id)},
             name=self._panel_display_name,
             manufacturer="Inim Electronics",
-            model=self._system_info.get("type", "SmartLiving"),
-            sw_version=self._system_info.get("version", "Unknown"),
+            model=device_model(self._system_info),
+            sw_version=device_sw_version(self._system_info),
         )
 
     @property
@@ -330,7 +335,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
             self.hass,
             self.config_entry,
             self.coordinator,
-            self.api_client,
+            self.panel,
             self._initial_panel_config,
             self.unique_id,
             self.name,
@@ -415,7 +420,7 @@ class InimAlarmControlPanel(CoordinatorEntity, AlarmControlPanelEntity):
         ) or f"Area {area_id}"
         try:
             await async_send_command(
-                self.api_client.panel.reset_alarm_memory(frozenset({area_id})),
+                self.panel.reset_alarm_memory(frozenset({area_id})),
                 area_name,
             )
         finally:

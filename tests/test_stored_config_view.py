@@ -30,7 +30,6 @@ from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
 )
-from custom_components.inim_smartliving_alarm.legacy import zone_exists
 from custom_components.inim_smartliving_alarm.panel_view import configuration_view
 from custom_components.inim_smartliving_alarm.selection import (
     available_areas,
@@ -38,10 +37,13 @@ from custom_components.inim_smartliving_alarm.selection import (
     available_scenarios,
     available_zones,
     output_items,
-    scenario_area_modes,
     suggested_mappings,
     suggested_selection,
-    zone_details,
+)
+from custom_components.inim_smartliving_alarm.stored_config import (
+    scenario_area_modes,
+    stored_zones,
+    system_info,
 )
 
 from .fake_panel import (
@@ -64,26 +66,26 @@ ENTRIES = Path(__file__).parent / "fixtures" / "entries"
 
 def reader_view(config: Mapping[str, Any]) -> dict[str, Any]:
     """Everything the integration reads from a stored configuration."""
-    zones = []
-    for detail in zone_details(config):
-        if "zone_index" not in detail:
-            continue
-        zones.append(
-            {
-                "number": detail["zone_index"] + 1,
-                "exists": zone_exists(detail),
-                "areas": detail.get("assigned_areas"),
-                "terminal": detail.get("terminal_index"),
-                "terminal_type": detail.get("terminal_type_val"),
-                "second_zone": detail.get("second_zone"),
-                "slot": detail.get("internal_index"),
-            }
-        )
-    system_info = config.get("system_info") or {}
+    zones = [
+        {
+            "number": zone.number,
+            "exists": zone.exists,
+            "areas": list(zone.areas),
+            "terminal": zone.terminal,
+            "terminal_type": zone.terminal_type,
+            "second_zone": zone.second_zone,
+            "slot": zone.slot,
+        }
+        for zone in stored_zones(config)
+    ]
+    info = system_info(config)
     proposed = suggested_selection(config)
     return {
         "configuration": configuration_view(config),
-        "system_info": {key: system_info.get(key) for key in ("version", "type")},
+        "system_info": {
+            "version": info.version if info else None,
+            "type": info.type if info else None,
+        },
         "available": {
             "areas": available_areas(config),
             "zones": available_zones(config),

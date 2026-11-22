@@ -36,6 +36,556 @@
   },
   {
    "attributes": {
+    "area_id": 10,
+    "area_name": "Area 10",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 10 Alarm (Area 10)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_10_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 10 Alarm (Area 10)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_10_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 10,
+    "area_name": "Area 10",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 10 Tamper (Area 10)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_10_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 10 Tamper (Area 10)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_10_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 10,
+    "area_name": "Area 10",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 10 Alarm memory (Area 10)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_10_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 10 Alarm memory (Area 10)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_10_triggered_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 1,
+    "area_name": "Area 1",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 1 Alarm (Area 1)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_1_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 1 Alarm (Area 1)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_1_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 1,
+    "area_name": "Area 1",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 1 Tamper (Area 1)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_1_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 1 Tamper (Area 1)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_1_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 1,
+    "area_name": "Area 1",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 1 Alarm memory (Area 1)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_1_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 1 Alarm memory (Area 1)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_1_triggered_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 2,
+    "area_name": "Area 2",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 2 Alarm (Area 2)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_2_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 2 Alarm (Area 2)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_2_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 2,
+    "area_name": "Area 2",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 2 Tamper (Area 2)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_2_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 2 Tamper (Area 2)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_2_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 2,
+    "area_name": "Area 2",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 2 Alarm memory (Area 2)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_2_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 2 Alarm memory (Area 2)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_2_triggered_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 3,
+    "area_name": "Area 3",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 3 Alarm (Area 3)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_3_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 3 Alarm (Area 3)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_3_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 3,
+    "area_name": "Area 3",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 3 Tamper (Area 3)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_3_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 3 Tamper (Area 3)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_3_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 3,
+    "area_name": "Area 3",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 3 Alarm memory (Area 3)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_3_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 3 Alarm memory (Area 3)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_3_triggered_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 4,
+    "area_name": "Area 4",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 4 Alarm (Area 4)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_4_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 4 Alarm (Area 4)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_4_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 4,
+    "area_name": "Area 4",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 4 Tamper (Area 4)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_4_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 4 Tamper (Area 4)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_4_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 4,
+    "area_name": "Area 4",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 4 Alarm memory (Area 4)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_4_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 4 Alarm memory (Area 4)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_4_triggered_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 5,
+    "area_name": "Area 5",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 5 Alarm (Area 5)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_5_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 5 Alarm (Area 5)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_5_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 5,
+    "area_name": "Area 5",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 5 Tamper (Area 5)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_5_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 5 Tamper (Area 5)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_5_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 5,
+    "area_name": "Area 5",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 5 Alarm memory (Area 5)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_5_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 5 Alarm memory (Area 5)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_5_triggered_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 6,
+    "area_name": "Area 6",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 6 Alarm (Area 6)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_6_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 6 Alarm (Area 6)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_6_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 6,
+    "area_name": "Area 6",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 6 Tamper (Area 6)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_6_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 6 Tamper (Area 6)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_6_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 6,
+    "area_name": "Area 6",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 6 Alarm memory (Area 6)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_6_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 6 Alarm memory (Area 6)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_6_triggered_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 7,
+    "area_name": "Area 7",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 7 Alarm (Area 7)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_7_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 7 Alarm (Area 7)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_7_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 7,
+    "area_name": "Area 7",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 7 Tamper (Area 7)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_7_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 7 Tamper (Area 7)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_7_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 7,
+    "area_name": "Area 7",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 7 Alarm memory (Area 7)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_7_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 7 Alarm memory (Area 7)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_7_triggered_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 8,
+    "area_name": "Area 8",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 8 Alarm (Area 8)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_8_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 8 Alarm (Area 8)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_8_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 8,
+    "area_name": "Area 8",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 8 Tamper (Area 8)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_8_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 8 Tamper (Area 8)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_8_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 8,
+    "area_name": "Area 8",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 8 Alarm memory (Area 8)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_8_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 8 Alarm memory (Area 8)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_8_triggered_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 9,
+    "area_name": "Area 9",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 9 Alarm (Area 9)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_9_alarm",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 9 Alarm (Area 9)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_9_alarm_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 9,
+    "area_name": "Area 9",
+    "device_class": "tamper",
+    "friendly_name": "Test Panel Area 9 Tamper (Area 9)"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_9_tamper",
+   "hidden_by": null,
+   "original_device_class": "tamper",
+   "original_icon": null,
+   "original_name": "Area 9 Tamper (Area 9)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_9_tamper_bs"
+  },
+  {
+   "attributes": {
+    "area_id": 9,
+    "area_name": "Area 9",
+    "device_class": "safety",
+    "friendly_name": "Test Panel Area 9 Alarm memory (Area 9)",
+    "tamper_memory": false
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "binary_sensor.test_panel_test_panel_area_9_triggered",
+   "hidden_by": null,
+   "original_device_class": "safety",
+   "original_icon": null,
+   "original_name": "Area 9 Alarm memory (Area 9)",
+   "platform": "binary_sensor",
+   "state": "off",
+   "unique_id": "_area_9_triggered_bs"
+  },
+  {
+   "attributes": {
     "friendly_name": "Test Panel Programming mode",
     "icon": "mdi:wrench-clock"
    },
@@ -3732,6 +4282,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "total",
+     "10": "keep",
+     "2": "total",
+     "3": "total",
+     "4": "total",
+     "5": "total",
+     "6": "total",
+     "7": "total",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 1'",
     "icon": "mdi:play-box",
     "scenario_index": 0,
@@ -3750,6 +4312,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "disarm",
+     "10": "keep",
+     "2": "disarm",
+     "3": "disarm",
+     "4": "disarm",
+     "5": "disarm",
+     "6": "disarm",
+     "7": "disarm",
+     "8": "disarm",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 2'",
     "icon": "mdi:play-box",
     "scenario_index": 1,
@@ -3768,6 +4342,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 11'",
     "icon": "mdi:play-box",
     "scenario_index": 10,
@@ -3786,6 +4372,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 12'",
     "icon": "mdi:play-box",
     "scenario_index": 11,
@@ -3804,6 +4402,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 13'",
     "icon": "mdi:play-box",
     "scenario_index": 12,
@@ -3822,6 +4432,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 14'",
     "icon": "mdi:play-box",
     "scenario_index": 13,
@@ -3840,6 +4462,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 15'",
     "icon": "mdi:play-box",
     "scenario_index": 14,
@@ -3858,6 +4492,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 16'",
     "icon": "mdi:play-box",
     "scenario_index": 15,
@@ -3876,6 +4522,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 17'",
     "icon": "mdi:play-box",
     "scenario_index": 16,
@@ -3894,6 +4552,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 18'",
     "icon": "mdi:play-box",
     "scenario_index": 17,
@@ -3912,6 +4582,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 19'",
     "icon": "mdi:play-box",
     "scenario_index": 18,
@@ -3930,6 +4612,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 20'",
     "icon": "mdi:play-box",
     "scenario_index": 19,
@@ -3948,6 +4642,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "total",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "total",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 3'",
     "icon": "mdi:play-box",
     "scenario_index": 2,
@@ -3966,6 +4672,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 21'",
     "icon": "mdi:play-box",
     "scenario_index": 20,
@@ -3984,6 +4702,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 22'",
     "icon": "mdi:play-box",
     "scenario_index": 21,
@@ -4002,6 +4732,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 23'",
     "icon": "mdi:play-box",
     "scenario_index": 22,
@@ -4020,6 +4762,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 24'",
     "icon": "mdi:play-box",
     "scenario_index": 23,
@@ -4038,6 +4792,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 25'",
     "icon": "mdi:play-box",
     "scenario_index": 24,
@@ -4056,6 +4822,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 26'",
     "icon": "mdi:play-box",
     "scenario_index": 25,
@@ -4074,6 +4852,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 27'",
     "icon": "mdi:play-box",
     "scenario_index": 26,
@@ -4092,6 +4882,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 28'",
     "icon": "mdi:play-box",
     "scenario_index": 27,
@@ -4110,6 +4912,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 29'",
     "icon": "mdi:play-box",
     "scenario_index": 28,
@@ -4128,6 +4942,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 30'",
     "icon": "mdi:play-box",
     "scenario_index": 29,
@@ -4146,6 +4972,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 4'",
     "icon": "mdi:play-box",
     "scenario_index": 3,
@@ -4164,6 +5002,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 5'",
     "icon": "mdi:play-box",
     "scenario_index": 4,
@@ -4182,6 +5032,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 6'",
     "icon": "mdi:play-box",
     "scenario_index": 5,
@@ -4200,6 +5062,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 7'",
     "icon": "mdi:play-box",
     "scenario_index": 6,
@@ -4218,6 +5092,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 8'",
     "icon": "mdi:play-box",
     "scenario_index": 7,
@@ -4236,6 +5122,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 9'",
     "icon": "mdi:play-box",
     "scenario_index": 8,
@@ -4254,6 +5152,18 @@
   },
   {
    "attributes": {
+    "area_actions_details": {
+     "1": "keep",
+     "10": "keep",
+     "2": "keep",
+     "3": "keep",
+     "4": "keep",
+     "5": "keep",
+     "6": "keep",
+     "7": "keep",
+     "8": "keep",
+     "9": "keep"
+    },
     "friendly_name": "Test Panel Activate 'Scenario 10'",
     "icon": "mdi:play-box",
     "scenario_index": 9,
@@ -4269,6 +5179,336 @@
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_9"
+  },
+  {
+   "attributes": {
+    "area_id": 1,
+    "area_name": "Area 1",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 1 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_1_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 1 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_1"
+  },
+  {
+   "attributes": {
+    "area_id": 10,
+    "area_name": "Area 10",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 10 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_10_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 10 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_10"
+  },
+  {
+   "attributes": {
+    "area_id": 2,
+    "area_name": "Area 2",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 2 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_2_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 2 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_2"
+  },
+  {
+   "attributes": {
+    "area_id": 3,
+    "area_name": "Area 3",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 3 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_3_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 3 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_3"
+  },
+  {
+   "attributes": {
+    "area_id": 4,
+    "area_name": "Area 4",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 4 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_4_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 4 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_4"
+  },
+  {
+   "attributes": {
+    "area_id": 5,
+    "area_name": "Area 5",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 5 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_5_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 5 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_5"
+  },
+  {
+   "attributes": {
+    "area_id": 6,
+    "area_name": "Area 6",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 6 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_6_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 6 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_6"
+  },
+  {
+   "attributes": {
+    "area_id": 7,
+    "area_name": "Area 7",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 7 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_7_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 7 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_7"
+  },
+  {
+   "attributes": {
+    "area_id": 8,
+    "area_name": "Area 8",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 8 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_8_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 8 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_8"
+  },
+  {
+   "attributes": {
+    "area_id": 9,
+    "area_name": "Area 9",
+    "auto_arm_partial": false,
+    "clear_call_queue_on_disarm": true,
+    "entry_time": "0 s",
+    "entry_time_2": "not used",
+    "exit_time": "0 s",
+    "friendly_name": "Test Panel Area 9 arming mode",
+    "icon": "mdi:shield-home-outline",
+    "options": [
+     "disarmed",
+     "armed_total",
+     "armed_partial",
+     "armed_instant"
+    ],
+    "patrol_time": "5 min",
+    "pre_arm_warning_time": "3 min",
+    "reset_alarm_memory_on_arming": true,
+    "timer_program": "none"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "select.test_panel_area_9_arming_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-home-outline",
+   "original_name": "Area 9 arming mode",
+   "platform": "select",
+   "state": "disarmed",
+   "unique_id": "_area_mode_select_9"
   },
   {
    "attributes": null,
@@ -4377,7 +5617,7 @@
   {
    "attributes": {
     "expanders": [
-     "Exp Kitchen"
+     "Expander 1"
     ],
     "friendly_name": "Test Panel Peripherals",
     "icon": "mdi:devices",
@@ -4386,12 +5626,12 @@
      "Tast Garage"
     ],
     "readers": [
-     "PK Giorno",
-     "PK Garage",
+     "Reader 1",
+     "Reader 2",
      "Reader 3"
     ],
     "sirens": [
-     "Outdoor siren"
+     "Siren 1"
     ]
    },
    "disabled_by": null,
@@ -4448,8 +5688,911 @@
    "original_icon": "mdi:account-key",
    "original_name": "User code",
    "platform": "sensor",
-   "state": "Master",
+   "state": "Code 1",
    "unique_id": "_user_code"
+  },
+  {
+   "attributes": {
+    "area_id": 1,
+    "area_name": "Area 1",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 1 (Area 1)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_1",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 1 (Area 1)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_1"
+  },
+  {
+   "attributes": {
+    "area_id": 10,
+    "area_name": "Area 10",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 10 (Area 10)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_10",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 10 (Area 10)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_10"
+  },
+  {
+   "attributes": {
+    "area_id": 2,
+    "area_name": "Area 2",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 2 (Area 2)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_2",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 2 (Area 2)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_2"
+  },
+  {
+   "attributes": {
+    "area_id": 3,
+    "area_name": "Area 3",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 3 (Area 3)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_3",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 3 (Area 3)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_3"
+  },
+  {
+   "attributes": {
+    "area_id": 4,
+    "area_name": "Area 4",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 4 (Area 4)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_4",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 4 (Area 4)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_4"
+  },
+  {
+   "attributes": {
+    "area_id": 5,
+    "area_name": "Area 5",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 5 (Area 5)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_5",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 5 (Area 5)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_5"
+  },
+  {
+   "attributes": {
+    "area_id": 6,
+    "area_name": "Area 6",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 6 (Area 6)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_6",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 6 (Area 6)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_6"
+  },
+  {
+   "attributes": {
+    "area_id": 7,
+    "area_name": "Area 7",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 7 (Area 7)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_7",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 7 (Area 7)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_7"
+  },
+  {
+   "attributes": {
+    "area_id": 8,
+    "area_name": "Area 8",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 8 (Area 8)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_8",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 8 (Area 8)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_8"
+  },
+  {
+   "attributes": {
+    "area_id": 9,
+    "area_name": "Area 9",
+    "arming_mode": "disarmed",
+    "friendly_name": "Test Panel Area 9 (Area 9)",
+    "icon": "mdi:shield-off-outline",
+    "status_text": "disarmed"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_area_9",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-off-outline",
+   "original_name": "Test Panel Area 9 (Area 9)",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_area_switch_9"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 1 Enabled (Zone 1)",
+    "icon": "mdi:shield-check",
+    "internal_index": 0,
+    "zone_id": 1,
+    "zone_name": "Zone 1"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_1",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 1 Enabled (Zone 1)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_1"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 10 Enabled (Zone 10)",
+    "icon": "mdi:shield-check",
+    "internal_index": 9,
+    "zone_id": 10,
+    "zone_name": "Zone 10"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_10",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 10 Enabled (Zone 10)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_10"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 11 Enabled (Zone 11)",
+    "icon": "mdi:shield-check",
+    "internal_index": 10,
+    "zone_id": 11,
+    "zone_name": "Zone 11"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_11",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 11 Enabled (Zone 11)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_11"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 12 Enabled (Zone 12)",
+    "icon": "mdi:shield-check",
+    "internal_index": 11,
+    "zone_id": 12,
+    "zone_name": "Zone 12"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_12",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 12 Enabled (Zone 12)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_12"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 13 Enabled (Zone 13)",
+    "icon": "mdi:shield-check",
+    "internal_index": 12,
+    "zone_id": 13,
+    "zone_name": "Zone 13"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_13",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 13 Enabled (Zone 13)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_13"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 14 Enabled (Zone 14)",
+    "icon": "mdi:shield-check",
+    "internal_index": 13,
+    "zone_id": 14,
+    "zone_name": "Zone 14"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_14",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 14 Enabled (Zone 14)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_14"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 15 Enabled (Zone 15)",
+    "icon": "mdi:shield-check",
+    "internal_index": 14,
+    "zone_id": 15,
+    "zone_name": "Zone 15"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_15",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 15 Enabled (Zone 15)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_15"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 16 Enabled (Zone 16)",
+    "icon": "mdi:shield-check",
+    "internal_index": 15,
+    "zone_id": 16,
+    "zone_name": "Zone 16"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_16",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 16 Enabled (Zone 16)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_16"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 17 Enabled (Zone 17)",
+    "icon": "mdi:shield-check",
+    "internal_index": 16,
+    "zone_id": 17,
+    "zone_name": "Zone 17"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_17",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 17 Enabled (Zone 17)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_17"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 18 Enabled (Zone 18)",
+    "icon": "mdi:shield-check",
+    "internal_index": 17,
+    "zone_id": 18,
+    "zone_name": "Zone 18"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_18",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 18 Enabled (Zone 18)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_18"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 19 Enabled (Zone 19)",
+    "icon": "mdi:shield-check",
+    "internal_index": 18,
+    "zone_id": 19,
+    "zone_name": "Zone 19"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_19",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 19 Enabled (Zone 19)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_19"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 2 Enabled (Zone 2)",
+    "icon": "mdi:shield-check",
+    "internal_index": 1,
+    "zone_id": 2,
+    "zone_name": "Zone 2"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_2",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 2 Enabled (Zone 2)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_2"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 20 Enabled (Zone 20)",
+    "icon": "mdi:shield-check",
+    "internal_index": 19,
+    "zone_id": 20,
+    "zone_name": "Zone 20"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_20",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 20 Enabled (Zone 20)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_20"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 21 Enabled (Zone 21)",
+    "icon": "mdi:shield-check",
+    "internal_index": 20,
+    "zone_id": 21,
+    "zone_name": "Zone 21"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_21",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 21 Enabled (Zone 21)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_21"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 22 Enabled (Zone 22)",
+    "icon": "mdi:shield-check",
+    "internal_index": 21,
+    "zone_id": 22,
+    "zone_name": "Zone 22"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_22",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 22 Enabled (Zone 22)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_22"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 23 Enabled (Zone 23)",
+    "icon": "mdi:shield-check",
+    "internal_index": 22,
+    "zone_id": 23,
+    "zone_name": "Zone 23"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_23",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 23 Enabled (Zone 23)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_23"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 24 Enabled (Zone 24)",
+    "icon": "mdi:shield-check",
+    "internal_index": 23,
+    "zone_id": 24,
+    "zone_name": "Zone 24"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_24",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 24 Enabled (Zone 24)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_24"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 25 Enabled (Zone 25)",
+    "icon": "mdi:shield-check",
+    "internal_index": 24,
+    "zone_id": 25,
+    "zone_name": "Zone 25"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_25",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 25 Enabled (Zone 25)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_25"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 26 Enabled (Zone 26)",
+    "icon": "mdi:shield-check",
+    "internal_index": 25,
+    "zone_id": 26,
+    "zone_name": "Zone 26"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_26",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 26 Enabled (Zone 26)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_26"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 27 Enabled (Zone 27)",
+    "icon": "mdi:shield-check",
+    "internal_index": 26,
+    "zone_id": 27,
+    "zone_name": "Zone 27"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_27",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 27 Enabled (Zone 27)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_27"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 28 Enabled (Zone 28)",
+    "icon": "mdi:shield-check",
+    "internal_index": 27,
+    "zone_id": 28,
+    "zone_name": "Zone 28"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_28",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 28 Enabled (Zone 28)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_28"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 29 Enabled (Zone 29)",
+    "icon": "mdi:shield-check",
+    "internal_index": 28,
+    "zone_id": 29,
+    "zone_name": "Zone 29"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_29",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 29 Enabled (Zone 29)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_29"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 3 Enabled (Zone 3)",
+    "icon": "mdi:shield-check",
+    "internal_index": 2,
+    "zone_id": 3,
+    "zone_name": "Zone 3"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_3",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 3 Enabled (Zone 3)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_3"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 30 Enabled (Zone 30)",
+    "icon": "mdi:shield-check",
+    "internal_index": 29,
+    "zone_id": 30,
+    "zone_name": "Zone 30"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_30",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 30 Enabled (Zone 30)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_30"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 31 Enabled (Zone 31)",
+    "icon": "mdi:shield-check",
+    "internal_index": 30,
+    "zone_id": 31,
+    "zone_name": "Zone 31"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_31",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 31 Enabled (Zone 31)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_31"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 32 Enabled (Zone 32)",
+    "icon": "mdi:shield-check",
+    "internal_index": 31,
+    "zone_id": 32,
+    "zone_name": "Zone 32"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_32",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 32 Enabled (Zone 32)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_32"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 33 Enabled (Zone 33)",
+    "icon": "mdi:shield-check",
+    "internal_index": 32,
+    "zone_id": 33,
+    "zone_name": "Zone 33"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_33",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 33 Enabled (Zone 33)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_33"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 34 Enabled (Zone 34)",
+    "icon": "mdi:shield-check",
+    "internal_index": 33,
+    "zone_id": 34,
+    "zone_name": "Zone 34"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_34",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 34 Enabled (Zone 34)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_34"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 35 Enabled (Zone 35)",
+    "icon": "mdi:shield-check",
+    "internal_index": 34,
+    "zone_id": 35,
+    "zone_name": "Zone 35"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_35",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 35 Enabled (Zone 35)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_35"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 36 Enabled (Zone 36)",
+    "icon": "mdi:shield-check",
+    "internal_index": 110,
+    "zone_id": 36,
+    "zone_name": "Zone 36"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_36",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 36 Enabled (Zone 36)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_36"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 37 Enabled (Zone 37)",
+    "icon": "mdi:shield-check",
+    "internal_index": 112,
+    "zone_id": 37,
+    "zone_name": "Zone 37"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_37",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 37 Enabled (Zone 37)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_37"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 4 Enabled (Zone 4)",
+    "icon": "mdi:shield-check",
+    "internal_index": 3,
+    "zone_id": 4,
+    "zone_name": "Zone 4"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_4",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 4 Enabled (Zone 4)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_4"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 5 Enabled (Zone 5)",
+    "icon": "mdi:shield-check",
+    "internal_index": 4,
+    "zone_id": 5,
+    "zone_name": "Zone 5"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_5",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 5 Enabled (Zone 5)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_5"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 6 Enabled (Zone 6)",
+    "icon": "mdi:shield-check",
+    "internal_index": 5,
+    "zone_id": 6,
+    "zone_name": "Zone 6"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_6",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 6 Enabled (Zone 6)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_6"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 7 Enabled (Zone 7)",
+    "icon": "mdi:shield-check",
+    "internal_index": 6,
+    "zone_id": 7,
+    "zone_name": "Zone 7"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_7",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 7 Enabled (Zone 7)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_7"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 8 Enabled (Zone 8)",
+    "icon": "mdi:shield-check",
+    "internal_index": 7,
+    "zone_id": 8,
+    "zone_name": "Zone 8"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_8",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 8 Enabled (Zone 8)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_8"
+  },
+  {
+   "attributes": {
+    "friendly_name": "Test Panel Zone 9 Enabled (Zone 9)",
+    "icon": "mdi:shield-check",
+    "internal_index": 8,
+    "zone_id": 9,
+    "zone_name": "Zone 9"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "switch.test_panel_test_panel_zone_9",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:shield-check",
+   "original_name": "Test Panel Zone 9 Enabled (Zone 9)",
+   "platform": "switch",
+   "state": "on",
+   "unique_id": "_zone_enabled_switch_9"
   }
  ],
  "home_assistant": "2026.10"

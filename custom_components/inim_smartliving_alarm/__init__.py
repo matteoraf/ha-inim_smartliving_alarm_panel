@@ -1,38 +1,16 @@
 """The Inim Alarm integration."""
 
-import copy
 import logging
-from pathlib import Path
-from typing import Any
 
-from homeassistant.components.alarm_control_panel import (
-    DOMAIN as ALARM_CONTROL_PANEL_DOMAIN,
-)
-from homeassistant.config_entries import ConfigEntry, ConfigEntryState
-from homeassistant.const import ATTR_CONFIG_ENTRY_ID
-from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er, issue_registry as ir
 import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.service import (
-    async_extract_entity_ids,
-    async_set_service_schema,
-)
 from homeassistant.helpers.typing import ConfigType
-from homeassistant.util.yaml import load_yaml_dict
-import voluptuous as vol
 
+from .api import SmartLivingPanel, create_panel
 from .const import (
-    ARM_MODE_DISARM,
-    ARM_MODE_INSTANT,
-    ARM_MODE_PARTIAL,
-    ARM_MODE_TOTAL,
-    ATTR_AREAS,
-    ATTR_FORCE_ARM,
-    ATTR_MODE,
-    ATTR_SCENARIO,
     BOARD_SMARTLAN_SI,
-    CONF_AREAS,
     CONF_BOARD,
     CONF_HOST,
     CONF_LIMIT_AREAS,
@@ -43,270 +21,52 @@ from .const import (
     CONF_POLLING_INTERVAL,
     CONF_PORT,
     CONF_READER_NAMES,
-    CONF_SCENARIOS,
     CONF_USERNAME,
-    DATA_ALARM_PANEL,
-    DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DEFAULT_POLLING_INTERVAL,
     DOMAIN,
-    KEY_INIT_AREA_RECORDS,
-    KEY_INIT_CODES,
-    KEY_INIT_EXPANDERS,
-    KEY_INIT_EXTRA_OUTPUT_OPTIONS,
-    KEY_INIT_FIXED_OUTPUT_LABELS,
-    KEY_INIT_FIXED_OUTPUT_RECORDS,
-    KEY_INIT_GENERAL_OPTIONS,
-    KEY_INIT_KEYS,
-    KEY_INIT_PERIPHERALS,
-    KEY_INIT_PHYSICAL_MAP,
-    KEY_INIT_READERS,
-    KEY_INIT_SIRENS,
-    KEY_INIT_TIMERS,
-    KEY_INIT_USER_CODE_OUTPUTS,
-    KEY_INIT_ZONES_CONFIG,
-    KEY_INIT_ZONES_CONFIG_DETAILED,
     PLATFORMS,
-    SERVICE_ACTIVATE_SCENARIO,
-    SERVICE_ALARM_RESET,
-    SERVICE_ARM_AREA,
-    SERVICE_REREAD_PANEL_CONFIGURATION,
 )
-
-# Import the custom coordinator
 from .coordinator import InimDataUpdateCoordinator
-from .errors import InimCommandError
-
-# Import API
-from .legacy import (
-    LegacyPanelClient,
-    create_client,
-    upgrade_zone_configuration,
-    zone_exists,
-)
 from .panel_config import (
+    PanelConfigError,
+    PanelUnreachable,
     async_fetch_panel_configuration,
-    async_reread_panel_configuration,
 )
-from .protocol.commands import ArmMode
 from .protocol.errors import UnsupportedPanelError
 from .protocol.model import model_for
-from .readiness import async_arm
 from .report_state import async_drop_report_state
 from .selection import (
-    area_label,
-    is_disarm_scenario,
     item_of_unique_id,
     migrated_selection,
     panel_config,
-    scenario_label,
-    selected,
-    stored_layout_fits,
-    stored_model,
     unselected_items,
 )
-from .utils import async_activate_scenario
+from .services import (
+    async_forget_action_descriptions,
+    async_register_services,
+    async_update_action_descriptions,
+)
+from .stored_config import (
+    migrate_v1,
+    missing_blocks,
+    stored_layout_fits,
+    stored_model,
+    stored_zones,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
-# Data this version needs in the stored panel configuration: a configuration
-# stored by an earlier version without any of them is read again once at
-# setup. Add a key here whenever the configuration read stores something new.
-_REQUIRED_CONFIGURATION_KEYS = (
-    KEY_INIT_CODES,
-    KEY_INIT_PERIPHERALS,
-    KEY_INIT_GENERAL_OPTIONS,
-    KEY_INIT_AREA_RECORDS,
-    KEY_INIT_FIXED_OUTPUT_RECORDS,
-    KEY_INIT_FIXED_OUTPUT_LABELS,
-    KEY_INIT_PHYSICAL_MAP,
-    KEY_INIT_USER_CODE_OUTPUTS,
-    KEY_INIT_EXTRA_OUTPUT_OPTIONS,
-    KEY_INIT_KEYS,
-    KEY_INIT_READERS,
-    KEY_INIT_EXPANDERS,
-    KEY_INIT_TIMERS,
-    KEY_INIT_SIRENS,
-)
-
-# Where the action descriptions from services.yaml are kept (hass.data)
-_ACTION_DESCRIPTIONS = f"{DOMAIN}_action_descriptions"
 _LIMIT_KEYS = (CONF_LIMIT_AREAS, CONF_LIMIT_ZONES, CONF_LIMIT_SCENARIOS)
-
-REREAD_PANEL_CONFIGURATION_SCHEMA = vol.Schema(
-    {vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string}
-)
-
-
-ARM_AREA_MODES = {
-    ARM_MODE_TOTAL: ArmMode.AWAY,
-    ARM_MODE_PARTIAL: ArmMode.STAY,
-    ARM_MODE_INSTANT: ArmMode.INSTANT,
-    ARM_MODE_DISARM: ArmMode.DISARM,
-}
-
-ARM_AREA_SCHEMA = vol.Schema(
-    {
-        vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string,
-        vol.Required(ATTR_AREAS): vol.All(
-            cv.ensure_list,
-            [vol.All(vol.Coerce(int), vol.Range(min=1))],
-            vol.Length(min=1),
-        ),
-        vol.Required(ATTR_MODE): vol.In(list(ARM_AREA_MODES)),
-        vol.Optional(ATTR_FORCE_ARM, default=False): cv.boolean,
-    }
-)
-
-ACTIVATE_SCENARIO_SCHEMA = vol.Schema(
-    {
-        vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string,
-        vol.Required(ATTR_SCENARIO): vol.All(vol.Coerce(int), vol.Range(min=1)),
-        vol.Optional(ATTR_FORCE_ARM, default=False): cv.boolean,
-    }
-)
-
-
-def _loaded_entry(
-    hass: HomeAssistant, entry_id: str, not_loaded_key: str
-) -> ConfigEntry:
-    """The integration's entry with this ID; it must be loaded."""
-    entry = hass.config_entries.async_get_entry(entry_id)
-    if entry is None or entry.domain != DOMAIN:
-        raise ServiceValidationError(
-            translation_domain=DOMAIN,
-            translation_key="entry_not_found",
-            translation_placeholders={"entry_id": entry_id},
-        )
-    if entry.state is not ConfigEntryState.LOADED:
-        raise ServiceValidationError(
-            translation_domain=DOMAIN,
-            translation_key=not_loaded_key,
-            translation_placeholders={"title": entry.title},
-        )
-    return entry
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Register the integration services."""
-
-    async def async_reread_service(call: ServiceCall) -> None:
-        """Read the panel configuration of one entry again and reload it."""
-        entry = _loaded_entry(hass, call.data[ATTR_CONFIG_ENTRY_ID], "entry_not_loaded")
-        await async_reread_panel_configuration(hass, entry)
-
-    async def async_arm_area_service(call: ServiceCall) -> None:
-        """Arm or disarm one or more areas of one panel in a single command."""
-        entry = _loaded_entry(
-            hass, call.data[ATTR_CONFIG_ENTRY_ID], "entry_not_loaded_command"
-        )
-        api: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
-        areas = sorted(set(call.data[ATTR_AREAS]))
-        config = panel_config(entry.data)
-        imported = selected(entry.options, config, CONF_AREAS)
-        if missing := [area for area in areas if area not in imported]:
-            raise ServiceValidationError(
-                translation_domain=DOMAIN,
-                translation_key="area_not_imported",
-                translation_placeholders={
-                    "areas": ", ".join(str(area) for area in missing),
-                    "title": entry.title,
-                },
-            )
-        target = ", ".join(area_label(config, area) for area in areas)
-        mode = ARM_AREA_MODES[call.data[ATTR_MODE]]
-        _LOGGER.info("arm_area: %s -> %s", target, call.data[ATTR_MODE])
-        # Arming checks the zones first; disarming is never checked
-        await async_arm(
-            hass,
-            entry,
-            lambda check: api.panel.arm_areas(
-                dict.fromkeys(areas, mode), on_not_ready=check
-            ),
-            target,
-            force=call.data[ATTR_FORCE_ARM],
-        )
-        coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
-        await coordinator.async_request_refresh()
-
-    async def async_activate_scenario_service(call: ServiceCall) -> None:
-        """Activate one imported scenario of one panel."""
-        entry = _loaded_entry(
-            hass, call.data[ATTR_CONFIG_ENTRY_ID], "entry_not_loaded_command"
-        )
-        number = call.data[ATTR_SCENARIO]
-        config = panel_config(entry.data)
-        if number not in selected(entry.options, config, CONF_SCENARIOS):
-            raise ServiceValidationError(
-                translation_domain=DOMAIN,
-                translation_key="scenario_not_imported",
-                translation_placeholders={
-                    "scenario": str(number),
-                    "title": entry.title,
-                },
-            )
-        label = scenario_label(config, number)
-        data = hass.data[DOMAIN][entry.entry_id]
-        await async_activate_scenario(
-            hass,
-            entry,
-            data[DATA_COORDINATOR],
-            data[DATA_API_CLIENT],
-            config,
-            f"{entry.entry_id}_activate_scenario_action",
-            entry.title,
-            number - 1,
-            f"activate scenario '{label}'",
-            is_disarm_scenario=is_disarm_scenario(config, number),
-            action_key="activate_scenario",
-            force=call.data[ATTR_FORCE_ARM],
-        )
-
-    async def async_alarm_reset_service(call: ServiceCall) -> None:
-        """Reset the alarm and tamper memories of the targeted panels' areas."""
-        registry = er.async_get(hass)
-        failures: list[InimCommandError] = []
-        for entity_id in sorted(await async_extract_entity_ids(call)):
-            registered = registry.async_get(entity_id)
-            if (
-                registered is None
-                or registered.platform != DOMAIN
-                or registered.domain != ALARM_CONTROL_PANEL_DOMAIN
-                or registered.config_entry_id is None
-            ):
-                continue
-            entry = _loaded_entry(
-                hass, registered.config_entry_id, "entry_not_loaded_command"
-            )
-            alarm_panel = hass.data[DOMAIN][entry.entry_id].get(DATA_ALARM_PANEL)
-            if alarm_panel is None:
-                continue
-            try:
-                await alarm_panel.async_reset_memories()
-            except InimCommandError as err:
-                failures.append(err)
-        if failures:
-            raise failures[0]
-
-    hass.services.async_register(DOMAIN, SERVICE_ALARM_RESET, async_alarm_reset_service)
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_REREAD_PANEL_CONFIGURATION,
-        async_reread_service,
-        schema=REREAD_PANEL_CONFIGURATION_SCHEMA,
-    )
-    hass.services.async_register(
-        DOMAIN, SERVICE_ARM_AREA, async_arm_area_service, schema=ARM_AREA_SCHEMA
-    )
-    hass.services.async_register(
-        DOMAIN,
-        SERVICE_ACTIVATE_SCENARIO,
-        async_activate_scenario_service,
-        schema=ACTIVATE_SCENARIO_SCHEMA,
-    )
+    """Register the integration's actions."""
+    async_register_services(hass)
     return True
 
 
@@ -328,8 +88,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.data.get(CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL),
     )
 
-    # One client per entry, holding one connection to the panel
-    api = create_client(
+    # One panel object per entry, holding one connection to the panel
+    panel = create_panel(
         host,
         port,
         pin,
@@ -343,7 +103,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = InimDataUpdateCoordinator(
         hass=hass,
         entry=entry,
-        api_client=api,
+        panel=panel,
         name=coordinator_name,
         update_interval_seconds=polling_interval,
     )
@@ -353,36 +113,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _LOGGER.debug(
         "(%s) Performing initial data refresh for coordinator...", entry.title
     )
+    # Until the platforms are set up, any failure closes the panel's
+    # connection: the board may accept only one
     try:
         await coordinator.async_config_entry_first_refresh()
-    except Exception:
-        await api.close()
-        raise
+        await _reread_configuration_if_outdated(hass, entry, panel)
+        _report_unsupported_panel(hass, entry, panel)
+        _remove_entities_not_imported(hass, entry)
 
-    await _reread_configuration_if_outdated(hass, entry, api)
-    _report_unsupported_panel(hass, entry, api)
-    _remove_entities_not_imported(hass, entry)
-
-    # Store the API instance and coordinator in hass.data for platforms to access.
-    # Platforms will also access static config from entry.data (set by config_flow).
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {
-        DATA_API_CLIENT: api,
-        DATA_COORDINATOR: coordinator,
-        # Static config like scenario names, zone types, etc., is in entry.data
-        # (e.g., entry.data[DATA_INITIAL_PANEL_CONFIG])
-    }
-
-    # Set up platforms (alarm_control_panel, binary_sensor, switch, button, sensor)
-    _LOGGER.debug("(%s) Forwarding setup to platforms: %s", entry.title, PLATFORMS)
-    try:
+        # The panel and the coordinator for the platforms; the stored panel
+        # configuration is in entry.data[DATA_INITIAL_PANEL_CONFIG]
+        hass.data.setdefault(DOMAIN, {})
+        hass.data[DOMAIN][entry.entry_id] = {
+            DATA_PANEL: panel,
+            DATA_COORDINATOR: coordinator,
+        }
+        _LOGGER.debug("(%s) Forwarding setup to platforms: %s", entry.title, PLATFORMS)
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     except Exception:
-        # Keep nothing of a failed setup: the client's connection included
-        hass.data[DOMAIN].pop(entry.entry_id, None)
-        if not hass.data[DOMAIN]:
-            hass.data.pop(DOMAIN)
-        await api.close()
+        # Keep nothing of a failed setup: the panel's connection included
+        if entry.entry_id in hass.data.get(DOMAIN, {}):
+            hass.data[DOMAIN].pop(entry.entry_id)
+            if not hass.data[DOMAIN]:
+                hass.data.pop(DOMAIN)
+        await panel.close()
         raise
     _warn_about_leftover_zone_entities(hass, entry)
     await async_update_action_descriptions(hass)
@@ -406,60 +160,16 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # Clean up data stored in hass.data
         if DOMAIN in hass.data and entry.entry_id in hass.data[DOMAIN]:
             entry_data = hass.data[DOMAIN].pop(entry.entry_id)
-            await entry_data[DATA_API_CLIENT].close()
+            await entry_data[DATA_PANEL].close()
             _LOGGER.debug("Cleaned up data for %s", entry.title)
         if not hass.data.get(DOMAIN):  # If no more entries for this domain
             hass.data.pop(DOMAIN, None)
             _LOGGER.debug("Cleaned up domain data for %s", DOMAIN)
         await async_update_action_descriptions(hass)
-        if DOMAIN not in hass.data:  # the last panel: nothing to describe
-            hass.data.pop(_ACTION_DESCRIPTIONS, None)
+        async_forget_action_descriptions(hass)
     else:
         _LOGGER.error("Failed to unload platforms for %s", entry.title)
     return unload_ok
-
-
-async def async_update_action_descriptions(hass: HomeAssistant) -> None:
-    """List the imported areas and scenarios of the loaded panels in the actions.
-
-    The arm_area form offers only the imported areas and the
-    activate_scenario form only the imported scenarios, by their panel
-    labels. The value of each choice is the number; with several panels, a
-    number lists the item of each panel that imports it, with the panel's
-    name. services.yaml holds the rest of the descriptions.
-    """
-    base = hass.data.get(_ACTION_DESCRIPTIONS)
-    if base is None:
-        services = await hass.async_add_executor_job(
-            load_yaml_dict, str(Path(__file__).parent / "services.yaml")
-        )
-        base = hass.data[_ACTION_DESCRIPTIONS] = {
-            SERVICE_ARM_AREA: services[SERVICE_ARM_AREA],
-            SERVICE_ACTIVATE_SCENARIO: services[SERVICE_ACTIVATE_SCENARIO],
-        }
-    entries = [
-        entry
-        for entry_id in hass.data.get(DOMAIN, {})
-        if (entry := hass.config_entries.async_get_entry(entry_id)) is not None
-    ]
-    for service, field, kind, label_of in (
-        (SERVICE_ARM_AREA, ATTR_AREAS, CONF_AREAS, area_label),
-        (SERVICE_ACTIVATE_SCENARIO, ATTR_SCENARIO, CONF_SCENARIOS, scenario_label),
-    ):
-        labels: dict[int, list[str]] = {}
-        for entry in entries:
-            config = panel_config(entry.data)
-            for number in selected(entry.options, config, kind):
-                label = label_of(config, number)
-                if len(entries) > 1:
-                    label = f"{label} ({entry.title})"
-                labels.setdefault(number, []).append(label)
-        description: dict[str, Any] = copy.deepcopy(base[service])
-        description["fields"][field]["selector"]["select"]["options"] = [
-            {"value": str(number), "label": ", ".join(names)}
-            for number, names in sorted(labels.items())
-        ]
-        async_set_service_schema(hass, DOMAIN, service, description)
 
 
 def _remove_entities_not_imported(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -493,7 +203,7 @@ def _unsupported_issue_id(entry: ConfigEntry) -> str:
 
 
 def _report_unsupported_panel(
-    hass: HomeAssistant, entry: ConfigEntry, api: LegacyPanelClient
+    hass: HomeAssistant, entry: ConfigEntry, panel: SmartLivingPanel
 ) -> None:
     """A repair issue while the panel has no profile of its own.
 
@@ -502,7 +212,7 @@ def _report_unsupported_panel(
     wrong. The issue goes away once the panel is supported.
     """
     try:
-        firmware = api.panel.firmware
+        firmware = panel.firmware
     except RuntimeError:  # not identified (no successful read)
         return
     try:
@@ -527,25 +237,23 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 
 async def _reread_configuration_if_outdated(
-    hass: HomeAssistant, entry: ConfigEntry, api: LegacyPanelClient
+    hass: HomeAssistant, entry: ConfigEntry, panel: SmartLivingPanel
 ) -> None:
-    """Read the configuration again if it was stored by an earlier version.
+    """Read the configuration again if the stored one is incomplete or outdated.
 
     Called at every setup, but it only looks at the stored configuration:
-    nothing is read from the panel unless it lacks the names of user codes,
-    keys and readers, the enabled peripherals or the general options
-    (stored from this version on), or it was stored with another layout.
-    The panel model is known from the first status read, and the stored
-    terminal records and peripherals must have its lengths; they differ
-    once for a panel that got its own profile (another model, or firmware
-    5.1) after it was set up with an earlier version, which read it with the
-    SmartLiving 1050's firmware 6 addresses. After the re-read neither
-    applies. Unique IDs do not change. If the re-read fails, setup goes on
-    with the stored configuration, and the blocks that do not fit are not
-    decoded.
+    nothing is read from the panel unless a block is missing (a
+    configuration stored by an earlier version, or a re-read that failed)
+    or it was stored with another layout. The panel model is known from the
+    first status read, and the stored terminal records and peripherals must
+    have its lengths; they differ once for a panel that got its own profile
+    (another model, or firmware 5.1) after it was set up with an earlier
+    version, which read it with the SmartLiving 1050's firmware 6 addresses.
+    Unique IDs do not change. If the re-read fails, setup goes on with the
+    stored configuration and the check runs again at the next start.
     """
     try:
-        model = api.panel.model
+        model = panel.model
     except RuntimeError:  # not identified (no successful read)
         return
     config = entry.data.get(DATA_INITIAL_PANEL_CONFIG) or {}
@@ -558,22 +266,22 @@ async def _reread_configuration_if_outdated(
             entry.title,
             model.name,
         )
-    elif any(key not in config for key in _REQUIRED_CONFIGURATION_KEYS):
+    elif missing_blocks(config):
         _LOGGER.info(
-            "%s: reading the panel configuration again for what this version "
-            "adds to it (such as the outputs' programming and names)",
+            "%s: reading the panel configuration again for what is not stored "
+            "yet (such as the names of user codes, keys and readers)",
             entry.title,
         )
     else:
         return
     try:
-        new_config = await async_fetch_panel_configuration(hass, api)
-    except (ConnectionError, ValueError) as err:
+        new_config = await async_fetch_panel_configuration(hass, panel)
+    except (PanelUnreachable, PanelConfigError) as err:
         _LOGGER.error(
-            "%s: cannot read the panel configuration again (%s); use 'Re-read "
-            "panel configuration' later",
+            "%s: cannot read the panel configuration again (%s); it is tried "
+            "again at the next start, or use 'Re-read panel configuration'",
             entry.title,
-            err,
+            getattr(err, "detail", err),
         )
         return
     hass.config_entries.async_update_entry(
@@ -599,14 +307,7 @@ def _warn_about_leftover_zone_entities(hass: HomeAssistant, entry: ConfigEntry) 
     removed automatically: the user deletes them.
     """
     config = entry.data.get(DATA_INITIAL_PANEL_CONFIG) or {}
-    details = (config.get(KEY_INIT_ZONES_CONFIG) or {}).get(
-        KEY_INIT_ZONES_CONFIG_DETAILED
-    ) or []
-    not_zones = {
-        detail["zone_index"] + 1
-        for detail in details
-        if "zone_index" in detail and not zone_exists(detail)
-    }
+    not_zones = {zone.number for zone in stored_zones(config) if not zone.exists}
     if not not_zones:
         return
     leftovers = []
@@ -628,25 +329,30 @@ def _warn_about_leftover_zone_entities(hass: HomeAssistant, entry: ConfigEntry) 
 
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Migrate an entry to the current version (1.5).
+    """Migrate an entry to the current version (2.1).
 
-    1.2 adds the board type; every older entry uses SmartLAN/SI. 1.3 stores
-    every zone number with its terminal type, rebuilt from the raw panel
-    data the entry already holds (no panel access). 1.4 replaces the counts
-    of areas, zones and scenarios with lists of the items to import, which
-    keep the same entities. 1.5 drops the reader names option: reader
-    names are read from the panel. A newer major version (from a later
-    integration release) cannot be loaded.
+    1.2 adds the board type; every older entry uses SmartLAN/SI. 1.3 stored
+    every zone number with its terminal type; nothing is left of it, as 2.1
+    decodes the zones from the stored records. 1.4 replaces the counts of
+    areas, zones and scenarios with lists of the items to import, which keep
+    the same entities. 1.5 drops the reader names option: reader names are
+    read from the panel. 2.1 keeps the panel configuration as the blocks
+    read from the panel, without what was derived from them (no panel
+    access); what the earlier versions did not keep is read again at setup.
+    A newer major version (from a later integration release) cannot be
+    loaded.
     """
     version, minor = config_entry.version, config_entry.minor_version
     _LOGGER.debug("Checking migration of config entry version %s.%s", version, minor)
-    if version > 1:
+    if version > 2:
         _LOGGER.error(
             "Config entry version %s.%s is newer than this integration supports",
             version,
             minor,
         )
         return False
+    if version > 1:
+        return True
     if minor < 2:
         hass.config_entries.async_update_entry(
             config_entry,
@@ -655,18 +361,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         )
         _LOGGER.info("Migrated config entry %s to version 1.2", config_entry.title)
     if config_entry.minor_version < 3:
-        data = dict(config_entry.data)
-        upgraded = upgrade_zone_configuration(data.get(DATA_INITIAL_PANEL_CONFIG) or {})
-        if upgraded is None:
-            _LOGGER.warning(
-                "The stored panel configuration of %s has no complete zone data; "
-                "zones are shown as before. Use 'Re-read panel configuration' to "
-                "read it from the panel",
-                config_entry.title,
-            )
-        else:
-            data[DATA_INITIAL_PANEL_CONFIG] = upgraded
-        hass.config_entries.async_update_entry(config_entry, data=data, minor_version=3)
+        hass.config_entries.async_update_entry(config_entry, minor_version=3)
         _LOGGER.info("Migrated config entry %s to version 1.3", config_entry.title)
     if config_entry.minor_version < 4:
         selection = migrated_selection({**config_entry.data, **config_entry.options})
@@ -691,6 +386,15 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             config_entry, options=options, minor_version=5
         )
         _LOGGER.info("Migrated config entry %s to version 1.5", config_entry.title)
+    data = dict(config_entry.data)
+    if DATA_INITIAL_PANEL_CONFIG in data:
+        data[DATA_INITIAL_PANEL_CONFIG] = migrate_v1(
+            data[DATA_INITIAL_PANEL_CONFIG] or {}
+        )
+    hass.config_entries.async_update_entry(
+        config_entry, data=data, version=2, minor_version=1
+    )
+    _LOGGER.info("Migrated config entry %s to version 2.1", config_entry.title)
     return True
 
 

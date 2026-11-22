@@ -5617,7 +5617,7 @@
   {
    "attributes": {
     "expanders": [
-     "Exp Kitchen"
+     "Expander 1"
     ],
     "friendly_name": "Test Panel Peripherals",
     "icon": "mdi:devices",
@@ -5626,12 +5626,12 @@
      "Tast Garage"
     ],
     "readers": [
-     "PK Giorno",
-     "PK Garage",
+     "Reader 1",
+     "Reader 2",
      "Reader 3"
     ],
     "sirens": [
-     "Outdoor siren"
+     "Siren 1"
     ]
    },
    "disabled_by": null,
@@ -5688,7 +5688,7 @@
    "original_icon": "mdi:account-key",
    "original_name": "User code",
    "platform": "sensor",
-   "state": "Master",
+   "state": "Code 1",
    "unique_id": "_user_code"
   },
   {

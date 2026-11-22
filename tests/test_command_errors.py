@@ -29,6 +29,8 @@ from custom_components.inim_smartliving_alarm.protocol.commands import (
 )
 from custom_components.inim_smartliving_alarm.selection import (
     panel_config,
+)
+from custom_components.inim_smartliving_alarm.stored_config import (
     zone_names,
 )
 

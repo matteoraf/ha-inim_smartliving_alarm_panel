@@ -1,7 +1,8 @@
-"""Behaviour of the integration's panel client against the fake SmartLiving 1050.
+"""Behaviour of the integration against the fake SmartLiving 1050.
 
-These tests describe the dictionaries the entities receive (legacy.py, on
-top of the asynchronous API).
+These tests describe what is stored from the panel configuration, the
+dictionaries the entities receive for the status and events (legacy.py, on
+top of the asynchronous API) and the commands.
 """
 
 from collections.abc import AsyncGenerator, Awaitable, Callable
@@ -11,12 +12,25 @@ from zoneinfo import ZoneInfo
 from homeassistant.core import HomeAssistant
 import pytest
 
-from custom_components.inim_smartliving_alarm.legacy import (
-    LegacyPanelClient,
-    create_client,
-    zone_exists,
+from custom_components.inim_smartliving_alarm.api import (
+    create_panel,
+)
+from custom_components.inim_smartliving_alarm.legacy import LegacyPanelClient
+from custom_components.inim_smartliving_alarm.protocol.commands import (
+    ArmMode,
+)
+from custom_components.inim_smartliving_alarm.stored_config import (
+    area_names,
+    keypad_names,
+    scenario_area_modes,
+    scenario_names,
+    store,
+    stored_zones,
+    system_info,
+    zone_names,
 )
 
+from .conftest import accepted
 from .fake_panel import FakePanel, captures, const as c
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
@@ -35,10 +49,10 @@ async def panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
 
 @pytest.fixture
 async def api(panel: FakePanel) -> AsyncGenerator[LegacyPanelClient]:
-    """Client for the fake panel, using PIN 1234 (user code 0)."""
-    client = create_client(panel.host, panel.port, "1234")
-    yield client
-    await client.close()
+    """Status and event reads of the fake panel, using PIN 1234 (user code 0)."""
+    connection = create_panel(panel.host, panel.port, "1234")
+    yield LegacyPanelClient(connection)
+    await connection.close()
 
 
 async def run(
@@ -65,46 +79,46 @@ async def test_initial_configuration(
     hass: HomeAssistant, api: LegacyPanelClient
 ) -> None:
     """Names, scenario actions and zone configuration are read and decoded."""
-    config = await run(hass, api.get_initial_panel_configuration)
+    config = store(await api.panel.read_configuration())
 
-    assert config["errors"] == []
-    assert config["system_info"]["version"] == "6.07"
-    assert config["system_info"]["type"] == "01050"
-    assert config["areas"]["names"] == [f"Area {n}" for n in range(1, 11)]
-    assert config["zones"]["zone_names"] == [f"Zone {n}" for n in range(1, 101)]
-    assert config["scenarios"]["names"] == [f"Scenario {n}" for n in range(1, 31)]
-    assert config["keyboard_names"]["names"][:2] == ["Tast Zona Giorno", "Tast Garage"]
+    info = system_info(config)
+    assert info is not None
+    assert (info.version, info.type) == ("6.07", "01050")
+    assert area_names(config) == [f"Area {n}" for n in range(1, 11)]
+    assert zone_names(config) == [f"Zone {n}" for n in range(1, 101)]
+    assert scenario_names(config) == [f"Scenario {n}" for n in range(1, 31)]
+    assert keypad_names(config)[:2] == ["Tast Zona Giorno", "Tast Garage"]
 
-    activations = config["scenario_activations"]
-    assert len(activations) == 30
-    assert activations[0]["area_actions"] == {
-        **dict.fromkeys(range(1, 8), "total"),
-        **dict.fromkeys(range(8, 11), "keep"),
+    modes = scenario_area_modes(config)
+    assert len(modes) == 30
+    assert modes[1] == {
+        **dict.fromkeys(range(1, 8), ArmMode.AWAY),
+        **dict.fromkeys(range(8, 11), ArmMode.KEEP),
     }
-    assert activations[1]["area_actions"] == {
-        **dict.fromkeys(range(1, 9), "disarm"),
-        9: "keep",
-        10: "keep",
+    assert modes[2] == {
+        **dict.fromkeys(range(1, 9), ArmMode.DISARM),
+        9: ArmMode.KEEP,
+        10: ArmMode.KEEP,
     }
-    assert activations[2]["area_actions"][1] == "total"
-    assert activations[2]["area_actions"][7] == "total"
+    assert modes[3][1] == ArmMode.AWAY
+    assert modes[3][7] == ArmMode.AWAY
 
-    zones = config["zones_config"]["zones_config_detailed"]
+    zones = stored_zones(config)
     assert len(zones) == 100  # every zone number; 51-100 are second zones
-    assert zones[19]["assigned_areas"] == [1]
-    assert zones[23]["assigned_areas"] == [4]
-    assert zones[35]["assigned_areas"] == [7]
-    # internal_index is the physical slot: keypad zones 36 and 37 sit at 110 and 112
-    assert zones[0]["internal_index"] == 0
-    assert zones[35]["internal_index"] == 110
-    assert zones[36]["internal_index"] == 112
-    assert "internal_index" not in zones[37]
+    assert zones[19].areas == (1,)
+    assert zones[23].areas == (4,)
+    assert zones[35].areas == (7,)
+    # the slot is the first physical slot: keypad zones 36 and 37 at 110 and 112
+    assert zones[0].slot == 0
+    assert zones[35].slot == 110
+    assert zones[36].slot == 112
+    assert zones[37].slot is None
     # terminal types: 37 inputs, the rest unused
-    assert zones[0]["terminal_type_desc"] == "Input"
-    assert zones[37]["terminal_type_desc"] == "Not used"
-    assert zones[50]["terminal_index"] == 0
-    assert zones[50]["second_zone"] is True
-    assert [zone_exists(zone) for zone in zones].count(True) == 37
+    assert zones[0].terminal_type == 0
+    assert zones[37].terminal_type == 4
+    assert zones[50].terminal == 0
+    assert zones[50].second_zone is True
+    assert [zone.exists for zone in zones].count(True) == 37
 
 
 # ------------------------------------------------------------ live status
@@ -176,21 +190,21 @@ async def test_arm_and_disarm(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Arming sends the captured frame and the area is armed; disarming reverts it."""
-    assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[3]) is True
+    assert await accepted(api.panel.arm_areas({3: ArmMode.AWAY})) is True
     assert writes(panel) == [captures.ARM_AREA_3]
     assert panel.state.armed_areas() == [3]
 
-    assert await run(hass, api.execute_arm_disarm_areas, areas_to_disarm=[3]) is True
+    assert await accepted(api.panel.arm_areas({3: ArmMode.DISARM})) is True
     assert panel.state.armed_areas() == []
 
 
 async def test_arm_with_wrong_pin(hass: HomeAssistant, panel: FakePanel) -> None:
     """A PIN not in the panel is refused and nothing changes."""
-    api = create_client(panel.host, panel.port, "9999")
+    connection = create_panel(panel.host, panel.port, "9999")
     try:
-        assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[3]) is False
+        assert await accepted(connection.arm_areas({3: ArmMode.AWAY})) is False
     finally:
-        await api.close()
+        await connection.close()
     assert panel.state.armed_areas() == []
 
 
@@ -200,7 +214,7 @@ async def test_arm_with_open_zone(
     """A panel that does not allow arming with zones not ready refuses it."""
     panel.state.zone_states[0] = c.ZONE_ALARM  # zone 1, area 1
     panel.state.block_arming_when_not_ready = True
-    assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[1]) is False
+    assert await accepted(api.panel.arm_areas({1: ArmMode.AWAY})) is False
     assert panel.state.armed_areas() == []
 
 
@@ -209,7 +223,7 @@ async def test_arm_with_open_zone_accepted(
 ) -> None:
     """Otherwise the panel arms with a zone open."""
     panel.state.zone_states[0] = c.ZONE_ALARM  # zone 1, area 1
-    assert await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[1]) is True
+    assert await accepted(api.panel.arm_areas({1: ArmMode.AWAY})) is True
     assert panel.state.armed_areas() == [1]
 
 
@@ -219,7 +233,7 @@ async def test_reset_area_alarm(
     """Reset sends the captured frame and clears the area and zone memories."""
     panel.state.area_alarm_memory = 1 << 6
     panel.state.zone_memory[35] = True
-    assert await run(hass, api.execute_reset_area_alarm, 7) is True
+    assert await accepted(api.panel.reset_alarm_memory(frozenset({7}))) is True
     assert writes(panel) == [captures.RESET_AREA_7]
     assert panel.state.area_alarm_memory == 0
     assert panel.state.zone_memory[35] is False
@@ -229,11 +243,11 @@ async def test_bypass_and_include_zone(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Bypass by physical slot sends the captured frame; including reverts it."""
-    assert await run(hass, api.execute_set_zone_excluded_status, 23, True) is True
+    assert await accepted(api.panel.bypass_zone(23, bypass=True)) is True
     assert writes(panel) == [captures.BYPASS_SLOT_23]
     assert panel.state.zone_included[23] is False
 
-    assert await run(hass, api.execute_set_zone_excluded_status, 23, False) is True
+    assert await accepted(api.panel.bypass_zone(23, bypass=False)) is True
     assert panel.state.zone_included[23] is True
 
 
@@ -241,7 +255,7 @@ async def test_bypass_keypad_zone_by_physical_slot(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Zone 36 (logical 35) is wired to a keypad and is addressed by its slot 110."""
-    assert await run(hass, api.execute_set_zone_excluded_status, 110, True) is True
+    assert await accepted(api.panel.bypass_zone(110, bypass=True)) is True
     assert panel.state.zone_included[35] is False
 
 
@@ -249,7 +263,7 @@ async def test_activate_scenario(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """Scenario activation checks the zones first, then sends the captured frame."""
-    assert await run(hass, api.execute_activate_scenario, 0) is True
+    assert await accepted(api.panel.activate_scenario(0)) is True
     assert writes(panel) == [captures.ACTIVATE_SCENARIO_0]
     assert panel.state.armed_areas() == [1, 2, 3, 4, 5, 6, 7]
 
@@ -259,8 +273,8 @@ async def test_activate_scenario_blocked_by_open_zone(
 ) -> None:
     """With an open zone the scenario is not sent at all."""
     panel.state.zone_states[0] = c.ZONE_ALARM
-    assert await run(hass, api.execute_check_scenario_activation_allowed, 0) is False
-    assert await run(hass, api.execute_activate_scenario, 0) is False
+    assert await api.panel.not_ready_zones(0)
+    assert await accepted(api.panel.activate_scenario(0)) is False
     assert writes(panel) == []
     assert panel.state.armed_areas() == []
 
@@ -304,7 +318,7 @@ async def test_new_event_after_command(
     hass: HomeAssistant, api: LegacyPanelClient, panel: FakePanel
 ) -> None:
     """An incremental read returns only the event added after the last index."""
-    await run(hass, api.execute_arm_disarm_areas, areas_to_arm=[3])
+    await accepted(api.panel.arm_areas({3: ArmMode.AWAY}))
     result = await run(
         hass,
         api.execute_get_compact_events,

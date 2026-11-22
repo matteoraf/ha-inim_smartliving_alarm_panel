@@ -14,10 +14,16 @@ from custom_components.inim_smartliving_alarm.const import (
     DOMAIN,
 )
 from custom_components.inim_smartliving_alarm.sensor import _EventNames
+from custom_components.inim_smartliving_alarm.stored_config import (
+    BLOCKS,
+    name_table,
+    peripherals,
+)
 from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
+from .conftest import label_block
 from .fake_panel import FakePanel, panel_10100
 from .test_config_flow import open_options, unload_all
 from .test_init_baseline import entity_id_for
@@ -26,12 +32,12 @@ from .test_zones import stored_configuration
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
 NAME_TABLES = (
-    "code_names",
-    "key_names",
-    "reader_names",
-    "expander_names",
-    "timer_names",
-    "siren_names",
+    "code_labels",
+    "key_labels",
+    "reader_labels",
+    "expander_labels",
+    "timer_labels",
+    "siren_labels",
 )
 
 
@@ -64,16 +70,16 @@ async def test_the_names_are_stored(hass: HomeAssistant, entry: ConfigEntry) -> 
     config = entry.data[DATA_INITIAL_PANEL_CONFIG]
     for table in NAME_TABLES:
         assert table in config, table
-    assert config["reader_names"]["names"][:2] == ["PK Giorno", "PK Garage"]
+    assert name_table(config, "readers")[:2] == ["PK Giorno", "PK Garage"]
 
 
 # -------------------------------------------------------------- event log
 
 CONFIG_1050 = {
-    "keyboard_names": {"names": ["Hall", "Garage", *[""] * 8]},
-    "code_names": {"names": ["Master", "Anna", ""]},
-    "key_names": {"names": ["Tag Anna", ""]},
-    "reader_names": {"names": ["Front door", ""]},
+    "keypad_labels": label_block(["Hall", "Garage", *[""] * 8]),
+    "code_labels": label_block(["Master", "Anna", ""]),
+    "key_labels": label_block(["Tag Anna", ""]),
+    "reader_labels": label_block(["Front door", ""]),
 }
 
 
@@ -113,8 +119,8 @@ def test_event_agents(agent: int, location: int, expected: str) -> None:
 def test_readers_follow_the_keypad_count() -> None:
     """A 10100 has 15 keypads: its first reader is location 15."""
     config = {
-        "keyboard_names": {"names": [""] * 15},
-        "reader_names": {"names": ["Gate"]},
+        "keypad_labels": label_block([""] * 15),
+        "reader_labels": label_block(["Gate"]),
     }
     names = _EventNames(config)
     assert names.location(12) == "Keypad 13"
@@ -162,8 +168,8 @@ async def test_old_configuration_is_read_again_once(
         del stored[table]
     entry = MockConfigEntry(
         domain=DOMAIN,
-        version=1,
-        minor_version=4,
+        version=2,
+        minor_version=1,
         title="Old",
         data={
             "host": panel.host,
@@ -179,16 +185,16 @@ async def test_old_configuration_is_read_again_once(
     with caplog.at_level(logging.INFO):
         assert await hass.config_entries.async_setup(entry.entry_id)
         await hass.async_block_till_done()
-    assert "for what this version adds to it" in caplog.text
+    assert "for what is not stored yet" in caplog.text
     config = entry.data[DATA_INITIAL_PANEL_CONFIG]
-    assert config["code_names"]["names"][0] == "Master"
-    assert config["peripherals"]["keypads"] == [1, 2]
+    assert name_table(config, "codes")[0] == "Master"
+    assert peripherals(config).keypads == (0, 1)
     assert entry.options["zones"] == [1]  # the selection is kept
 
     caplog.clear()
     assert await hass.config_entries.async_reload(entry.entry_id)
     await hass.async_block_till_done()
-    assert "for what this version adds to it" not in caplog.text
+    assert "for what is not stored yet" not in caplog.text
     await unload_all(hass)
 
 
@@ -196,21 +202,34 @@ async def test_old_configuration_is_read_again_once(
 # configuration again. Listed here, not taken from the code, so that a block
 # dropped from the code's list fails its case.
 REQUIRED_BLOCKS = (
-    "code_names",
-    "peripherals",
-    "general_options",
+    "model_string",
+    "area_labels",
+    "zone_labels",
+    "scenario_labels",
+    "keypad_labels",
+    "code_labels",
+    "key_labels",
+    "reader_labels",
+    "expander_labels",
+    "timer_labels",
+    "siren_labels",
+    "zone_records",
+    "terminal_records",
+    "scenario_records",
     "area_records",
+    "general_options",
+    "peripherals",
+    "physical_map",
     "fixed_output_records",
     "fixed_output_labels",
-    "physical_map",
     "user_code_outputs",
     "extra_output_options",
-    "key_names",
-    "reader_names",
-    "expander_names",
-    "timer_names",
-    "siren_names",
 )
+
+
+def test_every_block_is_required() -> None:
+    """The code's list of blocks is the one above."""
+    assert set(BLOCKS) == set(REQUIRED_BLOCKS)
 
 
 @pytest.mark.parametrize("missing", REQUIRED_BLOCKS)
@@ -225,8 +244,8 @@ async def test_each_required_block_is_read_again_once(
     del stored[missing]
     entry = MockConfigEntry(
         domain=DOMAIN,
-        version=1,
-        minor_version=5,
+        version=2,
+        minor_version=1,
         title="Old",
         data={
             "host": panel.host,
@@ -264,7 +283,7 @@ async def test_reader_names_option_is_dropped(hass: HomeAssistant) -> None:
     )
     entry.add_to_hass(hass)
     assert await async_migrate_entry(hass, entry)
-    assert entry.minor_version == 5
+    assert (entry.version, entry.minor_version) == (2, 1)
     assert dict(entry.options) == {"polling_interval": 30}
 
 

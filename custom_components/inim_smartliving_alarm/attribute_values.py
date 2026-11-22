@@ -7,6 +7,7 @@ members as lower-case keys, times with a short unit.
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any
 
+from .protocol.commands import ArmMode
 from .protocol.config import (
     AreaConfig,
     PanelTime,
@@ -25,6 +26,15 @@ if TYPE_CHECKING:
 _VALUE_KEYS: dict[tuple[type, int], str] = {(ZoneType, ZoneType.H24): "24_hour"}
 
 _UNIT_TEXT = {TimeUnit.SECONDS: "s", TimeUnit.MINUTES: "min"}
+
+# What a scenario does to an area, and the modes of the arm_area action
+ARM_MODE_TEXT: dict[ArmMode, str] = {
+    ArmMode.KEEP: "keep",
+    ArmMode.AWAY: "total",
+    ArmMode.STAY: "partial",
+    ArmMode.INSTANT: "instant",
+    ArmMode.DISARM: "disarm",
+}
 
 
 def value_key(value: Any) -> Any:

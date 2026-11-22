@@ -19,10 +19,10 @@ import logging
 import re
 from typing import Any
 
+from . import stored_config
 from .api import BlockRead, ReportReads
 from .const import (
     BOARD_SMARTLAN_G,
-    KEY_INIT_RAW_HEX,
 )
 from .panel_view import configuration_view
 from .protocol import registers as reg
@@ -71,25 +71,13 @@ _LOGGER = logging.getLogger(__name__)
 REPORT_VERSION = 1
 SELF_CHECK_ERROR = {"error": "self-check"}
 
-# Blocks also stored in the entry: block name -> path in the stored
-# configuration. The stored physical map covers the three map blocks: each
-# one's part starts at its distance from the first.
-_CACHED: dict[str, tuple[str, ...]] = {
-    "model_string": ("system_info", KEY_INIT_RAW_HEX),
-    "area_labels": ("areas", KEY_INIT_RAW_HEX),
-    "zone_labels": ("zones", "raw_hex_full"),
-    "scenario_labels": ("scenarios", KEY_INIT_RAW_HEX),
-    "keypad_labels": ("keyboard_names", KEY_INIT_RAW_HEX),
-    "fixed_output_labels": ("fixed_output_labels", KEY_INIT_RAW_HEX),
-    "zone_records": ("zones_config", "raw_hex_part1_full_response"),
-    "terminal_records": ("zones_config", "raw_hex_part2_full_response"),
-    "area_records": ("area_records", KEY_INIT_RAW_HEX),
-    "fixed_output_records": ("fixed_output_records", KEY_INIT_RAW_HEX),
-    "physical_map": ("physical_map", KEY_INIT_RAW_HEX),
-    "physical_map_expanders": ("physical_map", KEY_INIT_RAW_HEX),
-    "physical_map_keypads": ("physical_map", KEY_INIT_RAW_HEX),
-    "extra_output_options": ("extra_output_options", KEY_INIT_RAW_HEX),
-    "general_options": ("general_options", KEY_INIT_RAW_HEX),
+# Blocks also stored in the entry, under the same name. The stored physical
+# map covers the three map blocks: each one's part starts at its distance
+# from the first.
+_CACHED: dict[str, str] = {
+    **{name: name for name in stored_config.BLOCKS},
+    "physical_map_expanders": stored_config.PHYSICAL_MAP,
+    "physical_map_keypads": stored_config.PHYSICAL_MAP,
 }
 _PHYSICAL_MAP = "physical_map"
 
@@ -177,18 +165,6 @@ def _host_text(host: str, level: Level) -> str:
     )
 
 
-def _stored_bytes(config: Mapping[str, Any], path: tuple[str, ...]) -> bytes | None:
-    node: Any = config
-    for key in path:
-        if not isinstance(node, Mapping):
-            return None
-        node = node.get(key)
-    try:
-        return bytes.fromhex(node) if isinstance(node, str) else None
-    except ValueError:
-        return None
-
-
 def _fields(read: BlockRead, length: int) -> Fields:
     block = read.block
     if block.space is Space.LABELS:
@@ -206,13 +182,13 @@ def _cached(
 ) -> bytes | None:
     """The stored copy of a block, if the entry keeps one."""
     block = read.block
-    if (path := _CACHED.get(block.name)) is None:
+    if (name := _CACHED.get(block.name)) is None:
         return None
-    raw = _stored_bytes(stored, path)
+    raw = stored_config.raw_block(stored, name)
     if raw is None:
         return None
     offset = 0
-    if path[0] == _PHYSICAL_MAP:
+    if name == _PHYSICAL_MAP:
         if physical_map is None:
             return None
         offset = block.address - physical_map
@@ -296,8 +272,11 @@ def _panel(data: ReportInput) -> dict[str, Any]:
             "experimental": reads.model.experimental,
         }
     else:
-        info = stored.get("system_info") or {}
-        section |= {"model_string": info.get(KEY_INIT_RAW_HEX), "source": "cached"}
+        raw = stored_config.raw_block(stored, stored_config.MODEL_STRING)
+        section |= {
+            "model_string": None if raw is None else raw.hex(),
+            "source": "cached",
+        }
     production = _by_name(reads).get("production_area")
     if production is not None and production.data:
         area = decode_production_area(production.data)

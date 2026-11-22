@@ -129,7 +129,7 @@ async def test_setup_smartlan_si(hass: HomeAssistant, panel: FakePanel) -> None:
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     entry: ConfigEntry = result["result"]
-    assert (entry.version, entry.minor_version) == (1, 5)
+    assert (entry.version, entry.minor_version) == (2, 1)
     assert entry.data["board"] == "smartlan_si"
     assert "username" not in entry.data
     assert entry.state is ConfigEntryState.LOADED
@@ -338,7 +338,7 @@ async def test_reconfigure_smartlan_g(hass: HomeAssistant, g_panel: FakePanel) -
 
 
 async def test_migration_adds_the_board(hass: HomeAssistant) -> None:
-    """Entries from before 1.2 are SmartLAN/SI entries (and then go to 1.5)."""
+    """Entries from before 1.2 are SmartLAN/SI entries (and then go to 2.1)."""
     entry = MockConfigEntry(
         domain=DOMAIN,
         version=1,
@@ -348,7 +348,7 @@ async def test_migration_adds_the_board(hass: HomeAssistant) -> None:
     entry.add_to_hass(hass)
 
     assert await async_migrate_entry(hass, entry)
-    assert entry.minor_version == 5
+    assert (entry.version, entry.minor_version) == (2, 1)
     assert entry.data == {
         "host": "192.0.2.10",
         "port": 5004,
@@ -371,7 +371,7 @@ async def test_migrated_entry_without_configuration_sets_up(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     assert entry.state is ConfigEntryState.LOADED
-    assert entry.minor_version == 5
+    assert (entry.version, entry.minor_version) == (2, 1)
     errors = [
         record.getMessage()
         for record in caplog.records
@@ -383,10 +383,10 @@ async def test_migrated_entry_without_configuration_sets_up(
 
 async def test_newer_major_version_is_not_loaded(hass: HomeAssistant) -> None:
     """An entry from a later major version is refused, not changed."""
-    entry = MockConfigEntry(domain=DOMAIN, version=2, minor_version=1, data={})
+    entry = MockConfigEntry(domain=DOMAIN, version=3, minor_version=1, data={})
     entry.add_to_hass(hass)
     assert not await async_migrate_entry(hass, entry)
-    assert entry.version == 2
+    assert entry.version == 3
 
 
 # ------------------------------------------------------------ network search

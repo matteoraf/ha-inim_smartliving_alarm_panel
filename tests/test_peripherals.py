@@ -22,10 +22,12 @@ from custom_components.inim_smartliving_alarm.protocol.errors import ProtocolErr
 from custom_components.inim_smartliving_alarm.protocol.model import (
     SMARTLIVING_1050_FW6,
 )
+from custom_components.inim_smartliving_alarm.stored_config import peripherals
 from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
+from .conftest import label_block
 from .fake_panel import FakePanel, panel_10100
 from .test_config_flow import open_options
 
@@ -104,20 +106,25 @@ async def test_10100_peripherals() -> None:
 async def test_the_peripherals_are_stored(
     hass: HomeAssistant, entry: ConfigEntry
 ) -> None:
-    """Stored as 1-based numbers, as the panel numbers them."""
-    stored = entry.data[DATA_INITIAL_PANEL_CONFIG]["peripherals"]
-    assert stored["keypads"] == [1, 2]
-    assert stored["readers"] == [1, 2, 3]
-    assert stored["expanders"] == [1]
-    assert stored["sirens"] == [1]
+    """Stored as read, decoded as 0-based device numbers."""
+    stored = peripherals(entry.data[DATA_INITIAL_PANEL_CONFIG])
+    assert stored is not None
+    assert stored.keypads == (0, 1)
+    assert stored.readers == (0, 1, 2)
+    assert stored.expanders == (0,)
+    assert stored.sirens == (0,)
 
 
 def test_names_of_the_peripherals() -> None:
     """The panel's names, else the kind and number."""
+    enabled = bytearray(22)  # the 1050's bitmaps
+    enabled[10] = 0b101  # keypads 1 and 3
+    enabled[4] = 0b10  # expander 2
     config = {
-        "peripherals": {"keypads": [1, 3], "readers": [], "expanders": [2]},
-        "keyboard_names": {"names": ["Hall", "", ""]},
-        "expander_names": {"names": ["", "Kitchen"]},
+        "model_string": b"6.07 01050  ".hex(),
+        "peripherals": enabled.hex(),
+        "keypad_labels": label_block(["Hall", "", ""]),
+        "expander_labels": label_block(["", "Kitchen"]),
     }
     assert enabled_peripherals(config) == {
         "keypads": ["Hall", "Keypad 3"],

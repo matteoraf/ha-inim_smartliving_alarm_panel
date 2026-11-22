@@ -22,11 +22,17 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 import custom_components.inim_smartliving_alarm as integration
 from custom_components.inim_smartliving_alarm.const import (
-    DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DOMAIN,
     SERVICE_REREAD_PANEL_CONFIGURATION,
+)
+from custom_components.inim_smartliving_alarm.protocol.errors import ProtocolError
+from custom_components.inim_smartliving_alarm.stored_config import (
+    area_names,
+    scenario_names,
+    zone_names,
 )
 
 from .fake_panel import FakePanel, const as c
@@ -135,7 +141,7 @@ async def test_reconfigure_moves_entry_to_new_address(
     assert entity_ids(hass, entry) == before
 
     # Polls now reach the panel at the new address
-    assert hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT].port == (
+    assert hass.data[DOMAIN][entry.entry_id][DATA_PANEL].transport.port == (
         second_panel.port
     )
     second_panel.state.zone_states[19] = c.ZONE_ALARM
@@ -205,8 +211,8 @@ async def test_reread_service_updates_configuration(
 
     assert setups.call_count == 1
     assert entry.state is ConfigEntryState.LOADED
-    assert panel_config(entry)["scenarios"]["names"][2] == "Night"
-    assert panel_config(entry)["zones"]["zone_names"][19] == "Kitchen window"
+    assert scenario_names(panel_config(entry))[2] == "Night"
+    assert zone_names(panel_config(entry))[19] == "Kitchen window"
     button = registry_entry(hass, entry, "button", "_scenario_button_2")
     assert button.original_name == "Activate 'Night'"
     assert entity_ids(hass, entry) == before
@@ -241,7 +247,7 @@ async def test_reread_button(
 
     assert setups.call_count == 1
     assert entry.state is ConfigEntryState.LOADED
-    assert panel_config(entry)["areas"]["names"][0] == "Ground floor"
+    assert area_names(panel_config(entry))[0] == "Ground floor"
 
 
 async def test_reread_unknown_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -282,13 +288,11 @@ async def test_reread_incomplete_configuration(
 ) -> None:
     """An incomplete configuration from the panel is not stored."""
     data = dict(entry.data)
-    api = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    panel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
 
     with (
         patch.object(
-            api,
-            "get_initial_panel_configuration",
-            return_value={"errors": ["Failed zones."], "system_info": {}},
+            panel, "read_configuration", side_effect=ProtocolError("Failed zones.")
         ),
         pytest.raises(HomeAssistantError) as err,
     ):

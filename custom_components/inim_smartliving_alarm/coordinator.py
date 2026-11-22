@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
+from .api import SmartLivingPanel
 from .const import (
     CONF_EVENT_LOG_SIZE,
     DEFAULT_EVENT_LOG_SIZE,
@@ -32,13 +33,15 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self,
         hass: HomeAssistant,
         entry: ConfigEntry,
-        api_client: LegacyPanelClient,
+        panel: SmartLivingPanel,
         name: str,
         update_interval_seconds: int,
     ) -> None:
         """Initialize the data update coordinator."""
-        self.api_client = api_client
-        self.panel_host_port = f"{api_client.host}:{api_client.port}"
+        self.panel = panel
+        # Status and events in the entities' dictionaries
+        self._reads = LegacyPanelClient(panel)
+        self.panel_host_port = f"{panel.transport.host}:{panel.transport.port}"
         self._last_known_event_index_val: int | None = None
         self.config_entry = entry
 
@@ -61,7 +64,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         try:
             # Fetch standard status data
-            status_data = await self.api_client.get_live_status_snapshot()
+            status_data = await self._reads.get_live_status_snapshot()
 
             if status_data is None:
                 raise UpdateFailed(
@@ -116,7 +119,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 api_call_count_param,
             )
 
-            event_result = await self.api_client.execute_get_compact_events(
+            event_result = await self._reads.execute_get_compact_events(
                 count=api_call_count_param,
                 last_processed_compact_event_index_val=api_call_last_index_param,
                 # the panel stores local time: read it in Home Assistant's zone
@@ -197,7 +200,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if not dimmers:
             return {}
         try:
-            return await self.api_client.panel.read_output_levels(dimmers)
+            return await self.panel.read_output_levels(dimmers)
         except (TransportError, ProtocolError, ValueError) as err:
             _LOGGER.debug("(%s) Dimmer levels not read: %s", self.name, err)
             return {}

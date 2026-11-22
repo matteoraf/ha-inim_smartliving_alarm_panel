@@ -12,6 +12,8 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
+from . import stored_config
+from .api import SmartLivingPanel
 from .attribute_values import area_settings_attributes
 from .const import (
     AREA_MODE_DISARMED,
@@ -20,23 +22,28 @@ from .const import (
     AREA_MODE_TOTAL,
     CONF_AREAS,
     CONF_PANEL_NAME,
-    DATA_API_CLIENT,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
     DEFAULT_PANEL_NAME,
     DOMAIN,
-    KEY_INIT_SYSTEM_INFO,
-    KEY_INIT_SYSTEM_INFO_TYPE,
-    KEY_INIT_SYSTEM_INFO_VERSION,
     KEY_LIVE_AREA_MODES_MAP,
     KEY_LIVE_AREAS_STATUS,
 )
-from .legacy import LegacyPanelClient
 from .protocol.commands import ArmMode
 from .protocol.masking import Level
 from .readiness import async_arm
 from .report_state import async_set_level, level_signal, report_state
-from .selection import area_label, area_records, selected
+from .selection import (
+    selected,
+)
+from .stored_config import (
+    SystemInfo,
+    area_label,
+    area_records,
+    device_model,
+    device_sw_version,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,17 +74,17 @@ async def async_setup_entry(
 ) -> None:
     """Set up one arming-mode select per imported area, and the diagnostics level."""
     coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
-    api_client: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    panel: SmartLivingPanel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
 
     initial_panel_config = entry.data.get(DATA_INITIAL_PANEL_CONFIG, {})
-    system_info = initial_panel_config.get(KEY_INIT_SYSTEM_INFO, {})
+    system_info = stored_config.system_info(initial_panel_config)
     panel_display_name = entry.data.get(CONF_PANEL_NAME, DEFAULT_PANEL_NAME)
     # The areas' delays and options, decoded from the stored records
     records = area_records(initial_panel_config) or []
     async_add_entities(
         InimAreaModeSelect(
             coordinator,
-            api_client,
+            panel,
             entry,
             panel_display_name,
             system_info,
@@ -103,10 +110,10 @@ class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
     def __init__(
         self,
         coordinator: Any,
-        api_client: LegacyPanelClient,
+        panel: SmartLivingPanel,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
         area: int,
         area_name: str,
         settings: dict[str, Any] | None = None,
@@ -117,7 +124,7 @@ class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
         they are not known).
         """
         super().__init__(coordinator)
-        self.api_client = api_client
+        self.panel = panel
         self._entry = config_entry
         self._area = area
         self._area_name = area_name
@@ -128,8 +135,8 @@ class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
             identifiers={(DOMAIN, config_entry.entry_id)},
             name=panel_display_name,
             manufacturer="Inim Electronics",
-            model=system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(system_info),
+            sw_version=device_sw_version(system_info),
         )
         self._update_from_coordinator()
 
@@ -155,7 +162,7 @@ class InimAreaModeSelect(CoordinatorEntity, SelectEntity):
         await async_arm(
             self.hass,
             self._entry,
-            lambda check: self.api_client.panel.arm_areas(
+            lambda check: self.panel.arm_areas(
                 {self._area: OPTION_MODES[option]}, on_not_ready=check
             ),
             self._area_name,
@@ -183,7 +190,7 @@ class InimDiagnosticsLevelSelect(SelectEntity):
         self,
         config_entry: ConfigEntry,
         panel_display_name: str,
-        system_info: dict[str, Any],
+        system_info: SystemInfo | None,
     ) -> None:
         """Initialize the select of one entry."""
         self._entry_id = config_entry.entry_id
@@ -192,8 +199,8 @@ class InimDiagnosticsLevelSelect(SelectEntity):
             identifiers={(DOMAIN, config_entry.entry_id)},
             name=panel_display_name,
             manufacturer="Inim Electronics",
-            model=system_info.get(KEY_INIT_SYSTEM_INFO_TYPE, "SmartLiving"),
-            sw_version=system_info.get(KEY_INIT_SYSTEM_INFO_VERSION, "Unknown"),
+            model=device_model(system_info),
+            sw_version=device_sw_version(system_info),
         )
 
     @property

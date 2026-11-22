@@ -217,11 +217,16 @@ async def set_up(hass: HomeAssistant, entry: MockConfigEntry) -> None:
     await hass.async_block_till_done()
 
 
-def code_labels(state: PanelState) -> range:
-    """EEPROM addresses of the user code names."""
-    offset, count = state.layout.labels[c.RAM_LABELS_CODES]
+def label_table(state: PanelState, register: int) -> range:
+    """EEPROM addresses of a label table (by its RAM pointer register)."""
+    offset, count = state.layout.labels[register]
     start = state.layout.label_bank + offset
     return range(start, start + count * 16)
+
+
+def code_labels(state: PanelState) -> range:
+    """EEPROM addresses of the user code names."""
+    return label_table(state, c.RAM_LABELS_CODES)
 
 
 # -------------------------------------------------------------------- states
@@ -372,8 +377,14 @@ async def test_i_outputs(hass: HomeAssistant, make_panel: Callable) -> None:
 
 
 async def test_j_no_area_labels(hass: HomeAssistant, make_panel: Callable) -> None:
-    """(j) A stored configuration without the area labels."""
-    panel = await make_panel(panel_1050())
+    """(j) A stored configuration without the area labels.
+
+    The panel cannot deliver them either, so the configuration read at this
+    start fails and the areas stay without labels.
+    """
+    state = panel_1050()
+    panel = await make_panel(state)
+    panel.unreadable_eeprom = [label_table(state, c.RAM_LABELS_AREAS)]
 
     def drop_areas(config: dict) -> None:
         del config["areas"]

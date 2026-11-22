@@ -7,90 +7,80 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
-from .api import ProgrammingModeError
-from .const import DATA_API_CLIENT, DATA_INITIAL_PANEL_CONFIG, DOMAIN
-from .legacy import LegacyPanelClient
+from .api import ProgrammingModeError, SmartLivingPanel
+from .const import DATA_INITIAL_PANEL_CONFIG, DATA_PANEL, DOMAIN
+from .protocol.errors import ProtocolError, UnsupportedPanelError
+from .stored_config import store
+from .transport.base import TransportError
 
-# ValueError message (and error key) when the panel is in programming mode
+# Error keys of PanelConfigError
 PANEL_PROGRAMMING = "panel_programming"
+AUTH_FAILED = "auth_failed"
+INVALID_PANEL_RESPONSE = "invalid_panel_response"
+INVALID_PANEL_CONFIGURATION = "invalid_panel_configuration"
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_fetch_panel_configuration(
-    hass: HomeAssistant, api: LegacyPanelClient
-) -> dict[str, Any]:
-    """Read the panel configuration (names, zone setup, scenarios) and check it.
+class PanelUnreachable(ConnectionError):
+    """The panel could not be reached to read its configuration."""
 
-    Raises ConnectionError if the panel cannot be reached and ValueError if
-    the configuration is incomplete or invalid, or cannot be read because the
-    panel is in programming mode (PANEL_PROGRAMMING).
+
+class PanelConfigError(ValueError):
+    """The panel's configuration could not be read; key tells why.
+
+    One of PANEL_PROGRAMMING, AUTH_FAILED, INVALID_PANEL_RESPONSE and
+    INVALID_PANEL_CONFIGURATION; the message is the key, the detail the
+    underlying error.
     """
-    host, port = api.host, api.port
-    _LOGGER.debug("Fetching the panel configuration from %s:%s", host, port)
 
+    def __init__(self, key: str, detail: str = "") -> None:
+        """An error with its key and, for the log, what went wrong."""
+        super().__init__(key)
+        self.key = key
+        self.detail = detail or key
+
+
+def _where(panel: SmartLivingPanel) -> str:
+    return f"{panel.transport.host}:{panel.transport.port}"
+
+
+async def async_fetch_panel_configuration(
+    hass: HomeAssistant, panel: SmartLivingPanel
+) -> dict[str, Any]:
+    """Read the panel configuration, in the shape stored in the entry.
+
+    Raises PanelUnreachable if the panel cannot be reached and
+    PanelConfigError if the configuration cannot be read: the panel is in
+    programming mode, a reply is invalid (AUTH_FAILED when its error names
+    authentication), or the panel gives no model string.
+    """
+    where = _where(panel)
+    _LOGGER.debug("Fetching the panel configuration from %s", where)
     try:
-        initial_config = await api.get_initial_panel_configuration()
+        config = await panel.read_configuration()
     except ProgrammingModeError as err:
         _LOGGER.warning(
-            "The panel at %s:%s is in programming mode; its configuration is "
+            "The panel at %s is in programming mode; its configuration is "
             "not read until programming has ended",
-            host,
-            port,
+            where,
         )
-        raise ValueError(PANEL_PROGRAMMING) from err
-
-    if initial_config is None:
-        _LOGGER.error(
-            "Connection/API error for %s:%s (API returned None)",
-            host,
-            port,
-        )
-        raise ConnectionError(
-            "Failed to connect to the Inim panel or API error during fetch."
-        )
-
-    # Check for explicit errors reported by the API method
-    if initial_config.get("errors"):
-        _LOGGER.error(
-            "Errors reported by API for %s:%s: %s",
-            host,
-            port,
-            initial_config["errors"],
-        )
-        # If critical data is missing due to these errors, we'll catch it below.
-
-    essential_keys = [
-        "system_info",
-        "areas",
-        "zones",
-        "zones_config",
-        "scenarios",
-        "scenario_activations",
-    ]
-    missing_or_failed_parts = [
-        key for key in essential_keys if initial_config.get(key) is None
-    ]
-
-    if missing_or_failed_parts:
-        error_message = f"Failed to retrieve essential data for: {', '.join(missing_or_failed_parts)}."
-        _LOGGER.error("%s From %s:%s", error_message, host, port)
-        if any("auth" in error.lower() for error in initial_config.get("errors", [])):
-            raise ValueError("auth_failed")
-        raise ValueError(error_message)
-
-    if not initial_config.get("system_info") or not initial_config["system_info"].get(
-        "ascii"
-    ):
-        _LOGGER.error("System information is missing from initial configuration")
-        raise ValueError("invalid_panel_response")
-
-    _LOGGER.info(
-        "Panel configuration successfully fetched and validated for %s:%s",
-        host,
-        port,
-    )
-    return initial_config
+        raise PanelConfigError(PANEL_PROGRAMMING) from err
+    except TransportError as err:
+        _LOGGER.error("Cannot read the panel configuration from %s: %s", where, err)
+        raise PanelUnreachable(str(err)) from err
+    except (ProtocolError, UnsupportedPanelError, ValueError) as err:
+        _LOGGER.error("Invalid panel configuration from %s: %s", where, err)
+        # A reply error that names authentication is reported as such
+        auth = not isinstance(err, ValueError) and "auth" in str(err).lower()
+        raise PanelConfigError(
+            AUTH_FAILED if auth else INVALID_PANEL_CONFIGURATION, str(err)
+        ) from err
+    if not config.model_string.strip(b" \x00"):
+        _LOGGER.error("System information is missing from the panel configuration")
+        raise PanelConfigError(INVALID_PANEL_RESPONSE)
+    _LOGGER.info("Panel configuration read from %s", where)
+    return store(config)
 
 
 async def async_reread_panel_configuration(
@@ -98,27 +88,31 @@ async def async_reread_panel_configuration(
 ) -> None:
     """Read the panel configuration again, store it in the entry and reload it.
 
-    Options are left untouched. The entry's own API client is used, so the
-    read waits for any poll in progress instead of opening a second socket.
+    Options are left untouched. The entry's own panel connection is used, so
+    the read waits for any poll in progress instead of opening a second
+    socket.
     """
-    api: LegacyPanelClient = hass.data[DOMAIN][entry.entry_id][DATA_API_CLIENT]
+    panel: SmartLivingPanel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
     try:
-        panel_config = await async_fetch_panel_configuration(hass, api)
-    except ConnectionError as err:
+        panel_config = await async_fetch_panel_configuration(hass, panel)
+    except PanelUnreachable as err:
         raise HomeAssistantError(
             translation_domain=DOMAIN,
             translation_key="cannot_connect",
-            translation_placeholders={"host": api.host, "port": str(api.port)},
+            translation_placeholders={
+                "host": panel.transport.host,
+                "port": str(panel.transport.port),
+            },
         ) from err
-    except ValueError as err:
-        if str(err) == PANEL_PROGRAMMING:
+    except PanelConfigError as err:
+        if err.key == PANEL_PROGRAMMING:
             raise HomeAssistantError(
                 translation_domain=DOMAIN, translation_key="panel_programming_config"
             ) from err
         raise HomeAssistantError(
             translation_domain=DOMAIN,
             translation_key="invalid_panel_configuration",
-            translation_placeholders={"error": str(err)},
+            translation_placeholders={"error": err.detail},
         ) from err
 
     _LOGGER.info("Panel configuration re-read for %s, reloading", entry.title)
