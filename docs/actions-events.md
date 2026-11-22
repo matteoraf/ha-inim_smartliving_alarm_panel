@@ -156,7 +156,7 @@ Automations can react to these events with an event trigger.
 | `config_entry_id` | the panel's configuration entry |
 | `target` | the area's name, several area names separated by commas (from **Arm area**), or the scenario's name |
 | `action` | `refused` (not sent), `armed_anyway` (sent with a warning), `refused_by_panel` (sent, and the panel refused it) |
-| `zones` | the zones not ready, each with `zone_id` (the number) and `zone_name` (for example `Kitchen window (12)`) |
+| `zones` | the zones not ready, each with `zone_id` (the number) and `zone_name` (the zone's name on the panel, for example `Kitchen window`, or `Zone 12` when it has none) |
 | `panel_refuses_not_ready` | `true` or `false`: whether the panel itself refuses arming with zones not ready; `null` before the configuration was read again by this version |
 
 ```yaml

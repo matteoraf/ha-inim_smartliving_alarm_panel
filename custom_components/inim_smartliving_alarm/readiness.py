@@ -31,13 +31,13 @@ from .errors import (
     CommandRefusedError,
     ZonesNotReadyError,
     async_send_command,
-    zone_label,
+    zone_text,
 )
 from .notifications import Texts, async_texts
 from .protocol.commands import CommandResult
 from .protocol.config import refuses_arming_when_not_ready
 from .protocol.errors import ProtocolError
-from .selection import panel_config, stored_model, zone_names
+from .selection import panel_config, stored_model, zone_label, zone_names
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -128,7 +128,6 @@ def _fire(
     action: str,
     config: Mapping[str, Any],
 ) -> None:
-    names = zone_names(config)
     hass.bus.async_fire(
         EVENT_ZONES_NOT_READY,
         {
@@ -136,7 +135,7 @@ def _fire(
             "target": target,
             "action": action,
             "zones": [
-                {"zone_id": zone, "zone_name": zone_label(zone, names)}
+                {"zone_id": zone, "zone_name": zone_label(config, zone)}
                 for zone in zones
             ],
             "panel_refuses_not_ready": panel_refuses_not_ready(config),
@@ -151,7 +150,7 @@ def _warning(
     names: list[str],
     panel_refuses: bool | None,
 ) -> str:
-    listed = "\n".join(f"- {zone_label(zone, names)}" for zone in zones)
+    listed = "\n".join(f"- {zone_text(zone, names)}" for zone in zones)
     ending = (
         "notification_armed_not_ready_panel_allows"
         if panel_refuses is False

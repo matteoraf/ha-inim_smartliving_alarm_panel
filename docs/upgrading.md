@@ -1,5 +1,9 @@
 # Upgrading
 
+## From 0.4.0b1 or 0.4.0b2
+
+*   **Check your automations:** in the `inim_smartliving_alarm_zones_not_ready` event, `zone_name` is now the zone's plain name (for example `Kitchen window`), as in the zone entities and the scenario failure event. Automations that match a name with the number in brackets, such as `Kitchen window (12)`, need updating; `zone_id` still gives the number.
+
 ## From 0.3.x
 
 Version 0.4 reworks how the integration talks to the panel. Your entity IDs and options stay as they are, and your configuration entry is updated automatically.
