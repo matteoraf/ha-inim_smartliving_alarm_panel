@@ -457,6 +457,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#slow-polling-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slow polling mode
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -736,6 +747,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#slow-polling-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Slow polling mode
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -860,8 +882,37 @@
 </ul>
 <div class="admonition note">
 <p class="admonition-title">One local connection at a time</p>
-<p>While Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network (such as the Inim app or the installer software) cannot connect to it meanwhile. Remote access through Inim Cloud is not affected.</p>
+<p>While Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network (such as the Inim app or the installer software) cannot connect to it meanwhile. To let them connect, turn on <a href="#slow-polling-mode">slow polling mode</a>. Remote access through Inim Cloud is not affected.</p>
 </div>
+<h3 id="slow-polling-mode">Slow polling mode<a class="headerlink" href="#slow-polling-mode" title="Permanent link">&para;</a></h3>
+<p><img alt="The Slow polling mode switch on the device page" src="../images/device-page-slow-polling.webp" width="400" /></p>
+<p>With a SmartLAN/SI board, the panel's device page has a <strong>Slow polling mode</strong> switch (in its <em>Configuration</em> section). While it is on, Home Assistant reads the whole panel once every <strong>Reading interval in slow polling mode</strong> (30 seconds by default) and closes its connection after each read and each command. Between the reads, the Inim app and the installer software can connect to the board.</p>
+<ul>
+<li>Changes at the panel show up to one interval later, as with the single polling interval of earlier versions.</li>
+<li>While another app is connected, Home Assistant cannot reach the board: the entities are unavailable until the app disconnects, and commands sent from Home Assistant fail with a message that the board can't be reached or is in use by another app. While the installer software reads the panel's programming, this can last about a minute; the log may then say how long the panel did not answer.</li>
+<li>Home Assistant's own read can now and then take the board between two connections of the installer software. If the installer software then reports a connection error, try again.</li>
+<li>The mode turns itself off after <strong>Turn off slow polling mode after</strong> (60 minutes by default). Set it to 0 to keep it on until you turn it off, for example if you use the Inim app on your network every day. It stays on, with the same end time, when Home Assistant restarts. If another app holds the board while Home Assistant starts, the integration cannot set up at first and tries again by itself a little later.</li>
+<li>When it turns off, every part of the panel is read at once, then at the intervals above.</li>
+<li>To have it on at set times, use an automation that turns the switch on and off.</li>
+</ul>
+<details class="example">
+<summary>Automation: slow polling mode in the evening</summary>
+<p>In the automation editor, <strong>Edit in YAML</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">alias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Slow polling mode in the evening</span>
+<span class="nt">triggers</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">trigger</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">time</span>
+<span class="w">    </span><span class="nt">at</span><span class="p">:</span><span class="w"> </span><span class="s">"19:00:00"</span>
+<span class="w">    </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"on"</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">trigger</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">time</span>
+<span class="w">    </span><span class="nt">at</span><span class="p">:</span><span class="w"> </span><span class="s">"23:00:00"</span>
+<span class="w">    </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"off"</span>
+<span class="nt">actions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">switch.turn_{{ trigger.id }}</span>
+<span class="w">    </span><span class="nt">target</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">entity_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">switch.home_slow_polling_mode</span>
+</code></pre></div>
+<p>Set <strong>Turn off slow polling mode after</strong> to 0, or to at least 240 minutes, so that it does not end before 23:00. Replace <code>switch.home_slow_polling_mode</code> with your switch's entity ID.</p>
+</details>
 <h2 id="all-options">All options<a class="headerlink" href="#all-options" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -978,6 +1029,20 @@
 <td>10 to 600</td>
 <td>60</td>
 <td>Seconds between reads of the panel state (programming mode).</td>
+</tr>
+<tr>
+<td><strong>Reading interval in slow polling mode</strong></td>
+<td>Polling (SmartLAN/SI)</td>
+<td>10 to 300</td>
+<td>30</td>
+<td>Seconds between reads of the whole panel while <a href="#slow-polling-mode">slow polling mode</a> is on.</td>
+</tr>
+<tr>
+<td><strong>Turn off slow polling mode after</strong></td>
+<td>Polling (SmartLAN/SI)</td>
+<td>0 to 1440</td>
+<td>60</td>
+<td>Minutes after which slow polling mode turns itself off; 0 keeps it on until you turn it off.</td>
 </tr>
 </tbody>
 </table>

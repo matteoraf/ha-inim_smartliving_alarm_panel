@@ -550,6 +550,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#after-the-panels-programming-was-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After the panel's programming was changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commands-not-carried-out" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -781,6 +792,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#after-the-panels-programming-was-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        After the panel's programming was changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#commands-not-carried-out" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -878,8 +900,12 @@
 <td>See <a href="#entities-missing-or-not-updating">Entities missing or not updating</a>.</td>
 </tr>
 <tr>
-<td>The Inim app cannot connect locally</td>
-<td>See <a href="#the-inim-app-cannot-connect-locally">The Inim app</a>.</td>
+<td>The Inim app or the installer software cannot connect locally</td>
+<td>Turn on slow polling mode: see <a href="#the-inim-app-cannot-connect-locally">The Inim app</a>.</td>
+</tr>
+<tr>
+<td>Entities unavailable for a while after the panel's programming was changed</td>
+<td>See <a href="#after-the-panels-programming-was-changed">After the panel's programming was changed</a>.</td>
 </tr>
 <tr>
 <td>Reporting a problem</td>
@@ -996,11 +1022,15 @@
 <p>The setup says <em>"The SmartLAN/G board answered, but its reply was not in the expected format"</em>. Check the board's user name and password first. If they are right, your board probably answers in a way this integration does not handle yet. Please open a GitHub issue with your panel model and firmware, the board's version and a <a href="#debug-log">debug log</a> of a setup attempt.</p>
 <h3 id="the-inim-app-cannot-connect-locally">The Inim app cannot connect locally<a class="headerlink" href="#the-inim-app-cannot-connect-locally" title="Permanent link">&para;</a></h3>
 <p>The SmartLAN/SI board accepts only one local connection at a time. While Home Assistant reads the panel at the <a href="../options/#polling">Polling</a> intervals, it keeps its connection to the board open, so the app cannot connect locally meanwhile. Remote access through Inim Cloud is not affected.</p>
+<p>Turn on <strong>Slow polling mode</strong> on the panel's device page (see <a href="../options/#slow-polling-mode">Slow polling mode</a>). Home Assistant then reads the panel every 30 seconds and closes its connection after each read, so the app, or the installer software, can connect in between. While another app is connected, the entities are unavailable; while the installer software reads the panel's programming, that can last about a minute. If the installer software reports a connection error, try again: Home Assistant's read may have taken the board for a moment. The mode turns itself off after 60 minutes, unless you set it otherwise.</p>
 <h3 id="programming-mode">Programming mode<a class="headerlink" href="#programming-mode" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Someone is programming the panel from a keypad, or the panel is reloading its configuration. Commands work again when programming has ended; the <em>Programming mode</em> sensor shows when.</li>
-<li>Programming from the installer software on a PC does not block commands. After the software writes new programming, the panel may restart by itself, and Home Assistant cannot reach it for a short time. Then use <strong>Re-read panel configuration</strong> to pick up the changes.</li>
+<li>Programming from the installer software on a PC does not block commands. To connect the installer software over your network, turn on <a href="../options/#slow-polling-mode">slow polling mode</a> first.</li>
 </ul>
+<h3 id="after-the-panels-programming-was-changed">After the panel's programming was changed<a class="headerlink" href="#after-the-panels-programming-was-changed" title="Permanent link">&para;</a></h3>
+<p>After a change to its programming, made with the installer software or from a keypad, the panel may stop answering for a short while. Home Assistant shows the entities as unavailable meanwhile, and as usual again once the panel answers. When the panel did not answer for a while, the log says for how long.</p>
+<p>The integration does not notice a change to the programming by itself. To pick up new names, zones or scenarios, use <strong>Re-read panel configuration</strong> (see <a href="../setup/#re-reading-the-panel-configuration">Setup</a>).</p>
 <h3 id="commands-not-carried-out">Commands not carried out<a class="headerlink" href="#commands-not-carried-out" title="Permanent link">&para;</a></h3>
 <ul>
 <li>The error message tells why (see <a href="#when-the-panel-refuses-a-command">When the panel refuses a command</a>).</li>

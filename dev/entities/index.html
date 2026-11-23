@@ -823,8 +823,8 @@
 </tr>
 <tr>
 <td><a href="#diagnostic-and-configuration-entities">Diagnostics</a></td>
-<td>sensors, a select, a button</td>
-<td>The user code, the devices found, programming mode, system reports, re-reading the configuration</td>
+<td>sensors, a select, a button, a switch</td>
+<td>The user code, the devices found, programming mode, system reports, re-reading the configuration, slow polling mode</td>
 </tr>
 </tbody>
 </table>
@@ -1477,6 +1477,11 @@
 <td>Diagnostics level</td>
 <td>Redacted, Full, Full confidential; disabled by default</td>
 </tr>
+<tr>
+<td><code>switch.…_slow_polling_mode</code></td>
+<td>Slow polling mode</td>
+<td>on while the panel is read every 30 seconds, so that other apps can connect to the board; SmartLAN/SI only (see <a href="../options/#slow-polling-mode">Slow polling mode</a>)</td>
+</tr>
 </tbody>
 </table>
 <details class="note">
@@ -1486,6 +1491,7 @@
 <li><strong>Peripherals</strong>: it does not tell whether a device is answering.</li>
 <li><strong>Programming mode</strong>: on while the panel is being programmed from a keypad, or reloading its configuration. Commands are not sent then. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5.0x).</li>
 <li><strong>Refuses arming with zones not ready</strong>: read with the panel configuration; unknown until the configuration is read again by this version. See <a href="../actions-events/#zones-not-ready">Zones not ready</a>.</li>
+<li><strong>Slow polling mode</strong>: stays available while the panel cannot be reached, so you can turn it off. It turns itself off at the time in <code>until</code>.</li>
 <li><strong>Diagnostics level</strong>: how much the next diagnostics download shows (see <a href="../system-report/">System report</a>). It goes back to <em>Redacted</em> when the integration restarts or reloads, after the readable copy of a Full report has been downloaded, and 10 minutes after a Full report's first download.</li>
 </ul>
 <table>
@@ -1516,6 +1522,11 @@
 <td><code>keypads</code>, <code>readers</code>, <code>expanders</code>, <code>sirens</code></td>
 <td>Peripherals</td>
 <td>the names of the enabled devices</td>
+</tr>
+<tr>
+<td><code>until</code></td>
+<td>Slow polling mode</td>
+<td>when the mode turns itself off; empty while it is off or kept on until turned off</td>
 </tr>
 </tbody>
 </table>
