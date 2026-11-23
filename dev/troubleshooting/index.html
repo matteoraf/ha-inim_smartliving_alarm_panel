@@ -995,7 +995,7 @@
 <h3 id="smartlang-the-reply-was-not-in-the-expected-format">SmartLAN/G: the reply was not in the expected format<a class="headerlink" href="#smartlang-the-reply-was-not-in-the-expected-format" title="Permanent link">&para;</a></h3>
 <p>The setup says <em>"The SmartLAN/G board answered, but its reply was not in the expected format"</em>. Check the board's user name and password first. If they are right, your board probably answers in a way this integration does not handle yet. Please open a GitHub issue with your panel model and firmware, the board's version and a <a href="#debug-log">debug log</a> of a setup attempt.</p>
 <h3 id="the-inim-app-cannot-connect-locally">The Inim app cannot connect locally<a class="headerlink" href="#the-inim-app-cannot-connect-locally" title="Permanent link">&para;</a></h3>
-<p>The SmartLAN/SI board accepts only one local connection at a time. Home Assistant keeps its connection open while it reads the panel and for a few seconds after each update, so the app may have to retry. Remote access through Inim Cloud is not affected.</p>
+<p>The SmartLAN/SI board accepts only one local connection at a time. While Home Assistant reads the panel at the <a href="../options/#polling">Polling</a> intervals, it keeps its connection to the board open, so the app cannot connect locally meanwhile. Remote access through Inim Cloud is not affected.</p>
 <h3 id="programming-mode">Programming mode<a class="headerlink" href="#programming-mode" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Someone is programming the panel from a keypad, or the panel is reloading its configuration. Commands work again when programming has ended; the <em>Programming mode</em> sensor shows when.</li>
@@ -1010,7 +1010,7 @@
 <h3 id="entities-missing-or-not-updating">Entities missing or not updating<a class="headerlink" href="#entities-missing-or-not-updating" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Check the Home Assistant logs (<strong>Settings</strong> → <strong>System</strong> → <strong>Logs</strong>) for errors from the <code>inim_smartliving_alarm</code> integration.</li>
-<li>Check the polling interval in the <a href="../options/#all-options">options</a>. Too short can overload the panel or the network; too long delays updates.</li>
+<li>Check the intervals in the <a href="../options/#polling">Polling</a> options. Too short can keep the board busy; too long delays updates. The log says when the panel cannot keep up with them.</li>
 <li>Only ticked items get entities: check the options under <strong>Areas, zones, scenarios and outputs</strong>.</li>
 <li>A zone is listed only if its terminal is programmed as a zone on the panel. If you changed the panel's programming, use <strong>Re-read panel configuration</strong> first.</li>
 </ul>

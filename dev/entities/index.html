@@ -1548,7 +1548,7 @@
 </table>
 <ul>
 <li><strong>On/off and monostable outputs</strong> are switches. A monostable output switches itself off after its time; the switch shows it off at the next poll.</li>
-<li><strong>Dimmers</strong> are lights with brightness. On firmware 6 the level is read from the panel at every poll and after each change; on firmware 5.1 the panel does not report it, so the brightness is the last one set from Home Assistant.</li>
+<li><strong>Dimmers</strong> are lights with brightness. On firmware 6 the level is read from the panel with the zone bypass (every 30 seconds by default, see <a href="../options/#polling">Polling</a>) and after each change; on firmware 5.1 the panel does not report it, so the brightness is the last one set from Home Assistant.</li>
 <li>Outputs without a name on the panel are called <em>Output n</em>, or <em>O1</em> to <em>O3</em> for the fixed outputs.</li>
 </ul>
 <details class="note">

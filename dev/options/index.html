@@ -446,6 +446,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#polling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Polling
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -714,6 +725,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#polling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Polling
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -752,7 +774,6 @@
 <h2 id="initial-options">Initial options<a class="headerlink" href="#initial-options" title="Permanent link">&para;</a></h2>
 <p>When you add a panel, the last step asks for:</p>
 <ul>
-<li><strong>Polling Interval (seconds)</strong>: how often Home Assistant reads the panel's state.</li>
 <li><strong>Number of Events to store in log</strong>: how many recent events the event log sensor keeps.</li>
 <li><strong>Arm Home, Arm Away, Arm Night, Arm Vacation and Disarm Scenario</strong>: which of your scenarios the alarm panel card runs for each button. An arm mode without a scenario is not offered; Disarm without a scenario fails with a message.</li>
 </ul>
@@ -776,6 +797,7 @@
 <li><strong>Areas, zones, scenarios and outputs</strong>: what to import. The same step as at setup.</li>
 <li><strong>Area switches arm mode per area</strong>: the mode each area's switch arms in, if not the general one.</li>
 <li><strong>General settings</strong>: everything else, including a new PIN.</li>
+<li><strong>Polling</strong>: how often each part of the panel's state is read.</li>
 </ul>
 </li>
 <li>
@@ -791,6 +813,55 @@
 <h3 id="general-settings">General settings<a class="headerlink" href="#general-settings" title="Permanent link">&para;</a></h3>
 <p><img alt="The general settings" src="../images/options-general.webp" width="480" /></p>
 <p>The step names the user code the current PIN belongs to and the areas it controls. Leave <strong>New PIN Code</strong> empty to keep the current PIN; a new PIN is checked with the panel as at setup.</p>
+<h3 id="polling">Polling<a class="headerlink" href="#polling" title="Permanent link">&para;</a></h3>
+<p><img alt="The polling options" src="../images/options-polling.webp" width="480" /></p>
+<p>The integration reads the panel's state in parts, each at its own interval, in seconds:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Updates</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Zones and outputs</strong></td>
+<td>zone sensors, alarm and tamper memories, output switches and lights</td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Areas and active scenario</strong></td>
+<td>the alarm panel, area switches and sensors, arming mode selects, the active scenario sensors</td>
+<td>2</td>
+</tr>
+<tr>
+<td><strong>Zone bypass and dimmer levels</strong></td>
+<td><em>Zone N included</em> switches, the zones' <code>test</code> attribute, the brightness of dimmers</td>
+<td>30</td>
+</tr>
+<tr>
+<td><strong>Event log</strong></td>
+<td>the event log sensor</td>
+<td>10</td>
+</tr>
+<tr>
+<td><strong>Panel state</strong></td>
+<td>the <em>Programming mode</em> sensor</td>
+<td>60</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>After a command sent from Home Assistant (arming, a scenario, a bypass, an output), every part is read at once, whatever its interval.</li>
+<li>Shorter intervals show changes sooner and keep the board busier. At the defaults the integration sends about three requests a second, well within what the board answers.</li>
+<li>If the panel cannot answer as fast as an interval asks, the reads simply come later, and the log says so once.</li>
+<li>Home Assistant's <strong>Enable polling for updates</strong> setting (the panel's entry, ⋮ menu, <strong>System options</strong>) turns all scheduled reads off; commands and the <code>homeassistant.update_entity</code> action still read the panel.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">One local connection at a time</p>
+<p>While Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network (such as the Inim app or the installer software) cannot connect to it meanwhile. Remote access through Inim Cloud is not affected.</p>
+</div>
 <h2 id="all-options">All options<a class="headerlink" href="#all-options" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -803,13 +874,6 @@
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><strong>Polling Interval (seconds)</strong></td>
-<td>setup, General settings</td>
-<td>5 to 300</td>
-<td>30</td>
-<td>How often the panel's state is read. Shorter intervals show changes sooner and keep the board busier.</td>
-</tr>
 <tr>
 <td><strong>Number of Events to store in log</strong></td>
 <td>setup, General settings</td>
@@ -879,6 +943,41 @@
 <td>1 to 6 digits, or empty</td>
 <td>empty</td>
 <td>A new PIN, checked with the panel. Empty keeps the current PIN.</td>
+</tr>
+<tr>
+<td><strong>Zones and outputs</strong></td>
+<td>Polling</td>
+<td>0.5 to 60</td>
+<td>1</td>
+<td>Seconds between reads of the zones and the outputs.</td>
+</tr>
+<tr>
+<td><strong>Areas and active scenario</strong></td>
+<td>Polling</td>
+<td>0.5 to 60</td>
+<td>2</td>
+<td>Seconds between reads of the areas and the active scenario.</td>
+</tr>
+<tr>
+<td><strong>Zone bypass and dimmer levels</strong></td>
+<td>Polling</td>
+<td>5 to 300</td>
+<td>30</td>
+<td>Seconds between reads of the zone bypass and test flags and the dimmer levels.</td>
+</tr>
+<tr>
+<td><strong>Event log</strong></td>
+<td>Polling</td>
+<td>1 to 300</td>
+<td>10</td>
+<td>Seconds between reads of the event log.</td>
+</tr>
+<tr>
+<td><strong>Panel state</strong></td>
+<td>Polling</td>
+<td>10 to 600</td>
+<td>60</td>
+<td>Seconds between reads of the panel state (programming mode).</td>
 </tr>
 </tbody>
 </table>
