@@ -7,6 +7,13 @@ it may also accept a connection and close it at once. So the transport
 keeps one connection, replaces it before it can go idle, pauses briefly
 before reconnecting (also when another transport for the same board closed), and repeats a read once if its connection was lost.
 
+While another client holds the SmartLAN/SI board's only connection, the
+board ignores a new one: the attempt times out. When the board is shared
+with other clients, a brief connect (one attempt, a short timeout) lets a
+read fail in seconds instead of waiting through every attempt, and the
+connection is closed once no request has come for a moment, whoever made
+the last one.
+
 At debug level every frame is logged, with the PIN of commands masked;
 replies that may hold PINs are not logged.
 """
@@ -46,6 +53,11 @@ RECONNECT_PAUSE = 0.15  # after a close, before the next connection attempt
 IDLE_RECONNECT = (
     5.0  # replace a connection idle for longer (the board drops it at ~6.7 s)
 )
+BRIEF_CONNECT_TIMEOUT = 2.0  # one attempt, when the board may be in use
+# When shared, the connection closes this long after the last request: the
+# requests that follow each other (the groups of one read, a command and
+# the read after it) still share one connection
+SHARED_IDLE_CLOSE = 0.5  # seconds
 
 # When a connection to each address last closed, for every transport: a new
 # transport for the same board (after a reload, or a second client) must
@@ -140,6 +152,24 @@ class TransportStats:
         self._connect_times: deque[float] = deque(maxlen=50)
         self.errors: deque[dict[str, Any]] = deque(maxlen=ERRORS_KEPT)
         self.trace: deque[dict[str, Any]] = deque(maxlen=TRACE_LENGTH)
+        # Since when requests fail (None: the last one went through), and the
+        # longest such time that has ended
+        self._failing_since: float | None = None
+        self.longest_outage: float | None = None  # seconds
+
+    def failing(self) -> None:
+        """A request or a connection failed."""
+        if self._failing_since is None:
+            self._failing_since = time.monotonic()
+
+    def answered(self) -> None:
+        """A request went through: an outage, if any, has ended."""
+        if self._failing_since is None:
+            return
+        outage = time.monotonic() - self._failing_since
+        self._failing_since = None
+        if self.longest_outage is None or outage > self.longest_outage:
+            self.longest_outage = outage
 
     def exchange(
         self,
@@ -168,6 +198,10 @@ class TransportStats:
             self.counters[error] += 1
             entry["error"] = error
             self.error(error)
+            if error != "cancelled":  # stopped from this side: not an outage
+                self.failing()
+        else:
+            self.answered()
         self.trace.append(entry)
         return entry
 
@@ -199,6 +233,9 @@ class TransportStats:
             "command_results": dict(sorted(self.command_results.items())),
             "round_trip": timing(self._round_trips),
             "connect": timing(self._connect_times),
+            "longest_outage_s": None
+            if self.longest_outage is None
+            else round(self.longest_outage, 1),
             "last_errors": list(self.errors),
         }
 
@@ -310,6 +347,9 @@ class PanelTransport:
     """
 
     dialect: ClassVar[Dialect]
+    # Added to "the board can't be reached" when a connection fails: for a
+    # board that accepts one client at a time
+    busy_hint: ClassVar[str] = ""
     # Whether a read reply ends with the panel's checksum (SmartLAN/SI) or
     # carries the data alone (SmartLAN/G, which checks it on the board)
     reply_checksum: ClassVar[bool] = True
@@ -333,6 +373,10 @@ class PanelTransport:
         self.reply_timeout = reply_timeout
         self.reconnect_pause = reconnect_pause
         self.idle_reconnect = idle_reconnect
+        # Shared with other clients: one connection attempt with a short
+        # timeout, and the connection closed when idle (see the module)
+        self.shared = False
+        self._idle_close: asyncio.TimerHandle | None = None
         self.connections_opened = 0
         self.stats = TransportStats()
         self._reader: asyncio.StreamReader | None = None
@@ -351,10 +395,27 @@ class PanelTransport:
     ) -> AsyncIterator[Session]:
         """Hold the connection for several requests."""
         await self._lock.acquire(priority)
+        self._cancel_idle_close()
         try:
             yield Session(self)
         finally:
             self._lock.release()
+            if self.shared and self.connected and not self._lock.locked:
+                self._idle_close = asyncio.get_running_loop().call_later(
+                    SHARED_IDLE_CLOSE, self._close_idle
+                )
+
+    def _close_idle(self) -> None:
+        """Close the shared connection if no request has come since."""
+        self._idle_close = None
+        # Still shared, and no session running or waiting
+        if self.shared and not self._lock.locked:
+            self._drop()
+
+    def _cancel_idle_close(self) -> None:
+        if self._idle_close is not None:
+            self._idle_close.cancel()
+            self._idle_close = None
 
     async def read(
         self, frame: bytes, length: int, priority: Priority = Priority.POLL
@@ -479,7 +540,12 @@ class PanelTransport:
 
     async def _connect(self) -> None:
         error: Exception | None = None
-        for attempt in range(1, self.connect_attempts + 1):
+        attempts, timeout = (
+            (1, min(self.connect_timeout, BRIEF_CONNECT_TIMEOUT))
+            if self.shared
+            else (self.connect_attempts, self.connect_timeout)
+        )
+        for attempt in range(1, attempts + 1):
             closed = _last_close.get((self.host, self.port), float("-inf"))
             wait = closed + self.reconnect_pause - time.monotonic()
             if wait > 0:
@@ -487,12 +553,13 @@ class PanelTransport:
             started = time.monotonic()
             try:
                 self._reader, self._writer = await asyncio.wait_for(
-                    asyncio.open_connection(self.host, self.port), self.connect_timeout
+                    asyncio.open_connection(self.host, self.port), timeout
                 )
             except OSError as err:  # refused, unreachable or timed out
                 error = err
                 self.stats.counters["connect_failures"] += 1
                 self.stats.error("connect_failure")
+                self.stats.failing()
                 _last_close[(self.host, self.port)] = time.monotonic()
                 _LOGGER.debug(
                     "Connection attempt %s to %s:%s failed: %r",
@@ -507,7 +574,10 @@ class PanelTransport:
             self.stats.connected(self._last_activity - started)
             _LOGGER.debug("Connected to %s:%s", self.host, self.port)
             return
-        raise ConnectError(f"cannot connect to {self.host}:{self.port}: {error!r}")
+        raise ConnectError(
+            f"cannot connect to {self.host}:{self.port} (the board can't be "
+            f"reached{self.busy_hint}): {error!r}"
+        )
 
     # ---------------------------------------------- framing (per board type)
 

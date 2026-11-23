@@ -72,7 +72,41 @@ The integration reads the panel's state in parts, each at its own interval, in s
 
 !!! note "One local connection at a time"
 
-    While Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network (such as the Inim app or the installer software) cannot connect to it meanwhile. Remote access through Inim Cloud is not affected.
+    While Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network (such as the Inim app or the installer software) cannot connect to it meanwhile. To let them connect, turn on [slow polling mode](#slow-polling-mode). Remote access through Inim Cloud is not affected.
+
+### Slow polling mode
+
+![The Slow polling mode switch on the device page](images/device-page-slow-polling.webp){ width="400" }
+
+With a SmartLAN/SI board, the panel's device page has a **Slow polling mode** switch (in its *Configuration* section). While it is on, Home Assistant reads the whole panel once every **Reading interval in slow polling mode** (30 seconds by default) and closes its connection after each read and each command. Between the reads, the Inim app and the installer software can connect to the board.
+
+*   Changes at the panel show up to one interval later, as with the single polling interval of earlier versions.
+*   While another app is connected, Home Assistant cannot reach the board: the entities are unavailable until the app disconnects, and commands sent from Home Assistant fail with a message that the board can't be reached or is in use by another app. While the installer software reads the panel's programming, this can last about a minute; the log may then say how long the panel did not answer.
+*   Home Assistant's own read can now and then take the board between two connections of the installer software. If the installer software then reports a connection error, try again.
+*   The mode turns itself off after **Turn off slow polling mode after** (60 minutes by default). Set it to 0 to keep it on until you turn it off, for example if you use the Inim app on your network every day. It stays on, with the same end time, when Home Assistant restarts. If another app holds the board while Home Assistant starts, the integration cannot set up at first and tries again by itself a little later.
+*   When it turns off, every part of the panel is read at once, then at the intervals above.
+*   To have it on at set times, use an automation that turns the switch on and off.
+
+??? example "Automation: slow polling mode in the evening"
+
+    In the automation editor, **Edit in YAML**:
+
+    ```yaml
+    alias: Slow polling mode in the evening
+    triggers:
+      - trigger: time
+        at: "19:00:00"
+        id: "on"
+      - trigger: time
+        at: "23:00:00"
+        id: "off"
+    actions:
+      - action: switch.turn_{{ trigger.id }}
+        target:
+          entity_id: switch.home_slow_polling_mode
+    ```
+
+    Set **Turn off slow polling mode after** to 0, or to at least 240 minutes, so that it does not end before 23:00. Replace `switch.home_slow_polling_mode` with your switch's entity ID.
 
 ## All options
 
@@ -93,5 +127,7 @@ The integration reads the panel's state in parts, each at its own interval, in s
 | **Zone bypass and dimmer levels** | Polling | 5 to 300 | 30 | Seconds between reads of the zone bypass and test flags and the dimmer levels. |
 | **Event log** | Polling | 1 to 300 | 10 | Seconds between reads of the event log. |
 | **Panel state** | Polling | 10 to 600 | 60 | Seconds between reads of the panel state (programming mode). |
+| **Reading interval in slow polling mode** | Polling (SmartLAN/SI) | 10 to 300 | 30 | Seconds between reads of the whole panel while [slow polling mode](#slow-polling-mode) is on. |
+| **Turn off slow polling mode after** | Polling (SmartLAN/SI) | 0 to 1440 | 60 | Minutes after which slow polling mode turns itself off; 0 keeps it on until you turn it off. |
 
 The board's address, port, user name and password are changed with **Reconfigure** (see [Setup](setup.md#changing-the-connection-details-reconfigure)).

@@ -14,6 +14,7 @@ class SmartLanSiTransport(PanelTransport):
     """Plain frames over TCP."""
 
     dialect = SMARTLAN_SI
+    busy_hint = " or is in use by another app"
 
     def _encode(self, data: bytes) -> bytes:
         return data

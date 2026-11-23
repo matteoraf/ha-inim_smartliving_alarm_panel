@@ -1625,6 +1625,13 @@
   },
   {
     "platform": "switch",
+    "unique_id": "_slow_polling",
+    "original_name": "Slow polling mode",
+    "device_class": null,
+    "state": "off"
+  },
+  {
+    "platform": "switch",
     "unique_id": "_zone_enabled_switch_1",
     "original_name": "Zone 1 included",
     "device_class": null,

@@ -24,7 +24,11 @@ from custom_components.inim_smartliving_alarm import const
 from custom_components.inim_smartliving_alarm.attribute_values import value_key
 from custom_components.inim_smartliving_alarm.const import DATA_COORDINATOR, DOMAIN
 from custom_components.inim_smartliving_alarm.errors import REFUSAL_REASONS
-from custom_components.inim_smartliving_alarm.polling import GROUPS
+from custom_components.inim_smartliving_alarm.polling import (
+    GROUPS,
+    SLOW_POLLING_DURATION,
+    SLOW_POLLING_INTERVAL,
+)
 from custom_components.inim_smartliving_alarm.protocol.config import (
     Balancing,
     SensorKind,
@@ -204,6 +208,11 @@ def test_option_defaults_and_ranges() -> None:
         assert row[1] == "Polling"
         assert row[2] == f"{spec.minimum:g} to {spec.maximum:g}"
         assert row[3] == f"{spec.default:g}"
+    for spec in (SLOW_POLLING_INTERVAL, SLOW_POLLING_DURATION):
+        row = row_for(rows, EN["options"]["step"]["polling"]["data"][spec.option])
+        assert row[1] == "Polling (SmartLAN/SI)"
+        assert row[2] == f"{spec.minimum:g} to {spec.maximum:g}"
+        assert row[3] == f"{spec.default:g}"
     events = row_for(rows, EN["options"]["step"]["general"]["data"]["event_log_size"])
     assert events[2] == f"1 to {const.SYSTEM_MAX_EVENT_LOG_SIZE}"
     assert events[3] == str(const.DEFAULT_EVENT_LOG_SIZE)
@@ -335,6 +344,7 @@ ATTRIBUTE_TABLES = {
     "_active_scenario": ("entities", "The active scenario in detail"),
     "_user_code": ("entities", "Details and attributes"),
     "_peripherals": ("entities", "Details and attributes"),
+    "_slow_polling": ("entities", "Details and attributes"),
 }
 
 

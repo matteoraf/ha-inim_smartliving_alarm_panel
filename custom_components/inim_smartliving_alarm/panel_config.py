@@ -8,7 +8,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
 from .api import ProgrammingModeError, SmartLivingPanel
-from .const import DATA_INITIAL_PANEL_CONFIG, DATA_PANEL, DOMAIN
+from .const import (
+    BOARD_SMARTLAN_SI,
+    CONF_BOARD,
+    DATA_INITIAL_PANEL_CONFIG,
+    DATA_PANEL,
+    DOMAIN,
+)
 from .protocol.errors import ProtocolError, UnsupportedPanelError
 from .stored_config import store
 from .transport.base import TransportError
@@ -96,9 +102,11 @@ async def async_reread_panel_configuration(
     try:
         panel_config = await async_fetch_panel_configuration(hass, panel)
     except PanelUnreachable as err:
+        # A SmartLAN/SI board may be held by another app
+        in_use = entry.data.get(CONF_BOARD, BOARD_SMARTLAN_SI) == BOARD_SMARTLAN_SI
         raise HomeAssistantError(
             translation_domain=DOMAIN,
-            translation_key="cannot_connect",
+            translation_key="cannot_connect_in_use" if in_use else "cannot_connect",
             translation_placeholders={
                 "host": panel.transport.host,
                 "port": str(panel.transport.port),

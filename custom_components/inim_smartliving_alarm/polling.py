@@ -1,8 +1,12 @@
 """The polling groups: which parts of the live status are read, how often.
 
-Each group is read at its own interval. The schedule is plain logic on a
-clock value it is given: it neither reads nor waits, so the coordinator
-drives it and tests can move its clock by hand.
+Each group is read at its own interval. In slow polling mode every group is
+read at one longer interval instead, so that other apps can connect to a
+board that accepts one client at a time between the reads.
+
+The schedule is plain logic on a clock value it is given: it neither reads
+nor waits, so the coordinator drives it and tests can move its clock by
+hand.
 """
 
 from collections.abc import Mapping
@@ -17,11 +21,15 @@ from .const import (
     CONF_POLL_INTERVAL_FAULTS,
     CONF_POLL_INTERVAL_INCLUSION,
     CONF_POLL_INTERVAL_ZONES,
+    CONF_SLOW_POLLING_DURATION,
+    CONF_SLOW_POLLING_INTERVAL,
     DEFAULT_POLL_INTERVAL_AREAS,
     DEFAULT_POLL_INTERVAL_EVENTS,
     DEFAULT_POLL_INTERVAL_FAULTS,
     DEFAULT_POLL_INTERVAL_INCLUSION,
     DEFAULT_POLL_INTERVAL_ZONES,
+    DEFAULT_SLOW_POLLING_DURATION,
+    DEFAULT_SLOW_POLLING_INTERVAL,
 )
 
 # After this many failed reads in a row, the next try waits RETRY_INTERVAL
@@ -49,7 +57,10 @@ class PollGroup(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class GroupSpec:
-    """A group's option, its default interval and the allowed range (seconds)."""
+    """An option, its default and the allowed range.
+
+    For a group: its interval option, in seconds.
+    """
 
     option: str
     default: float
@@ -78,18 +89,41 @@ GROUPS: dict[PollGroup, GroupSpec] = {
 }
 
 
+# Slow polling mode: the interval every group is read at (seconds), and the
+# minutes after which the mode turns itself off (0: until turned off)
+SLOW_POLLING_INTERVAL = GroupSpec(
+    CONF_SLOW_POLLING_INTERVAL, DEFAULT_SLOW_POLLING_INTERVAL, 10, 300
+)
+SLOW_POLLING_DURATION = GroupSpec(
+    CONF_SLOW_POLLING_DURATION, DEFAULT_SLOW_POLLING_DURATION, 0, 1440
+)
+
+
+def option_value(options: Mapping[str, Any], spec: GroupSpec) -> float:
+    """An option's value: as set, else the default, within the range."""
+    try:
+        value = float(options.get(spec.option, spec.default))
+    except (TypeError, ValueError):
+        value = spec.default
+    if math.isnan(value):
+        value = spec.default
+    return min(max(value, spec.minimum), spec.maximum)
+
+
 def intervals(options: Mapping[str, Any]) -> dict[PollGroup, float]:
     """Each group's interval: the option, else the default, within the range."""
-    result = {}
-    for group, spec in GROUPS.items():
-        try:
-            value = float(options.get(spec.option, spec.default))
-        except (TypeError, ValueError):
-            value = spec.default
-        if math.isnan(value):
-            value = spec.default
-        result[group] = min(max(value, spec.minimum), spec.maximum)
-    return result
+    return {group: option_value(options, spec) for group, spec in GROUPS.items()}
+
+
+def slow_intervals(options: Mapping[str, Any]) -> dict[PollGroup, float]:
+    """Each group's interval in slow polling mode: the same for every group."""
+    seconds = option_value(options, SLOW_POLLING_INTERVAL)
+    return dict.fromkeys(GROUPS, seconds)
+
+
+def slow_polling_minutes(options: Mapping[str, Any]) -> float:
+    """After how many minutes slow polling mode ends (0: until turned off)."""
+    return option_value(options, SLOW_POLLING_DURATION)
 
 
 class PollSchedule:

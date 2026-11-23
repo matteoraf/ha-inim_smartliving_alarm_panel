@@ -211,20 +211,24 @@
         },
         "polling": {
           "title": "Polling",
-          "description": "How often each part of the panel's state is read, in seconds. Shorter intervals show changes sooner and keep the board busier. After a command sent from Home Assistant, every part is read at once.\n\nWhile Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network cannot connect to it meanwhile.",
+          "description": "How often each part of the panel's state is read, in seconds. Shorter intervals show changes sooner and keep the board busier. After a command sent from Home Assistant, every part is read at once.\n\nWhile Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network cannot connect to it meanwhile. To let them connect, turn on Slow polling mode on the panel's device page: Home Assistant then reads the whole panel at the slow polling interval and closes its connection after each read.",
           "data": {
             "poll_interval_zones": "Zones and outputs",
             "poll_interval_areas": "Areas and active scenario",
             "poll_interval_inclusion": "Zone bypass and dimmer levels",
             "poll_interval_events": "Event log",
-            "poll_interval_faults": "Panel state"
+            "poll_interval_faults": "Panel state",
+            "slow_polling_interval": "Reading interval in slow polling mode",
+            "slow_polling_duration": "Turn off slow polling mode after"
           },
           "data_description": {
             "poll_interval_zones": "Zone sensors, alarm and tamper memories, output switches and lights.",
             "poll_interval_areas": "Alarm panel, area switches and sensors, arming mode selects, active scenario sensors.",
             "poll_interval_inclusion": "Zone included switches, the zones' test attribute and the brightness of dimmers.",
             "poll_interval_events": "Event log sensor.",
-            "poll_interval_faults": "Programming mode sensor."
+            "poll_interval_faults": "Programming mode sensor.",
+            "slow_polling_interval": "While slow polling mode is on, Home Assistant reads the whole panel at this interval and closes its connection after each read, so other apps can connect to the board in between.",
+            "slow_polling_duration": "Slow polling mode turns itself off after this many minutes. 0 keeps it on until you turn it off."
           }
         }
       },
@@ -246,7 +250,10 @@
     },
     "exceptions": {
       "cannot_connect": {
-        "message": "Failed to connect to the panel at {host}:{port}. The panel configuration was not changed."
+        "message": "Failed to connect to the panel at {host}:{port}: the board can't be reached. The panel configuration was not changed."
+      },
+      "cannot_connect_in_use": {
+        "message": "Failed to connect to the panel at {host}:{port}: the board can't be reached or is in use by another app. The panel configuration was not changed."
       },
       "invalid_panel_configuration": {
         "message": "The panel returned an incomplete or invalid configuration ({error}). The panel configuration was not changed."
@@ -555,6 +562,14 @@
         },
         "zone_included_unnamed": {
           "name": "Zone {number} included"
+        },
+        "slow_polling": {
+          "name": "Slow polling mode",
+          "state_attributes": {
+            "until": {
+              "name": "Until"
+            }
+          }
         },
         "terminal_output": {
           "name": "Output {number}"

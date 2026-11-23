@@ -4,20 +4,25 @@ The live status is read in polling groups, each at its own interval (see
 polling.py). A full read of every group runs at setup, after commands and
 on request; between them, the coordinator reads only the groups due and
 tells the entities only when something changed.
+
+In slow polling mode every group is read at one longer interval, and the
+connection is closed after each read or command, so that other apps can
+connect to a board that accepts one client at a time.
 """
 
 import asyncio
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, replace
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import time
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import CALLBACK_TYPE, HassJob, HomeAssistant
+from homeassistant.core import CALLBACK_TYPE, HassJob, HomeAssistant, callback
 from homeassistant.helpers.debounce import Debouncer
-from homeassistant.helpers.event import async_call_later
+from homeassistant.helpers.event import async_call_later, async_track_point_in_utc_time
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.util import dt as dt_util
 
 from .api import (
     PANEL_ERRORS,
@@ -26,15 +31,31 @@ from .api import (
     SmartLivingPanel,
     StatusReading,
 )
-from .const import CONF_EVENT_LOG_SIZE, DEFAULT_EVENT_LOG_SIZE
-from .polling import PollGroup, PollSchedule, intervals
+from .const import (
+    BOARD_SMARTLAN_SI,
+    CONF_BOARD,
+    CONF_EVENT_LOG_SIZE,
+    DEFAULT_EVENT_LOG_SIZE,
+)
+from .polling import (
+    PollGroup,
+    PollSchedule,
+    intervals,
+    slow_intervals,
+    slow_polling_minutes,
+)
 from .selection import imported_outputs, is_dimmer, panel_config
+from .transport.base import ConnectError
 
 _LOGGER = logging.getLogger(__name__)
 
 # A refresh asked for (after a command) runs at once; another one asked for
 # within this time runs once at its end
 REFRESH_COOLDOWN = 1.0  # seconds
+# Reads failing for longer than this (from the first failed read to the
+# last) are logged when they go through again, with a hint: a panel may stop
+# answering for a while after a change to its programming
+LONG_OUTAGE = 20.0  # seconds
 
 
 def _now() -> float:
@@ -83,6 +104,21 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         self._unsub_tick: CALLBACK_TYPE | None = None
         self._polling = False
         self._tick_job = HassJob(self._async_tick, f"{name} polling")
+        # When the first of the reads failing now started, and when the last
+        # one failed (None: reads go through)
+        self._failing_since: float | None = None
+        self._last_failure: float | None = None
+        # Stopped by unload or a failed setup: slow polling mode is not
+        # turned on then (_polling is also False with polling turned off)
+        self._stopped = False
+        # Whether this board may be held by another app
+        self._board_in_use_hint = (
+            entry.data.get(CONF_BOARD, BOARD_SMARTLAN_SI) == BOARD_SMARTLAN_SI
+        )
+        # Slow polling mode, and when it turns itself off (None: never)
+        self.slow_polling = False
+        self.slow_polling_until: datetime | None = None
+        self._unsub_slow_polling_end: CALLBACK_TYPE | None = None
 
         # Home Assistant does not poll: the groups have their own schedule
         super().__init__(
@@ -115,24 +151,20 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
                     status = await self.panel.read_status()
                 except PANEL_ERRORS as err:
                     # Home Assistant logs the first failure and the recovery
-                    raise UpdateFailed(
-                        f"Failed to connect to Inim panel at {self.panel_host_port} "
-                        "for live update"
-                    ) from err
+                    raise self._failure(err) from err
                 self._output_levels = await self._read_dimmer_levels()
                 await self._read_new_events()
             except UpdateFailed:
-                self.schedule.failed(_now())
+                self._note_failure(started)
                 raise
             except Exception as err:
-                self.schedule.failed(_now())
+                self._note_failure(started)
                 self._log_unexpected(err)
                 raise UpdateFailed(
                     f"Error communicating with API for {self.panel_host_port}: {err}"
                 ) from err
             self.schedule.read_all(started)
-            self.schedule.succeeded()
-            self._unexpected_logged = False
+            self._note_success()
             return self._panel_data(status)
 
     # ------------------------------------------------------- scheduled reads
@@ -141,8 +173,12 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         """Read the groups at their intervals, from now until stopped.
 
         Nothing is scheduled while the entry's "Enable polling for updates"
-        system option is off; refreshes after commands still read.
+        system option is off; refreshes after commands still read. The end
+        of slow polling mode is set again if a stop cancelled it.
         """
+        self._stopped = False
+        if self.slow_polling and self._unsub_slow_polling_end is None:
+            self._arm_slow_polling_end(self.slow_polling_until)
         if self.config_entry.pref_disable_polling:
             _LOGGER.info("%s: polling is turned off for this entry", self.name)
             return
@@ -156,9 +192,11 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         connection can be closed without a read opening it again.
         """
         self._polling = False
+        self._stopped = True
         if self._unsub_tick is not None:
             self._unsub_tick()
             self._unsub_tick = None
+        self._cancel_slow_polling_end()
         async with self._reading:
             pass
 
@@ -200,21 +238,16 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
             for group in due:
                 if self._stopping:
                     return
-                started = _now()
                 if group is PollGroup.EVENTS:
                     await self._read_new_events()
                 else:
                     status = (await self._read_group(group)).apply(status)
-                self.schedule.read(group, started)
+                # Every group of a wake-up counts from its start, so groups
+                # due together stay together (one connection a read when
+                # the connection is closed after each)
+                self.schedule.read(group, now)
         except PANEL_ERRORS as err:
-            self._read_failed(
-                status,
-                UpdateFailed(
-                    f"Failed to connect to Inim panel at {self.panel_host_port} "
-                    "for live update"
-                ),
-                err,
-            )
+            self._read_failed(status, self._failure(err), err, now)
             return
         except Exception as err:  # noqa: BLE001 - like a full read, it fails the poll
             self._log_unexpected(err)
@@ -224,10 +257,10 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
                     f"Error communicating with API for {self.panel_host_port}: {err}"
                 ),
                 err,
+                now,
             )
             return
-        self.schedule.succeeded()
-        self._unexpected_logged = False
+        self._note_success()
         self._publish(self._panel_data(status))
 
     async def _read_group(self, group: PollGroup) -> StatusReading:
@@ -247,7 +280,11 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         return reading
 
     def _read_failed(
-        self, status: PanelStatus, failure: UpdateFailed, err: Exception
+        self,
+        status: PanelStatus,
+        failure: UpdateFailed,
+        err: Exception,
+        started: float,
     ) -> None:
         """A group read failed: the entities become unavailable until a read
         goes through; Home Assistant logs the first failure.
@@ -257,7 +294,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         events read meanwhile with it.
         """
         failure.__cause__ = err
-        self.schedule.failed(_now())
+        self._note_failure(started)
         self.data = replace(
             self.data, status=status, new_events=(), output_levels=self._output_levels
         )
@@ -273,6 +310,49 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         _LOGGER.error(
             "(%s) Unexpected error fetching data: %s", self.name, err, exc_info=True
         )
+
+    def _failure(self, err: Exception) -> UpdateFailed:
+        """The failure of a read the panel did not answer."""
+        if isinstance(err, ConnectError):
+            in_use = " or is in use by another app" if self._board_in_use_hint else ""
+            return UpdateFailed(
+                f"Cannot connect to the Inim panel at {self.panel_host_port}: the "
+                f"board can't be reached{in_use}"
+            )
+        return UpdateFailed(
+            f"Failed to connect to Inim panel at {self.panel_host_port} for live update"
+        )
+
+    def _note_failure(self, started: float) -> None:
+        """A read that started then failed: the next one waits."""
+        self.schedule.failed(_now())
+        if self._failing_since is None:
+            self._failing_since = started
+        self._last_failure = _now()
+
+    def _note_success(self) -> None:
+        """A read went through: back to the intervals.
+
+        After a long time without answers, one line says how long, and how
+        to read the panel's configuration again in case it was changed
+        meanwhile (a panel may stop answering after a programming change).
+        The time runs from the first failed read to the last, so one read
+        that failed, followed by a long interval, is not a long time.
+        """
+        self.schedule.succeeded()
+        self._unexpected_logged = False
+        if self._failing_since is None or self._last_failure is None:
+            return
+        seconds = self._last_failure - self._failing_since
+        self._failing_since = self._last_failure = None
+        if seconds >= LONG_OUTAGE:
+            _LOGGER.info(
+                "%s: the panel did not answer for at least %.0f s. If its "
+                "programming was changed meanwhile, read its configuration again "
+                "with the Re-read panel configuration button or action",
+                self.name,
+                seconds,
+            )
 
     def _publish(self, data: PanelData) -> None:
         """Hand new data to the entities, unless nothing changed.
@@ -311,6 +391,108 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
                 self.intervals[group],
                 group,
             )
+
+    # ---------------------------------------------------- slow polling mode
+
+    @property
+    def _closed(self) -> bool:
+        """Whether the entry is unloading or failed to set up, or Home
+        Assistant is stopping: slow polling mode is not turned on then."""
+        return self._stopped or self.hass.is_stopping or self._shutdown_requested
+
+    async def async_set_slow_polling(self, on: bool) -> None:
+        """Turn slow polling mode on (for the minutes set in the options) or
+        off."""
+        if not on:
+            await self._async_end_slow_polling()
+            return
+        if self._closed:
+            return
+        minutes = slow_polling_minutes(self.config_entry.options)
+        until = dt_util.utcnow() + timedelta(minutes=minutes) if minutes else None
+        await self._async_start_slow_polling(until)
+
+    async def async_restore_slow_polling(self, until: datetime | None) -> None:
+        """Turn slow polling mode on again after a restart or a reload.
+
+        until is when it was to end (None: until turned off); it is not
+        turned on if that time has passed.
+        """
+        if self._closed or (until is not None and until <= dt_util.utcnow()):
+            return
+        await self._async_start_slow_polling(until)
+
+    async def _async_start_slow_polling(self, until: datetime | None) -> None:
+        """Read every group at the slow interval, closing the connection
+        after each read, until the given time (None: until turned off)."""
+        self._arm_slow_polling_end(until)
+        if not self.slow_polling:
+            self.slow_polling = True
+            self.panel.set_shared(True)
+            slow = slow_intervals(self.config_entry.options)
+            async with self._reading:
+                self.schedule = PollSchedule(slow)
+                self.schedule.read_all(_now())  # the next read is one interval away
+                await self.panel.release()
+            _LOGGER.info(
+                "%s: slow polling mode on: the panel is read every %g s and the "
+                "connection is closed after each read%s",
+                self.name,
+                next(iter(slow.values())),
+                ""
+                if until is None
+                else f", until {dt_util.as_local(until).strftime('%H:%M')}",
+            )
+            self._schedule_tick()
+        self.async_update_listeners()
+
+    async def _async_end_slow_polling(self) -> None:
+        """Back to the polling groups' intervals: every group is read now."""
+        self._cancel_slow_polling_end()
+        self.slow_polling_until = None
+        if self.slow_polling:
+            self.slow_polling = False
+            self.panel.set_shared(False)
+            async with self._reading:
+                self.schedule = PollSchedule(self.intervals)  # every group due
+            _LOGGER.info(
+                "%s: slow polling mode off: the panel is read at the Polling "
+                "intervals again",
+                self.name,
+            )
+            self._schedule_tick()
+        self.async_update_listeners()
+
+    def _arm_slow_polling_end(self, until: datetime | None) -> None:
+        """End slow polling mode at that time (None: never)."""
+        self._cancel_slow_polling_end()
+        self.slow_polling_until = until
+        if until is not None:
+            self._unsub_slow_polling_end = async_track_point_in_utc_time(
+                self.hass, self._slow_polling_ended, until
+            )
+
+    @callback
+    def _slow_polling_ended(self, _fired: datetime) -> None:
+        """The time set for slow polling mode is over."""
+        self._unsub_slow_polling_end = None
+        until = self.slow_polling_until
+        self.config_entry.async_create_background_task(
+            self.hass,
+            self._async_end_slow_polling_at(until),
+            f"{self.name} slow polling end",
+        )
+
+    async def _async_end_slow_polling_at(self, until: datetime | None) -> None:
+        """End slow polling mode, unless it was turned on again meanwhile
+        with another end time."""
+        if self.slow_polling and self.slow_polling_until == until:
+            await self._async_end_slow_polling()
+
+    def _cancel_slow_polling_end(self) -> None:
+        if self._unsub_slow_polling_end is not None:
+            self._unsub_slow_polling_end()
+            self._unsub_slow_polling_end = None
 
     # --------------------------------------------------------------- parts
 
