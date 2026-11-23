@@ -12,6 +12,9 @@ import pytest
 
 from custom_components.inim_smartliving_alarm import api
 from custom_components.inim_smartliving_alarm.const import DOMAIN
+from custom_components.inim_smartliving_alarm.coordinator import (
+    InimDataUpdateCoordinator,
+)
 from custom_components.inim_smartliving_alarm.protocol.commands import CommandResult
 from custom_components.inim_smartliving_alarm.protocol.errors import ProtocolError
 from custom_components.inim_smartliving_alarm.transport import (
@@ -46,6 +49,22 @@ def no_command_settle(
     """
     if request.node.get_closest_marker("real_panel") is None:
         monkeypatch.setattr(api, "COMMAND_SETTLE", 0)
+
+
+@pytest.fixture(autouse=True)
+def no_scheduled_polling(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Entries read the panel only when a test asks (a refresh, a command).
+
+    Polling every second would add reads to any test that runs longer, so
+    request counts and logs would depend on timing. Tests marked
+    scheduled_polling keep the schedule and move its clock by hand.
+    """
+    if request.node.get_closest_marker("scheduled_polling") is None:
+        monkeypatch.setattr(
+            InimDataUpdateCoordinator, "async_start_polling", lambda self: None
+        )
 
 
 @pytest.fixture
@@ -151,7 +170,6 @@ async def add_entry(
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
-            "polling_interval": 30,
             "event_log_size": 5,
             "scenario_arm_away": "0",
             "scenario_arm_home": "none",

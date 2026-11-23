@@ -96,7 +96,6 @@
           "title": "Opzioni Iniziali",
           "description": "Imposta le opzioni iniziali. Potranno essere modificate in seguito dalla pagina di configurazione dell'integrazione.",
           "data": {
-            "polling_interval": "Intervallo di aggiornamento (secondi)",
             "event_log_size": "Numero di eventi da memorizzare",
             "scenario_arm_home": "Scenario Inserimento Parziale (Casa)",
             "scenario_arm_away": "Scenario Inserimento Totale (Fuori)",
@@ -148,7 +147,8 @@
           "menu_options": {
             "items": "Aree, zone, scenari e uscite",
             "area_switches": "Modalità di inserimento per area",
-            "general": "Impostazioni generali"
+            "general": "Impostazioni generali",
+            "polling": "Aggiornamento"
           }
         },
         "items": {
@@ -194,7 +194,6 @@
           "description": "Modifica le impostazioni per la tua integrazione Inim.\n\nI comandi vengono inviati con il codice utente **{user_code}**, che controlla queste aree: {user_areas}.",
           "data": {
             "pin": "Nuovo codice PIN",
-            "polling_interval": "Intervallo di aggiornamento (secondi)",
             "event_log_size": "Numero di eventi da memorizzare nel log",
             "scenario_arm_home": "Scenario Inserimento Parziale (Casa)",
             "scenario_arm_away": "Scenario Inserimento Totale (Fuori)",
@@ -208,6 +207,24 @@
             "pin": "Lascia vuoto per mantenere il PIN attuale.",
             "area_switches_default_arm_mode": "Modalità usata quando si accende un interruttore area, a meno che la sua area non abbia una modalità propria in Modalità di inserimento per area. Il selettore della modalità di inserimento di ogni area imposta qualsiasi modalità.",
             "zones_not_ready": "Prima di inserire aree o attivare uno scenario, la centrale indica quali zone non sono pronte. Rifiuta: non viene inviato nulla e un errore elenca le zone. Inserisci comunque: il comando viene inviato e una notifica elenca le zone, che possono far scattare un allarme. In entrambi i casi l'evento inim_smartliving_alarm_zones_not_ready le elenca."
+          }
+        },
+        "polling": {
+          "title": "Aggiornamento",
+          "description": "Ogni quanto viene letta ciascuna parte dello stato della centrale, in secondi. Intervalli più brevi mostrano prima le modifiche e tengono la scheda più occupata. Dopo un comando inviato da Home Assistant, ogni parte viene letta subito.\n\nMentre legge la centrale a questi intervalli, Home Assistant tiene aperta la connessione con la scheda. La scheda SmartLAN/SI accetta un solo client locale alla volta, quindi nel frattempo le altre app della tua rete non possono collegarsi.",
+          "data": {
+            "poll_interval_zones": "Zone e uscite",
+            "poll_interval_areas": "Aree e scenario attivo",
+            "poll_interval_inclusion": "Esclusione zone e livelli dei dimmer",
+            "poll_interval_events": "Registro eventi",
+            "poll_interval_faults": "Stato della centrale"
+          },
+          "data_description": {
+            "poll_interval_zones": "Sensori delle zone, memorie di allarme e manomissione, interruttori delle uscite e luci.",
+            "poll_interval_areas": "Pannello di allarme, interruttori e sensori delle aree, selettori della modalità di inserimento, sensori dello scenario attivo.",
+            "poll_interval_inclusion": "Interruttori di inclusione delle zone, attributo test delle zone e luminosità dei dimmer.",
+            "poll_interval_events": "Sensore del registro eventi.",
+            "poll_interval_faults": "Sensore della modalità programmazione."
           }
         }
       },

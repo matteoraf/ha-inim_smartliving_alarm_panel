@@ -39,7 +39,6 @@ pytestmark = pytest.mark.usefixtures("socket_enabled")
 USERNAME = "installer"
 PASSWORD = "s3cret"
 OPTIONS = {
-    "polling_interval": 30,
     "event_log_size": 5,
     "scenario_arm_away": "0",
     "scenario_arm_home": "none",
@@ -104,7 +103,7 @@ async def open_options(
     """Open the options and pick one of the menu's steps."""
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["type"] is FlowResultType.MENU
-    assert result["menu_options"] == ["items", "area_switches", "general"]
+    assert result["menu_options"] == ["items", "area_switches", "general", "polling"]
     return await hass.config_entries.options.async_configure(
         result["flow_id"], {"next_step_id": step}
     )
@@ -121,7 +120,7 @@ async def unload_all(hass: HomeAssistant) -> None:
 
 
 async def test_setup_smartlan_si(hass: HomeAssistant, panel: FakePanel) -> None:
-    """SmartLAN/SI: menu, connection, items, options; the entry is version 1.5."""
+    """SmartLAN/SI: menu, connection, items, options; the entry is version 2.2."""
     flow_id = await board_form(hass, "smartlan_si")
     result = await submit(hass, flow_id, si_input(panel))
     await pick_items(hass, flow_id, result)
@@ -129,7 +128,7 @@ async def test_setup_smartlan_si(hass: HomeAssistant, panel: FakePanel) -> None:
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     entry: ConfigEntry = result["result"]
-    assert (entry.version, entry.minor_version) == (2, 1)
+    assert (entry.version, entry.minor_version) == (2, 2)
     assert entry.data["board"] == "smartlan_si"
     assert "username" not in entry.data
     assert entry.state is ConfigEntryState.LOADED
@@ -338,7 +337,7 @@ async def test_reconfigure_smartlan_g(hass: HomeAssistant, g_panel: FakePanel) -
 
 
 async def test_migration_adds_the_board(hass: HomeAssistant) -> None:
-    """Entries from before 1.2 are SmartLAN/SI entries (and then go to 2.1)."""
+    """Entries from before 1.2 are SmartLAN/SI entries (and then go to 2.2)."""
     entry = MockConfigEntry(
         domain=DOMAIN,
         version=1,
@@ -348,7 +347,7 @@ async def test_migration_adds_the_board(hass: HomeAssistant) -> None:
     entry.add_to_hass(hass)
 
     assert await async_migrate_entry(hass, entry)
-    assert (entry.version, entry.minor_version) == (2, 1)
+    assert (entry.version, entry.minor_version) == (2, 2)
     assert entry.data == {
         "host": "192.0.2.10",
         "port": 5004,
@@ -371,7 +370,7 @@ async def test_migrated_entry_without_configuration_sets_up(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     assert entry.state is ConfigEntryState.LOADED
-    assert (entry.version, entry.minor_version) == (2, 1)
+    assert (entry.version, entry.minor_version) == (2, 2)
     errors = [
         record.getMessage()
         for record in caplog.records

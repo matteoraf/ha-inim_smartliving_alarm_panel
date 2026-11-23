@@ -14,7 +14,7 @@ never logged or kept.
 import asyncio
 from collections.abc import AsyncIterator, Callable, Iterable, Mapping
 import contextlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import logging
 import time
 
@@ -379,6 +379,113 @@ class PanelStatus:
         return self.active_scenario is not None
 
 
+# The live status read in parts, one per polling group. Each part replaces
+# its fields (and its registers' bytes) in an earlier PanelStatus.
+
+
+@dataclass(frozen=True, slots=True)
+class ZoneReading:
+    """Zone states and zone memory (alarm and tamper memories, outputs)."""
+
+    zone_states: tuple[ZoneState, ...]
+    zone_memory: ZoneMemory
+    raw: Mapping[int, bytes]
+
+    def apply(self, status: PanelStatus) -> PanelStatus:
+        """The status with these zone states and memory."""
+        return replace(
+            status,
+            zone_states=self.zone_states,
+            zone_memory=self.zone_memory,
+            raw={**status.raw, **self.raw},
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class AreaReading:
+    """Area status and the active scenario, read together."""
+
+    areas: AreaStatus
+    active_scenario: int | None
+    raw_active_scenario: bytes
+    raw: Mapping[int, bytes]
+
+    def apply(self, status: PanelStatus) -> PanelStatus:
+        """The status with these areas and active scenario."""
+        return replace(
+            status,
+            areas=self.areas,
+            active_scenario=self.active_scenario,
+            raw_active_scenario=self.raw_active_scenario,
+            raw={**status.raw, **self.raw},
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class InclusionReading:
+    """Zone inclusion and test."""
+
+    zone_inclusion: ZoneInclusion
+    raw: Mapping[int, bytes]
+
+    def apply(self, status: PanelStatus) -> PanelStatus:
+        """The status with this zone inclusion."""
+        return replace(
+            status,
+            zone_inclusion=self.zone_inclusion,
+            raw={**status.raw, **self.raw},
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class PanelStateReading:
+    """The panel state flags; None when the panel's model is not known."""
+
+    panel_state: PanelState | None
+    raw: Mapping[int, bytes]
+
+    def apply(self, status: PanelStatus) -> PanelStatus:
+        """The status with these panel state flags."""
+        return replace(
+            status, panel_state=self.panel_state, raw={**status.raw, **self.raw}
+        )
+
+
+StatusReading = ZoneReading | AreaReading | InclusionReading | PanelStateReading
+
+
+def _zone_reading(raw: Mapping[int, bytes], model: PanelModel) -> ZoneReading:
+    return ZoneReading(
+        zone_states=decode_zone_states(raw[reg.ZONE_STATE], model),
+        zone_memory=decode_zone_memory(raw[reg.ZONE_MEMORY], model),
+        raw={key: raw[key] for key in (reg.ZONE_STATE, reg.ZONE_MEMORY)},
+    )
+
+
+def _area_reading(raw: Mapping[int, bytes], model: PanelModel) -> AreaReading:
+    return AreaReading(
+        areas=decode_area_status(raw[reg.AREA_STATUS], model),
+        active_scenario=decode_active_scenario(raw[reg.ACTIVE_SCENARIO], model),
+        raw_active_scenario=raw[reg.ACTIVE_SCENARIO],
+        raw={key: raw[key] for key in (reg.AREA_STATUS, reg.ACTIVE_SCENARIO)},
+    )
+
+
+def _inclusion_reading(raw: Mapping[int, bytes], model: PanelModel) -> InclusionReading:
+    return InclusionReading(
+        zone_inclusion=decode_zone_inclusion(raw[reg.ZONE_INCLUSION], model),
+        raw={reg.ZONE_INCLUSION: raw[reg.ZONE_INCLUSION]},
+    )
+
+
+def _panel_state_reading(raw: Mapping[int, bytes]) -> PanelStateReading:
+    faults = raw.get(reg.FAULTS)
+    return PanelStateReading(
+        panel_state=None if faults is None else _panel_state(faults),
+        raw={} if faults is None else {reg.FAULTS: faults},
+    )
+
+
 class SmartLivingPanel:
     """A SmartLiving panel reached through a SmartLAN transport.
 
@@ -619,30 +726,85 @@ class SmartLivingPanel:
         """Read areas, zones, the active scenario and the state flags in one go."""
         async with self.transport.session() as session:
             model = await self._identify(session)
-            raw: dict[int, bytes] = {}
-            for register, length in (
-                (reg.AREA_STATUS, model.area_status_length),
-                (reg.ZONE_STATE, model.zone_state_length),
-                (reg.ZONE_INCLUSION, model.zone_inclusion_length),
-                (reg.ZONE_MEMORY, model.zone_memory_length),
-            ):
-                raw[register] = await session.read(read_ram(register, length), length)
-            raw[reg.ACTIVE_SCENARIO] = await session.read(
-                active_scenario_request(area_mask(self._user_areas)), 1
+            raw = await self._read_registers(
+                session,
+                model,
+                (reg.AREA_STATUS, reg.ZONE_STATE, reg.ZONE_INCLUSION, reg.ZONE_MEMORY),
             )
-            if self.reads_panel_state:
-                raw[reg.FAULTS] = await session.read_ram(reg.FAULTS, reg.FAULTS_LENGTH)
-        faults = raw.get(reg.FAULTS)
+            raw.update(await self._read_active_scenario(session))
+            raw.update(await self._read_faults(session))
+        areas = _area_reading(raw, model)
+        zones = _zone_reading(raw, model)
         return PanelStatus(
-            areas=decode_area_status(raw[reg.AREA_STATUS], model),
-            zone_states=decode_zone_states(raw[reg.ZONE_STATE], model),
-            zone_inclusion=decode_zone_inclusion(raw[reg.ZONE_INCLUSION], model),
-            zone_memory=decode_zone_memory(raw[reg.ZONE_MEMORY], model),
-            active_scenario=decode_active_scenario(raw[reg.ACTIVE_SCENARIO], model),
-            panel_state=None if faults is None else _panel_state(faults),
+            areas=areas.areas,
+            zone_states=zones.zone_states,
+            zone_inclusion=_inclusion_reading(raw, model).zone_inclusion,
+            zone_memory=zones.zone_memory,
+            active_scenario=areas.active_scenario,
+            panel_state=_panel_state_reading(raw).panel_state,
             raw=raw,
-            raw_active_scenario=raw[reg.ACTIVE_SCENARIO],
+            raw_active_scenario=areas.raw_active_scenario,
         )
+
+    async def read_zones(self) -> ZoneReading:
+        """Read the zone states and the zone memory."""
+        async with self.transport.session() as session:
+            model = await self._identify(session)
+            raw = await self._read_registers(
+                session, model, (reg.ZONE_STATE, reg.ZONE_MEMORY)
+            )
+        return _zone_reading(raw, model)
+
+    async def read_areas(self) -> AreaReading:
+        """Read the area status and the active scenario."""
+        async with self.transport.session() as session:
+            model = await self._identify(session)
+            raw = await self._read_registers(session, model, (reg.AREA_STATUS,))
+            raw.update(await self._read_active_scenario(session))
+        return _area_reading(raw, model)
+
+    async def read_zone_inclusion(self) -> InclusionReading:
+        """Read the zone inclusion and test flags."""
+        async with self.transport.session() as session:
+            model = await self._identify(session)
+            raw = await self._read_registers(session, model, (reg.ZONE_INCLUSION,))
+        return _inclusion_reading(raw, model)
+
+    async def read_panel_state(self) -> PanelStateReading:
+        """Read the panel state flags (nothing on a panel without a profile)."""
+        async with self.transport.session() as session:
+            await self._identify(session)
+            raw = await self._read_faults(session)
+        return _panel_state_reading(raw)
+
+    async def _read_registers(
+        self, session: Session, model: PanelModel, registers: Iterable[int]
+    ) -> dict[int, bytes]:
+        """Read status registers, each with the model's length."""
+        lengths = {
+            reg.AREA_STATUS: model.area_status_length,
+            reg.ZONE_STATE: model.zone_state_length,
+            reg.ZONE_INCLUSION: model.zone_inclusion_length,
+            reg.ZONE_MEMORY: model.zone_memory_length,
+        }
+        raw: dict[int, bytes] = {}
+        for register in registers:
+            length = lengths[register]
+            raw[register] = await session.read(read_ram(register, length), length)
+        return raw
+
+    async def _read_active_scenario(self, session: Session) -> dict[int, bytes]:
+        """The active scenario for the user code's areas (1 byte)."""
+        data = await session.read(
+            active_scenario_request(area_mask(self._user_areas)), 1
+        )
+        return {reg.ACTIVE_SCENARIO: data}
+
+    async def _read_faults(self, session: Session) -> dict[int, bytes]:
+        """The faults register, only on a panel with a profile of its own."""
+        if not self.reads_panel_state:
+            return {}
+        return {reg.FAULTS: await session.read_ram(reg.FAULTS, reg.FAULTS_LENGTH)}
 
     async def _not_ready_for_areas(
         self, session: Session, modes: Mapping[int, ArmMode]

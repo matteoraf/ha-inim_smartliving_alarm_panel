@@ -68,7 +68,7 @@ The setup says *"The SmartLAN/G board answered, but its reply was not in the exp
 
 ### The Inim app cannot connect locally
 
-The SmartLAN/SI board accepts only one local connection at a time. Home Assistant keeps its connection open while it reads the panel and for a few seconds after each update, so the app may have to retry. Remote access through Inim Cloud is not affected.
+The SmartLAN/SI board accepts only one local connection at a time. While Home Assistant reads the panel at the [Polling](options.md#polling) intervals, it keeps its connection to the board open, so the app cannot connect locally meanwhile. Remote access through Inim Cloud is not affected.
 
 ### Programming mode
 
@@ -84,7 +84,7 @@ The SmartLAN/SI board accepts only one local connection at a time. Home Assistan
 ### Entities missing or not updating
 
 *   Check the Home Assistant logs (**Settings** → **System** → **Logs**) for errors from the `inim_smartliving_alarm` integration.
-*   Check the polling interval in the [options](options.md#all-options). Too short can overload the panel or the network; too long delays updates.
+*   Check the intervals in the [Polling](options.md#polling) options. Too short can keep the board busy; too long delays updates. The log says when the panel cannot keep up with them.
 *   Only ticked items get entities: check the options under **Areas, zones, scenarios and outputs**.
 *   A zone is listed only if its terminal is programmed as a zone on the panel. If you changed the panel's programming, use **Re-read panel configuration** first.
 

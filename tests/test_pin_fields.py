@@ -115,7 +115,7 @@ async def test_options_change_the_pin(
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert entry.data["pin"] == "4321"
-    for key in ("areas", "zones", "scenarios", "polling_interval"):
+    for key in ("areas", "zones", "scenarios", "event_log_size"):
         assert entry.options[key] == options[key]
     assert setups.call_count == 1
     assert entry.state is ConfigEntryState.LOADED
@@ -134,7 +134,7 @@ async def test_options_refuse_a_wrong_pin(
     data, options = dict(entry.data), dict(entry.options)
     result = await open_options(hass, entry)
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"pin": pin, "polling_interval": 45}
+        result["flow_id"], {"pin": pin, "event_log_size": 45}
     )
     await hass.async_block_till_done()
 
@@ -143,7 +143,7 @@ async def test_options_refuse_a_wrong_pin(
     assert dict(entry.data) == data
     assert dict(entry.options) == options
     assert setups.call_count == 0
-    assert form_defaults(result)["polling_interval"] == 45
+    assert form_defaults(result)["event_log_size"] == 45
     assert_secret_field(result, "pin")
 
     # The running entry was paused for the check, and goes on
@@ -177,7 +177,7 @@ async def test_options_keep_the_pin(
     hass: HomeAssistant, entry: ConfigEntry, setups: AsyncMock, pin: str | None
 ) -> None:
     """Empty, or the same PIN: not checked, not changed; options saved."""
-    user_input: dict[str, Any] = {"polling_interval": 45}
+    user_input: dict[str, Any] = {"event_log_size": 45}
     if pin is not None:
         user_input["pin"] = pin
     result = await open_options(hass, entry)
@@ -191,7 +191,7 @@ async def test_options_keep_the_pin(
     assert result["type"] is FlowResultType.CREATE_ENTRY
     check.assert_not_called()
     assert entry.data["pin"] == "1234"
-    assert entry.options["polling_interval"] == 45
+    assert entry.options["event_log_size"] == 45
     assert setups.call_count == 1
 
 

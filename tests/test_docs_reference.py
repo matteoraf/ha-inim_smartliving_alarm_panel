@@ -24,6 +24,7 @@ from custom_components.inim_smartliving_alarm import const
 from custom_components.inim_smartliving_alarm.attribute_values import value_key
 from custom_components.inim_smartliving_alarm.const import DATA_COORDINATOR, DOMAIN
 from custom_components.inim_smartliving_alarm.errors import REFUSAL_REASONS
+from custom_components.inim_smartliving_alarm.polling import GROUPS
 from custom_components.inim_smartliving_alarm.protocol.config import (
     Balancing,
     SensorKind,
@@ -189,6 +190,7 @@ def test_every_option_is_documented() -> None:
     labels = {
         *EN["config"]["step"]["initial_options"]["data"].values(),
         *EN["options"]["step"]["general"]["data"].values(),
+        *EN["options"]["step"]["polling"]["data"].values(),
         EN["options"]["step"]["area_switches"]["title"],
     }
     documented = {re.sub(r"\*\*(.*)\*\*", r"\1", row[0]) for row in rows}
@@ -197,11 +199,11 @@ def test_every_option_is_documented() -> None:
 
 def test_option_defaults_and_ranges() -> None:
     rows = tables(section(page("options"), "All options"))[0]
-    polling = row_for(
-        rows, EN["options"]["step"]["general"]["data"]["polling_interval"]
-    )
-    assert polling[2] == "5 to 300"
-    assert polling[3] == str(const.DEFAULT_POLLING_INTERVAL)
+    for spec in GROUPS.values():
+        row = row_for(rows, EN["options"]["step"]["polling"]["data"][spec.option])
+        assert row[1] == "Polling"
+        assert row[2] == f"{spec.minimum:g} to {spec.maximum:g}"
+        assert row[3] == f"{spec.default:g}"
     events = row_for(rows, EN["options"]["step"]["general"]["data"]["event_log_size"])
     assert events[2] == f"1 to {const.SYSTEM_MAX_EVENT_LOG_SIZE}"
     assert events[3] == str(const.DEFAULT_EVENT_LOG_SIZE)
@@ -233,7 +235,6 @@ async def set_up(hass: HomeAssistant, fake: FakePanel) -> ConfigEntry:
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         {
-            "polling_interval": 30,
             "event_log_size": 50,
             "scenario_arm_home": "none",
             "scenario_arm_away": "0",

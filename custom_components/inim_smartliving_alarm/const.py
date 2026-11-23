@@ -23,6 +23,7 @@ CONF_BOARD = "board"
 CONF_USERNAME = "username"  # SmartLAN/G only
 CONF_PASSWORD = "password"  # SmartLAN/G only
 CONF_FOUND_BOARD = "found_board"  # setup: the board picked from a network search
+# Removed option: the single polling interval, replaced by the polling groups
 CONF_POLLING_INTERVAL = "polling_interval"
 CONF_PANEL_NAME = "panel_name"
 
@@ -38,6 +39,13 @@ CONF_LIMIT_ZONES = "limit_zones"
 CONF_LIMIT_SCENARIOS = "limit_scenarios"
 CONF_EVENT_LOG_SIZE = "event_log_size"
 CONF_READER_NAMES = "reader_names"  # removed option (names come from the panel)
+# How often each polling group is read, in seconds (see polling.py); stored
+# only when set otherwise than the default
+CONF_POLL_INTERVAL_ZONES = "poll_interval_zones"
+CONF_POLL_INTERVAL_AREAS = "poll_interval_areas"
+CONF_POLL_INTERVAL_INCLUSION = "poll_interval_inclusion"
+CONF_POLL_INTERVAL_EVENTS = "poll_interval_events"
+CONF_POLL_INTERVAL_FAULTS = "poll_interval_faults"
 
 
 # Scenario mapping keys (stored in ConfigEntry options, set by user in config flow)
@@ -54,7 +62,11 @@ BOARD_SMARTLAN_G = smartlan.BOARD_SMARTLAN_G
 # Setup refuses firmware older than 5.1 and models without their own layout
 
 # Defaults
-DEFAULT_POLLING_INTERVAL = 30  # seconds
+DEFAULT_POLL_INTERVAL_ZONES = 1.0  # seconds
+DEFAULT_POLL_INTERVAL_AREAS = 2.0
+DEFAULT_POLL_INTERVAL_INCLUSION = 30.0
+DEFAULT_POLL_INTERVAL_EVENTS = 10.0
+DEFAULT_POLL_INTERVAL_FAULTS = 60.0
 DEFAULT_PORT = 5004  # SmartLAN/SI default; also proposed for SmartLAN/G (no default)
 DEFAULT_PANEL_NAME = "Inim Smartliving"  # Default if user doesn't provide one
 

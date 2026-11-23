@@ -96,7 +96,6 @@
           "title": "Initial Options",
           "description": "Set the initial options for your Inim Alarm integration. These can be changed later from the integration's configuration page.",
           "data": {
-            "polling_interval": "Polling Interval (seconds)",
             "event_log_size": "Number of Events to store in log",
             "scenario_arm_home": "Arm Home Scenario",
             "scenario_arm_away": "Arm Away Scenario",
@@ -148,7 +147,8 @@
           "menu_options": {
             "items": "Areas, zones, scenarios and outputs",
             "area_switches": "Area switches arm mode per area",
-            "general": "General settings"
+            "general": "General settings",
+            "polling": "Polling"
           }
         },
         "items": {
@@ -194,7 +194,6 @@
           "description": "Adjust the settings for your Inim Alarm integration.\n\nCommands are sent with the user code **{user_code}**, which controls these areas: {user_areas}.",
           "data": {
             "pin": "New PIN Code",
-            "polling_interval": "Polling Interval (seconds)",
             "event_log_size": "Number of Events to store in log",
             "scenario_arm_home": "Arm Home Scenario",
             "scenario_arm_away": "Arm Away Scenario",
@@ -208,6 +207,24 @@
             "pin": "Leave empty to keep the current PIN.",
             "area_switches_default_arm_mode": "Mode used when an area switch is turned on, unless its area has its own mode under Area switches arm mode per area. The arming mode select of each area sets any mode.",
             "zones_not_ready": "Before arming areas or activating a scenario, the panel is asked which zones are not ready. Refuse: nothing is sent and an error lists the zones. Arm anyway: the command is sent and a notification lists the zones, which can trigger an alarm. Either way the inim_smartliving_alarm_zones_not_ready event lists them."
+          }
+        },
+        "polling": {
+          "title": "Polling",
+          "description": "How often each part of the panel's state is read, in seconds. Shorter intervals show changes sooner and keep the board busier. After a command sent from Home Assistant, every part is read at once.\n\nWhile Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network cannot connect to it meanwhile.",
+          "data": {
+            "poll_interval_zones": "Zones and outputs",
+            "poll_interval_areas": "Areas and active scenario",
+            "poll_interval_inclusion": "Zone bypass and dimmer levels",
+            "poll_interval_events": "Event log",
+            "poll_interval_faults": "Panel state"
+          },
+          "data_description": {
+            "poll_interval_zones": "Zone sensors, alarm and tamper memories, output switches and lights.",
+            "poll_interval_areas": "Alarm panel, area switches and sensors, arming mode selects, active scenario sensors.",
+            "poll_interval_inclusion": "Zone included switches, the zones' test attribute and the brightness of dimmers.",
+            "poll_interval_events": "Event log sensor.",
+            "poll_interval_faults": "Programming mode sensor."
           }
         }
       },

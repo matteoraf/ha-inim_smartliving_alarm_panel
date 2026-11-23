@@ -10,6 +10,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult, section
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.selector import (
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
     SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
@@ -39,7 +42,6 @@ from .const import (
     CONF_PANEL_NAME,
     CONF_PASSWORD,
     CONF_PIN,
-    CONF_POLLING_INTERVAL,
     CONF_PORT,
     CONF_SCENARIO_ARM_AWAY,
     CONF_SCENARIO_ARM_HOME,
@@ -55,7 +57,6 @@ from .const import (
     DEFAULT_AREA_SWITCHES_ARM_MODE,
     DEFAULT_EVENT_LOG_SIZE,
     DEFAULT_PANEL_NAME,
-    DEFAULT_POLLING_INTERVAL,
     DEFAULT_PORT,
     DEFAULT_ZONES_NOT_READY,
     DOMAIN,
@@ -67,6 +68,7 @@ from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .notifications import Texts, async_texts
 from .panel_config import PanelConfigError, async_fetch_panel_configuration
 from .peripherals import peripheral_placeholders
+from .polling import GROUPS
 from .protocol.errors import (
     DecryptionError,
     InvalidPinError,
@@ -338,7 +340,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Inim Alarm."""
 
     VERSION = 2
-    MINOR_VERSION = 1
+    MINOR_VERSION = 2
 
     def __init__(self) -> None:
         """Start with no data (kept per flow, between the steps)."""
@@ -493,7 +495,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_initial_options(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle the last step: polling, events and scenario mappings."""
+        """Handle the last step: events and scenario mappings."""
         errors: dict[str, str] = {}
         step1_data = self._flow_data["user_input_step1"]
         initial_config_data = self._flow_data[DATA_INITIAL_PANEL_CONFIG]
@@ -519,7 +521,6 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 final_data_for_entry[CONF_PASSWORD] = step1_data[CONF_PASSWORD]
 
             final_options_for_entry = {
-                CONF_POLLING_INTERVAL: user_input[CONF_POLLING_INTERVAL],
                 **selection,
                 CONF_EVENT_LOG_SIZE: min(
                     user_input[CONF_EVENT_LOG_SIZE], SYSTEM_MAX_EVENT_LOG_SIZE
@@ -542,12 +543,8 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 title=title, data=final_data_for_entry, options=final_options_for_entry
             )
 
-        # Schema for this step, using defaults from step1 if available for limits/polling
+        # Schema for this step
         initial_options_schema_dict = {
-            vol.Optional(
-                CONF_POLLING_INTERVAL,
-                default=step1_data.get(CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL),
-            ): vol.All(vol.Coerce(int), vol.Range(min=5, max=300)),
             vol.Optional(CONF_EVENT_LOG_SIZE, default=DEFAULT_EVENT_LOG_SIZE): vol.All(
                 vol.Coerce(int), vol.Range(min=1, max=SYSTEM_MAX_EVENT_LOG_SIZE)
             ),
@@ -688,7 +685,48 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Choose what to change."""
         return self.async_show_menu(
-            step_id="init", menu_options=["items", "area_switches", "general"]
+            step_id="init",
+            menu_options=["items", "area_switches", "general", "polling"],
+        )
+
+    async def async_step_polling(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """How often each polling group is read.
+
+        Only intervals set otherwise than their default are stored, so that
+        a later default reaches the entries that kept it.
+        """
+        options = self.config_entry.options
+        if user_input is not None:
+            new_options = {
+                key: value
+                for key, value in options.items()
+                if key not in {spec.option for spec in GROUPS.values()}
+            }
+            for spec in GROUPS.values():
+                value = float(user_input.get(spec.option, spec.default))
+                if value != spec.default:
+                    new_options[spec.option] = value
+            return self.async_create_entry(title="", data=new_options)
+        return self.async_show_form(
+            step_id="polling",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        spec.option, default=options.get(spec.option, spec.default)
+                    ): NumberSelector(
+                        NumberSelectorConfig(
+                            min=spec.minimum,
+                            max=spec.maximum,
+                            step=0.5,
+                            unit_of_measurement="s",
+                            mode=NumberSelectorMode.BOX,
+                        )
+                    )
+                    for spec in GROUPS.values()
+                }
+            ),
         )
 
     async def async_step_area_switches(
@@ -824,9 +862,6 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
 
             if not errors:
                 updated_options: dict[str, Any] = {}
-                updated_options[CONF_POLLING_INTERVAL] = user_input.get(
-                    CONF_POLLING_INTERVAL
-                )
                 event_log_size_input = user_input.get(
                     CONF_EVENT_LOG_SIZE, DEFAULT_EVENT_LOG_SIZE
                 )
@@ -887,10 +922,6 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
         }
         options_schema_dict = {
             vol.Optional(CONF_PIN): _secret_field(),
-            vol.Optional(
-                CONF_POLLING_INTERVAL,
-                default=values.get(CONF_POLLING_INTERVAL),
-            ): vol.All(vol.Coerce(int), vol.Range(min=5, max=300)),
             vol.Optional(
                 CONF_EVENT_LOG_SIZE,
                 default=values.get(CONF_EVENT_LOG_SIZE, DEFAULT_EVENT_LOG_SIZE),

@@ -252,7 +252,7 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
 | `light.…_`*output name* | the output's name on the panel | on or off, with brightness (dimmers) |
 
 *   **On/off and monostable outputs** are switches. A monostable output switches itself off after its time; the switch shows it off at the next poll.
-*   **Dimmers** are lights with brightness. On firmware 6 the level is read from the panel at every poll and after each change; on firmware 5.1 the panel does not report it, so the brightness is the last one set from Home Assistant.
+*   **Dimmers** are lights with brightness. On firmware 6 the level is read from the panel with the zone bypass (every 30 seconds by default, see [Polling](options.md#polling)) and after each change; on firmware 5.1 the panel does not report it, so the brightness is the last one set from Home Assistant.
 *   Outputs without a name on the panel are called *Output n*, or *O1* to *O3* for the fixed outputs.
 
 ??? note "Which outputs are offered and ticked"

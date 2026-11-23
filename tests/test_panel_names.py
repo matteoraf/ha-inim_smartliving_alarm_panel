@@ -279,12 +279,12 @@ async def test_reader_names_option_is_dropped(hass: HomeAssistant) -> None:
         version=1,
         minor_version=4,
         data={},
-        options={"reader_names": "Front, Back", "polling_interval": 30},
+        options={"reader_names": "Front, Back", "event_log_size": 30},
     )
     entry.add_to_hass(hass)
     assert await async_migrate_entry(hass, entry)
-    assert (entry.version, entry.minor_version) == (2, 1)
-    assert dict(entry.options) == {"polling_interval": 30}
+    assert (entry.version, entry.minor_version) == (2, 2)
+    assert dict(entry.options) == {"event_log_size": 30}
 
 
 async def test_no_reader_names_field(hass: HomeAssistant, entry: ConfigEntry) -> None:
