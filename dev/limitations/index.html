@@ -560,10 +560,7 @@
 <p>Known limitations of this version, and what you can do about them:</p>
 <ul>
 <li>
-<p>On recent Home Assistant versions, new installations get entity IDs with the panel name twice (for example <code>switch.home_home_area_3</code>); existing installations keep their IDs. You can rename the entity IDs in each entity's settings.</p>
-</li>
-<li>
-<p>The integration polls the panel (every 30 seconds by default, see the <a href="../options/#all-options">polling interval</a>), so an alarm that starts and ends between two polls never shows as <em>Triggered</em> on the alarm panel entity or on the <em>Area N Alarm</em> sensor. The <em>Alarm memory</em> sensors of the area and the zone stay on afterwards and show that it happened, until the memory is reset (see <a href="../actions-events/#resetting-the-alarm-memory">Resetting the alarm memory</a>).</p>
+<p>The integration polls the panel (every 30 seconds by default, see the <a href="../options/#all-options">polling interval</a>), so an alarm that starts and ends between two polls never shows as <em>Triggered</em> on the alarm panel entity or on the <em>Area N alarm</em> sensor. The <em>alarm memory</em> sensors of the area and the zone stay on afterwards and show that it happened, until the memory is reset (see <a href="../actions-events/#resetting-the-alarm-memory">Resetting the alarm memory</a>).</p>
 </li>
 <li>
 <p>The event log names the most common events: alarms, arming, disarming and resets, zone bypasses, scenarios, programming, valid codes and keys, and failed calls. Other events show as <em>Unknown Action</em> with their code. Decoding the remaining events is planned for an upcoming release.</p>

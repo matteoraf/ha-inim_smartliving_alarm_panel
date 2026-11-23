@@ -833,7 +833,7 @@
 <img alt="Tile cards for an area" src="../images/area-card-dark.webp#only-dark" width="400" /></p>
 <div class="admonition note">
 <p class="admonition-title">Entity IDs</p>
-<p>Entity IDs start with your panel's name: with the name <em>Home</em>, area 1's switch is <code>switch.home_home_area_1</code> on a new installation (the name appears twice, see <a href="../limitations/">Known limitations</a>), or <code>switch.home_area_1</code> on one set up with an earlier version. The tables below give the end of each ID; <em>N</em> is the area, zone or scenario number. Every entity is enabled by default, except <strong>Diagnostics level</strong>.</p>
+<p>Entity IDs start with your panel's name: with the name <em>Home</em>, area 1's switch is <code>switch.home_area_1</code>. The tables below give the end of each ID; <em>N</em> is the area, zone or scenario number (scenario IDs count from 0). Names are shown after the panel's name, in your Home Assistant language; <em>(name)</em> is the item's name on the panel, shown when it has one. Every entity is enabled by default, except <strong>Diagnostics level</strong>.</p>
 </div>
 <h2 id="the-alarm-panel">The alarm panel<a class="headerlink" href="#the-alarm-panel" title="Permanent link">&para;</a></h2>
 <table>
@@ -877,31 +877,31 @@
 <tbody>
 <tr>
 <td><code>switch.…_area_N</code></td>
-<td><em>panel</em> Area N (<em>name</em>)</td>
+<td>Area N (<em>name</em>)</td>
 <td>on when armed in any mode</td>
 <td>–</td>
 </tr>
 <tr>
 <td><code>select.…_area_N_arming_mode</code></td>
-<td>Area N arming mode</td>
+<td>Area N arming mode (<em>name</em>)</td>
 <td>Disarmed, Armed total, Armed partial, Armed instant</td>
 <td>–</td>
 </tr>
 <tr>
 <td><code>binary_sensor.…_area_N_alarm</code></td>
-<td>Area N Alarm (<em>name</em>)</td>
+<td>Area N alarm (<em>name</em>)</td>
 <td>on while the area is in alarm</td>
 <td>safety</td>
 </tr>
 <tr>
 <td><code>binary_sensor.…_area_N_tamper</code></td>
-<td>Area N Tamper (<em>name</em>)</td>
+<td>Area N tamper (<em>name</em>)</td>
 <td>on while the area is in tamper</td>
 <td>tamper</td>
 </tr>
 <tr>
 <td><code>binary_sensor.…_area_N_triggered</code></td>
-<td>Area N Alarm memory (<em>name</em>)</td>
+<td>Area N alarm memory (<em>name</em>)</td>
 <td>on after an alarm, until the memory is reset</td>
 <td>safety</td>
 </tr>
@@ -1018,19 +1018,19 @@
 </tr>
 <tr>
 <td><code>binary_sensor.…_zone_N_triggered</code></td>
-<td>Zone N Alarm memory (<em>name</em>)</td>
+<td>Zone N alarm memory (<em>name</em>)</td>
 <td>on after the zone raised an alarm, until the memory is reset</td>
 <td>problem</td>
 </tr>
 <tr>
 <td><code>binary_sensor.…_zone_N_tamper</code></td>
-<td>Zone N Tamper (<em>name</em>)</td>
+<td>Zone N tamper (<em>name</em>)</td>
 <td>on while the zone is in tamper or short circuit</td>
 <td>tamper</td>
 </tr>
 <tr>
 <td><code>switch.…_zone_N</code></td>
-<td><em>panel</em> Zone N Enabled (<em>name</em>)</td>
+<td>Zone N included (<em>name</em>)</td>
 <td>on: included; off: bypassed</td>
 <td>–</td>
 </tr>
@@ -1250,12 +1250,12 @@
 <tbody>
 <tr>
 <td><code>button.…_scenario_N</code></td>
-<td>Activate '<em>name</em>'</td>
+<td>Activate scenario N (<em>name</em>)</td>
 <td>–</td>
 </tr>
 <tr>
 <td><code>binary_sensor.…_scenario_N_active</code></td>
-<td>Scenario '<em>name</em>' Active</td>
+<td>Scenario N active (<em>name</em>)</td>
 <td>on while the scenario is the active one on the panel</td>
 </tr>
 </tbody>
@@ -1305,29 +1305,18 @@
 <tbody>
 <tr>
 <td><code>sensor.…_event_log</code></td>
-<td><em>panel</em> Event Log</td>
+<td>Event log</td>
 <td>the position of the newest event in the panel's log</td>
 </tr>
 <tr>
 <td><code>sensor.…_active_scenario</code></td>
-<td>Active Scenario Name</td>
+<td>Active scenario</td>
 <td>the active scenario's name and index, for example <code>Night (Index 1)</code>, or <code>No scenario matches</code></td>
-</tr>
-<tr>
-<td><code>sensor.…_firmware_version</code></td>
-<td>Firmware Version</td>
-<td>the panel's firmware, for example <code>6.07</code></td>
-</tr>
-<tr>
-<td><code>sensor.…_system_type</code></td>
-<td>System Type</td>
-<td>the panel's model, for example <code>01050</code></td>
 </tr>
 </tbody>
 </table>
 <ul>
 <li><strong>The event log</strong> keeps the recent events, with the names programmed on the panel: who did it and where. It keeps its last events while the panel cannot be reached. To show it on a dashboard, see <a href="../actions-events/#the-event-log-on-a-dashboard">The event log on a dashboard</a>.</li>
-<li><strong>The firmware and system type sensors</strong> are created when the panel reports them.</li>
 </ul>
 <details class="note">
 <summary>The event log in detail</summary>
@@ -1452,6 +1441,16 @@
 <td><code>button.…_reread_panel_configuration</code></td>
 <td>Re-read panel configuration</td>
 <td>reads the panel configuration again and reloads (see <a href="../setup/#re-reading-the-panel-configuration">Setup</a>)</td>
+</tr>
+<tr>
+<td><code>sensor.…_firmware_version</code></td>
+<td>Firmware version</td>
+<td>the panel's firmware, for example <code>6.07</code>; created when the panel reports it</td>
+</tr>
+<tr>
+<td><code>sensor.…_system_type</code></td>
+<td>System type</td>
+<td>the panel's model, for example <code>01050</code>; created when the panel reports it</td>
 </tr>
 <tr>
 <td><code>sensor.…_user_code</code></td>

@@ -962,7 +962,7 @@
 </code></pre></div>
 <p>To run a scenario from an automation, use <strong>Activate scenario</strong> (see <a href="#action-activate-scenario">below</a>). You can try any action from <strong>Settings</strong> → <strong>Tools</strong> → <strong>Actions</strong> (on versions before 2026.11, <strong>Developer tools</strong> → <strong>Actions</strong>).</p>
 <h2 id="resetting-the-alarm-memory">Resetting the alarm memory<a class="headerlink" href="#resetting-the-alarm-memory" title="Permanent link">&para;</a></h2>
-<p>After an alarm, the panel keeps the alarm memory of the areas involved until it is reset; the <em>Area N Alarm memory</em> sensors show it. The <strong>Alarm Reset</strong> action resets every area of the panel that has an alarm or tamper memory:</p>
+<p>After an alarm, the panel keeps the alarm memory of the areas involved until it is reset; the <em>Area N alarm memory</em> sensors show it. The <strong>Alarm Reset</strong> action resets every area of the panel that has an alarm or tamper memory:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inim_smartliving_alarm.alarm_reset</span>
 <span class="nt">target</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">entity_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alarm_control_panel.your_panel_name</span>
@@ -988,11 +988,11 @@
 </ul>
 </details>
 <h2 id="the-event-log-on-a-dashboard">The event log on a dashboard<a class="headerlink" href="#the-event-log-on-a-dashboard" title="Permanent link">&para;</a></h2>
-<p>A Markdown card shows the last events of the <a href="../entities/#sensors">event log sensor</a>. Replace <code>sensor.home_home_event_log</code> with your event log sensor's ID:</p>
+<p>A Markdown card shows the last events of the <a href="../entities/#sensors">event log sensor</a>. Replace <code>sensor.home_event_log</code> with your event log sensor's ID:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">markdown</span>
 <span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Alarm events</span>
 <span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
-<span class="w">  </span><span class="no">{% for e in (state_attr('sensor.home_home_event_log', 'event_log') or [])[:10] %}</span>
+<span class="w">  </span><span class="no">{% for e in (state_attr('sensor.home_event_log', 'event_log') or [])[:10] %}</span>
 <span class="w">  </span><span class="no">- {{ as_timestamp(e.timestamp) | timestamp_custom('%d/%m %H:%M') }}</span>
 <span class="w">  </span><span class="no">· {{ e.description }}{% if e.authorized_by %} · {{ e.authorized_by }}{% endif %}{% if e.affected_areas %} · {{ e.affected_areas }}{% endif %}</span>
 <span class="w">  </span><span class="no">{% endfor %}</span>
