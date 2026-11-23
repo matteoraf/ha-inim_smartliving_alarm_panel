@@ -24,7 +24,7 @@ After [installing](installation.md#installing) the integration and restarting Ho
 
     ![Choosing the areas, zones, scenarios and outputs](images/setup-items.webp){ width="560" }
 
-7.  Set the **Initial Options**: how often to read the panel, how many events to keep, and which scenarios the alarm panel card uses. See [Options](options.md#initial-options).
+7.  Set the **Initial Options**: how many events to keep and which scenarios the alarm panel card uses. See [Options](options.md#initial-options).
 
     ![The initial options](images/setup-initial-options.webp){ width="480" }
 

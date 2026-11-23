@@ -2,7 +2,9 @@
 
 Known limitations of this version, and what you can do about them:
 
-*   The integration polls the panel (every 30 seconds by default, see the [polling interval](options.md#all-options)), so an alarm that starts and ends between two polls never shows as *Triggered* on the alarm panel entity or on the *Area N alarm* sensor. The *alarm memory* sensors of the area and the zone stay on afterwards and show that it happened, until the memory is reset (see [Resetting the alarm memory](actions-events.md#resetting-the-alarm-memory)).
+*   The integration polls the panel (the areas every 2 seconds by default, see [Polling](options.md#polling)), so an alarm that starts and ends between two reads never shows as *Triggered* on the alarm panel entity or on the *Area N alarm* sensor. The *alarm memory* sensors of the area and the zone stay on afterwards and show that it happened, until the memory is reset (see [Resetting the alarm memory](actions-events.md#resetting-the-alarm-memory)).
+
+*   While Home Assistant reads the panel at the [Polling](options.md#polling) intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network (such as the Inim app or the installer software) cannot connect to it meanwhile. Remote access through Inim Cloud is not affected.
 
 *   The event log names the most common events: alarms, arming, disarming and resets, zone bypasses, scenarios, programming, valid codes and keys, and failed calls. Other events show as *Unknown Action* with their code. Decoding the remaining events is planned for an upcoming release.
 

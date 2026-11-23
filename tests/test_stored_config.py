@@ -136,7 +136,7 @@ async def test_store_keeps_every_block_as_read(
 def test_entries_of_this_version_are_major_version_2() -> None:
     """0.4 refuses an entry of a newer major version, so it never runs on
     the blocks it cannot read."""
-    assert (InimAlarmConfigFlow.VERSION, InimAlarmConfigFlow.MINOR_VERSION) == (2, 1)
+    assert (InimAlarmConfigFlow.VERSION, InimAlarmConfigFlow.MINOR_VERSION) == (2, 2)
 
 
 # -------------------------------------------------------------- migration
@@ -242,8 +242,9 @@ def test_short_blocks_are_not_decoded() -> None:
 
 
 @pytest.mark.parametrize("release", RELEASES)
-async def test_entry_migration_to_2_1(hass: HomeAssistant, release: str) -> None:
-    """Every 1.x entry ends at 2.1 with the migrated configuration."""
+async def test_entry_migration_to_2_2(hass: HomeAssistant, release: str) -> None:
+    """Every 1.x entry ends at 2.2 with the migrated configuration, without
+    the single polling interval."""
     stored = fixture(release)
     entry = MockConfigEntry(
         domain=DOMAIN,
@@ -255,7 +256,8 @@ async def test_entry_migration_to_2_1(hass: HomeAssistant, release: str) -> None
     )
     entry.add_to_hass(hass)
     assert await async_migrate_entry(hass, entry)
-    assert (entry.version, entry.minor_version) == (2, 1)
+    assert (entry.version, entry.minor_version) == (2, 2)
+    assert "polling_interval" not in entry.options
     assert entry.data[DATA_INITIAL_PANEL_CONFIG] == migrate_v1(
         stored["data"][DATA_INITIAL_PANEL_CONFIG]
     )

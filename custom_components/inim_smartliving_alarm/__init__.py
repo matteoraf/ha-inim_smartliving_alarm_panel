@@ -25,7 +25,6 @@ from .const import (
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
     DATA_PANEL,
-    DEFAULT_POLLING_INTERVAL,
     DOMAIN,
     PLATFORMS,
 )
@@ -62,6 +61,8 @@ _LOGGER = logging.getLogger(__name__)
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 _LIMIT_KEYS = (CONF_LIMIT_AREAS, CONF_LIMIT_ZONES, CONF_LIMIT_SCENARIOS)
+# The single polling interval's default, before the polling groups
+_OLD_DEFAULT_POLLING_INTERVAL = 30
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -82,12 +83,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     port = entry.data[CONF_PORT]
     pin = entry.data[CONF_PIN]
 
-    # Polling interval from options (if user changed it) or from initial data
-    polling_interval = entry.options.get(
-        CONF_POLLING_INTERVAL,
-        entry.data.get(CONF_POLLING_INTERVAL, DEFAULT_POLLING_INTERVAL),
-    )
-
     # One panel object per entry, holding one connection to the panel
     panel = create_panel(
         host,
@@ -105,7 +100,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry=entry,
         panel=panel,
         name=coordinator_name,
-        update_interval_seconds=polling_interval,
     )
 
     # Fetch initial data to ensure coordinator has data before entities are set up.
@@ -130,8 +124,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         }
         _LOGGER.debug("(%s) Forwarding setup to platforms: %s", entry.title, PLATFORMS)
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+        # The groups are read at their intervals from now on
+        coordinator.async_start_polling()
     except Exception:
         # Keep nothing of a failed setup: the panel's connection included
+        await coordinator.async_stop_polling()
         if entry.entry_id in hass.data.get(DOMAIN, {}):
             hass.data[DOMAIN].pop(entry.entry_id)
             if not hass.data[DOMAIN]:
@@ -141,7 +138,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _warn_about_leftover_zone_entities(hass, entry)
     await async_update_action_descriptions(hass)
 
-    # Listen for option updates (e.g., if user changes polling interval via UI)
+    # Listen for option updates (e.g., if user changes polling intervals via UI)
     entry.async_on_unload(entry.add_update_listener(update_listener))
     # The diagnostics level and any report waiting for its readable download
     # do not outlive the entry: a reload starts at Redacted
@@ -155,6 +152,10 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     _LOGGER.info("Unloading Inim Alarm integration for %s", entry.title)
     # This is called when an integration entry is removed from HA or HA is shutting down.
+    # No scheduled read may reopen the connection once it is closed below
+    entry_data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if entry_data is not None:
+        await entry_data[DATA_COORDINATOR].async_stop_polling()
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         # Clean up data stored in hass.data
@@ -169,6 +170,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         async_forget_action_descriptions(hass)
     else:
         _LOGGER.error("Failed to unload platforms for %s", entry.title)
+        if entry_data is not None:
+            entry_data[DATA_COORDINATOR].async_start_polling()
     return unload_ok
 
 
@@ -329,7 +332,7 @@ def _warn_about_leftover_zone_entities(hass: HomeAssistant, entry: ConfigEntry) 
 
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Migrate an entry to the current version (2.1).
+    """Migrate an entry to the current version (2.2).
 
     1.2 adds the board type; every older entry uses SmartLAN/SI. 1.3 stored
     every zone number with its terminal type; nothing is left of it, as 2.1
@@ -339,8 +342,9 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     read from the panel. 2.1 keeps the panel configuration as the blocks
     read from the panel, without what was derived from them (no panel
     access); what the earlier versions did not keep is read again at setup.
-    A newer major version (from a later integration release) cannot be
-    loaded.
+    2.2 drops the single polling interval: the polling groups start on
+    their defaults. A newer major version (from a later integration
+    release) cannot be loaded.
     """
     version, minor = config_entry.version, config_entry.minor_version
     _LOGGER.debug("Checking migration of config entry version %s.%s", version, minor)
@@ -351,9 +355,40 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             minor,
         )
         return False
-    if version > 1:
-        return True
-    if minor < 2:
+    if version == 1:
+        _migrate_from_v1(hass, config_entry)
+    if config_entry.minor_version < 2:
+        interval = config_entry.options.get(
+            CONF_POLLING_INTERVAL, config_entry.data.get(CONF_POLLING_INTERVAL)
+        )
+        if interval is not None and interval != _OLD_DEFAULT_POLLING_INTERVAL:
+            _LOGGER.info(
+                "%s: the polling interval of %s s is replaced by the polling "
+                "groups' defaults; set them in the Polling options",
+                config_entry.title,
+                interval,
+            )
+        hass.config_entries.async_update_entry(
+            config_entry,
+            data={
+                key: value
+                for key, value in config_entry.data.items()
+                if key != CONF_POLLING_INTERVAL
+            },
+            options={
+                key: value
+                for key, value in config_entry.options.items()
+                if key != CONF_POLLING_INTERVAL
+            },
+            minor_version=2,
+        )
+        _LOGGER.info("Migrated config entry %s to version 2.2", config_entry.title)
+    return True
+
+
+def _migrate_from_v1(hass: HomeAssistant, config_entry: ConfigEntry) -> None:
+    """Migrate a version 1 entry to 2.1 (see async_migrate_entry)."""
+    if config_entry.minor_version < 2:
         hass.config_entries.async_update_entry(
             config_entry,
             data={**config_entry.data, CONF_BOARD: BOARD_SMARTLAN_SI},
@@ -395,7 +430,6 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         config_entry, data=data, version=2, minor_version=1
     )
     _LOGGER.info("Migrated config entry %s to version 2.1", config_entry.title)
-    return True
 
 
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
@@ -404,6 +438,6 @@ async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
         "Inim Alarm configuration options updated for %s, reloading entry to apply changes.",
         entry.title,
     )
-    # This is called when options (e.g., polling interval, scenario mappings) are changed via UI.
+    # This is called when options (e.g., polling intervals, scenario mappings) are changed via UI.
     # Reload the entry to apply the new options.
     await hass.config_entries.async_reload(entry.entry_id)

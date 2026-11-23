@@ -188,7 +188,7 @@ async def test_untick_and_tick_again(hass: HomeAssistant, entry: ConfigEntry) ->
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert entry.options["areas"] == areas
-    assert entry.options["polling_interval"] == 30  # the rest is kept
+    assert entry.options["event_log_size"] == 5  # the rest is kept
     assert registry.async_get(area_switch) is None
     assert registry.async_get(zone_sensor) is None
     for entity in (
@@ -276,12 +276,12 @@ async def test_upgrade_keeps_the_entities(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
-    assert (entry.version, entry.minor_version) == (2, 1)
+    assert (entry.version, entry.minor_version) == (2, 2)
     assert not {"limit_areas", "limit_zones", "limit_scenarios"} & set(entry.options)
     assert entry.options["areas"] == [1, 2, 3, 4]
     assert entry.options["zones"] == list(range(1, 21))
     assert entry.options["scenarios"] == [1, 2, 3, 4, 5, 10]
-    assert entry.options["polling_interval"] == 30
+    assert "polling_interval" not in entry.options
     for entity, expected in (
         (("switch", "_area_switch_4"), True),
         (("switch", "_area_switch_5"), False),

@@ -6,7 +6,6 @@ Options set how the integration reads your panel and what it does when you arm. 
 
 When you add a panel, the last step asks for:
 
-*   **Polling Interval (seconds)**: how often Home Assistant reads the panel's state.
 *   **Number of Events to store in log**: how many recent events the event log sensor keeps.
 *   **Arm Home, Arm Away, Arm Night, Arm Vacation and Disarm Scenario**: which of your scenarios the alarm panel card runs for each button. An arm mode without a scenario is not offered; Disarm without a scenario fails with a message.
 
@@ -30,6 +29,7 @@ The setup proposes **Arm Away** and **Disarm** from what your scenarios do to th
     *   **Areas, zones, scenarios and outputs**: what to import. The same step as at setup.
     *   **Area switches arm mode per area**: the mode each area's switch arms in, if not the general one.
     *   **General settings**: everything else, including a new PIN.
+    *   **Polling**: how often each part of the panel's state is read.
 
 4.  Click **Submit**. The integration reloads with the new options.
 
@@ -51,11 +51,33 @@ Each area's switch arms in the mode chosen here when you turn it on. *Use the de
 
 The step names the user code the current PIN belongs to and the areas it controls. Leave **New PIN Code** empty to keep the current PIN; a new PIN is checked with the panel as at setup.
 
+### Polling
+
+![The polling options](images/options-polling.webp){ width="480" }
+
+The integration reads the panel's state in parts, each at its own interval, in seconds:
+
+| Field | Updates | Default |
+|---|---|---|
+| **Zones and outputs** | zone sensors, alarm and tamper memories, output switches and lights | 1 |
+| **Areas and active scenario** | the alarm panel, area switches and sensors, arming mode selects, the active scenario sensors | 2 |
+| **Zone bypass and dimmer levels** | *Zone N included* switches, the zones' `test` attribute, the brightness of dimmers | 30 |
+| **Event log** | the event log sensor | 10 |
+| **Panel state** | the *Programming mode* sensor | 60 |
+
+*   After a command sent from Home Assistant (arming, a scenario, a bypass, an output), every part is read at once, whatever its interval.
+*   Shorter intervals show changes sooner and keep the board busier. At the defaults the integration sends about three requests a second, well within what the board answers.
+*   If the panel cannot answer as fast as an interval asks, the reads simply come later, and the log says so once.
+*   Home Assistant's **Enable polling for updates** setting (the panel's entry, ⋮ menu, **System options**) turns all scheduled reads off; commands and the `homeassistant.update_entity` action still read the panel.
+
+!!! note "One local connection at a time"
+
+    While Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network (such as the Inim app or the installer software) cannot connect to it meanwhile. Remote access through Inim Cloud is not affected.
+
 ## All options
 
 | Option | Where | Values | Default | What it does |
 |---|---|---|---|---|
-| **Polling Interval (seconds)** | setup, General settings | 5 to 300 | 30 | How often the panel's state is read. Shorter intervals show changes sooner and keep the board busier. |
 | **Number of Events to store in log** | setup, General settings | 1 to 100 | 50 | How many recent events the event log sensor keeps in its attributes. |
 | **Arm Home Scenario** | setup, General settings | *None (Do Not Assign)* or an imported scenario | none | The scenario the alarm panel's Arm Home runs. |
 | **Arm Away Scenario** | setup, General settings | as above | proposed | The scenario the alarm panel's Arm Away runs. |
@@ -66,5 +88,10 @@ The step names the user code the current PIN belongs to and the areas it control
 | **Area switches arm mode per area** | its own step | *Use the default*, *Total*, *Partial*, *Instant*, for each area | *Use the default* | A different mode for single areas' switches. |
 | **When zones are not ready** | General settings | *Refuse*, *Arm anyway and warn* | *Refuse* | What happens when zones are not ready at arming; see [Zones not ready](actions-events.md#zones-not-ready). |
 | **New PIN Code** | General settings | 1 to 6 digits, or empty | empty | A new PIN, checked with the panel. Empty keeps the current PIN. |
+| **Zones and outputs** | Polling | 0.5 to 60 | 1 | Seconds between reads of the zones and the outputs. |
+| **Areas and active scenario** | Polling | 0.5 to 60 | 2 | Seconds between reads of the areas and the active scenario. |
+| **Zone bypass and dimmer levels** | Polling | 5 to 300 | 30 | Seconds between reads of the zone bypass and test flags and the dimmer levels. |
+| **Event log** | Polling | 1 to 300 | 10 | Seconds between reads of the event log. |
+| **Panel state** | Polling | 10 to 600 | 60 | Seconds between reads of the panel state (programming mode). |
 
 The board's address, port, user name and password are changed with **Reconfigure** (see [Setup](setup.md#changing-the-connection-details-reconfigure)).

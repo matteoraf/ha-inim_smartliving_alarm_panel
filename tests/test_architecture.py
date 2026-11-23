@@ -136,6 +136,7 @@ HA_FREE = [
     "event_log",
     "panel_view",
     "peripherals",
+    "polling",
     "report_crypto",
     "selection",
     "stored_config",
@@ -370,3 +371,10 @@ def test_entity_modules_import_no_transport(module: str) -> None:
     no transport module and no register address."""
     assert {_layer(m) for m in _imports(module)[0]} & {"transport"} == set()
     assert not _registers_reached(module)
+
+
+def test_polling_schedule_reads_nothing() -> None:
+    """The polling schedule is plain logic: it reaches no transport, no API
+    and no register address."""
+    assert {_layer(m) for m in _reach("polling")} & {"transport", "api"} == set()
+    assert not _registers_reached("polling")
