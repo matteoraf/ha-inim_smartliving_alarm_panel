@@ -12,7 +12,8 @@ Start with the table: find your problem, then follow the link for the details.
 | Commands fail with "the panel is in programming mode" | Wait until programming has ended: see [Programming mode](#programming-mode). |
 | Names, zones or scenarios are out of date | Use **Re-read panel configuration**: see [Setup](setup.md#re-reading-the-panel-configuration). |
 | Entities are missing, too many, or not updating | See [Entities missing or not updating](#entities-missing-or-not-updating). |
-| The Inim app cannot connect locally | See [The Inim app](#the-inim-app-cannot-connect-locally). |
+| The Inim app or the installer software cannot connect locally | Turn on slow polling mode: see [The Inim app](#the-inim-app-cannot-connect-locally). |
+| Entities unavailable for a while after the panel's programming was changed | See [After the panel's programming was changed](#after-the-panels-programming-was-changed). |
 | Reporting a problem | Attach a [system report](system-report.md) to the GitHub issue, and if you can a [debug log](#debug-log). |
 
 ## When the panel refuses a command
@@ -70,10 +71,18 @@ The setup says *"The SmartLAN/G board answered, but its reply was not in the exp
 
 The SmartLAN/SI board accepts only one local connection at a time. While Home Assistant reads the panel at the [Polling](options.md#polling) intervals, it keeps its connection to the board open, so the app cannot connect locally meanwhile. Remote access through Inim Cloud is not affected.
 
+Turn on **Slow polling mode** on the panel's device page (see [Slow polling mode](options.md#slow-polling-mode)). Home Assistant then reads the panel every 30 seconds and closes its connection after each read, so the app, or the installer software, can connect in between. While another app is connected, the entities are unavailable; while the installer software reads the panel's programming, that can last about a minute. If the installer software reports a connection error, try again: Home Assistant's read may have taken the board for a moment. The mode turns itself off after 60 minutes, unless you set it otherwise.
+
 ### Programming mode
 
 *   Someone is programming the panel from a keypad, or the panel is reloading its configuration. Commands work again when programming has ended; the *Programming mode* sensor shows when.
-*   Programming from the installer software on a PC does not block commands. After the software writes new programming, the panel may restart by itself, and Home Assistant cannot reach it for a short time. Then use **Re-read panel configuration** to pick up the changes.
+*   Programming from the installer software on a PC does not block commands. To connect the installer software over your network, turn on [slow polling mode](options.md#slow-polling-mode) first.
+
+### After the panel's programming was changed
+
+After a change to its programming, made with the installer software or from a keypad, the panel may stop answering for a short while. Home Assistant shows the entities as unavailable meanwhile, and as usual again once the panel answers. When the panel did not answer for a while, the log says for how long.
+
+The integration does not notice a change to the programming by itself. To pick up new names, zones or scenarios, use **Re-read panel configuration** (see [Setup](setup.md#re-reading-the-panel-configuration)).
 
 ### Commands not carried out
 

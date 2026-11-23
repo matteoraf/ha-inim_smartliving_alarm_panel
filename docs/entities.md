@@ -12,7 +12,7 @@ Your panel appears in Home Assistant as one device, named as you chose at setup.
 | [Each scenario](#scenarios) | a button, a binary sensor | Run the scenario; see whether it is active |
 | [Each output](#outputs) | a switch, or a light for dimmers | Switch or dim the output |
 | [The panel's state](#sensors) | sensors | The event log, the active scenario, firmware and model |
-| [Diagnostics](#diagnostic-and-configuration-entities) | sensors, a select, a button | The user code, the devices found, programming mode, system reports, re-reading the configuration |
+| [Diagnostics](#diagnostic-and-configuration-entities) | sensors, a select, a button, a switch | The user code, the devices found, programming mode, system reports, re-reading the configuration, slow polling mode |
 
 For example, the tile cards of an area: its arming mode, its switch and its alarm memory.
 
@@ -224,6 +224,7 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
 | `binary_sensor.…_programming_mode` | Programming mode | on while the panel is in programming mode |
 | `binary_sensor.…_refuses_arming_with_zones_not_ready` | Refuses arming with zones not ready | on when the installer set the panel to refuse arming with zones not ready |
 | `select.…_diagnostics_level` | Diagnostics level | Redacted, Full, Full confidential; disabled by default |
+| `switch.…_slow_polling_mode` | Slow polling mode | on while the panel is read every 30 seconds, so that other apps can connect to the board; SmartLAN/SI only (see [Slow polling mode](options.md#slow-polling-mode)) |
 
 ??? note "Details and attributes"
 
@@ -231,6 +232,7 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
     *   **Peripherals**: it does not tell whether a device is answering.
     *   **Programming mode**: on while the panel is being programmed from a keypad, or reloading its configuration. Commands are not sent then. It is unavailable for panels handled with the SmartLiving 1050's layout (other models, firmware 5.0x).
     *   **Refuses arming with zones not ready**: read with the panel configuration; unknown until the configuration is read again by this version. See [Zones not ready](actions-events.md#zones-not-ready).
+    *   **Slow polling mode**: stays available while the panel cannot be reached, so you can turn it off. It turns itself off at the time in `until`.
     *   **Diagnostics level**: how much the next diagnostics download shows (see [System report](system-report.md)). It goes back to *Redacted* when the integration restarts or reloads, after the readable copy of a Full report has been downloaded, and 10 minutes after a Full report's first download.
 
     | Attribute | On | Values |
@@ -239,6 +241,7 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
     | `areas` | User code | the areas it controls, by name |
     | `type` | User code | `standard`, `manager`, `master` |
     | `keypads`, `readers`, `expanders`, `sirens` | Peripherals | the names of the enabled devices |
+    | `until` | Slow polling mode | when the mode turns itself off; empty while it is off or kept on until turned off |
 
 ## Outputs
 

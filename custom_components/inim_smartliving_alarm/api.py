@@ -552,6 +552,24 @@ class SmartLivingPanel:
         """Close the connection."""
         await self.transport.close()
 
+    async def release(self) -> None:
+        """Close the connection once the current request is done.
+
+        For a board that accepts one client at a time: another app can
+        connect until the next request, which connects again.
+        """
+        await self.transport.close()
+
+    def set_shared(self, shared: bool) -> None:
+        """Share the board with other apps, or hold its connection as usual.
+
+        Shared: one connection attempt with a short timeout (a board in use
+        ignores a new connection, so a request fails in seconds), and the
+        connection is closed shortly after the last request, whatever it
+        was.
+        """
+        self.transport.shared = shared
+
     @contextlib.asynccontextmanager
     async def released(self) -> AsyncIterator[None]:
         """Hold this panel's requests and free its connection meanwhile.

@@ -40,6 +40,8 @@ from custom_components.inim_smartliving_alarm.polling import (
     GROUPS,
     LATE_READS_REPORTED,
     RETRY_INTERVAL,
+    SLOW_POLLING_DURATION,
+    SLOW_POLLING_INTERVAL,
     PollGroup,
     PollSchedule,
     intervals,
@@ -612,7 +614,10 @@ async def test_polling_step(hass: HomeAssistant, entry: ConfigEntry) -> None:
     result = await open_options(hass, entry, "polling")
     assert result["step_id"] == "polling"
     defaults = {str(key): key.default() for key in result["data_schema"].schema}
-    assert defaults == {spec.option: spec.default for spec in GROUPS.values()}
+    assert defaults == {
+        spec.option: spec.default
+        for spec in (*GROUPS.values(), SLOW_POLLING_INTERVAL, SLOW_POLLING_DURATION)
+    }
     result = await hass.config_entries.options.async_configure(
         result["flow_id"],
         {**defaults, "poll_interval_zones": 0.5, "poll_interval_events": 30},

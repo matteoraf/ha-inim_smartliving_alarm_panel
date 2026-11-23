@@ -68,7 +68,7 @@ from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .notifications import Texts, async_texts
 from .panel_config import PanelConfigError, async_fetch_panel_configuration
 from .peripherals import peripheral_placeholders
-from .polling import GROUPS
+from .polling import GROUPS, SLOW_POLLING_DURATION, SLOW_POLLING_INTERVAL, GroupSpec
 from .protocol.errors import (
     DecryptionError,
     InvalidPinError,
@@ -692,19 +692,31 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_polling(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """How often each polling group is read.
+        """How often each polling group is read, and (SmartLAN/SI) slow
+        polling mode.
 
-        Only intervals set otherwise than their default are stored, so that
-        a later default reaches the entries that kept it.
+        Only values set otherwise than their default are stored, so that a
+        later default reaches the entries that kept it.
         """
         options = self.config_entry.options
+        # Each field: its option, step and unit
+        fields: list[tuple[GroupSpec, float, str]] = [
+            (spec, 0.5, "s") for spec in GROUPS.values()
+        ]
+        if self.config_entry.data.get(CONF_BOARD, BOARD_SMARTLAN_SI) == (
+            BOARD_SMARTLAN_SI
+        ):
+            fields += [
+                (SLOW_POLLING_INTERVAL, 1, "s"),
+                (SLOW_POLLING_DURATION, 1, "min"),
+            ]
         if user_input is not None:
             new_options = {
                 key: value
                 for key, value in options.items()
-                if key not in {spec.option for spec in GROUPS.values()}
+                if key not in {spec.option for spec, _, _ in fields}
             }
-            for spec in GROUPS.values():
+            for spec, _, _ in fields:
                 value = float(user_input.get(spec.option, spec.default))
                 if value != spec.default:
                     new_options[spec.option] = value
@@ -719,12 +731,12 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                         NumberSelectorConfig(
                             min=spec.minimum,
                             max=spec.maximum,
-                            step=0.5,
-                            unit_of_measurement="s",
+                            step=step,
+                            unit_of_measurement=unit,
                             mode=NumberSelectorMode.BOX,
                         )
                     )
-                    for spec in GROUPS.values()
+                    for spec, step, unit in fields
                 }
             ),
         )

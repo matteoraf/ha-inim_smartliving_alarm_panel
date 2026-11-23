@@ -1,13 +1,20 @@
-"""Platform for switch entities for the Inim Alarm integration (Areas and Zones)."""
+"""Platform for switch entities for the Inim Alarm integration.
 
+Areas, zone bypass, outputs, and the panel's slow polling mode.
+"""
+
+from datetime import datetime
 import logging
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import STATE_ON, EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
+from homeassistant.util import dt as dt_util
 
 from .api import SmartLivingPanel
 from .attribute_values import area_mode_text, area_status_text
@@ -15,9 +22,11 @@ from .const import (
     ARM_MODE_INSTANT,
     ARM_MODE_PARTIAL,
     ARM_MODE_TOTAL,
+    BOARD_SMARTLAN_SI,
     CONF_AREA_SWITCH_ARM_MODE_BY_AREA,
     CONF_AREA_SWITCHES_DEFAULT_ARM_MODE,
     CONF_AREAS,
+    CONF_BOARD,
     CONF_PANEL_NAME,
     CONF_ZONES,
     DATA_COORDINATOR,
@@ -126,6 +135,10 @@ async def async_setup_entry(
                     item,
                 )
             )
+
+    # --- Slow polling mode: for the board that accepts one client at a time ---
+    if entry.data.get(CONF_BOARD, BOARD_SMARTLAN_SI) == BOARD_SMARTLAN_SI:
+        switches_to_add.append(InimSlowPollingSwitch(coordinator, entry))
 
     if switches_to_add:
         async_add_entities(switches_to_add)
@@ -358,3 +371,70 @@ class InimOutputSwitch(InimOutputEntity, SwitchEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Switch the output off."""
         await self._async_switch(0)
+
+
+class InimSlowPollingSwitch(InimCoordinatorEntity, SwitchEntity, RestoreEntity):
+    """Slow polling mode: read the panel less often, so that other apps can
+    connect to the board between the reads.
+
+    It turns itself off after the time set in the Polling options; after a
+    restart it is on again if it was on and that time has not passed.
+    """
+
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_has_entity_name = True
+    _attr_translation_key = "slow_polling"
+    _attr_icon = "mdi:timer-sand"
+
+    def __init__(self, coordinator: Any, config_entry: ConfigEntry) -> None:
+        """Initialize the switch."""
+        super().__init__(coordinator)
+        self.config_entry = config_entry
+        self._attr_unique_id = f"{config_entry.entry_id}_slow_polling"
+
+    @property
+    def suggested_object_id(self) -> str | None:
+        """Return a suggested object ID for the entity."""
+        return "slow_polling_mode"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information for the entity."""
+        return panel_device_info(self.config_entry)
+
+    @property
+    def available(self) -> bool:
+        """Always: it can be turned off while the panel does not answer."""
+        return True
+
+    @property
+    def is_on(self) -> bool:
+        """Whether slow polling mode is on."""
+        return self.coordinator.slow_polling
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """When the mode turns itself off (None: when turned off)."""
+        until = self.coordinator.slow_polling_until
+        return {"until": until.isoformat() if until is not None else None}
+
+    async def async_added_to_hass(self) -> None:
+        """Turn the mode on again if it was on and its time has not passed."""
+        await super().async_added_to_hass()
+        last = await self.async_get_last_state()
+        if last is None or last.state != STATE_ON or self.coordinator.slow_polling:
+            return
+        until: datetime | None = None
+        if (text := last.attributes.get("until")) is not None:
+            until = dt_util.parse_datetime(str(text))
+            if until is None:  # not a time: do not turn it on for ever
+                return
+        await self.coordinator.async_restore_slow_polling(until)
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn slow polling mode on."""
+        await self.coordinator.async_set_slow_polling(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn slow polling mode off."""
+        await self.coordinator.async_set_slow_polling(False)

@@ -277,7 +277,8 @@ async def test_reread_panel_unreachable(
     with pytest.raises(HomeAssistantError) as err:
         await reread(hass, entry.entry_id)
 
-    assert err.value.translation_key == "cannot_connect"
+    # A SmartLAN/SI board: the message adds that it may be in use
+    assert err.value.translation_key == "cannot_connect_in_use"
     assert dict(entry.data) == data
     assert setups.call_count == 0
     assert entry.state is ConfigEntryState.LOADED

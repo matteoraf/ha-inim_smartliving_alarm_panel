@@ -211,20 +211,24 @@
         },
         "polling": {
           "title": "Aggiornamento",
-          "description": "Ogni quanto viene letta ciascuna parte dello stato della centrale, in secondi. Intervalli più brevi mostrano prima le modifiche e tengono la scheda più occupata. Dopo un comando inviato da Home Assistant, ogni parte viene letta subito.\n\nMentre legge la centrale a questi intervalli, Home Assistant tiene aperta la connessione con la scheda. La scheda SmartLAN/SI accetta un solo client locale alla volta, quindi nel frattempo le altre app della tua rete non possono collegarsi.",
+          "description": "Ogni quanto viene letta ciascuna parte dello stato della centrale, in secondi. Intervalli più brevi mostrano prima le modifiche e tengono la scheda più occupata. Dopo un comando inviato da Home Assistant, ogni parte viene letta subito.\n\nMentre legge la centrale a questi intervalli, Home Assistant tiene aperta la connessione con la scheda. La scheda SmartLAN/SI accetta un solo client locale alla volta, quindi nel frattempo le altre app della tua rete non possono collegarsi. Per permettere loro di collegarsi, attiva Modalità aggiornamento lento nella pagina del dispositivo della centrale: Home Assistant legge allora tutta la centrale all'intervallo dell'aggiornamento lento e chiude la connessione dopo ogni lettura.",
           "data": {
             "poll_interval_zones": "Zone e uscite",
             "poll_interval_areas": "Aree e scenario attivo",
             "poll_interval_inclusion": "Esclusione zone e livelli dei dimmer",
             "poll_interval_events": "Registro eventi",
-            "poll_interval_faults": "Stato della centrale"
+            "poll_interval_faults": "Stato della centrale",
+            "slow_polling_interval": "Intervallo di lettura in modalità aggiornamento lento",
+            "slow_polling_duration": "Disattiva la modalità aggiornamento lento dopo"
           },
           "data_description": {
             "poll_interval_zones": "Sensori delle zone, memorie di allarme e manomissione, interruttori delle uscite e luci.",
             "poll_interval_areas": "Pannello di allarme, interruttori e sensori delle aree, selettori della modalità di inserimento, sensori dello scenario attivo.",
             "poll_interval_inclusion": "Interruttori di inclusione delle zone, attributo test delle zone e luminosità dei dimmer.",
             "poll_interval_events": "Sensore del registro eventi.",
-            "poll_interval_faults": "Sensore della modalità programmazione."
+            "poll_interval_faults": "Sensore della modalità programmazione.",
+            "slow_polling_interval": "Mentre la modalità aggiornamento lento è attiva, Home Assistant legge tutta la centrale a questo intervallo e chiude la connessione dopo ogni lettura, così le altre app possono collegarsi alla scheda nel frattempo.",
+            "slow_polling_duration": "La modalità aggiornamento lento si disattiva da sola dopo questi minuti. Con 0 resta attiva finché non la disattivi."
           }
         }
       },
@@ -246,7 +250,10 @@
     },
     "exceptions": {
       "cannot_connect": {
-        "message": "Connessione alla centrale {host}:{port} fallita. La configurazione della centrale non è stata modificata."
+        "message": "Connessione alla centrale {host}:{port} fallita: la scheda non è raggiungibile. La configurazione della centrale non è stata modificata."
+      },
+      "cannot_connect_in_use": {
+        "message": "Connessione alla centrale {host}:{port} fallita: la scheda non è raggiungibile o è in uso da un'altra app. La configurazione della centrale non è stata modificata."
       },
       "invalid_panel_configuration": {
         "message": "La centrale ha restituito una configurazione incompleta o non valida ({error}). La configurazione della centrale non è stata modificata."
@@ -555,6 +562,14 @@
         },
         "zone_included_unnamed": {
           "name": "Zona {number} inclusa"
+        },
+        "slow_polling": {
+          "name": "Modalità aggiornamento lento",
+          "state_attributes": {
+            "until": {
+              "name": "Fino a"
+            }
+          }
         },
         "terminal_output": {
           "name": "Uscita {number}"

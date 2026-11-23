@@ -46,6 +46,11 @@ CONF_POLL_INTERVAL_AREAS = "poll_interval_areas"
 CONF_POLL_INTERVAL_INCLUSION = "poll_interval_inclusion"
 CONF_POLL_INTERVAL_EVENTS = "poll_interval_events"
 CONF_POLL_INTERVAL_FAULTS = "poll_interval_faults"
+# Slow polling mode (SmartLAN/SI): the reading interval in seconds, and the
+# minutes after which the mode turns itself off (0: until turned off);
+# stored only when set otherwise than the default
+CONF_SLOW_POLLING_INTERVAL = "slow_polling_interval"
+CONF_SLOW_POLLING_DURATION = "slow_polling_duration"
 
 
 # Scenario mapping keys (stored in ConfigEntry options, set by user in config flow)
@@ -67,6 +72,8 @@ DEFAULT_POLL_INTERVAL_AREAS = 2.0
 DEFAULT_POLL_INTERVAL_INCLUSION = 30.0
 DEFAULT_POLL_INTERVAL_EVENTS = 10.0
 DEFAULT_POLL_INTERVAL_FAULTS = 60.0
+DEFAULT_SLOW_POLLING_INTERVAL = 30.0  # seconds
+DEFAULT_SLOW_POLLING_DURATION = 60.0  # minutes
 DEFAULT_PORT = 5004  # SmartLAN/SI default; also proposed for SmartLAN/G (no default)
 DEFAULT_PANEL_NAME = "Inim Smartliving"  # Default if user doesn't provide one
 

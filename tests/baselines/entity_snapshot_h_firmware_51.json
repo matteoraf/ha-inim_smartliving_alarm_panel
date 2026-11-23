@@ -5881,6 +5881,23 @@
   },
   {
    "attributes": {
+    "friendly_name": "Test Panel Slow polling mode",
+    "icon": "mdi:timer-sand",
+    "until": null
+   },
+   "disabled_by": null,
+   "entity_category": "config",
+   "entity_id": "switch.test_panel_slow_polling_mode",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": "mdi:timer-sand",
+   "original_name": "Slow polling mode",
+   "platform": "switch",
+   "state": "off",
+   "unique_id": "_slow_polling"
+  },
+  {
+   "attributes": {
     "friendly_name": "Test Panel Zone 1 included",
     "icon": "mdi:shield-check",
     "internal_index": 0,
