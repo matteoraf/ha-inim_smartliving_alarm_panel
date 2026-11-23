@@ -214,7 +214,7 @@ async def test_reread_service_updates_configuration(
     assert scenario_names(panel_config(entry))[2] == "Night"
     assert zone_names(panel_config(entry))[19] == "Kitchen window"
     button = registry_entry(hass, entry, "button", "_scenario_button_2")
-    assert button.original_name == "Activate 'Night'"
+    assert button.original_name == "Activate scenario 3 (Night)"
     assert entity_ids(hass, entry) == before
     assert dict(entry.options) == options
 

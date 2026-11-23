@@ -21,7 +21,7 @@ For example, the tile cards of an area: its arming mode, its switch and its alar
 
 !!! note "Entity IDs"
 
-    Entity IDs start with your panel's name: with the name *Home*, area 1's switch is `switch.home_home_area_1` on a new installation (the name appears twice, see [Known limitations](limitations.md)), or `switch.home_area_1` on one set up with an earlier version. The tables below give the end of each ID; *N* is the area, zone or scenario number. Every entity is enabled by default, except **Diagnostics level**.
+    Entity IDs start with your panel's name: with the name *Home*, area 1's switch is `switch.home_area_1`. The tables below give the end of each ID; *N* is the area, zone or scenario number (scenario IDs count from 0). Names are shown after the panel's name, in your Home Assistant language; *(name)* is the item's name on the panel, shown when it has one. Every entity is enabled by default, except **Diagnostics level**.
 
 ## The alarm panel
 
@@ -44,11 +44,11 @@ The alarm panel arms and disarms with the scenarios you mapped in the [options](
 
 | ID ends with | Name | States | Device class |
 |---|---|---|---|
-| `switch.…_area_N` | *panel* Area N (*name*) | on when armed in any mode | – |
-| `select.…_area_N_arming_mode` | Area N arming mode | Disarmed, Armed total, Armed partial, Armed instant | – |
-| `binary_sensor.…_area_N_alarm` | Area N Alarm (*name*) | on while the area is in alarm | safety |
-| `binary_sensor.…_area_N_tamper` | Area N Tamper (*name*) | on while the area is in tamper | tamper |
-| `binary_sensor.…_area_N_triggered` | Area N Alarm memory (*name*) | on after an alarm, until the memory is reset | safety |
+| `switch.…_area_N` | Area N (*name*) | on when armed in any mode | – |
+| `select.…_area_N_arming_mode` | Area N arming mode (*name*) | Disarmed, Armed total, Armed partial, Armed instant | – |
+| `binary_sensor.…_area_N_alarm` | Area N alarm (*name*) | on while the area is in alarm | safety |
+| `binary_sensor.…_area_N_tamper` | Area N tamper (*name*) | on while the area is in tamper | tamper |
+| `binary_sensor.…_area_N_triggered` | Area N alarm memory (*name*) | on after an alarm, until the memory is reset | safety |
 
 *   **The switch** arms the area when you turn it on and disarms it when you turn it off. It arms in the area's own mode set under **Area switches arm mode per area**, else in **Area switches default arm mode** (total by default).
 *   **The arming mode select** arms the area in the mode you choose, or disarms it. If the panel refuses, an error says why. It is unknown while the panel reports none of the four modes.
@@ -84,9 +84,9 @@ Only zones that exist on the panel get entities: zones of input, input/output an
 | ID ends with | Name | States | Device class |
 |---|---|---|---|
 | `binary_sensor.…_zone_N` | Zone N (*name*) | on while the zone is in alarm (open) | guessed, see below |
-| `binary_sensor.…_zone_N_triggered` | Zone N Alarm memory (*name*) | on after the zone raised an alarm, until the memory is reset | problem |
-| `binary_sensor.…_zone_N_tamper` | Zone N Tamper (*name*) | on while the zone is in tamper or short circuit | tamper |
-| `switch.…_zone_N` | *panel* Zone N Enabled (*name*) | on: included; off: bypassed | – |
+| `binary_sensor.…_zone_N_triggered` | Zone N alarm memory (*name*) | on after the zone raised an alarm, until the memory is reset | problem |
+| `binary_sensor.…_zone_N_tamper` | Zone N tamper (*name*) | on while the zone is in tamper or short circuit | tamper |
+| `switch.…_zone_N` | Zone N included (*name*) | on: included; off: bypassed | – |
 
 *   **The zone sensor** is on while the zone is open or in alarm. A short circuit or tamper shows in its `status_text` and in the zone's tamper sensor.
 *   **The zone switch** bypasses the zone when you turn it off, and includes it again when you turn it on.
@@ -149,8 +149,8 @@ The zone sensor's attributes are the zone's programming, as read from the panel.
 
 | ID ends with | Name | States |
 |---|---|---|
-| `button.…_scenario_N` | Activate '*name*' | – |
-| `binary_sensor.…_scenario_N_active` | Scenario '*name*' Active | on while the scenario is the active one on the panel |
+| `button.…_scenario_N` | Activate scenario N (*name*) | – |
+| `binary_sensor.…_scenario_N_active` | Scenario N active (*name*) | on while the scenario is the active one on the panel |
 
 *   **The button** runs the scenario. If it fails (a zone not ready, or the panel refuses), an error and a persistent notification give the reason.
 *   For scenarios, *N* is the scenario number minus 1: scenario 1 is `scenario_0`. Area and zone numbers, and the `scenario` field of the `activate_scenario` action, start from 1.
@@ -167,13 +167,10 @@ The zone sensor's attributes are the zone's programming, as read from the panel.
 
 | ID ends with | Name | State |
 |---|---|---|
-| `sensor.…_event_log` | *panel* Event Log | the position of the newest event in the panel's log |
-| `sensor.…_active_scenario` | Active Scenario Name | the active scenario's name and index, for example `Night (Index 1)`, or `No scenario matches` |
-| `sensor.…_firmware_version` | Firmware Version | the panel's firmware, for example `6.07` |
-| `sensor.…_system_type` | System Type | the panel's model, for example `01050` |
+| `sensor.…_event_log` | Event log | the position of the newest event in the panel's log |
+| `sensor.…_active_scenario` | Active scenario | the active scenario's name and index, for example `Night (Index 1)`, or `No scenario matches` |
 
 *   **The event log** keeps the recent events, with the names programmed on the panel: who did it and where. It keeps its last events while the panel cannot be reached. To show it on a dashboard, see [The event log on a dashboard](actions-events.md#the-event-log-on-a-dashboard).
-*   **The firmware and system type sensors** are created when the panel reports them.
 
 ??? note "The event log in detail"
 
@@ -220,6 +217,8 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
 | ID ends with | Name | State |
 |---|---|---|
 | `button.…_reread_panel_configuration` | Re-read panel configuration | reads the panel configuration again and reloads (see [Setup](setup.md#re-reading-the-panel-configuration)) |
+| `sensor.…_firmware_version` | Firmware version | the panel's firmware, for example `6.07`; created when the panel reports it |
+| `sensor.…_system_type` | System type | the panel's model, for example `01050`; created when the panel reports it |
 | `sensor.…_user_code` | User code | the name of the user code the PIN belongs to (never the PIN) |
 | `sensor.…_peripherals` | Peripherals | how many keypads, readers, expanders and sirens are enabled |
 | `binary_sensor.…_programming_mode` | Programming mode | on while the panel is in programming mode |

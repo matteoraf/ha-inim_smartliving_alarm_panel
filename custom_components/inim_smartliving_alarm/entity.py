@@ -3,6 +3,7 @@ typed live status of the last poll."""
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .api import PanelStatus
@@ -24,6 +25,26 @@ def panel_device_info(entry: ConfigEntry) -> DeviceInfo:
         model=info.type if info is not None else "SmartLiving",
         sw_version=info.version if info is not None else "Unknown",
     )
+
+
+def name_item(entity: Entity, key: str, kind: str, number: int, label: str) -> None:
+    """Name an entity of an area, zone or scenario from a translated name.
+
+    With the panel's label as a placeholder ("Zone 3 (Kitchen window)");
+    without one, or with only the default label ("Zone 3"), the name has
+    the number alone. The panel name is not in the name: Home Assistant
+    shows the device's name before it.
+    """
+    entity._attr_has_entity_name = True
+    if label and label != f"{kind} {number}":
+        entity._attr_translation_key = key
+        entity._attr_translation_placeholders = {
+            "number": str(number),
+            "label": label,
+        }
+    else:
+        entity._attr_translation_key = f"{key}_unnamed"
+        entity._attr_translation_placeholders = {"number": str(number)}
 
 
 class InimCoordinatorEntity(CoordinatorEntity[InimDataUpdateCoordinator]):

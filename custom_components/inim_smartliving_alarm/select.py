@@ -25,7 +25,7 @@ from .const import (
     DEFAULT_PANEL_NAME,
     DOMAIN,
 )
-from .entity import InimCoordinatorEntity, panel_device_info
+from .entity import InimCoordinatorEntity, name_item, panel_device_info
 from .protocol.commands import ArmMode
 from .protocol.masking import Level
 from .readiness import async_arm
@@ -91,8 +91,6 @@ async def async_setup_entry(
 class InimAreaModeSelect(InimCoordinatorEntity, SelectEntity):
     """The arming mode of one area; choosing a mode arms or disarms it."""
 
-    _attr_has_entity_name = True
-    _attr_translation_key = "area_arming_mode"
     _attr_options = list(OPTION_MODES)
     _attr_icon = "mdi:shield-home-outline"
 
@@ -118,9 +116,14 @@ class InimAreaModeSelect(InimCoordinatorEntity, SelectEntity):
         self._area_name = area_name
         self._settings = settings or {}
         self._attr_unique_id = f"{config_entry.entry_id}_area_mode_select_{area}"
-        self._attr_translation_placeholders = {"area": str(area)}
+        name_item(self, "area_arming_mode", "Area", area, area_name)
         self._attr_device_info = panel_device_info(config_entry)
         self._update_from_coordinator()
+
+    @property
+    def suggested_object_id(self) -> str | None:
+        """The end of the entity ID: area_N_arming_mode."""
+        return f"area_{self._area}_arming_mode"
 
     @callback
     def _handle_coordinator_update(self) -> None:

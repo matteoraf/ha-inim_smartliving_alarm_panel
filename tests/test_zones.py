@@ -89,7 +89,7 @@ async def test_second_zone_state_and_bypass(
     """The second zone has its own state and is bypassed with the second-zone flag."""
     sensor = ("binary_sensor", "_zone_51")
     switch = ("switch", "_zone_enabled_switch_51")
-    assert original_name(hass, mixed_entry, sensor) == "Zone 51 (Zone 51)"
+    assert original_name(hass, mixed_entry, sensor) == "Zone 51"
 
     panel.state.zone_states[c.NUM_TERMINALS] = c.ZONE_ALARM
     await refresh(hass, mixed_entry)
@@ -139,7 +139,7 @@ async def test_zone_tamper_short_and_flags(
     state = hass.states.get(entity_id_for(hass, entry, zone_sensor))
     assert state.attributes["test"] is True
     assert state.attributes["terminal_type"] == "input"
-    assert original_name(hass, entry, memory) == "Zone 20 Alarm memory (Zone 20)"
+    assert original_name(hass, entry, memory) == "Zone 20 alarm memory"
     state = hass.states.get(entity_id_for(hass, entry, memory))
     assert state.attributes["tamper_memory"] is True
 

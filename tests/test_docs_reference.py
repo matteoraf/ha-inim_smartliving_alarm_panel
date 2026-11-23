@@ -469,7 +469,7 @@ async def test_event_log_card_renders(hass: HomeAssistant, demo: ConfigEntry) ->
         for state in hass.states.async_all("sensor")
         if state.entity_id.endswith("_event_log")
     ]
-    content = card["content"].replace("sensor.home_home_event_log", log)
+    content = card["content"].replace("sensor.home_event_log", log)
     rendered = Template(content, hass).async_render(parse_result=False)
     assert "Area(s) Disarmed" in rendered
     assert "Family" in rendered

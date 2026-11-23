@@ -33,7 +33,7 @@ To run a scenario from an automation, use **Activate scenario** (see [below](#ac
 
 ## Resetting the alarm memory
 
-After an alarm, the panel keeps the alarm memory of the areas involved until it is reset; the *Area N Alarm memory* sensors show it. The **Alarm Reset** action resets every area of the panel that has an alarm or tamper memory:
+After an alarm, the panel keeps the alarm memory of the areas involved until it is reset; the *Area N alarm memory* sensors show it. The **Alarm Reset** action resets every area of the panel that has an alarm or tamper memory:
 
 ```yaml
 action: inim_smartliving_alarm.alarm_reset
@@ -63,13 +63,13 @@ Before it arms an area or runs a scenario, the integration asks the panel which 
 
 ## The event log on a dashboard
 
-A Markdown card shows the last events of the [event log sensor](entities.md#sensors). Replace `sensor.home_home_event_log` with your event log sensor's ID:
+A Markdown card shows the last events of the [event log sensor](entities.md#sensors). Replace `sensor.home_event_log` with your event log sensor's ID:
 
 ```yaml
 type: markdown
 title: Alarm events
 content: >-
-  {% for e in (state_attr('sensor.home_home_event_log', 'event_log') or [])[:10] %}
+  {% for e in (state_attr('sensor.home_event_log', 'event_log') or [])[:10] %}
   - {{ as_timestamp(e.timestamp) | timestamp_custom('%d/%m %H:%M') }}
   · {{ e.description }}{% if e.authorized_by %} · {{ e.authorized_by }}{% endif %}{% if e.affected_areas %} · {{ e.affected_areas }}{% endif %}
   {% endfor %}

@@ -8,10 +8,9 @@ shows fails here; after an intended change, regenerate the files with:
 
     INIM_UPDATE_BASELINE=1 pytest tests/test_entity_snapshot.py
 
-and explain each changed line in the pull request. Home Assistant derives
-entity IDs and friendly names differently across its versions: they are
-compared only on the version the files were generated with (recorded in
-each file); everything else is compared on every version.
+and explain each changed line in the pull request. Everything is compared
+on every Home Assistant version the tests run on; the version the files
+were made with is recorded in each file, for information.
 
 Entries stored by earlier releases come from tests/fixtures/entries: each
 file is the entry a release stored for the fake 1050, captured by running
@@ -129,19 +128,9 @@ def snapshot(hass: HomeAssistant, entry: ConfigEntry) -> dict:
     return _scrub(plain, {entry.entry_id: "<entry_id>"})
 
 
-def without_names(snapshot: dict) -> dict:
-    """The snapshot without what Home Assistant's version decides."""
-    entities = []
-    for entity in snapshot["entities"]:
-        entity = {key: value for key, value in entity.items() if key != "entity_id"}
-        if entity["attributes"] is not None:
-            entity["attributes"] = {
-                key: value
-                for key, value in entity["attributes"].items()
-                if key != "friendly_name"
-            }
-        entities.append(entity)
-    return {"devices": snapshot["devices"], "entities": entities}
+def without_version(snapshot: dict) -> dict:
+    """The snapshot without the Home Assistant version it was made with."""
+    return {key: value for key, value in snapshot.items() if key != "home_assistant"}
 
 
 def check(hass: HomeAssistant, entry: ConfigEntry, name: str) -> None:
@@ -154,10 +143,7 @@ def check(hass: HomeAssistant, entry: ConfigEntry, name: str) -> None:
             encoding="utf-8",
         )
     stored = json.loads(path.read_text(encoding="utf-8"))
-    if stored["home_assistant"] == HA_RELEASE:
-        assert current == stored
-    else:
-        assert without_names(current) == without_names(stored)
+    assert without_version(current) == without_version(stored)
 
 
 @pytest.fixture(autouse=True)
