@@ -2,217 +2,217 @@
   {
     "platform": "alarm_control_panel",
     "unique_id": "_alarm_control_panel",
-    "original_name": "Test Panel",
+    "original_name": null,
     "device_class": null,
     "state": "disarmed"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_10_alarm_bs",
-    "original_name": "Area 10 Alarm (Area 10)",
+    "original_name": "Area 10 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_10_tamper_bs",
-    "original_name": "Area 10 Tamper (Area 10)",
+    "original_name": "Area 10 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_10_triggered_bs",
-    "original_name": "Area 10 Alarm memory (Area 10)",
+    "original_name": "Area 10 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_1_alarm_bs",
-    "original_name": "Area 1 Alarm (Area 1)",
+    "original_name": "Area 1 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_1_tamper_bs",
-    "original_name": "Area 1 Tamper (Area 1)",
+    "original_name": "Area 1 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_1_triggered_bs",
-    "original_name": "Area 1 Alarm memory (Area 1)",
+    "original_name": "Area 1 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_2_alarm_bs",
-    "original_name": "Area 2 Alarm (Area 2)",
+    "original_name": "Area 2 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_2_tamper_bs",
-    "original_name": "Area 2 Tamper (Area 2)",
+    "original_name": "Area 2 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_2_triggered_bs",
-    "original_name": "Area 2 Alarm memory (Area 2)",
+    "original_name": "Area 2 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_3_alarm_bs",
-    "original_name": "Area 3 Alarm (Area 3)",
+    "original_name": "Area 3 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_3_tamper_bs",
-    "original_name": "Area 3 Tamper (Area 3)",
+    "original_name": "Area 3 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_3_triggered_bs",
-    "original_name": "Area 3 Alarm memory (Area 3)",
+    "original_name": "Area 3 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_4_alarm_bs",
-    "original_name": "Area 4 Alarm (Area 4)",
+    "original_name": "Area 4 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_4_tamper_bs",
-    "original_name": "Area 4 Tamper (Area 4)",
+    "original_name": "Area 4 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_4_triggered_bs",
-    "original_name": "Area 4 Alarm memory (Area 4)",
+    "original_name": "Area 4 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_5_alarm_bs",
-    "original_name": "Area 5 Alarm (Area 5)",
+    "original_name": "Area 5 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_5_tamper_bs",
-    "original_name": "Area 5 Tamper (Area 5)",
+    "original_name": "Area 5 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_5_triggered_bs",
-    "original_name": "Area 5 Alarm memory (Area 5)",
+    "original_name": "Area 5 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_6_alarm_bs",
-    "original_name": "Area 6 Alarm (Area 6)",
+    "original_name": "Area 6 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_6_tamper_bs",
-    "original_name": "Area 6 Tamper (Area 6)",
+    "original_name": "Area 6 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_6_triggered_bs",
-    "original_name": "Area 6 Alarm memory (Area 6)",
+    "original_name": "Area 6 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_7_alarm_bs",
-    "original_name": "Area 7 Alarm (Area 7)",
+    "original_name": "Area 7 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_7_tamper_bs",
-    "original_name": "Area 7 Tamper (Area 7)",
+    "original_name": "Area 7 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_7_triggered_bs",
-    "original_name": "Area 7 Alarm memory (Area 7)",
+    "original_name": "Area 7 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_8_alarm_bs",
-    "original_name": "Area 8 Alarm (Area 8)",
+    "original_name": "Area 8 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_8_tamper_bs",
-    "original_name": "Area 8 Tamper (Area 8)",
+    "original_name": "Area 8 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_8_triggered_bs",
-    "original_name": "Area 8 Alarm memory (Area 8)",
+    "original_name": "Area 8 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_9_alarm_bs",
-    "original_name": "Area 9 Alarm (Area 9)",
+    "original_name": "Area 9 alarm",
     "device_class": "safety",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_9_tamper_bs",
-    "original_name": "Area 9 Tamper (Area 9)",
+    "original_name": "Area 9 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_area_9_triggered_bs",
-    "original_name": "Area 9 Alarm memory (Area 9)",
+    "original_name": "Area 9 alarm memory",
     "device_class": "safety",
     "state": "off"
   },
@@ -233,987 +233,987 @@
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_0_active_bs",
-    "original_name": "Scenario 'Scenario 1' Active",
+    "original_name": "Scenario 1 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_10_active_bs",
-    "original_name": "Scenario 'Scenario 11' Active",
+    "original_name": "Scenario 11 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_11_active_bs",
-    "original_name": "Scenario 'Scenario 12' Active",
+    "original_name": "Scenario 12 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_12_active_bs",
-    "original_name": "Scenario 'Scenario 13' Active",
+    "original_name": "Scenario 13 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_13_active_bs",
-    "original_name": "Scenario 'Scenario 14' Active",
+    "original_name": "Scenario 14 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_14_active_bs",
-    "original_name": "Scenario 'Scenario 15' Active",
+    "original_name": "Scenario 15 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_15_active_bs",
-    "original_name": "Scenario 'Scenario 16' Active",
+    "original_name": "Scenario 16 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_16_active_bs",
-    "original_name": "Scenario 'Scenario 17' Active",
+    "original_name": "Scenario 17 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_17_active_bs",
-    "original_name": "Scenario 'Scenario 18' Active",
+    "original_name": "Scenario 18 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_18_active_bs",
-    "original_name": "Scenario 'Scenario 19' Active",
+    "original_name": "Scenario 19 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_19_active_bs",
-    "original_name": "Scenario 'Scenario 20' Active",
+    "original_name": "Scenario 20 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_1_active_bs",
-    "original_name": "Scenario 'Scenario 2' Active",
+    "original_name": "Scenario 2 active",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_20_active_bs",
-    "original_name": "Scenario 'Scenario 21' Active",
+    "original_name": "Scenario 21 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_21_active_bs",
-    "original_name": "Scenario 'Scenario 22' Active",
+    "original_name": "Scenario 22 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_22_active_bs",
-    "original_name": "Scenario 'Scenario 23' Active",
+    "original_name": "Scenario 23 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_23_active_bs",
-    "original_name": "Scenario 'Scenario 24' Active",
+    "original_name": "Scenario 24 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_24_active_bs",
-    "original_name": "Scenario 'Scenario 25' Active",
+    "original_name": "Scenario 25 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_25_active_bs",
-    "original_name": "Scenario 'Scenario 26' Active",
+    "original_name": "Scenario 26 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_26_active_bs",
-    "original_name": "Scenario 'Scenario 27' Active",
+    "original_name": "Scenario 27 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_27_active_bs",
-    "original_name": "Scenario 'Scenario 28' Active",
+    "original_name": "Scenario 28 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_28_active_bs",
-    "original_name": "Scenario 'Scenario 29' Active",
+    "original_name": "Scenario 29 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_29_active_bs",
-    "original_name": "Scenario 'Scenario 30' Active",
+    "original_name": "Scenario 30 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_2_active_bs",
-    "original_name": "Scenario 'Scenario 3' Active",
+    "original_name": "Scenario 3 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_3_active_bs",
-    "original_name": "Scenario 'Scenario 4' Active",
+    "original_name": "Scenario 4 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_4_active_bs",
-    "original_name": "Scenario 'Scenario 5' Active",
+    "original_name": "Scenario 5 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_5_active_bs",
-    "original_name": "Scenario 'Scenario 6' Active",
+    "original_name": "Scenario 6 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_6_active_bs",
-    "original_name": "Scenario 'Scenario 7' Active",
+    "original_name": "Scenario 7 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_7_active_bs",
-    "original_name": "Scenario 'Scenario 8' Active",
+    "original_name": "Scenario 8 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_8_active_bs",
-    "original_name": "Scenario 'Scenario 9' Active",
+    "original_name": "Scenario 9 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_scenario_9_active_bs",
-    "original_name": "Scenario 'Scenario 10' Active",
+    "original_name": "Scenario 10 active",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_1",
-    "original_name": "Zone 1 (Zone 1)",
+    "original_name": "Zone 1",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_10",
-    "original_name": "Zone 10 (Zone 10)",
+    "original_name": "Zone 10",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_11",
-    "original_name": "Zone 11 (Zone 11)",
+    "original_name": "Zone 11",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_12",
-    "original_name": "Zone 12 (Zone 12)",
+    "original_name": "Zone 12",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_13",
-    "original_name": "Zone 13 (Zone 13)",
+    "original_name": "Zone 13",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_14",
-    "original_name": "Zone 14 (Zone 14)",
+    "original_name": "Zone 14",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_15",
-    "original_name": "Zone 15 (Zone 15)",
+    "original_name": "Zone 15",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_16",
-    "original_name": "Zone 16 (Zone 16)",
+    "original_name": "Zone 16",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_17",
-    "original_name": "Zone 17 (Zone 17)",
+    "original_name": "Zone 17",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_18",
-    "original_name": "Zone 18 (Zone 18)",
+    "original_name": "Zone 18",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_19",
-    "original_name": "Zone 19 (Zone 19)",
+    "original_name": "Zone 19",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_2",
-    "original_name": "Zone 2 (Zone 2)",
+    "original_name": "Zone 2",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_20",
-    "original_name": "Zone 20 (Zone 20)",
+    "original_name": "Zone 20",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_21",
-    "original_name": "Zone 21 (Zone 21)",
+    "original_name": "Zone 21",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_22",
-    "original_name": "Zone 22 (Zone 22)",
+    "original_name": "Zone 22",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_23",
-    "original_name": "Zone 23 (Zone 23)",
+    "original_name": "Zone 23",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_24",
-    "original_name": "Zone 24 (Zone 24)",
+    "original_name": "Zone 24",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_25",
-    "original_name": "Zone 25 (Zone 25)",
+    "original_name": "Zone 25",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_26",
-    "original_name": "Zone 26 (Zone 26)",
+    "original_name": "Zone 26",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_27",
-    "original_name": "Zone 27 (Zone 27)",
+    "original_name": "Zone 27",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_28",
-    "original_name": "Zone 28 (Zone 28)",
+    "original_name": "Zone 28",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_29",
-    "original_name": "Zone 29 (Zone 29)",
+    "original_name": "Zone 29",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_3",
-    "original_name": "Zone 3 (Zone 3)",
+    "original_name": "Zone 3",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_30",
-    "original_name": "Zone 30 (Zone 30)",
+    "original_name": "Zone 30",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_31",
-    "original_name": "Zone 31 (Zone 31)",
+    "original_name": "Zone 31",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_32",
-    "original_name": "Zone 32 (Zone 32)",
+    "original_name": "Zone 32",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_33",
-    "original_name": "Zone 33 (Zone 33)",
+    "original_name": "Zone 33",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_34",
-    "original_name": "Zone 34 (Zone 34)",
+    "original_name": "Zone 34",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_35",
-    "original_name": "Zone 35 (Zone 35)",
+    "original_name": "Zone 35",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_36",
-    "original_name": "Zone 36 (Zone 36)",
+    "original_name": "Zone 36",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_37",
-    "original_name": "Zone 37 (Zone 37)",
+    "original_name": "Zone 37",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_4",
-    "original_name": "Zone 4 (Zone 4)",
+    "original_name": "Zone 4",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_5",
-    "original_name": "Zone 5 (Zone 5)",
+    "original_name": "Zone 5",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_6",
-    "original_name": "Zone 6 (Zone 6)",
+    "original_name": "Zone 6",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_7",
-    "original_name": "Zone 7 (Zone 7)",
+    "original_name": "Zone 7",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_8",
-    "original_name": "Zone 8 (Zone 8)",
+    "original_name": "Zone 8",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_9",
-    "original_name": "Zone 9 (Zone 9)",
+    "original_name": "Zone 9",
     "device_class": "opening",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_1",
-    "original_name": "Zone 1 Tamper (Zone 1)",
+    "original_name": "Zone 1 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_10",
-    "original_name": "Zone 10 Tamper (Zone 10)",
+    "original_name": "Zone 10 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_11",
-    "original_name": "Zone 11 Tamper (Zone 11)",
+    "original_name": "Zone 11 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_12",
-    "original_name": "Zone 12 Tamper (Zone 12)",
+    "original_name": "Zone 12 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_13",
-    "original_name": "Zone 13 Tamper (Zone 13)",
+    "original_name": "Zone 13 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_14",
-    "original_name": "Zone 14 Tamper (Zone 14)",
+    "original_name": "Zone 14 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_15",
-    "original_name": "Zone 15 Tamper (Zone 15)",
+    "original_name": "Zone 15 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_16",
-    "original_name": "Zone 16 Tamper (Zone 16)",
+    "original_name": "Zone 16 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_17",
-    "original_name": "Zone 17 Tamper (Zone 17)",
+    "original_name": "Zone 17 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_18",
-    "original_name": "Zone 18 Tamper (Zone 18)",
+    "original_name": "Zone 18 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_19",
-    "original_name": "Zone 19 Tamper (Zone 19)",
+    "original_name": "Zone 19 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_2",
-    "original_name": "Zone 2 Tamper (Zone 2)",
+    "original_name": "Zone 2 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_20",
-    "original_name": "Zone 20 Tamper (Zone 20)",
+    "original_name": "Zone 20 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_21",
-    "original_name": "Zone 21 Tamper (Zone 21)",
+    "original_name": "Zone 21 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_22",
-    "original_name": "Zone 22 Tamper (Zone 22)",
+    "original_name": "Zone 22 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_23",
-    "original_name": "Zone 23 Tamper (Zone 23)",
+    "original_name": "Zone 23 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_24",
-    "original_name": "Zone 24 Tamper (Zone 24)",
+    "original_name": "Zone 24 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_25",
-    "original_name": "Zone 25 Tamper (Zone 25)",
+    "original_name": "Zone 25 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_26",
-    "original_name": "Zone 26 Tamper (Zone 26)",
+    "original_name": "Zone 26 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_27",
-    "original_name": "Zone 27 Tamper (Zone 27)",
+    "original_name": "Zone 27 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_28",
-    "original_name": "Zone 28 Tamper (Zone 28)",
+    "original_name": "Zone 28 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_29",
-    "original_name": "Zone 29 Tamper (Zone 29)",
+    "original_name": "Zone 29 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_3",
-    "original_name": "Zone 3 Tamper (Zone 3)",
+    "original_name": "Zone 3 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_30",
-    "original_name": "Zone 30 Tamper (Zone 30)",
+    "original_name": "Zone 30 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_31",
-    "original_name": "Zone 31 Tamper (Zone 31)",
+    "original_name": "Zone 31 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_32",
-    "original_name": "Zone 32 Tamper (Zone 32)",
+    "original_name": "Zone 32 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_33",
-    "original_name": "Zone 33 Tamper (Zone 33)",
+    "original_name": "Zone 33 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_34",
-    "original_name": "Zone 34 Tamper (Zone 34)",
+    "original_name": "Zone 34 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_35",
-    "original_name": "Zone 35 Tamper (Zone 35)",
+    "original_name": "Zone 35 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_36",
-    "original_name": "Zone 36 Tamper (Zone 36)",
+    "original_name": "Zone 36 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_37",
-    "original_name": "Zone 37 Tamper (Zone 37)",
+    "original_name": "Zone 37 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_4",
-    "original_name": "Zone 4 Tamper (Zone 4)",
+    "original_name": "Zone 4 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_5",
-    "original_name": "Zone 5 Tamper (Zone 5)",
+    "original_name": "Zone 5 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_6",
-    "original_name": "Zone 6 Tamper (Zone 6)",
+    "original_name": "Zone 6 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_7",
-    "original_name": "Zone 7 Tamper (Zone 7)",
+    "original_name": "Zone 7 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_8",
-    "original_name": "Zone 8 Tamper (Zone 8)",
+    "original_name": "Zone 8 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_tamper_9",
-    "original_name": "Zone 9 Tamper (Zone 9)",
+    "original_name": "Zone 9 tamper",
     "device_class": "tamper",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_1",
-    "original_name": "Zone 1 Alarm memory (Zone 1)",
+    "original_name": "Zone 1 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_10",
-    "original_name": "Zone 10 Alarm memory (Zone 10)",
+    "original_name": "Zone 10 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_11",
-    "original_name": "Zone 11 Alarm memory (Zone 11)",
+    "original_name": "Zone 11 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_12",
-    "original_name": "Zone 12 Alarm memory (Zone 12)",
+    "original_name": "Zone 12 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_13",
-    "original_name": "Zone 13 Alarm memory (Zone 13)",
+    "original_name": "Zone 13 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_14",
-    "original_name": "Zone 14 Alarm memory (Zone 14)",
+    "original_name": "Zone 14 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_15",
-    "original_name": "Zone 15 Alarm memory (Zone 15)",
+    "original_name": "Zone 15 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_16",
-    "original_name": "Zone 16 Alarm memory (Zone 16)",
+    "original_name": "Zone 16 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_17",
-    "original_name": "Zone 17 Alarm memory (Zone 17)",
+    "original_name": "Zone 17 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_18",
-    "original_name": "Zone 18 Alarm memory (Zone 18)",
+    "original_name": "Zone 18 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_19",
-    "original_name": "Zone 19 Alarm memory (Zone 19)",
+    "original_name": "Zone 19 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_2",
-    "original_name": "Zone 2 Alarm memory (Zone 2)",
+    "original_name": "Zone 2 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_20",
-    "original_name": "Zone 20 Alarm memory (Zone 20)",
+    "original_name": "Zone 20 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_21",
-    "original_name": "Zone 21 Alarm memory (Zone 21)",
+    "original_name": "Zone 21 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_22",
-    "original_name": "Zone 22 Alarm memory (Zone 22)",
+    "original_name": "Zone 22 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_23",
-    "original_name": "Zone 23 Alarm memory (Zone 23)",
+    "original_name": "Zone 23 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_24",
-    "original_name": "Zone 24 Alarm memory (Zone 24)",
+    "original_name": "Zone 24 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_25",
-    "original_name": "Zone 25 Alarm memory (Zone 25)",
+    "original_name": "Zone 25 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_26",
-    "original_name": "Zone 26 Alarm memory (Zone 26)",
+    "original_name": "Zone 26 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_27",
-    "original_name": "Zone 27 Alarm memory (Zone 27)",
+    "original_name": "Zone 27 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_28",
-    "original_name": "Zone 28 Alarm memory (Zone 28)",
+    "original_name": "Zone 28 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_29",
-    "original_name": "Zone 29 Alarm memory (Zone 29)",
+    "original_name": "Zone 29 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_3",
-    "original_name": "Zone 3 Alarm memory (Zone 3)",
+    "original_name": "Zone 3 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_30",
-    "original_name": "Zone 30 Alarm memory (Zone 30)",
+    "original_name": "Zone 30 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_31",
-    "original_name": "Zone 31 Alarm memory (Zone 31)",
+    "original_name": "Zone 31 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_32",
-    "original_name": "Zone 32 Alarm memory (Zone 32)",
+    "original_name": "Zone 32 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_33",
-    "original_name": "Zone 33 Alarm memory (Zone 33)",
+    "original_name": "Zone 33 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_34",
-    "original_name": "Zone 34 Alarm memory (Zone 34)",
+    "original_name": "Zone 34 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_35",
-    "original_name": "Zone 35 Alarm memory (Zone 35)",
+    "original_name": "Zone 35 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_36",
-    "original_name": "Zone 36 Alarm memory (Zone 36)",
+    "original_name": "Zone 36 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_37",
-    "original_name": "Zone 37 Alarm memory (Zone 37)",
+    "original_name": "Zone 37 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_4",
-    "original_name": "Zone 4 Alarm memory (Zone 4)",
+    "original_name": "Zone 4 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_5",
-    "original_name": "Zone 5 Alarm memory (Zone 5)",
+    "original_name": "Zone 5 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_6",
-    "original_name": "Zone 6 Alarm memory (Zone 6)",
+    "original_name": "Zone 6 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_7",
-    "original_name": "Zone 7 Alarm memory (Zone 7)",
+    "original_name": "Zone 7 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_8",
-    "original_name": "Zone 8 Alarm memory (Zone 8)",
+    "original_name": "Zone 8 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
   {
     "platform": "binary_sensor",
     "unique_id": "_zone_triggered_9",
-    "original_name": "Zone 9 Alarm memory (Zone 9)",
+    "original_name": "Zone 9 alarm memory",
     "device_class": "problem",
     "state": "off"
   },
@@ -1227,210 +1227,210 @@
   {
     "platform": "button",
     "unique_id": "_scenario_button_0",
-    "original_name": "Activate 'Scenario 1'",
+    "original_name": "Activate scenario 1",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_1",
-    "original_name": "Activate 'Scenario 2'",
+    "original_name": "Activate scenario 2",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_10",
-    "original_name": "Activate 'Scenario 11'",
+    "original_name": "Activate scenario 11",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_11",
-    "original_name": "Activate 'Scenario 12'",
+    "original_name": "Activate scenario 12",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_12",
-    "original_name": "Activate 'Scenario 13'",
+    "original_name": "Activate scenario 13",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_13",
-    "original_name": "Activate 'Scenario 14'",
+    "original_name": "Activate scenario 14",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_14",
-    "original_name": "Activate 'Scenario 15'",
+    "original_name": "Activate scenario 15",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_15",
-    "original_name": "Activate 'Scenario 16'",
+    "original_name": "Activate scenario 16",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_16",
-    "original_name": "Activate 'Scenario 17'",
+    "original_name": "Activate scenario 17",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_17",
-    "original_name": "Activate 'Scenario 18'",
+    "original_name": "Activate scenario 18",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_18",
-    "original_name": "Activate 'Scenario 19'",
+    "original_name": "Activate scenario 19",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_19",
-    "original_name": "Activate 'Scenario 20'",
+    "original_name": "Activate scenario 20",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_2",
-    "original_name": "Activate 'Scenario 3'",
+    "original_name": "Activate scenario 3",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_20",
-    "original_name": "Activate 'Scenario 21'",
+    "original_name": "Activate scenario 21",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_21",
-    "original_name": "Activate 'Scenario 22'",
+    "original_name": "Activate scenario 22",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_22",
-    "original_name": "Activate 'Scenario 23'",
+    "original_name": "Activate scenario 23",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_23",
-    "original_name": "Activate 'Scenario 24'",
+    "original_name": "Activate scenario 24",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_24",
-    "original_name": "Activate 'Scenario 25'",
+    "original_name": "Activate scenario 25",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_25",
-    "original_name": "Activate 'Scenario 26'",
+    "original_name": "Activate scenario 26",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_26",
-    "original_name": "Activate 'Scenario 27'",
+    "original_name": "Activate scenario 27",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_27",
-    "original_name": "Activate 'Scenario 28'",
+    "original_name": "Activate scenario 28",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_28",
-    "original_name": "Activate 'Scenario 29'",
+    "original_name": "Activate scenario 29",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_29",
-    "original_name": "Activate 'Scenario 30'",
+    "original_name": "Activate scenario 30",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_3",
-    "original_name": "Activate 'Scenario 4'",
+    "original_name": "Activate scenario 4",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_4",
-    "original_name": "Activate 'Scenario 5'",
+    "original_name": "Activate scenario 5",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_5",
-    "original_name": "Activate 'Scenario 6'",
+    "original_name": "Activate scenario 6",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_6",
-    "original_name": "Activate 'Scenario 7'",
+    "original_name": "Activate scenario 7",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_7",
-    "original_name": "Activate 'Scenario 8'",
+    "original_name": "Activate scenario 8",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_8",
-    "original_name": "Activate 'Scenario 9'",
+    "original_name": "Activate scenario 9",
     "device_class": null,
     "state": "unknown"
   },
   {
     "platform": "button",
     "unique_id": "_scenario_button_9",
-    "original_name": "Activate 'Scenario 10'",
+    "original_name": "Activate scenario 10",
     "device_class": null,
     "state": "unknown"
   },
@@ -1514,21 +1514,21 @@
   {
     "platform": "sensor",
     "unique_id": "_active_scenario_name",
-    "original_name": "Active Scenario Name",
+    "original_name": "Active scenario",
     "device_class": null,
     "state": "Scenario 2 (Index 1)"
   },
   {
     "platform": "sensor",
     "unique_id": "_event_log",
-    "original_name": "Test Panel Event Log",
+    "original_name": "Event log",
     "device_class": null,
     "state": "467"
   },
   {
     "platform": "sensor",
     "unique_id": "_firmware_version",
-    "original_name": "Firmware Version",
+    "original_name": "Firmware version",
     "device_class": null,
     "state": "6.07"
   },
@@ -1542,7 +1542,7 @@
   {
     "platform": "sensor",
     "unique_id": "_system_type",
-    "original_name": "System Type",
+    "original_name": "System type",
     "device_class": null,
     "state": "01050"
   },
@@ -1556,329 +1556,329 @@
   {
     "platform": "switch",
     "unique_id": "_area_switch_1",
-    "original_name": "Test Panel Area 1 (Area 1)",
+    "original_name": "Area 1",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_area_switch_10",
-    "original_name": "Test Panel Area 10 (Area 10)",
+    "original_name": "Area 10",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_area_switch_2",
-    "original_name": "Test Panel Area 2 (Area 2)",
+    "original_name": "Area 2",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_area_switch_3",
-    "original_name": "Test Panel Area 3 (Area 3)",
+    "original_name": "Area 3",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_area_switch_4",
-    "original_name": "Test Panel Area 4 (Area 4)",
+    "original_name": "Area 4",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_area_switch_5",
-    "original_name": "Test Panel Area 5 (Area 5)",
+    "original_name": "Area 5",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_area_switch_6",
-    "original_name": "Test Panel Area 6 (Area 6)",
+    "original_name": "Area 6",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_area_switch_7",
-    "original_name": "Test Panel Area 7 (Area 7)",
+    "original_name": "Area 7",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_area_switch_8",
-    "original_name": "Test Panel Area 8 (Area 8)",
+    "original_name": "Area 8",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_area_switch_9",
-    "original_name": "Test Panel Area 9 (Area 9)",
+    "original_name": "Area 9",
     "device_class": null,
     "state": "off"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_1",
-    "original_name": "Test Panel Zone 1 Enabled (Zone 1)",
+    "original_name": "Zone 1 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_10",
-    "original_name": "Test Panel Zone 10 Enabled (Zone 10)",
+    "original_name": "Zone 10 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_11",
-    "original_name": "Test Panel Zone 11 Enabled (Zone 11)",
+    "original_name": "Zone 11 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_12",
-    "original_name": "Test Panel Zone 12 Enabled (Zone 12)",
+    "original_name": "Zone 12 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_13",
-    "original_name": "Test Panel Zone 13 Enabled (Zone 13)",
+    "original_name": "Zone 13 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_14",
-    "original_name": "Test Panel Zone 14 Enabled (Zone 14)",
+    "original_name": "Zone 14 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_15",
-    "original_name": "Test Panel Zone 15 Enabled (Zone 15)",
+    "original_name": "Zone 15 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_16",
-    "original_name": "Test Panel Zone 16 Enabled (Zone 16)",
+    "original_name": "Zone 16 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_17",
-    "original_name": "Test Panel Zone 17 Enabled (Zone 17)",
+    "original_name": "Zone 17 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_18",
-    "original_name": "Test Panel Zone 18 Enabled (Zone 18)",
+    "original_name": "Zone 18 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_19",
-    "original_name": "Test Panel Zone 19 Enabled (Zone 19)",
+    "original_name": "Zone 19 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_2",
-    "original_name": "Test Panel Zone 2 Enabled (Zone 2)",
+    "original_name": "Zone 2 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_20",
-    "original_name": "Test Panel Zone 20 Enabled (Zone 20)",
+    "original_name": "Zone 20 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_21",
-    "original_name": "Test Panel Zone 21 Enabled (Zone 21)",
+    "original_name": "Zone 21 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_22",
-    "original_name": "Test Panel Zone 22 Enabled (Zone 22)",
+    "original_name": "Zone 22 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_23",
-    "original_name": "Test Panel Zone 23 Enabled (Zone 23)",
+    "original_name": "Zone 23 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_24",
-    "original_name": "Test Panel Zone 24 Enabled (Zone 24)",
+    "original_name": "Zone 24 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_25",
-    "original_name": "Test Panel Zone 25 Enabled (Zone 25)",
+    "original_name": "Zone 25 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_26",
-    "original_name": "Test Panel Zone 26 Enabled (Zone 26)",
+    "original_name": "Zone 26 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_27",
-    "original_name": "Test Panel Zone 27 Enabled (Zone 27)",
+    "original_name": "Zone 27 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_28",
-    "original_name": "Test Panel Zone 28 Enabled (Zone 28)",
+    "original_name": "Zone 28 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_29",
-    "original_name": "Test Panel Zone 29 Enabled (Zone 29)",
+    "original_name": "Zone 29 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_3",
-    "original_name": "Test Panel Zone 3 Enabled (Zone 3)",
+    "original_name": "Zone 3 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_30",
-    "original_name": "Test Panel Zone 30 Enabled (Zone 30)",
+    "original_name": "Zone 30 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_31",
-    "original_name": "Test Panel Zone 31 Enabled (Zone 31)",
+    "original_name": "Zone 31 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_32",
-    "original_name": "Test Panel Zone 32 Enabled (Zone 32)",
+    "original_name": "Zone 32 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_33",
-    "original_name": "Test Panel Zone 33 Enabled (Zone 33)",
+    "original_name": "Zone 33 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_34",
-    "original_name": "Test Panel Zone 34 Enabled (Zone 34)",
+    "original_name": "Zone 34 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_35",
-    "original_name": "Test Panel Zone 35 Enabled (Zone 35)",
+    "original_name": "Zone 35 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_36",
-    "original_name": "Test Panel Zone 36 Enabled (Zone 36)",
+    "original_name": "Zone 36 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_37",
-    "original_name": "Test Panel Zone 37 Enabled (Zone 37)",
+    "original_name": "Zone 37 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_4",
-    "original_name": "Test Panel Zone 4 Enabled (Zone 4)",
+    "original_name": "Zone 4 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_5",
-    "original_name": "Test Panel Zone 5 Enabled (Zone 5)",
+    "original_name": "Zone 5 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_6",
-    "original_name": "Test Panel Zone 6 Enabled (Zone 6)",
+    "original_name": "Zone 6 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_7",
-    "original_name": "Test Panel Zone 7 Enabled (Zone 7)",
+    "original_name": "Zone 7 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_8",
-    "original_name": "Test Panel Zone 8 Enabled (Zone 8)",
+    "original_name": "Zone 8 included",
     "device_class": null,
     "state": "on"
   },
   {
     "platform": "switch",
     "unique_id": "_zone_enabled_switch_9",
-    "original_name": "Test Panel Zone 9 Enabled (Zone 9)",
+    "original_name": "Zone 9 included",
     "device_class": null,
     "state": "on"
   }

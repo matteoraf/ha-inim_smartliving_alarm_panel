@@ -26,7 +26,7 @@ from .const import (
     ZONE_STATE_ALARMED,
     ZONE_TAMPER_STATES,
 )
-from .entity import InimCoordinatorEntity, panel_device_info
+from .entity import InimCoordinatorEntity, name_item, panel_device_info
 from .protocol.config import (
     Balancing,
     SensorKind,
@@ -245,7 +245,7 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
         self._zone_name = zone_name
         self._slot = slot
         self._programming = programming or {}
-        self._attr_name = f"Zone {self._zone_id_1_based} ({self._zone_name})"
+        name_item(self, "zone", "Zone", self._zone_id_1_based, zone_name)
         self._attr_unique_id = f"{config_entry.entry_id}_zone_{self._zone_id_1_based}"
 
         self._attr_device_class = device_class
@@ -256,7 +256,7 @@ class InimZoneBinarySensor(BaseInimBinarySensor):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_zone_{self._zone_id_1_based}"
+        return f"zone_{self._zone_id_1_based}"
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -309,9 +309,7 @@ class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
         super().__init__(coordinator, config_entry, panel_display_name)
         self._zone_id_1_based = zone_index_0_based + 1
         self._zone_name = zone_name
-        self._attr_name = (
-            f"Zone {self._zone_id_1_based} Alarm memory ({self._zone_name})"
-        )
+        name_item(self, "zone_alarm_memory", "Zone", self._zone_id_1_based, zone_name)
         self._attr_unique_id = (
             f"{config_entry.entry_id}_zone_triggered_{self._zone_id_1_based}"
         )
@@ -320,7 +318,7 @@ class InimZoneTriggeredBinarySensor(BaseInimBinarySensor):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_zone_{self._zone_id_1_based}_triggered"
+        return f"zone_{self._zone_id_1_based}_triggered"
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -357,7 +355,7 @@ class InimZoneTamperBinarySensor(BaseInimBinarySensor):
         super().__init__(coordinator, config_entry, panel_display_name)
         self._zone_id_1_based = zone_index_0_based + 1
         self._zone_name = zone_name
-        self._attr_name = f"Zone {self._zone_id_1_based} Tamper ({self._zone_name})"
+        name_item(self, "zone_tamper", "Zone", self._zone_id_1_based, zone_name)
         self._attr_unique_id = (
             f"{config_entry.entry_id}_zone_tamper_{self._zone_id_1_based}"
         )
@@ -366,7 +364,7 @@ class InimZoneTamperBinarySensor(BaseInimBinarySensor):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_zone_{self._zone_id_1_based}_tamper"
+        return f"zone_{self._zone_id_1_based}_tamper"
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -390,7 +388,7 @@ class InimAreaBinarySensor(BaseInimBinarySensor):
     """On while an area is in one of the area lists of the live status."""
 
     _status_key: str  # the areas field of the live status (alarm, tamper, ...)
-    _label: str  # shown in the name
+    _name_key: str  # the translation key of the name
     _unique_id_suffix: str
     _object_id_suffix: str
 
@@ -406,9 +404,7 @@ class InimAreaBinarySensor(BaseInimBinarySensor):
         super().__init__(coordinator, config_entry, panel_display_name)
         self._area_id_1_based = area_id_1_based
         self._area_name = area_name
-        self._attr_name = (
-            f"Area {self._area_id_1_based} {self._label} ({self._area_name})"
-        )
+        name_item(self, self._name_key, "Area", self._area_id_1_based, area_name)
         self._attr_unique_id = (
             f"{config_entry.entry_id}_area_{self._area_id_1_based}"
             f"_{self._unique_id_suffix}"
@@ -418,10 +414,7 @@ class InimAreaBinarySensor(BaseInimBinarySensor):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return (
-            f"{self._panel_display_name}_area_{self._area_id_1_based}"
-            f"_{self._object_id_suffix}"
-        )
+        return f"area_{self._area_id_1_based}_{self._object_id_suffix}"
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -449,7 +442,7 @@ class InimAreaAlarmMemoryBinarySensor(InimAreaBinarySensor):
 
     _attr_device_class = BinarySensorDeviceClass.SAFETY
     _status_key = "alarm_memory"
-    _label = "Alarm memory"
+    _name_key = "area_alarm_memory"
     _unique_id_suffix = "triggered_bs"
     _object_id_suffix = "triggered"
 
@@ -467,7 +460,7 @@ class InimAreaAlarmBinarySensor(InimAreaBinarySensor):
 
     _attr_device_class = BinarySensorDeviceClass.SAFETY
     _status_key = "alarm"
-    _label = "Alarm"
+    _name_key = "area_alarm"
     _unique_id_suffix = "alarm_bs"
     _object_id_suffix = "alarm"
 
@@ -477,7 +470,7 @@ class InimAreaTamperBinarySensor(InimAreaBinarySensor):
 
     _attr_device_class = BinarySensorDeviceClass.TAMPER
     _status_key = "tamper"
-    _label = "Tamper"
+    _name_key = "area_tamper"
     _unique_id_suffix = "tamper_bs"
     _object_id_suffix = "tamper"
 
@@ -499,7 +492,13 @@ class InimSpecificScenarioActiveBinarySensor(BaseInimBinarySensor):
         super().__init__(coordinator, config_entry, panel_display_name)
         self._scenario_index_0_based = scenario_index_0_based
         self._scenario_name = scenario_name
-        self._attr_name = f"Scenario '{self._scenario_name}' Active"
+        name_item(
+            self,
+            "scenario_active",
+            "Scenario",
+            self._scenario_index_0_based + 1,
+            scenario_name,
+        )
         self._attr_unique_id = (
             f"{config_entry.entry_id}_scenario_{self._scenario_index_0_based}_active_bs"
         )
@@ -509,9 +508,7 @@ class InimSpecificScenarioActiveBinarySensor(BaseInimBinarySensor):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return (
-            f"{self._panel_display_name}_scenario_{self._scenario_index_0_based}_active"
-        )
+        return f"scenario_{self._scenario_index_0_based}_active"
 
     @callback
     def _handle_coordinator_update(self) -> None:

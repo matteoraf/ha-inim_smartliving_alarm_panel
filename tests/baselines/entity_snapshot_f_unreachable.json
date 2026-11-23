@@ -26,7 +26,7 @@
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": null,
-   "original_name": "Test Panel",
+   "original_name": null,
    "platform": "alarm_control_panel",
    "state": "unavailable",
    "unique_id": "_alarm_control_panel"
@@ -34,15 +34,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 10 Alarm (Area 10)"
+    "friendly_name": "Test Panel Area 10 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_10_alarm",
+   "entity_id": "binary_sensor.test_panel_area_10_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 10 Alarm (Area 10)",
+   "original_name": "Area 10 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_10_alarm_bs"
@@ -50,15 +50,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 10 Tamper (Area 10)"
+    "friendly_name": "Test Panel Area 10 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_10_tamper",
+   "entity_id": "binary_sensor.test_panel_area_10_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 10 Tamper (Area 10)",
+   "original_name": "Area 10 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_10_tamper_bs"
@@ -66,15 +66,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 10 Alarm memory (Area 10)"
+    "friendly_name": "Test Panel Area 10 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_10_triggered",
+   "entity_id": "binary_sensor.test_panel_area_10_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 10 Alarm memory (Area 10)",
+   "original_name": "Area 10 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_10_triggered_bs"
@@ -82,15 +82,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 1 Alarm (Area 1)"
+    "friendly_name": "Test Panel Area 1 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_1_alarm",
+   "entity_id": "binary_sensor.test_panel_area_1_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 1 Alarm (Area 1)",
+   "original_name": "Area 1 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_1_alarm_bs"
@@ -98,15 +98,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 1 Tamper (Area 1)"
+    "friendly_name": "Test Panel Area 1 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_1_tamper",
+   "entity_id": "binary_sensor.test_panel_area_1_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 1 Tamper (Area 1)",
+   "original_name": "Area 1 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_1_tamper_bs"
@@ -114,15 +114,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 1 Alarm memory (Area 1)"
+    "friendly_name": "Test Panel Area 1 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_1_triggered",
+   "entity_id": "binary_sensor.test_panel_area_1_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 1 Alarm memory (Area 1)",
+   "original_name": "Area 1 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_1_triggered_bs"
@@ -130,15 +130,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 2 Alarm (Area 2)"
+    "friendly_name": "Test Panel Area 2 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_2_alarm",
+   "entity_id": "binary_sensor.test_panel_area_2_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 2 Alarm (Area 2)",
+   "original_name": "Area 2 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_2_alarm_bs"
@@ -146,15 +146,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 2 Tamper (Area 2)"
+    "friendly_name": "Test Panel Area 2 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_2_tamper",
+   "entity_id": "binary_sensor.test_panel_area_2_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 2 Tamper (Area 2)",
+   "original_name": "Area 2 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_2_tamper_bs"
@@ -162,15 +162,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 2 Alarm memory (Area 2)"
+    "friendly_name": "Test Panel Area 2 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_2_triggered",
+   "entity_id": "binary_sensor.test_panel_area_2_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 2 Alarm memory (Area 2)",
+   "original_name": "Area 2 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_2_triggered_bs"
@@ -178,15 +178,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 3 Alarm (Area 3)"
+    "friendly_name": "Test Panel Area 3 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_3_alarm",
+   "entity_id": "binary_sensor.test_panel_area_3_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 3 Alarm (Area 3)",
+   "original_name": "Area 3 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_3_alarm_bs"
@@ -194,15 +194,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 3 Tamper (Area 3)"
+    "friendly_name": "Test Panel Area 3 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_3_tamper",
+   "entity_id": "binary_sensor.test_panel_area_3_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 3 Tamper (Area 3)",
+   "original_name": "Area 3 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_3_tamper_bs"
@@ -210,15 +210,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 3 Alarm memory (Area 3)"
+    "friendly_name": "Test Panel Area 3 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_3_triggered",
+   "entity_id": "binary_sensor.test_panel_area_3_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 3 Alarm memory (Area 3)",
+   "original_name": "Area 3 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_3_triggered_bs"
@@ -226,15 +226,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 4 Alarm (Area 4)"
+    "friendly_name": "Test Panel Area 4 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_4_alarm",
+   "entity_id": "binary_sensor.test_panel_area_4_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 4 Alarm (Area 4)",
+   "original_name": "Area 4 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_4_alarm_bs"
@@ -242,15 +242,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 4 Tamper (Area 4)"
+    "friendly_name": "Test Panel Area 4 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_4_tamper",
+   "entity_id": "binary_sensor.test_panel_area_4_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 4 Tamper (Area 4)",
+   "original_name": "Area 4 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_4_tamper_bs"
@@ -258,15 +258,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 4 Alarm memory (Area 4)"
+    "friendly_name": "Test Panel Area 4 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_4_triggered",
+   "entity_id": "binary_sensor.test_panel_area_4_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 4 Alarm memory (Area 4)",
+   "original_name": "Area 4 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_4_triggered_bs"
@@ -274,15 +274,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 5 Alarm (Area 5)"
+    "friendly_name": "Test Panel Area 5 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_5_alarm",
+   "entity_id": "binary_sensor.test_panel_area_5_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 5 Alarm (Area 5)",
+   "original_name": "Area 5 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_5_alarm_bs"
@@ -290,15 +290,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 5 Tamper (Area 5)"
+    "friendly_name": "Test Panel Area 5 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_5_tamper",
+   "entity_id": "binary_sensor.test_panel_area_5_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 5 Tamper (Area 5)",
+   "original_name": "Area 5 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_5_tamper_bs"
@@ -306,15 +306,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 5 Alarm memory (Area 5)"
+    "friendly_name": "Test Panel Area 5 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_5_triggered",
+   "entity_id": "binary_sensor.test_panel_area_5_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 5 Alarm memory (Area 5)",
+   "original_name": "Area 5 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_5_triggered_bs"
@@ -322,15 +322,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 6 Alarm (Area 6)"
+    "friendly_name": "Test Panel Area 6 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_6_alarm",
+   "entity_id": "binary_sensor.test_panel_area_6_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 6 Alarm (Area 6)",
+   "original_name": "Area 6 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_6_alarm_bs"
@@ -338,15 +338,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 6 Tamper (Area 6)"
+    "friendly_name": "Test Panel Area 6 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_6_tamper",
+   "entity_id": "binary_sensor.test_panel_area_6_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 6 Tamper (Area 6)",
+   "original_name": "Area 6 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_6_tamper_bs"
@@ -354,15 +354,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 6 Alarm memory (Area 6)"
+    "friendly_name": "Test Panel Area 6 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_6_triggered",
+   "entity_id": "binary_sensor.test_panel_area_6_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 6 Alarm memory (Area 6)",
+   "original_name": "Area 6 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_6_triggered_bs"
@@ -370,15 +370,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 7 Alarm (Area 7)"
+    "friendly_name": "Test Panel Area 7 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_7_alarm",
+   "entity_id": "binary_sensor.test_panel_area_7_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 7 Alarm (Area 7)",
+   "original_name": "Area 7 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_7_alarm_bs"
@@ -386,15 +386,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 7 Tamper (Area 7)"
+    "friendly_name": "Test Panel Area 7 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_7_tamper",
+   "entity_id": "binary_sensor.test_panel_area_7_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 7 Tamper (Area 7)",
+   "original_name": "Area 7 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_7_tamper_bs"
@@ -402,15 +402,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 7 Alarm memory (Area 7)"
+    "friendly_name": "Test Panel Area 7 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_7_triggered",
+   "entity_id": "binary_sensor.test_panel_area_7_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 7 Alarm memory (Area 7)",
+   "original_name": "Area 7 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_7_triggered_bs"
@@ -418,15 +418,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 8 Alarm (Area 8)"
+    "friendly_name": "Test Panel Area 8 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_8_alarm",
+   "entity_id": "binary_sensor.test_panel_area_8_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 8 Alarm (Area 8)",
+   "original_name": "Area 8 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_8_alarm_bs"
@@ -434,15 +434,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 8 Tamper (Area 8)"
+    "friendly_name": "Test Panel Area 8 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_8_tamper",
+   "entity_id": "binary_sensor.test_panel_area_8_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 8 Tamper (Area 8)",
+   "original_name": "Area 8 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_8_tamper_bs"
@@ -450,15 +450,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 8 Alarm memory (Area 8)"
+    "friendly_name": "Test Panel Area 8 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_8_triggered",
+   "entity_id": "binary_sensor.test_panel_area_8_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 8 Alarm memory (Area 8)",
+   "original_name": "Area 8 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_8_triggered_bs"
@@ -466,15 +466,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 9 Alarm (Area 9)"
+    "friendly_name": "Test Panel Area 9 alarm"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_9_alarm",
+   "entity_id": "binary_sensor.test_panel_area_9_alarm",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 9 Alarm (Area 9)",
+   "original_name": "Area 9 alarm",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_9_alarm_bs"
@@ -482,15 +482,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Area 9 Tamper (Area 9)"
+    "friendly_name": "Test Panel Area 9 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_9_tamper",
+   "entity_id": "binary_sensor.test_panel_area_9_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Area 9 Tamper (Area 9)",
+   "original_name": "Area 9 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_9_tamper_bs"
@@ -498,15 +498,15 @@
   {
    "attributes": {
     "device_class": "safety",
-    "friendly_name": "Test Panel Area 9 Alarm memory (Area 9)"
+    "friendly_name": "Test Panel Area 9 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_area_9_triggered",
+   "entity_id": "binary_sensor.test_panel_area_9_triggered",
    "hidden_by": null,
    "original_device_class": "safety",
    "original_icon": null,
-   "original_name": "Area 9 Alarm memory (Area 9)",
+   "original_name": "Area 9 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_area_9_triggered_bs"
@@ -545,480 +545,480 @@
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 1' Active",
+    "friendly_name": "Test Panel Scenario 1 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_0_active",
+   "entity_id": "binary_sensor.test_panel_scenario_0_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 1' Active",
+   "original_name": "Scenario 1 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_0_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 11' Active",
+    "friendly_name": "Test Panel Scenario 11 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_10_active",
+   "entity_id": "binary_sensor.test_panel_scenario_10_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 11' Active",
+   "original_name": "Scenario 11 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_10_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 12' Active",
+    "friendly_name": "Test Panel Scenario 12 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_11_active",
+   "entity_id": "binary_sensor.test_panel_scenario_11_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 12' Active",
+   "original_name": "Scenario 12 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_11_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 13' Active",
+    "friendly_name": "Test Panel Scenario 13 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_12_active",
+   "entity_id": "binary_sensor.test_panel_scenario_12_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 13' Active",
+   "original_name": "Scenario 13 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_12_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 14' Active",
+    "friendly_name": "Test Panel Scenario 14 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_13_active",
+   "entity_id": "binary_sensor.test_panel_scenario_13_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 14' Active",
+   "original_name": "Scenario 14 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_13_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 15' Active",
+    "friendly_name": "Test Panel Scenario 15 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_14_active",
+   "entity_id": "binary_sensor.test_panel_scenario_14_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 15' Active",
+   "original_name": "Scenario 15 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_14_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 16' Active",
+    "friendly_name": "Test Panel Scenario 16 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_15_active",
+   "entity_id": "binary_sensor.test_panel_scenario_15_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 16' Active",
+   "original_name": "Scenario 16 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_15_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 17' Active",
+    "friendly_name": "Test Panel Scenario 17 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_16_active",
+   "entity_id": "binary_sensor.test_panel_scenario_16_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 17' Active",
+   "original_name": "Scenario 17 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_16_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 18' Active",
+    "friendly_name": "Test Panel Scenario 18 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_17_active",
+   "entity_id": "binary_sensor.test_panel_scenario_17_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 18' Active",
+   "original_name": "Scenario 18 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_17_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 19' Active",
+    "friendly_name": "Test Panel Scenario 19 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_18_active",
+   "entity_id": "binary_sensor.test_panel_scenario_18_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 19' Active",
+   "original_name": "Scenario 19 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_18_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 20' Active",
+    "friendly_name": "Test Panel Scenario 20 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_19_active",
+   "entity_id": "binary_sensor.test_panel_scenario_19_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 20' Active",
+   "original_name": "Scenario 20 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_19_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 2' Active",
+    "friendly_name": "Test Panel Scenario 2 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_1_active",
+   "entity_id": "binary_sensor.test_panel_scenario_1_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 2' Active",
+   "original_name": "Scenario 2 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_1_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 21' Active",
+    "friendly_name": "Test Panel Scenario 21 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_20_active",
+   "entity_id": "binary_sensor.test_panel_scenario_20_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 21' Active",
+   "original_name": "Scenario 21 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_20_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 22' Active",
+    "friendly_name": "Test Panel Scenario 22 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_21_active",
+   "entity_id": "binary_sensor.test_panel_scenario_21_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 22' Active",
+   "original_name": "Scenario 22 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_21_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 23' Active",
+    "friendly_name": "Test Panel Scenario 23 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_22_active",
+   "entity_id": "binary_sensor.test_panel_scenario_22_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 23' Active",
+   "original_name": "Scenario 23 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_22_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 24' Active",
+    "friendly_name": "Test Panel Scenario 24 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_23_active",
+   "entity_id": "binary_sensor.test_panel_scenario_23_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 24' Active",
+   "original_name": "Scenario 24 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_23_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 25' Active",
+    "friendly_name": "Test Panel Scenario 25 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_24_active",
+   "entity_id": "binary_sensor.test_panel_scenario_24_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 25' Active",
+   "original_name": "Scenario 25 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_24_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 26' Active",
+    "friendly_name": "Test Panel Scenario 26 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_25_active",
+   "entity_id": "binary_sensor.test_panel_scenario_25_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 26' Active",
+   "original_name": "Scenario 26 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_25_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 27' Active",
+    "friendly_name": "Test Panel Scenario 27 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_26_active",
+   "entity_id": "binary_sensor.test_panel_scenario_26_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 27' Active",
+   "original_name": "Scenario 27 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_26_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 28' Active",
+    "friendly_name": "Test Panel Scenario 28 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_27_active",
+   "entity_id": "binary_sensor.test_panel_scenario_27_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 28' Active",
+   "original_name": "Scenario 28 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_27_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 29' Active",
+    "friendly_name": "Test Panel Scenario 29 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_28_active",
+   "entity_id": "binary_sensor.test_panel_scenario_28_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 29' Active",
+   "original_name": "Scenario 29 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_28_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 30' Active",
+    "friendly_name": "Test Panel Scenario 30 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_29_active",
+   "entity_id": "binary_sensor.test_panel_scenario_29_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 30' Active",
+   "original_name": "Scenario 30 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_29_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 3' Active",
+    "friendly_name": "Test Panel Scenario 3 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_2_active",
+   "entity_id": "binary_sensor.test_panel_scenario_2_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 3' Active",
+   "original_name": "Scenario 3 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_2_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 4' Active",
+    "friendly_name": "Test Panel Scenario 4 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_3_active",
+   "entity_id": "binary_sensor.test_panel_scenario_3_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 4' Active",
+   "original_name": "Scenario 4 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_3_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 5' Active",
+    "friendly_name": "Test Panel Scenario 5 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_4_active",
+   "entity_id": "binary_sensor.test_panel_scenario_4_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 5' Active",
+   "original_name": "Scenario 5 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_4_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 6' Active",
+    "friendly_name": "Test Panel Scenario 6 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_5_active",
+   "entity_id": "binary_sensor.test_panel_scenario_5_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 6' Active",
+   "original_name": "Scenario 6 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_5_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 7' Active",
+    "friendly_name": "Test Panel Scenario 7 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_6_active",
+   "entity_id": "binary_sensor.test_panel_scenario_6_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 7' Active",
+   "original_name": "Scenario 7 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_6_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 8' Active",
+    "friendly_name": "Test Panel Scenario 8 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_7_active",
+   "entity_id": "binary_sensor.test_panel_scenario_7_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 8' Active",
+   "original_name": "Scenario 8 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_7_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 9' Active",
+    "friendly_name": "Test Panel Scenario 9 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_8_active",
+   "entity_id": "binary_sensor.test_panel_scenario_8_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 9' Active",
+   "original_name": "Scenario 9 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_8_active_bs"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Scenario 'Scenario 10' Active",
+    "friendly_name": "Test Panel Scenario 10 active",
     "icon": "mdi:play-circle-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_scenario_9_active",
+   "entity_id": "binary_sensor.test_panel_scenario_9_active",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-circle-outline",
-   "original_name": "Scenario 'Scenario 10' Active",
+   "original_name": "Scenario 10 active",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_scenario_9_active_bs"
@@ -1026,15 +1026,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 1 (Zone 1)"
+    "friendly_name": "Test Panel Zone 1"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_1",
+   "entity_id": "binary_sensor.test_panel_zone_1",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 1 (Zone 1)",
+   "original_name": "Zone 1",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_1"
@@ -1042,15 +1042,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 10 (Zone 10)"
+    "friendly_name": "Test Panel Zone 10"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_10",
+   "entity_id": "binary_sensor.test_panel_zone_10",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 10 (Zone 10)",
+   "original_name": "Zone 10",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_10"
@@ -1058,15 +1058,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 11 (Zone 11)"
+    "friendly_name": "Test Panel Zone 11"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_11",
+   "entity_id": "binary_sensor.test_panel_zone_11",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 11 (Zone 11)",
+   "original_name": "Zone 11",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_11"
@@ -1074,15 +1074,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 12 (Zone 12)"
+    "friendly_name": "Test Panel Zone 12"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_12",
+   "entity_id": "binary_sensor.test_panel_zone_12",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 12 (Zone 12)",
+   "original_name": "Zone 12",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_12"
@@ -1090,15 +1090,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 13 (Zone 13)"
+    "friendly_name": "Test Panel Zone 13"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_13",
+   "entity_id": "binary_sensor.test_panel_zone_13",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 13 (Zone 13)",
+   "original_name": "Zone 13",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_13"
@@ -1106,15 +1106,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 14 (Zone 14)"
+    "friendly_name": "Test Panel Zone 14"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_14",
+   "entity_id": "binary_sensor.test_panel_zone_14",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 14 (Zone 14)",
+   "original_name": "Zone 14",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_14"
@@ -1122,15 +1122,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 15 (Zone 15)"
+    "friendly_name": "Test Panel Zone 15"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_15",
+   "entity_id": "binary_sensor.test_panel_zone_15",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 15 (Zone 15)",
+   "original_name": "Zone 15",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_15"
@@ -1138,15 +1138,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 16 (Zone 16)"
+    "friendly_name": "Test Panel Zone 16"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_16",
+   "entity_id": "binary_sensor.test_panel_zone_16",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 16 (Zone 16)",
+   "original_name": "Zone 16",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_16"
@@ -1154,15 +1154,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 17 (Zone 17)"
+    "friendly_name": "Test Panel Zone 17"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_17",
+   "entity_id": "binary_sensor.test_panel_zone_17",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 17 (Zone 17)",
+   "original_name": "Zone 17",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_17"
@@ -1170,15 +1170,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 18 (Zone 18)"
+    "friendly_name": "Test Panel Zone 18"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_18",
+   "entity_id": "binary_sensor.test_panel_zone_18",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 18 (Zone 18)",
+   "original_name": "Zone 18",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_18"
@@ -1186,15 +1186,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 19 (Zone 19)"
+    "friendly_name": "Test Panel Zone 19"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_19",
+   "entity_id": "binary_sensor.test_panel_zone_19",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 19 (Zone 19)",
+   "original_name": "Zone 19",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_19"
@@ -1202,15 +1202,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 2 (Zone 2)"
+    "friendly_name": "Test Panel Zone 2"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_2",
+   "entity_id": "binary_sensor.test_panel_zone_2",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 2 (Zone 2)",
+   "original_name": "Zone 2",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_2"
@@ -1218,15 +1218,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 20 (Zone 20)"
+    "friendly_name": "Test Panel Zone 20"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_20",
+   "entity_id": "binary_sensor.test_panel_zone_20",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 20 (Zone 20)",
+   "original_name": "Zone 20",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_20"
@@ -1234,15 +1234,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 21 (Zone 21)"
+    "friendly_name": "Test Panel Zone 21"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_21",
+   "entity_id": "binary_sensor.test_panel_zone_21",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 21 (Zone 21)",
+   "original_name": "Zone 21",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_21"
@@ -1250,15 +1250,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 22 (Zone 22)"
+    "friendly_name": "Test Panel Zone 22"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_22",
+   "entity_id": "binary_sensor.test_panel_zone_22",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 22 (Zone 22)",
+   "original_name": "Zone 22",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_22"
@@ -1266,15 +1266,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 23 (Zone 23)"
+    "friendly_name": "Test Panel Zone 23"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_23",
+   "entity_id": "binary_sensor.test_panel_zone_23",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 23 (Zone 23)",
+   "original_name": "Zone 23",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_23"
@@ -1282,15 +1282,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 24 (Zone 24)"
+    "friendly_name": "Test Panel Zone 24"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_24",
+   "entity_id": "binary_sensor.test_panel_zone_24",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 24 (Zone 24)",
+   "original_name": "Zone 24",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_24"
@@ -1298,15 +1298,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 25 (Zone 25)"
+    "friendly_name": "Test Panel Zone 25"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_25",
+   "entity_id": "binary_sensor.test_panel_zone_25",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 25 (Zone 25)",
+   "original_name": "Zone 25",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_25"
@@ -1314,15 +1314,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 26 (Zone 26)"
+    "friendly_name": "Test Panel Zone 26"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_26",
+   "entity_id": "binary_sensor.test_panel_zone_26",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 26 (Zone 26)",
+   "original_name": "Zone 26",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_26"
@@ -1330,15 +1330,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 27 (Zone 27)"
+    "friendly_name": "Test Panel Zone 27"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_27",
+   "entity_id": "binary_sensor.test_panel_zone_27",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 27 (Zone 27)",
+   "original_name": "Zone 27",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_27"
@@ -1346,15 +1346,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 28 (Zone 28)"
+    "friendly_name": "Test Panel Zone 28"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_28",
+   "entity_id": "binary_sensor.test_panel_zone_28",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 28 (Zone 28)",
+   "original_name": "Zone 28",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_28"
@@ -1362,15 +1362,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 29 (Zone 29)"
+    "friendly_name": "Test Panel Zone 29"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_29",
+   "entity_id": "binary_sensor.test_panel_zone_29",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 29 (Zone 29)",
+   "original_name": "Zone 29",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_29"
@@ -1378,15 +1378,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 3 (Zone 3)"
+    "friendly_name": "Test Panel Zone 3"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_3",
+   "entity_id": "binary_sensor.test_panel_zone_3",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 3 (Zone 3)",
+   "original_name": "Zone 3",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_3"
@@ -1394,15 +1394,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 30 (Zone 30)"
+    "friendly_name": "Test Panel Zone 30"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_30",
+   "entity_id": "binary_sensor.test_panel_zone_30",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 30 (Zone 30)",
+   "original_name": "Zone 30",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_30"
@@ -1410,15 +1410,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 31 (Zone 31)"
+    "friendly_name": "Test Panel Zone 31"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_31",
+   "entity_id": "binary_sensor.test_panel_zone_31",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 31 (Zone 31)",
+   "original_name": "Zone 31",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_31"
@@ -1426,15 +1426,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 32 (Zone 32)"
+    "friendly_name": "Test Panel Zone 32"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_32",
+   "entity_id": "binary_sensor.test_panel_zone_32",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 32 (Zone 32)",
+   "original_name": "Zone 32",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_32"
@@ -1442,15 +1442,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 33 (Zone 33)"
+    "friendly_name": "Test Panel Zone 33"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_33",
+   "entity_id": "binary_sensor.test_panel_zone_33",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 33 (Zone 33)",
+   "original_name": "Zone 33",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_33"
@@ -1458,15 +1458,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 34 (Zone 34)"
+    "friendly_name": "Test Panel Zone 34"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_34",
+   "entity_id": "binary_sensor.test_panel_zone_34",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 34 (Zone 34)",
+   "original_name": "Zone 34",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_34"
@@ -1474,15 +1474,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 35 (Zone 35)"
+    "friendly_name": "Test Panel Zone 35"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_35",
+   "entity_id": "binary_sensor.test_panel_zone_35",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 35 (Zone 35)",
+   "original_name": "Zone 35",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_35"
@@ -1490,15 +1490,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 36 (Zone 36)"
+    "friendly_name": "Test Panel Zone 36"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_36",
+   "entity_id": "binary_sensor.test_panel_zone_36",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 36 (Zone 36)",
+   "original_name": "Zone 36",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_36"
@@ -1506,15 +1506,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 37 (Zone 37)"
+    "friendly_name": "Test Panel Zone 37"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_37",
+   "entity_id": "binary_sensor.test_panel_zone_37",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 37 (Zone 37)",
+   "original_name": "Zone 37",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_37"
@@ -1522,15 +1522,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 4 (Zone 4)"
+    "friendly_name": "Test Panel Zone 4"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_4",
+   "entity_id": "binary_sensor.test_panel_zone_4",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 4 (Zone 4)",
+   "original_name": "Zone 4",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_4"
@@ -1538,15 +1538,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 5 (Zone 5)"
+    "friendly_name": "Test Panel Zone 5"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_5",
+   "entity_id": "binary_sensor.test_panel_zone_5",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 5 (Zone 5)",
+   "original_name": "Zone 5",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_5"
@@ -1554,15 +1554,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 6 (Zone 6)"
+    "friendly_name": "Test Panel Zone 6"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_6",
+   "entity_id": "binary_sensor.test_panel_zone_6",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 6 (Zone 6)",
+   "original_name": "Zone 6",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_6"
@@ -1570,15 +1570,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 7 (Zone 7)"
+    "friendly_name": "Test Panel Zone 7"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_7",
+   "entity_id": "binary_sensor.test_panel_zone_7",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 7 (Zone 7)",
+   "original_name": "Zone 7",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_7"
@@ -1586,15 +1586,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 8 (Zone 8)"
+    "friendly_name": "Test Panel Zone 8"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_8",
+   "entity_id": "binary_sensor.test_panel_zone_8",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 8 (Zone 8)",
+   "original_name": "Zone 8",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_8"
@@ -1602,15 +1602,15 @@
   {
    "attributes": {
     "device_class": "opening",
-    "friendly_name": "Test Panel Zone 9 (Zone 9)"
+    "friendly_name": "Test Panel Zone 9"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_9",
+   "entity_id": "binary_sensor.test_panel_zone_9",
    "hidden_by": null,
    "original_device_class": "opening",
    "original_icon": null,
-   "original_name": "Zone 9 (Zone 9)",
+   "original_name": "Zone 9",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_9"
@@ -1618,15 +1618,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 1 Tamper (Zone 1)"
+    "friendly_name": "Test Panel Zone 1 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_1_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_1_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 1 Tamper (Zone 1)",
+   "original_name": "Zone 1 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_1"
@@ -1634,15 +1634,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 10 Tamper (Zone 10)"
+    "friendly_name": "Test Panel Zone 10 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_10_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_10_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 10 Tamper (Zone 10)",
+   "original_name": "Zone 10 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_10"
@@ -1650,15 +1650,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 11 Tamper (Zone 11)"
+    "friendly_name": "Test Panel Zone 11 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_11_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_11_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 11 Tamper (Zone 11)",
+   "original_name": "Zone 11 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_11"
@@ -1666,15 +1666,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 12 Tamper (Zone 12)"
+    "friendly_name": "Test Panel Zone 12 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_12_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_12_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 12 Tamper (Zone 12)",
+   "original_name": "Zone 12 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_12"
@@ -1682,15 +1682,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 13 Tamper (Zone 13)"
+    "friendly_name": "Test Panel Zone 13 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_13_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_13_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 13 Tamper (Zone 13)",
+   "original_name": "Zone 13 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_13"
@@ -1698,15 +1698,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 14 Tamper (Zone 14)"
+    "friendly_name": "Test Panel Zone 14 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_14_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_14_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 14 Tamper (Zone 14)",
+   "original_name": "Zone 14 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_14"
@@ -1714,15 +1714,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 15 Tamper (Zone 15)"
+    "friendly_name": "Test Panel Zone 15 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_15_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_15_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 15 Tamper (Zone 15)",
+   "original_name": "Zone 15 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_15"
@@ -1730,15 +1730,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 16 Tamper (Zone 16)"
+    "friendly_name": "Test Panel Zone 16 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_16_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_16_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 16 Tamper (Zone 16)",
+   "original_name": "Zone 16 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_16"
@@ -1746,15 +1746,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 17 Tamper (Zone 17)"
+    "friendly_name": "Test Panel Zone 17 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_17_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_17_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 17 Tamper (Zone 17)",
+   "original_name": "Zone 17 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_17"
@@ -1762,15 +1762,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 18 Tamper (Zone 18)"
+    "friendly_name": "Test Panel Zone 18 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_18_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_18_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 18 Tamper (Zone 18)",
+   "original_name": "Zone 18 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_18"
@@ -1778,15 +1778,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 19 Tamper (Zone 19)"
+    "friendly_name": "Test Panel Zone 19 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_19_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_19_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 19 Tamper (Zone 19)",
+   "original_name": "Zone 19 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_19"
@@ -1794,15 +1794,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 2 Tamper (Zone 2)"
+    "friendly_name": "Test Panel Zone 2 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_2_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_2_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 2 Tamper (Zone 2)",
+   "original_name": "Zone 2 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_2"
@@ -1810,15 +1810,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 20 Tamper (Zone 20)"
+    "friendly_name": "Test Panel Zone 20 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_20_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_20_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 20 Tamper (Zone 20)",
+   "original_name": "Zone 20 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_20"
@@ -1826,15 +1826,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 21 Tamper (Zone 21)"
+    "friendly_name": "Test Panel Zone 21 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_21_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_21_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 21 Tamper (Zone 21)",
+   "original_name": "Zone 21 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_21"
@@ -1842,15 +1842,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 22 Tamper (Zone 22)"
+    "friendly_name": "Test Panel Zone 22 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_22_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_22_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 22 Tamper (Zone 22)",
+   "original_name": "Zone 22 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_22"
@@ -1858,15 +1858,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 23 Tamper (Zone 23)"
+    "friendly_name": "Test Panel Zone 23 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_23_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_23_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 23 Tamper (Zone 23)",
+   "original_name": "Zone 23 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_23"
@@ -1874,15 +1874,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 24 Tamper (Zone 24)"
+    "friendly_name": "Test Panel Zone 24 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_24_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_24_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 24 Tamper (Zone 24)",
+   "original_name": "Zone 24 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_24"
@@ -1890,15 +1890,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 25 Tamper (Zone 25)"
+    "friendly_name": "Test Panel Zone 25 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_25_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_25_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 25 Tamper (Zone 25)",
+   "original_name": "Zone 25 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_25"
@@ -1906,15 +1906,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 26 Tamper (Zone 26)"
+    "friendly_name": "Test Panel Zone 26 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_26_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_26_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 26 Tamper (Zone 26)",
+   "original_name": "Zone 26 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_26"
@@ -1922,15 +1922,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 27 Tamper (Zone 27)"
+    "friendly_name": "Test Panel Zone 27 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_27_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_27_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 27 Tamper (Zone 27)",
+   "original_name": "Zone 27 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_27"
@@ -1938,15 +1938,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 28 Tamper (Zone 28)"
+    "friendly_name": "Test Panel Zone 28 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_28_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_28_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 28 Tamper (Zone 28)",
+   "original_name": "Zone 28 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_28"
@@ -1954,15 +1954,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 29 Tamper (Zone 29)"
+    "friendly_name": "Test Panel Zone 29 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_29_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_29_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 29 Tamper (Zone 29)",
+   "original_name": "Zone 29 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_29"
@@ -1970,15 +1970,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 3 Tamper (Zone 3)"
+    "friendly_name": "Test Panel Zone 3 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_3_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_3_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 3 Tamper (Zone 3)",
+   "original_name": "Zone 3 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_3"
@@ -1986,15 +1986,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 30 Tamper (Zone 30)"
+    "friendly_name": "Test Panel Zone 30 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_30_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_30_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 30 Tamper (Zone 30)",
+   "original_name": "Zone 30 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_30"
@@ -2002,15 +2002,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 31 Tamper (Zone 31)"
+    "friendly_name": "Test Panel Zone 31 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_31_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_31_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 31 Tamper (Zone 31)",
+   "original_name": "Zone 31 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_31"
@@ -2018,15 +2018,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 32 Tamper (Zone 32)"
+    "friendly_name": "Test Panel Zone 32 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_32_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_32_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 32 Tamper (Zone 32)",
+   "original_name": "Zone 32 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_32"
@@ -2034,15 +2034,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 33 Tamper (Zone 33)"
+    "friendly_name": "Test Panel Zone 33 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_33_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_33_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 33 Tamper (Zone 33)",
+   "original_name": "Zone 33 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_33"
@@ -2050,15 +2050,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 34 Tamper (Zone 34)"
+    "friendly_name": "Test Panel Zone 34 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_34_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_34_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 34 Tamper (Zone 34)",
+   "original_name": "Zone 34 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_34"
@@ -2066,15 +2066,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 35 Tamper (Zone 35)"
+    "friendly_name": "Test Panel Zone 35 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_35_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_35_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 35 Tamper (Zone 35)",
+   "original_name": "Zone 35 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_35"
@@ -2082,15 +2082,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 36 Tamper (Zone 36)"
+    "friendly_name": "Test Panel Zone 36 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_36_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_36_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 36 Tamper (Zone 36)",
+   "original_name": "Zone 36 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_36"
@@ -2098,15 +2098,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 37 Tamper (Zone 37)"
+    "friendly_name": "Test Panel Zone 37 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_37_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_37_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 37 Tamper (Zone 37)",
+   "original_name": "Zone 37 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_37"
@@ -2114,15 +2114,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 4 Tamper (Zone 4)"
+    "friendly_name": "Test Panel Zone 4 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_4_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_4_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 4 Tamper (Zone 4)",
+   "original_name": "Zone 4 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_4"
@@ -2130,15 +2130,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 5 Tamper (Zone 5)"
+    "friendly_name": "Test Panel Zone 5 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_5_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_5_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 5 Tamper (Zone 5)",
+   "original_name": "Zone 5 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_5"
@@ -2146,15 +2146,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 6 Tamper (Zone 6)"
+    "friendly_name": "Test Panel Zone 6 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_6_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_6_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 6 Tamper (Zone 6)",
+   "original_name": "Zone 6 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_6"
@@ -2162,15 +2162,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 7 Tamper (Zone 7)"
+    "friendly_name": "Test Panel Zone 7 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_7_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_7_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 7 Tamper (Zone 7)",
+   "original_name": "Zone 7 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_7"
@@ -2178,15 +2178,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 8 Tamper (Zone 8)"
+    "friendly_name": "Test Panel Zone 8 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_8_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_8_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 8 Tamper (Zone 8)",
+   "original_name": "Zone 8 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_8"
@@ -2194,15 +2194,15 @@
   {
    "attributes": {
     "device_class": "tamper",
-    "friendly_name": "Test Panel Zone 9 Tamper (Zone 9)"
+    "friendly_name": "Test Panel Zone 9 tamper"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_9_tamper",
+   "entity_id": "binary_sensor.test_panel_zone_9_tamper",
    "hidden_by": null,
    "original_device_class": "tamper",
    "original_icon": null,
-   "original_name": "Zone 9 Tamper (Zone 9)",
+   "original_name": "Zone 9 tamper",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_tamper_9"
@@ -2210,15 +2210,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 1 Alarm memory (Zone 1)"
+    "friendly_name": "Test Panel Zone 1 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_1_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_1_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 1 Alarm memory (Zone 1)",
+   "original_name": "Zone 1 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_1"
@@ -2226,15 +2226,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 10 Alarm memory (Zone 10)"
+    "friendly_name": "Test Panel Zone 10 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_10_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_10_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 10 Alarm memory (Zone 10)",
+   "original_name": "Zone 10 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_10"
@@ -2242,15 +2242,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 11 Alarm memory (Zone 11)"
+    "friendly_name": "Test Panel Zone 11 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_11_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_11_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 11 Alarm memory (Zone 11)",
+   "original_name": "Zone 11 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_11"
@@ -2258,15 +2258,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 12 Alarm memory (Zone 12)"
+    "friendly_name": "Test Panel Zone 12 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_12_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_12_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 12 Alarm memory (Zone 12)",
+   "original_name": "Zone 12 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_12"
@@ -2274,15 +2274,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 13 Alarm memory (Zone 13)"
+    "friendly_name": "Test Panel Zone 13 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_13_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_13_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 13 Alarm memory (Zone 13)",
+   "original_name": "Zone 13 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_13"
@@ -2290,15 +2290,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 14 Alarm memory (Zone 14)"
+    "friendly_name": "Test Panel Zone 14 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_14_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_14_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 14 Alarm memory (Zone 14)",
+   "original_name": "Zone 14 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_14"
@@ -2306,15 +2306,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 15 Alarm memory (Zone 15)"
+    "friendly_name": "Test Panel Zone 15 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_15_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_15_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 15 Alarm memory (Zone 15)",
+   "original_name": "Zone 15 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_15"
@@ -2322,15 +2322,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 16 Alarm memory (Zone 16)"
+    "friendly_name": "Test Panel Zone 16 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_16_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_16_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 16 Alarm memory (Zone 16)",
+   "original_name": "Zone 16 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_16"
@@ -2338,15 +2338,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 17 Alarm memory (Zone 17)"
+    "friendly_name": "Test Panel Zone 17 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_17_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_17_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 17 Alarm memory (Zone 17)",
+   "original_name": "Zone 17 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_17"
@@ -2354,15 +2354,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 18 Alarm memory (Zone 18)"
+    "friendly_name": "Test Panel Zone 18 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_18_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_18_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 18 Alarm memory (Zone 18)",
+   "original_name": "Zone 18 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_18"
@@ -2370,15 +2370,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 19 Alarm memory (Zone 19)"
+    "friendly_name": "Test Panel Zone 19 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_19_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_19_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 19 Alarm memory (Zone 19)",
+   "original_name": "Zone 19 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_19"
@@ -2386,15 +2386,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 2 Alarm memory (Zone 2)"
+    "friendly_name": "Test Panel Zone 2 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_2_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_2_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 2 Alarm memory (Zone 2)",
+   "original_name": "Zone 2 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_2"
@@ -2402,15 +2402,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 20 Alarm memory (Zone 20)"
+    "friendly_name": "Test Panel Zone 20 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_20_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_20_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 20 Alarm memory (Zone 20)",
+   "original_name": "Zone 20 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_20"
@@ -2418,15 +2418,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 21 Alarm memory (Zone 21)"
+    "friendly_name": "Test Panel Zone 21 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_21_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_21_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 21 Alarm memory (Zone 21)",
+   "original_name": "Zone 21 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_21"
@@ -2434,15 +2434,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 22 Alarm memory (Zone 22)"
+    "friendly_name": "Test Panel Zone 22 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_22_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_22_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 22 Alarm memory (Zone 22)",
+   "original_name": "Zone 22 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_22"
@@ -2450,15 +2450,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 23 Alarm memory (Zone 23)"
+    "friendly_name": "Test Panel Zone 23 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_23_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_23_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 23 Alarm memory (Zone 23)",
+   "original_name": "Zone 23 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_23"
@@ -2466,15 +2466,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 24 Alarm memory (Zone 24)"
+    "friendly_name": "Test Panel Zone 24 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_24_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_24_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 24 Alarm memory (Zone 24)",
+   "original_name": "Zone 24 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_24"
@@ -2482,15 +2482,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 25 Alarm memory (Zone 25)"
+    "friendly_name": "Test Panel Zone 25 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_25_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_25_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 25 Alarm memory (Zone 25)",
+   "original_name": "Zone 25 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_25"
@@ -2498,15 +2498,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 26 Alarm memory (Zone 26)"
+    "friendly_name": "Test Panel Zone 26 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_26_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_26_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 26 Alarm memory (Zone 26)",
+   "original_name": "Zone 26 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_26"
@@ -2514,15 +2514,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 27 Alarm memory (Zone 27)"
+    "friendly_name": "Test Panel Zone 27 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_27_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_27_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 27 Alarm memory (Zone 27)",
+   "original_name": "Zone 27 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_27"
@@ -2530,15 +2530,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 28 Alarm memory (Zone 28)"
+    "friendly_name": "Test Panel Zone 28 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_28_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_28_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 28 Alarm memory (Zone 28)",
+   "original_name": "Zone 28 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_28"
@@ -2546,15 +2546,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 29 Alarm memory (Zone 29)"
+    "friendly_name": "Test Panel Zone 29 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_29_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_29_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 29 Alarm memory (Zone 29)",
+   "original_name": "Zone 29 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_29"
@@ -2562,15 +2562,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 3 Alarm memory (Zone 3)"
+    "friendly_name": "Test Panel Zone 3 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_3_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_3_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 3 Alarm memory (Zone 3)",
+   "original_name": "Zone 3 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_3"
@@ -2578,15 +2578,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 30 Alarm memory (Zone 30)"
+    "friendly_name": "Test Panel Zone 30 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_30_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_30_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 30 Alarm memory (Zone 30)",
+   "original_name": "Zone 30 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_30"
@@ -2594,15 +2594,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 31 Alarm memory (Zone 31)"
+    "friendly_name": "Test Panel Zone 31 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_31_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_31_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 31 Alarm memory (Zone 31)",
+   "original_name": "Zone 31 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_31"
@@ -2610,15 +2610,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 32 Alarm memory (Zone 32)"
+    "friendly_name": "Test Panel Zone 32 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_32_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_32_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 32 Alarm memory (Zone 32)",
+   "original_name": "Zone 32 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_32"
@@ -2626,15 +2626,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 33 Alarm memory (Zone 33)"
+    "friendly_name": "Test Panel Zone 33 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_33_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_33_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 33 Alarm memory (Zone 33)",
+   "original_name": "Zone 33 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_33"
@@ -2642,15 +2642,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 34 Alarm memory (Zone 34)"
+    "friendly_name": "Test Panel Zone 34 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_34_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_34_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 34 Alarm memory (Zone 34)",
+   "original_name": "Zone 34 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_34"
@@ -2658,15 +2658,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 35 Alarm memory (Zone 35)"
+    "friendly_name": "Test Panel Zone 35 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_35_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_35_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 35 Alarm memory (Zone 35)",
+   "original_name": "Zone 35 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_35"
@@ -2674,15 +2674,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 36 Alarm memory (Zone 36)"
+    "friendly_name": "Test Panel Zone 36 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_36_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_36_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 36 Alarm memory (Zone 36)",
+   "original_name": "Zone 36 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_36"
@@ -2690,15 +2690,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 37 Alarm memory (Zone 37)"
+    "friendly_name": "Test Panel Zone 37 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_37_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_37_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 37 Alarm memory (Zone 37)",
+   "original_name": "Zone 37 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_37"
@@ -2706,15 +2706,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 4 Alarm memory (Zone 4)"
+    "friendly_name": "Test Panel Zone 4 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_4_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_4_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 4 Alarm memory (Zone 4)",
+   "original_name": "Zone 4 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_4"
@@ -2722,15 +2722,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 5 Alarm memory (Zone 5)"
+    "friendly_name": "Test Panel Zone 5 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_5_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_5_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 5 Alarm memory (Zone 5)",
+   "original_name": "Zone 5 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_5"
@@ -2738,15 +2738,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 6 Alarm memory (Zone 6)"
+    "friendly_name": "Test Panel Zone 6 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_6_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_6_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 6 Alarm memory (Zone 6)",
+   "original_name": "Zone 6 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_6"
@@ -2754,15 +2754,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 7 Alarm memory (Zone 7)"
+    "friendly_name": "Test Panel Zone 7 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_7_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_7_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 7 Alarm memory (Zone 7)",
+   "original_name": "Zone 7 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_7"
@@ -2770,15 +2770,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 8 Alarm memory (Zone 8)"
+    "friendly_name": "Test Panel Zone 8 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_8_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_8_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 8 Alarm memory (Zone 8)",
+   "original_name": "Zone 8 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_8"
@@ -2786,15 +2786,15 @@
   {
    "attributes": {
     "device_class": "problem",
-    "friendly_name": "Test Panel Zone 9 Alarm memory (Zone 9)"
+    "friendly_name": "Test Panel Zone 9 alarm memory"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "binary_sensor.test_panel_test_panel_zone_9_triggered",
+   "entity_id": "binary_sensor.test_panel_zone_9_triggered",
    "hidden_by": null,
    "original_device_class": "problem",
    "original_icon": null,
-   "original_name": "Zone 9 Alarm memory (Zone 9)",
+   "original_name": "Zone 9 alarm memory",
    "platform": "binary_sensor",
    "state": "unavailable",
    "unique_id": "_zone_triggered_9"
@@ -2806,7 +2806,7 @@
    },
    "disabled_by": null,
    "entity_category": "config",
-   "entity_id": "button.test_panel_test_panel_reread_panel_configuration",
+   "entity_id": "button.test_panel_reread_panel_configuration",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:database-refresh",
@@ -2829,18 +2829,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 1'",
+    "friendly_name": "Test Panel Activate scenario 1",
     "icon": "mdi:play-box",
     "scenario_index": 0,
     "scenario_name": "Scenario 1"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_0",
+   "entity_id": "button.test_panel_scenario_0",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 1'",
+   "original_name": "Activate scenario 1",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_0"
@@ -2859,18 +2859,18 @@
      "8": "disarm",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 2'",
+    "friendly_name": "Test Panel Activate scenario 2",
     "icon": "mdi:play-box",
     "scenario_index": 1,
     "scenario_name": "Scenario 2"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_1",
+   "entity_id": "button.test_panel_scenario_1",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 2'",
+   "original_name": "Activate scenario 2",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_1"
@@ -2889,18 +2889,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 11'",
+    "friendly_name": "Test Panel Activate scenario 11",
     "icon": "mdi:play-box",
     "scenario_index": 10,
     "scenario_name": "Scenario 11"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_10",
+   "entity_id": "button.test_panel_scenario_10",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 11'",
+   "original_name": "Activate scenario 11",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_10"
@@ -2919,18 +2919,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 12'",
+    "friendly_name": "Test Panel Activate scenario 12",
     "icon": "mdi:play-box",
     "scenario_index": 11,
     "scenario_name": "Scenario 12"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_11",
+   "entity_id": "button.test_panel_scenario_11",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 12'",
+   "original_name": "Activate scenario 12",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_11"
@@ -2949,18 +2949,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 13'",
+    "friendly_name": "Test Panel Activate scenario 13",
     "icon": "mdi:play-box",
     "scenario_index": 12,
     "scenario_name": "Scenario 13"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_12",
+   "entity_id": "button.test_panel_scenario_12",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 13'",
+   "original_name": "Activate scenario 13",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_12"
@@ -2979,18 +2979,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 14'",
+    "friendly_name": "Test Panel Activate scenario 14",
     "icon": "mdi:play-box",
     "scenario_index": 13,
     "scenario_name": "Scenario 14"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_13",
+   "entity_id": "button.test_panel_scenario_13",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 14'",
+   "original_name": "Activate scenario 14",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_13"
@@ -3009,18 +3009,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 15'",
+    "friendly_name": "Test Panel Activate scenario 15",
     "icon": "mdi:play-box",
     "scenario_index": 14,
     "scenario_name": "Scenario 15"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_14",
+   "entity_id": "button.test_panel_scenario_14",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 15'",
+   "original_name": "Activate scenario 15",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_14"
@@ -3039,18 +3039,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 16'",
+    "friendly_name": "Test Panel Activate scenario 16",
     "icon": "mdi:play-box",
     "scenario_index": 15,
     "scenario_name": "Scenario 16"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_15",
+   "entity_id": "button.test_panel_scenario_15",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 16'",
+   "original_name": "Activate scenario 16",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_15"
@@ -3069,18 +3069,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 17'",
+    "friendly_name": "Test Panel Activate scenario 17",
     "icon": "mdi:play-box",
     "scenario_index": 16,
     "scenario_name": "Scenario 17"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_16",
+   "entity_id": "button.test_panel_scenario_16",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 17'",
+   "original_name": "Activate scenario 17",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_16"
@@ -3099,18 +3099,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 18'",
+    "friendly_name": "Test Panel Activate scenario 18",
     "icon": "mdi:play-box",
     "scenario_index": 17,
     "scenario_name": "Scenario 18"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_17",
+   "entity_id": "button.test_panel_scenario_17",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 18'",
+   "original_name": "Activate scenario 18",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_17"
@@ -3129,18 +3129,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 19'",
+    "friendly_name": "Test Panel Activate scenario 19",
     "icon": "mdi:play-box",
     "scenario_index": 18,
     "scenario_name": "Scenario 19"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_18",
+   "entity_id": "button.test_panel_scenario_18",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 19'",
+   "original_name": "Activate scenario 19",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_18"
@@ -3159,18 +3159,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 20'",
+    "friendly_name": "Test Panel Activate scenario 20",
     "icon": "mdi:play-box",
     "scenario_index": 19,
     "scenario_name": "Scenario 20"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_19",
+   "entity_id": "button.test_panel_scenario_19",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 20'",
+   "original_name": "Activate scenario 20",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_19"
@@ -3189,18 +3189,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 3'",
+    "friendly_name": "Test Panel Activate scenario 3",
     "icon": "mdi:play-box",
     "scenario_index": 2,
     "scenario_name": "Scenario 3"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_2",
+   "entity_id": "button.test_panel_scenario_2",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 3'",
+   "original_name": "Activate scenario 3",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_2"
@@ -3219,18 +3219,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 21'",
+    "friendly_name": "Test Panel Activate scenario 21",
     "icon": "mdi:play-box",
     "scenario_index": 20,
     "scenario_name": "Scenario 21"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_20",
+   "entity_id": "button.test_panel_scenario_20",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 21'",
+   "original_name": "Activate scenario 21",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_20"
@@ -3249,18 +3249,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 22'",
+    "friendly_name": "Test Panel Activate scenario 22",
     "icon": "mdi:play-box",
     "scenario_index": 21,
     "scenario_name": "Scenario 22"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_21",
+   "entity_id": "button.test_panel_scenario_21",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 22'",
+   "original_name": "Activate scenario 22",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_21"
@@ -3279,18 +3279,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 23'",
+    "friendly_name": "Test Panel Activate scenario 23",
     "icon": "mdi:play-box",
     "scenario_index": 22,
     "scenario_name": "Scenario 23"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_22",
+   "entity_id": "button.test_panel_scenario_22",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 23'",
+   "original_name": "Activate scenario 23",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_22"
@@ -3309,18 +3309,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 24'",
+    "friendly_name": "Test Panel Activate scenario 24",
     "icon": "mdi:play-box",
     "scenario_index": 23,
     "scenario_name": "Scenario 24"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_23",
+   "entity_id": "button.test_panel_scenario_23",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 24'",
+   "original_name": "Activate scenario 24",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_23"
@@ -3339,18 +3339,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 25'",
+    "friendly_name": "Test Panel Activate scenario 25",
     "icon": "mdi:play-box",
     "scenario_index": 24,
     "scenario_name": "Scenario 25"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_24",
+   "entity_id": "button.test_panel_scenario_24",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 25'",
+   "original_name": "Activate scenario 25",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_24"
@@ -3369,18 +3369,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 26'",
+    "friendly_name": "Test Panel Activate scenario 26",
     "icon": "mdi:play-box",
     "scenario_index": 25,
     "scenario_name": "Scenario 26"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_25",
+   "entity_id": "button.test_panel_scenario_25",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 26'",
+   "original_name": "Activate scenario 26",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_25"
@@ -3399,18 +3399,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 27'",
+    "friendly_name": "Test Panel Activate scenario 27",
     "icon": "mdi:play-box",
     "scenario_index": 26,
     "scenario_name": "Scenario 27"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_26",
+   "entity_id": "button.test_panel_scenario_26",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 27'",
+   "original_name": "Activate scenario 27",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_26"
@@ -3429,18 +3429,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 28'",
+    "friendly_name": "Test Panel Activate scenario 28",
     "icon": "mdi:play-box",
     "scenario_index": 27,
     "scenario_name": "Scenario 28"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_27",
+   "entity_id": "button.test_panel_scenario_27",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 28'",
+   "original_name": "Activate scenario 28",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_27"
@@ -3459,18 +3459,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 29'",
+    "friendly_name": "Test Panel Activate scenario 29",
     "icon": "mdi:play-box",
     "scenario_index": 28,
     "scenario_name": "Scenario 29"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_28",
+   "entity_id": "button.test_panel_scenario_28",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 29'",
+   "original_name": "Activate scenario 29",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_28"
@@ -3489,18 +3489,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 30'",
+    "friendly_name": "Test Panel Activate scenario 30",
     "icon": "mdi:play-box",
     "scenario_index": 29,
     "scenario_name": "Scenario 30"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_29",
+   "entity_id": "button.test_panel_scenario_29",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 30'",
+   "original_name": "Activate scenario 30",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_29"
@@ -3519,18 +3519,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 4'",
+    "friendly_name": "Test Panel Activate scenario 4",
     "icon": "mdi:play-box",
     "scenario_index": 3,
     "scenario_name": "Scenario 4"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_3",
+   "entity_id": "button.test_panel_scenario_3",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 4'",
+   "original_name": "Activate scenario 4",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_3"
@@ -3549,18 +3549,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 5'",
+    "friendly_name": "Test Panel Activate scenario 5",
     "icon": "mdi:play-box",
     "scenario_index": 4,
     "scenario_name": "Scenario 5"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_4",
+   "entity_id": "button.test_panel_scenario_4",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 5'",
+   "original_name": "Activate scenario 5",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_4"
@@ -3579,18 +3579,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 6'",
+    "friendly_name": "Test Panel Activate scenario 6",
     "icon": "mdi:play-box",
     "scenario_index": 5,
     "scenario_name": "Scenario 6"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_5",
+   "entity_id": "button.test_panel_scenario_5",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 6'",
+   "original_name": "Activate scenario 6",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_5"
@@ -3609,18 +3609,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 7'",
+    "friendly_name": "Test Panel Activate scenario 7",
     "icon": "mdi:play-box",
     "scenario_index": 6,
     "scenario_name": "Scenario 7"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_6",
+   "entity_id": "button.test_panel_scenario_6",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 7'",
+   "original_name": "Activate scenario 7",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_6"
@@ -3639,18 +3639,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 8'",
+    "friendly_name": "Test Panel Activate scenario 8",
     "icon": "mdi:play-box",
     "scenario_index": 7,
     "scenario_name": "Scenario 8"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_7",
+   "entity_id": "button.test_panel_scenario_7",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 8'",
+   "original_name": "Activate scenario 8",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_7"
@@ -3669,18 +3669,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 9'",
+    "friendly_name": "Test Panel Activate scenario 9",
     "icon": "mdi:play-box",
     "scenario_index": 8,
     "scenario_name": "Scenario 9"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_8",
+   "entity_id": "button.test_panel_scenario_8",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 9'",
+   "original_name": "Activate scenario 9",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_8"
@@ -3699,18 +3699,18 @@
      "8": "keep",
      "9": "keep"
     },
-    "friendly_name": "Test Panel Activate 'Scenario 10'",
+    "friendly_name": "Test Panel Activate scenario 10",
     "icon": "mdi:play-box",
     "scenario_index": 9,
     "scenario_name": "Scenario 10"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "button.test_panel_test_panel_scenario_9",
+   "entity_id": "button.test_panel_scenario_9",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:play-box",
-   "original_name": "Activate 'Scenario 10'",
+   "original_name": "Activate scenario 10",
    "platform": "button",
    "state": "unknown",
    "unique_id": "_scenario_button_9"
@@ -3950,16 +3950,16 @@
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Active Scenario Name",
+    "friendly_name": "Test Panel Active scenario",
     "icon": "mdi:list-status"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "sensor.test_panel_test_panel_active_scenario",
+   "entity_id": "sensor.test_panel_active_scenario",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:list-status",
-   "original_name": "Active Scenario Name",
+   "original_name": "Active scenario",
    "platform": "sensor",
    "state": "unavailable",
    "unique_id": "_active_scenario_name"
@@ -4005,34 +4005,34 @@
     ],
     "event_log_count_current": 5,
     "event_log_size_configured": 5,
-    "friendly_name": "Test Panel Event Log",
+    "friendly_name": "Test Panel Event log",
     "icon": "mdi:format-list-bulleted-type",
     "latest_event_description": "End of Zone Excluded",
     "latest_event_timestamp": "2025-06-15T12:09:32+02:00"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "sensor.test_panel_test_panel_event_log",
+   "entity_id": "sensor.test_panel_event_log",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:format-list-bulleted-type",
-   "original_name": "Test Panel Event Log",
+   "original_name": "Event log",
    "platform": "sensor",
    "state": "467",
    "unique_id": "_event_log"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Firmware Version",
+    "friendly_name": "Test Panel Firmware version",
     "icon": "mdi:chip"
    },
    "disabled_by": null,
-   "entity_category": null,
-   "entity_id": "sensor.test_panel_test_panel_firmware_version",
+   "entity_category": "diagnostic",
+   "entity_id": "sensor.test_panel_firmware_version",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:chip",
-   "original_name": "Firmware Version",
+   "original_name": "Firmware version",
    "platform": "sensor",
    "state": "6.07",
    "unique_id": "_firmware_version"
@@ -4070,16 +4070,16 @@
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel System Type",
+    "friendly_name": "Test Panel System type",
     "icon": "mdi:information-outline"
    },
    "disabled_by": null,
-   "entity_category": null,
-   "entity_id": "sensor.test_panel_test_panel_system_type",
+   "entity_category": "diagnostic",
+   "entity_id": "sensor.test_panel_system_type",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:information-outline",
-   "original_name": "System Type",
+   "original_name": "System type",
    "platform": "sensor",
    "state": "01050",
    "unique_id": "_system_type"
@@ -4116,752 +4116,752 @@
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 1 (Area 1)",
+    "friendly_name": "Test Panel Area 1",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_1",
+   "entity_id": "switch.test_panel_area_1",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 1 (Area 1)",
+   "original_name": "Area 1",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_1"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 10 (Area 10)",
+    "friendly_name": "Test Panel Area 10",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_10",
+   "entity_id": "switch.test_panel_area_10",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 10 (Area 10)",
+   "original_name": "Area 10",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_10"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 2 (Area 2)",
+    "friendly_name": "Test Panel Area 2",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_2",
+   "entity_id": "switch.test_panel_area_2",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 2 (Area 2)",
+   "original_name": "Area 2",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_2"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 3 (Area 3)",
+    "friendly_name": "Test Panel Area 3",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_3",
+   "entity_id": "switch.test_panel_area_3",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 3 (Area 3)",
+   "original_name": "Area 3",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_3"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 4 (Area 4)",
+    "friendly_name": "Test Panel Area 4",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_4",
+   "entity_id": "switch.test_panel_area_4",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 4 (Area 4)",
+   "original_name": "Area 4",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_4"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 5 (Area 5)",
+    "friendly_name": "Test Panel Area 5",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_5",
+   "entity_id": "switch.test_panel_area_5",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 5 (Area 5)",
+   "original_name": "Area 5",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_5"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 6 (Area 6)",
+    "friendly_name": "Test Panel Area 6",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_6",
+   "entity_id": "switch.test_panel_area_6",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 6 (Area 6)",
+   "original_name": "Area 6",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_6"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 7 (Area 7)",
+    "friendly_name": "Test Panel Area 7",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_7",
+   "entity_id": "switch.test_panel_area_7",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 7 (Area 7)",
+   "original_name": "Area 7",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_7"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 8 (Area 8)",
+    "friendly_name": "Test Panel Area 8",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_8",
+   "entity_id": "switch.test_panel_area_8",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 8 (Area 8)",
+   "original_name": "Area 8",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_8"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Area 9 (Area 9)",
+    "friendly_name": "Test Panel Area 9",
     "icon": "mdi:shield-off-outline"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_area_9",
+   "entity_id": "switch.test_panel_area_9",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-off-outline",
-   "original_name": "Test Panel Area 9 (Area 9)",
+   "original_name": "Area 9",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_area_switch_9"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 1 Enabled (Zone 1)",
+    "friendly_name": "Test Panel Zone 1 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_1",
+   "entity_id": "switch.test_panel_zone_1",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 1 Enabled (Zone 1)",
+   "original_name": "Zone 1 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_1"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 10 Enabled (Zone 10)",
+    "friendly_name": "Test Panel Zone 10 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_10",
+   "entity_id": "switch.test_panel_zone_10",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 10 Enabled (Zone 10)",
+   "original_name": "Zone 10 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_10"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 11 Enabled (Zone 11)",
+    "friendly_name": "Test Panel Zone 11 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_11",
+   "entity_id": "switch.test_panel_zone_11",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 11 Enabled (Zone 11)",
+   "original_name": "Zone 11 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_11"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 12 Enabled (Zone 12)",
+    "friendly_name": "Test Panel Zone 12 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_12",
+   "entity_id": "switch.test_panel_zone_12",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 12 Enabled (Zone 12)",
+   "original_name": "Zone 12 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_12"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 13 Enabled (Zone 13)",
+    "friendly_name": "Test Panel Zone 13 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_13",
+   "entity_id": "switch.test_panel_zone_13",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 13 Enabled (Zone 13)",
+   "original_name": "Zone 13 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_13"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 14 Enabled (Zone 14)",
+    "friendly_name": "Test Panel Zone 14 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_14",
+   "entity_id": "switch.test_panel_zone_14",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 14 Enabled (Zone 14)",
+   "original_name": "Zone 14 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_14"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 15 Enabled (Zone 15)",
+    "friendly_name": "Test Panel Zone 15 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_15",
+   "entity_id": "switch.test_panel_zone_15",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 15 Enabled (Zone 15)",
+   "original_name": "Zone 15 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_15"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 16 Enabled (Zone 16)",
+    "friendly_name": "Test Panel Zone 16 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_16",
+   "entity_id": "switch.test_panel_zone_16",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 16 Enabled (Zone 16)",
+   "original_name": "Zone 16 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_16"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 17 Enabled (Zone 17)",
+    "friendly_name": "Test Panel Zone 17 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_17",
+   "entity_id": "switch.test_panel_zone_17",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 17 Enabled (Zone 17)",
+   "original_name": "Zone 17 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_17"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 18 Enabled (Zone 18)",
+    "friendly_name": "Test Panel Zone 18 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_18",
+   "entity_id": "switch.test_panel_zone_18",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 18 Enabled (Zone 18)",
+   "original_name": "Zone 18 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_18"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 19 Enabled (Zone 19)",
+    "friendly_name": "Test Panel Zone 19 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_19",
+   "entity_id": "switch.test_panel_zone_19",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 19 Enabled (Zone 19)",
+   "original_name": "Zone 19 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_19"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 2 Enabled (Zone 2)",
+    "friendly_name": "Test Panel Zone 2 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_2",
+   "entity_id": "switch.test_panel_zone_2",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 2 Enabled (Zone 2)",
+   "original_name": "Zone 2 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_2"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 20 Enabled (Zone 20)",
+    "friendly_name": "Test Panel Zone 20 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_20",
+   "entity_id": "switch.test_panel_zone_20",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 20 Enabled (Zone 20)",
+   "original_name": "Zone 20 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_20"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 21 Enabled (Zone 21)",
+    "friendly_name": "Test Panel Zone 21 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_21",
+   "entity_id": "switch.test_panel_zone_21",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 21 Enabled (Zone 21)",
+   "original_name": "Zone 21 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_21"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 22 Enabled (Zone 22)",
+    "friendly_name": "Test Panel Zone 22 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_22",
+   "entity_id": "switch.test_panel_zone_22",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 22 Enabled (Zone 22)",
+   "original_name": "Zone 22 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_22"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 23 Enabled (Zone 23)",
+    "friendly_name": "Test Panel Zone 23 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_23",
+   "entity_id": "switch.test_panel_zone_23",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 23 Enabled (Zone 23)",
+   "original_name": "Zone 23 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_23"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 24 Enabled (Zone 24)",
+    "friendly_name": "Test Panel Zone 24 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_24",
+   "entity_id": "switch.test_panel_zone_24",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 24 Enabled (Zone 24)",
+   "original_name": "Zone 24 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_24"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 25 Enabled (Zone 25)",
+    "friendly_name": "Test Panel Zone 25 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_25",
+   "entity_id": "switch.test_panel_zone_25",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 25 Enabled (Zone 25)",
+   "original_name": "Zone 25 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_25"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 26 Enabled (Zone 26)",
+    "friendly_name": "Test Panel Zone 26 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_26",
+   "entity_id": "switch.test_panel_zone_26",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 26 Enabled (Zone 26)",
+   "original_name": "Zone 26 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_26"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 27 Enabled (Zone 27)",
+    "friendly_name": "Test Panel Zone 27 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_27",
+   "entity_id": "switch.test_panel_zone_27",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 27 Enabled (Zone 27)",
+   "original_name": "Zone 27 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_27"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 28 Enabled (Zone 28)",
+    "friendly_name": "Test Panel Zone 28 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_28",
+   "entity_id": "switch.test_panel_zone_28",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 28 Enabled (Zone 28)",
+   "original_name": "Zone 28 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_28"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 29 Enabled (Zone 29)",
+    "friendly_name": "Test Panel Zone 29 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_29",
+   "entity_id": "switch.test_panel_zone_29",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 29 Enabled (Zone 29)",
+   "original_name": "Zone 29 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_29"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 3 Enabled (Zone 3)",
+    "friendly_name": "Test Panel Zone 3 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_3",
+   "entity_id": "switch.test_panel_zone_3",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 3 Enabled (Zone 3)",
+   "original_name": "Zone 3 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_3"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 30 Enabled (Zone 30)",
+    "friendly_name": "Test Panel Zone 30 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_30",
+   "entity_id": "switch.test_panel_zone_30",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 30 Enabled (Zone 30)",
+   "original_name": "Zone 30 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_30"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 31 Enabled (Zone 31)",
+    "friendly_name": "Test Panel Zone 31 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_31",
+   "entity_id": "switch.test_panel_zone_31",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 31 Enabled (Zone 31)",
+   "original_name": "Zone 31 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_31"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 32 Enabled (Zone 32)",
+    "friendly_name": "Test Panel Zone 32 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_32",
+   "entity_id": "switch.test_panel_zone_32",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 32 Enabled (Zone 32)",
+   "original_name": "Zone 32 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_32"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 33 Enabled (Zone 33)",
+    "friendly_name": "Test Panel Zone 33 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_33",
+   "entity_id": "switch.test_panel_zone_33",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 33 Enabled (Zone 33)",
+   "original_name": "Zone 33 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_33"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 34 Enabled (Zone 34)",
+    "friendly_name": "Test Panel Zone 34 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_34",
+   "entity_id": "switch.test_panel_zone_34",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 34 Enabled (Zone 34)",
+   "original_name": "Zone 34 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_34"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 35 Enabled (Zone 35)",
+    "friendly_name": "Test Panel Zone 35 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_35",
+   "entity_id": "switch.test_panel_zone_35",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 35 Enabled (Zone 35)",
+   "original_name": "Zone 35 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_35"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 36 Enabled (Zone 36)",
+    "friendly_name": "Test Panel Zone 36 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_36",
+   "entity_id": "switch.test_panel_zone_36",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 36 Enabled (Zone 36)",
+   "original_name": "Zone 36 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_36"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 37 Enabled (Zone 37)",
+    "friendly_name": "Test Panel Zone 37 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_37",
+   "entity_id": "switch.test_panel_zone_37",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 37 Enabled (Zone 37)",
+   "original_name": "Zone 37 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_37"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 4 Enabled (Zone 4)",
+    "friendly_name": "Test Panel Zone 4 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_4",
+   "entity_id": "switch.test_panel_zone_4",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 4 Enabled (Zone 4)",
+   "original_name": "Zone 4 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_4"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 5 Enabled (Zone 5)",
+    "friendly_name": "Test Panel Zone 5 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_5",
+   "entity_id": "switch.test_panel_zone_5",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 5 Enabled (Zone 5)",
+   "original_name": "Zone 5 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_5"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 6 Enabled (Zone 6)",
+    "friendly_name": "Test Panel Zone 6 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_6",
+   "entity_id": "switch.test_panel_zone_6",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 6 Enabled (Zone 6)",
+   "original_name": "Zone 6 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_6"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 7 Enabled (Zone 7)",
+    "friendly_name": "Test Panel Zone 7 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_7",
+   "entity_id": "switch.test_panel_zone_7",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 7 Enabled (Zone 7)",
+   "original_name": "Zone 7 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_7"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 8 Enabled (Zone 8)",
+    "friendly_name": "Test Panel Zone 8 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_8",
+   "entity_id": "switch.test_panel_zone_8",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 8 Enabled (Zone 8)",
+   "original_name": "Zone 8 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_8"
   },
   {
    "attributes": {
-    "friendly_name": "Test Panel Zone 9 Enabled (Zone 9)",
+    "friendly_name": "Test Panel Zone 9 included",
     "icon": "mdi:shield-check"
    },
    "disabled_by": null,
    "entity_category": null,
-   "entity_id": "switch.test_panel_test_panel_zone_9",
+   "entity_id": "switch.test_panel_zone_9",
    "hidden_by": null,
    "original_device_class": null,
    "original_icon": "mdi:shield-check",
-   "original_name": "Test Panel Zone 9 Enabled (Zone 9)",
+   "original_name": "Zone 9 included",
    "platform": "switch",
    "state": "unavailable",
    "unique_id": "_zone_enabled_switch_9"

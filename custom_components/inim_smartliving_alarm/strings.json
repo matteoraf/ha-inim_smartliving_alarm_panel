@@ -418,6 +418,48 @@
     },
     "entity": {
       "binary_sensor": {
+        "zone": {
+          "name": "Zone {number} ({label})"
+        },
+        "zone_unnamed": {
+          "name": "Zone {number}"
+        },
+        "zone_alarm_memory": {
+          "name": "Zone {number} alarm memory ({label})"
+        },
+        "zone_alarm_memory_unnamed": {
+          "name": "Zone {number} alarm memory"
+        },
+        "zone_tamper": {
+          "name": "Zone {number} tamper ({label})"
+        },
+        "zone_tamper_unnamed": {
+          "name": "Zone {number} tamper"
+        },
+        "area_alarm": {
+          "name": "Area {number} alarm ({label})"
+        },
+        "area_alarm_unnamed": {
+          "name": "Area {number} alarm"
+        },
+        "area_tamper": {
+          "name": "Area {number} tamper ({label})"
+        },
+        "area_tamper_unnamed": {
+          "name": "Area {number} tamper"
+        },
+        "area_alarm_memory": {
+          "name": "Area {number} alarm memory ({label})"
+        },
+        "area_alarm_memory_unnamed": {
+          "name": "Area {number} alarm memory"
+        },
+        "scenario_active": {
+          "name": "Scenario {number} active ({label})"
+        },
+        "scenario_active_unnamed": {
+          "name": "Scenario {number} active"
+        },
         "programming_mode": {
           "name": "Programming mode"
         },
@@ -425,9 +467,29 @@
           "name": "Refuses arming with zones not ready"
         }
       },
+      "button": {
+        "scenario_activate": {
+          "name": "Activate scenario {number} ({label})"
+        },
+        "scenario_activate_unnamed": {
+          "name": "Activate scenario {number}"
+        },
+        "reread_panel_configuration": {
+          "name": "Re-read panel configuration"
+        }
+      },
       "select": {
         "area_arming_mode": {
-          "name": "Area {area} arming mode",
+          "name": "Area {number} arming mode ({label})",
+          "state": {
+            "disarmed": "Disarmed",
+            "armed_total": "Armed total",
+            "armed_partial": "Armed partial",
+            "armed_instant": "Armed instant"
+          }
+        },
+        "area_arming_mode_unnamed": {
+          "name": "Area {number} arming mode",
           "state": {
             "disarmed": "Disarmed",
             "armed_total": "Armed total",
@@ -445,6 +507,18 @@
         }
       },
       "sensor": {
+        "event_log": {
+          "name": "Event log"
+        },
+        "active_scenario": {
+          "name": "Active scenario"
+        },
+        "firmware_version": {
+          "name": "Firmware version"
+        },
+        "system_type": {
+          "name": "System type"
+        },
         "peripherals": {
           "name": "Peripherals"
         },
@@ -453,6 +527,18 @@
         }
       },
       "switch": {
+        "area": {
+          "name": "Area {number} ({label})"
+        },
+        "area_unnamed": {
+          "name": "Area {number}"
+        },
+        "zone_included": {
+          "name": "Zone {number} included ({label})"
+        },
+        "zone_included_unnamed": {
+          "name": "Zone {number} included"
+        },
         "terminal_output": {
           "name": "Output {number}"
         },

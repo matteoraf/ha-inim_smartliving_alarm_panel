@@ -27,7 +27,7 @@ from .const import (
     DEFAULT_PANEL_NAME,
     DOMAIN,
 )
-from .entity import InimCoordinatorEntity, panel_device_info
+from .entity import InimCoordinatorEntity, name_item, panel_device_info
 from .errors import async_send_command
 from .outputs import InimOutputEntity
 from .protocol.commands import ArmMode
@@ -161,7 +161,7 @@ class InimAreaSwitch(InimCoordinatorEntity, SwitchEntity):
         self._area_id_1_based = area_id_1_based
         self._area_name = area_name
 
-        self._attr_name = f"{self._panel_display_name} Area {self._area_id_1_based} ({self._area_name})"
+        name_item(self, "area", "Area", self._area_id_1_based, area_name)
         self._attr_unique_id = (
             f"{config_entry.entry_id}_area_switch_{self._area_id_1_based}"
         )
@@ -171,7 +171,7 @@ class InimAreaSwitch(InimCoordinatorEntity, SwitchEntity):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_area_{self._area_id_1_based}"
+        return f"area_{self._area_id_1_based}"
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -267,7 +267,7 @@ class InimZoneEnabledSwitch(InimCoordinatorEntity, SwitchEntity):
         self._zone_name = zone_name
         self._zone_internal_index = zone_internal_index
         self._second_zone = second_zone  # the second zone of a double terminal
-        self._attr_name = f"{self._panel_display_name} Zone {self._zone_id_1_based} Enabled ({self._zone_name})"
+        name_item(self, "zone_included", "Zone", self._zone_id_1_based, zone_name)
         self._attr_unique_id = (
             f"{config_entry.entry_id}_zone_enabled_switch_{self._zone_id_1_based}"
         )
@@ -276,7 +276,7 @@ class InimZoneEnabledSwitch(InimCoordinatorEntity, SwitchEntity):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_zone_{self._zone_id_1_based}"
+        return f"zone_{self._zone_id_1_based}"
 
     @property
     def device_info(self) -> DeviceInfo:

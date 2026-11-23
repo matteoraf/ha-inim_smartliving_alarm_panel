@@ -96,7 +96,9 @@ class InimAlarmControlPanel(InimCoordinatorEntity, AlarmControlPanelEntity):
         self._panel_display_name = panel_display_name
         self._scenario_mappings = scenario_mappings
 
-        self._attr_name = self._panel_display_name
+        # The device's name: the panel's name
+        self._attr_has_entity_name = True
+        self._attr_name = None
         self._attr_unique_id = f"{config_entry.entry_id}_alarm_control_panel"
 
         self._attr_code_arm_required = (

@@ -418,6 +418,48 @@
     },
     "entity": {
       "binary_sensor": {
+        "zone": {
+          "name": "Zona {number} ({label})"
+        },
+        "zone_unnamed": {
+          "name": "Zona {number}"
+        },
+        "zone_alarm_memory": {
+          "name": "Zona {number} memoria allarme ({label})"
+        },
+        "zone_alarm_memory_unnamed": {
+          "name": "Zona {number} memoria allarme"
+        },
+        "zone_tamper": {
+          "name": "Zona {number} manomissione ({label})"
+        },
+        "zone_tamper_unnamed": {
+          "name": "Zona {number} manomissione"
+        },
+        "area_alarm": {
+          "name": "Area {number} allarme ({label})"
+        },
+        "area_alarm_unnamed": {
+          "name": "Area {number} allarme"
+        },
+        "area_tamper": {
+          "name": "Area {number} manomissione ({label})"
+        },
+        "area_tamper_unnamed": {
+          "name": "Area {number} manomissione"
+        },
+        "area_alarm_memory": {
+          "name": "Area {number} memoria allarme ({label})"
+        },
+        "area_alarm_memory_unnamed": {
+          "name": "Area {number} memoria allarme"
+        },
+        "scenario_active": {
+          "name": "Scenario {number} attivo ({label})"
+        },
+        "scenario_active_unnamed": {
+          "name": "Scenario {number} attivo"
+        },
         "programming_mode": {
           "name": "Modalità programmazione"
         },
@@ -425,9 +467,29 @@
           "name": "Rifiuta l'inserimento con zone non pronte"
         }
       },
+      "button": {
+        "scenario_activate": {
+          "name": "Attiva scenario {number} ({label})"
+        },
+        "scenario_activate_unnamed": {
+          "name": "Attiva scenario {number}"
+        },
+        "reread_panel_configuration": {
+          "name": "Rileggi la configurazione della centrale"
+        }
+      },
       "select": {
         "area_arming_mode": {
-          "name": "Area {area} modalità di inserimento",
+          "name": "Area {number} modalità di inserimento ({label})",
+          "state": {
+            "disarmed": "Disinserita",
+            "armed_total": "Inserita totale",
+            "armed_partial": "Inserita parziale",
+            "armed_instant": "Inserita immediata"
+          }
+        },
+        "area_arming_mode_unnamed": {
+          "name": "Area {number} modalità di inserimento",
           "state": {
             "disarmed": "Disinserita",
             "armed_total": "Inserita totale",
@@ -445,6 +507,18 @@
         }
       },
       "sensor": {
+        "event_log": {
+          "name": "Registro eventi"
+        },
+        "active_scenario": {
+          "name": "Scenario attivo"
+        },
+        "firmware_version": {
+          "name": "Versione firmware"
+        },
+        "system_type": {
+          "name": "Tipo di centrale"
+        },
         "peripherals": {
           "name": "Periferiche"
         },
@@ -453,6 +527,18 @@
         }
       },
       "switch": {
+        "area": {
+          "name": "Area {number} ({label})"
+        },
+        "area_unnamed": {
+          "name": "Area {number}"
+        },
+        "zone_included": {
+          "name": "Zona {number} inclusa ({label})"
+        },
+        "zone_included_unnamed": {
+          "name": "Zona {number} inclusa"
+        },
         "terminal_output": {
           "name": "Uscita {number}"
         },

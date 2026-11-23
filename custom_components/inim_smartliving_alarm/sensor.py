@@ -159,7 +159,8 @@ class ActiveInimScenarioNameSensor(BaseInimSensorEntity):
         """Initialize the Active Scenario Sensor."""
         super().__init__(coordinator, config_entry, panel_display_name)
         self._scenario_names = scenario_names
-        self._attr_name = "Active Scenario Name"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "active_scenario"
         self._attr_unique_id = f"{config_entry.entry_id}_active_scenario_name"
         self._attr_icon = "mdi:list-status"
         self._update_state_from_coordinator()
@@ -167,7 +168,7 @@ class ActiveInimScenarioNameSensor(BaseInimSensorEntity):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_active_scenario"
+        return "active_scenario"
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -213,7 +214,9 @@ class PanelFirmwareSensor(SensorEntity):
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
         self._system_info = system_info
-        self._attr_name = "Firmware Version"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "firmware_version"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_unique_id = f"{config_entry.entry_id}_firmware_version"
         self._attr_icon = "mdi:chip"
         self._attr_native_value = (
@@ -223,7 +226,7 @@ class PanelFirmwareSensor(SensorEntity):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_firmware_version"
+        return "firmware_version"
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -246,7 +249,9 @@ class PanelSystemTypeSensor(SensorEntity):
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
         self._system_info = system_info
-        self._attr_name = "System Type"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "system_type"
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self._attr_unique_id = f"{config_entry.entry_id}_system_type"
         self._attr_icon = "mdi:information-outline"
         self._attr_native_value = (
@@ -256,7 +261,7 @@ class PanelSystemTypeSensor(SensorEntity):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_system_type"
+        return "system_type"
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -346,7 +351,8 @@ class InimEventLogSensor(BaseInimSensorEntity):
         """Initialize the event log sensor."""
         super().__init__(coordinator, config_entry, panel_display_name)
         self._initial_panel_config = initial_panel_config
-        self._attr_name = f"{panel_display_name} Event Log"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "event_log"
         self._attr_unique_id = f"{config_entry.entry_id}_{SENSOR_LAST_EVENT_LOG_SUFFIX}"
         self._attr_icon = "mdi:format-list-bulleted-type"
 
@@ -367,7 +373,7 @@ class InimEventLogSensor(BaseInimSensorEntity):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_{SENSOR_LAST_EVENT_LOG_SUFFIX}"
+        return SENSOR_LAST_EVENT_LOG_SUFFIX
 
     @property
     def available(self) -> bool:

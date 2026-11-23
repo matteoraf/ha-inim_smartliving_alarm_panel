@@ -21,7 +21,7 @@ from .const import (
     DOMAIN,
 )
 from .coordinator import InimDataUpdateCoordinator
-from .entity import panel_device_info
+from .entity import name_item, panel_device_info
 from .panel_config import async_reread_panel_configuration
 from .selection import (
     is_disarm_scenario,
@@ -108,7 +108,13 @@ class InimScenarioActivationButton(ButtonEntity):
         self._scenario_index_0_based = scenario_index_0_based
         self._scenario_name = scenario_name
 
-        self._attr_name = f"Activate '{self._scenario_name}'"
+        name_item(
+            self,
+            "scenario_activate",
+            "Scenario",
+            self._scenario_index_0_based + 1,
+            scenario_name,
+        )
         self._attr_unique_id = (
             f"{config_entry.entry_id}_scenario_button_{self._scenario_index_0_based}"
         )
@@ -117,7 +123,7 @@ class InimScenarioActivationButton(ButtonEntity):
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_scenario_{self._scenario_index_0_based}"
+        return f"scenario_{self._scenario_index_0_based}"
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -178,13 +184,14 @@ class InimRereadConfigurationButton(ButtonEntity):
         """Initialize the button."""
         self.config_entry = config_entry
         self._panel_display_name = panel_display_name
-        self._attr_name = "Re-read panel configuration"
+        self._attr_has_entity_name = True
+        self._attr_translation_key = "reread_panel_configuration"
         self._attr_unique_id = f"{config_entry.entry_id}_reread_panel_configuration"
 
     @property
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
-        return f"{self._panel_display_name}_reread_panel_configuration"
+        return "reread_panel_configuration"
 
     @property
     def device_info(self) -> DeviceInfo:

@@ -21,6 +21,7 @@ This version keeps the panel configuration in a new format. Your entity IDs and 
 | Zone bypass switches find the zone's terminal the same way as outputs | Nothing |
 | The active scenario sensor says *No scenario matches* when no scenario matches the areas | *Check your automations* if they test for *Unknown Scenario (Index 255)* or index 255 |
 | The event log no longer shows events twice after a poll that failed | Nothing |
+| Entity names are translated and no longer repeat the panel name; *Firmware version* and *System type* are diagnostic | Nothing: entity IDs don't change; a name you set yourself is kept |
 
 ??? note "Details"
 
@@ -29,6 +30,9 @@ This version keeps the panel configuration in a new format. Your entity IDs and 
     *   **Zone bypass switches find the zone's terminal in the panel's terminal list the same way as outputs.** A zone on the last position of the list (a keypad terminal on a fully used panel) now gets a bypass switch; before, it had none. If a terminal appears twice in the list, the switch uses its first position, and the zone's `internal_index` attribute shows it.
     *   **When no scenario matches the state of the areas** (no scenario matches, or the panel reports none), the *Active scenario* sensor now says *No scenario matches* and its `active_scenario_index` attribute is empty; before, it said *Unknown Scenario (Index 255)* and 255. `raw_active_scenario_hex` still gives the value the panel reported. The alarm panel still shows *Armed custom bypass* then, as before.
     *   **The event log no longer shows events twice.** When a poll failed after a good one, the events of that good poll were added to the log a second time.
+    *   **Entity names are translated and read the same way everywhere**: *Zone 12 (Window)*, *Zone 12 tamper (Window)*, *Area 3 alarm (Kitchen)*, *Activate scenario 2 (Night)*, *Event log*, shown after the panel's name and in your Home Assistant language. The zone switch is now *Zone N included*. An item without a name on the panel shows its number alone (*Zone 5*, not *Zone 5 (Zone 5)*). Entity IDs don't change, so automations and dashboards keep working; cards that show an entity's name show the new one, and a name you set yourself is kept.
+    *   ***Firmware version* and *System type*** move to the *Diagnostic* section of the device page.
+    *   **New installations no longer get the panel's name twice in entity IDs** (for example `switch.home_area_3` rather than `switch.home_home_area_3`). Entity IDs of an existing installation stay as they are; to remove a doubled name, rename the entity ID in the entity's settings (**Settings** → **Devices & services** → **Entities**, the entity, then the gear icon), and update the automations and dashboards that use it.
 
 ## From 0.4.0b1 or 0.4.0b2
 
@@ -58,8 +62,8 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
 | Change | What to do |
 |---|---|
 | Area switches are on for partial and instant arming too | *Check your automations* if they relied on the switch being off then |
-| *Area X Triggered* is now *Area X Alarm memory*; new *Area X Alarm* and *Area X Tamper* sensors | Nothing: same entity ID |
-| The alarm panel shows *Triggered* only while an area is in alarm | *Check your automations*: use the *Alarm memory* sensors for the memory |
+| *Area X Triggered* is now *Area X alarm memory*; new *Area X alarm* and *Area X tamper* sensors | Nothing: same entity ID |
+| The alarm panel shows *Triggered* only while an area is in alarm | *Check your automations*: use the *alarm memory* sensors for the memory |
 | New arming mode select per area, and the `arm_area` action | Add them to dashboards and automations if you like |
 | Each area switch can arm in its own mode | Optional: **Area switches arm mode per area** |
 | Each area's delays are shown as attributes | Nothing |
@@ -67,8 +71,8 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
 ??? note "Details"
 
     *   **Area switches** are now on for an area armed in partial or instant mode too (before, such an area showed as unknown and its switch was off). Turning a switch on still arms in total mode, unless you choose another mode with the new **Area switches default arm mode** option. The new `arming_mode` attribute tells the mode (`total`, `partial`, `instant` or `disarmed`); `status_text` stays `armed` or `disarmed`.
-    *   **"Area X Triggered" is now called "Area X Alarm memory"**: same entity ID, same meaning (on after an alarm until the memory is reset), now also for areas 9 and 10, with a `tamper_memory` attribute. Two new binary sensors per area show the **live** state: *Area X Alarm* and *Area X Tamper*.
-    *   **The alarm panel shows Triggered only while an area is in alarm.** Before, it stayed Triggered until the alarm memory was reset; now it returns to its armed or disarmed state when the alarm ends, and the *Alarm memory* sensors keep the memory. Automations that relied on Triggered lasting until the reset should use the *Alarm memory* sensors instead.
+    *   **"Area X Triggered" is now called "Area X alarm memory"**: same entity ID, same meaning (on after an alarm until the memory is reset), now also for areas 9 and 10, with a `tamper_memory` attribute. Two new binary sensors per area show the **live** state: *Area X alarm* and *Area X tamper*.
+    *   **The alarm panel shows Triggered only while an area is in alarm.** Before, it stayed Triggered until the alarm memory was reset; now it returns to its armed or disarmed state when the alarm ends, and the *alarm memory* sensors keep the memory. Automations that relied on Triggered lasting until the reset should use the *alarm memory* sensors instead.
     *   **New: an arming mode select per area** (*Area X arming mode*: disarmed, total, partial or instant) and the **`arm_area` action**, which arms or disarms several areas in one command (see [Arming areas from automations](actions-events.md#arming-areas-from-automations)).
     *   **Each area switch can arm in its own mode**: the new options step **Area switches arm mode per area** has one choice per imported area (use the default, total, partial or instant). Areas left at *Use the default* follow **Area switches default arm mode**, as before. The general option, called **Area switches arm in** in the 0.4.0a3 preview, is now **Area switches default arm mode**: if you changed it in that preview, set it again (it is back to total).
     *   **Each area's delays are shown**: the *Area X arming mode* select's attributes now include the area's exit and entry times, entry time 2, pre-arm warning and patrol times, timer program and three options, read from the panel. At the first start the integration reads the panel configuration again once by itself to get them (the log says so); if it cannot, they appear after the next start or a **Re-read panel configuration**.
@@ -78,7 +82,7 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
 | Change | What to do |
 |---|---|
 | Zones follow the panel's terminal types; second zones of double terminals can be added | Delete leftover entities; tick second zones if you want them |
-| *Zone X Triggered* is now *Zone X Alarm memory*; new *Zone X Tamper* sensor | Nothing: same entity ID |
+| *Zone X Triggered* is now *Zone X alarm memory*; new *Zone X tamper* sensor | Nothing: same entity ID |
 | Zones are checked before arming areas too, and arming is refused by default | Choose **When zones are not ready** |
 | Zone attributes show the real programming; some are renamed | *Check your automations* and templates |
 | Zone device classes follow the zone's programming | Set **Show as** on a zone to keep its old class |
@@ -86,7 +90,7 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
 ??? note "Details"
 
     *   **Zones follow the panel's terminal types.** Output terminals (for example a siren) and unused terminals no longer get zone entities, and the second zones of double terminals (11 to 20 on the 505, 21 to 40 on the 515, 51 to 100 on the 1050, 101 to 200 on the 10100) can be added: tick them in the options under **Areas, zones, scenarios and outputs** (existing installations keep the zones they had). Entities that earlier versions created for terminals that are not zones are **not deleted automatically**: they stay as unavailable entities, and the log lists them at every start (*"these entities belong to terminals that are not zones on the panel"*). Delete them in **Settings** → **Devices & services** → **Entities**.
-    *   **"Zone X Triggered" is now called "Zone X Alarm memory"** (same entity ID). Zones in short circuit or tamper are no longer shown as unknown: a new *Zone X Tamper* sensor turns on, and the zone's `status_text` says `short` or `tamper`. Such zones are also listed when they prevent a scenario from being activated.
+    *   **"Zone X Triggered" is now called "Zone X alarm memory"** (same entity ID). Zones in short circuit or tamper are no longer shown as unknown: a new *Zone X tamper* sensor turns on, and the zone's `status_text` says `short` or `tamper`. Such zones are also listed when they prevent a scenario from being activated.
     *   **Zones are checked before arming areas too.** The area switches, the arming mode selects and the `arm_area` action now ask the panel which zones are not ready, as scenarios already did, and by default **refuse to arm** when there are some (before, they armed with zones open). The new option **When zones are not ready** (General settings) can arm anyway with a warning instead; `force: true` does it for one action call. A new action, `activate_scenario`, activates a scenario from automations, and a new event, `inim_smartliving_alarm_zones_not_ready`, lists the zones each time. The integration also reads whether the panel itself refuses arming with zones not ready (new diagnostic sensor *Refuses arming with zones not ready*): at the first start it reads the panel configuration again once by itself (the log says so). Zone sensors show each zone's programming options (`autobypass`, `no_arming_if_not_ready`, `interior` and more) as attributes.
     *   **Zone attributes now show the zone's real programming**, read from the panel configuration already stored (nothing is read again). Before, most zone types and balancings showed as *Unknown*, and two times were read wrongly. Some attributes are renamed, so check templates and automations that use them: `activation_type` is now `zone_type`, `balancing_type` is `balancing`, `sensor_type` is `sensor_kind`, `duration_ms` is now `alarm_pulse_duration` (or `shock_sensitivity` for shock sensors), `time` is `pulse_window_time` and `pulses` is `pulse_count`. New: `alarm_cycles`. Values are now lower-case English keys (for example `delayed`, `double_eol`, `input` instead of *Delayed*, *Double Balancing*, *Input*).
     *   **Zone device classes follow the zone's programming.** Single EOL zones are now *opening* (before, no class), shock sensors are *vibration* (before, *opening* or none), and roller-blind sensors are *opening* (before, *motion*). Normally open, normally closed and double EOL zones keep their class. To keep the old class on a zone, set it with **Show as** in the entity's settings.
