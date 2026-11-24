@@ -22,6 +22,7 @@ from .protocol.smartlan import (
     BOARD_SMARTLAN_G,
     BOARD_SMARTLAN_SI,
     G_REPLY_ERROR,
+    SI_PROBE,
     decode_g_reply,
     decode_si_reply,
     split_g_reply,
@@ -32,7 +33,6 @@ _LOGGER = logging.getLogger(__name__)
 BROADCAST = "255.255.255.255"
 SCAN_TIME = 3.0  # seconds to wait for replies
 
-SI_PROBE = b"FIND"
 SI_PROBE_PORT = 1460
 SI_REPLY_PORT = 5001
 # The board compares the request as a C string: end it with NUL

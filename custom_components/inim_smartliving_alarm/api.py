@@ -89,7 +89,7 @@ from .protocol.model import (
     parse_model_string,
 )
 from .protocol.report_layout import ReportBlock, ReportTable, Space, table_for
-from .protocol.smartlan import BOARD_SMARTLAN_G, BOARD_SMARTLAN_SI
+from .protocol.smartlan import BOARD_SMARTLAN_G, BOARD_SMARTLAN_SI, decode_si_reply
 from .protocol.status import (
     OUTPUT_DETAIL_LENGTH,
     AreaStatus,
@@ -551,6 +551,21 @@ class SmartLivingPanel:
     async def close(self) -> None:
         """Close the connection."""
         await self.transport.close()
+
+    async def board_reply(self) -> bytes | None:
+        """The SmartLAN/SI board's reply to FIND, read over TCP.
+
+        None for another board, when the board cannot be reached or is in
+        use, or when the reply is not a FIND reply. The reply holds the
+        board's credentials when they are set: never log or store it.
+        """
+        if not isinstance(self.transport, SmartLanSiTransport):
+            return None
+        try:
+            reply = await self.transport.board_reply()
+        except TransportError:
+            return None
+        return reply if decode_si_reply(reply) is not None else None
 
     async def release(self) -> None:
         """Close the connection once the current request is done.

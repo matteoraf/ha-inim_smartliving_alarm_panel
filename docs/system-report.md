@@ -21,8 +21,8 @@ The *Diagnostics level* select chooses how much the next report shows. It is dis
 | Level | What it contains |
 |---|---|
 | **Redacted** (default) | Everything public: the programming, status, events with their times, statistics. Names are cut to their first 3 characters, the serial number to its last 4 digits, the board's MAC address to its last 2 bytes; addresses, PINs, phone numbers, key serials and passwords are left out. Safe to post. |
-| **Full** | Also the names, the serial number and the network addresses. PINs, phone numbers, key serials and passwords are still left out. |
-| **Full confidential** | Everything, including the PINs, phone numbers, key serials and the board's passwords. |
+| **Full** | Also the names, the serial number and the network addresses. PINs, phone numbers, key serials, passwords and the board's dynamic-DNS user name are still left out. |
+| **Full confidential** | Everything, including the PINs (the installer code too), phone numbers, key serials and the board's passwords and dynamic-DNS user name. |
 
 At **Redacted**, one download gives a plain file you can attach to a GitHub issue as it is.
 
@@ -37,7 +37,16 @@ At **Redacted**, one download gives a plain file you can attach to a GitHub issu
 
 ??? note "What is and is not read"
 
-    The board's own details (its network settings and firmware) are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys.
+    The board's own details (its network settings and firmware) are read from the board itself. A SmartLAN/SI board is asked directly, so they are included even when Home Assistant is on another subnet; if the board is in use by another app at that moment, the report falls back to a search of Home Assistant's own network. A SmartLAN/G board's details are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys.
+
+### Finding the installer code
+
+If you don't have your panel's installer code, a **Full confidential** report shows it (panel firmware 5.1 or newer):
+
+1.  Set the *Diagnostics level* to *Full confidential* and download diagnostics twice, as described above.
+2.  Open the second file, the readable copy, with the viewer: `python3 scripts/inim_report.py show REPORT.json`. The summary's **Installer code** row shows it, with its entry in the panel's PIN table. In the file itself it is under `panel` → `installer_code`.
+
+The readable copy holds every PIN of your panel: keep it private, and delete it once you have the code. Reports at other levels never show the installer code.
 
 ## Reading a report
 

@@ -100,6 +100,13 @@ class FakePanel:
         # SmartLAN/G only: send read replies with the panel's checksum, as
         # no known board does (the board sends the data alone)
         self.g_reply_checksum = False
+        # SmartLAN/SI: FIND as the first message of a connection is answered
+        # with this reply (None: the board's own, see discovery.si_reply);
+        # answer_find False leaves it unanswered, as a board in use would
+        self.find_reply: bytes | None = None
+        self.answer_find = True
+        self.close_after_find = False  # close the connection after the reply
+        self.find_requests = 0
 
         self._server: asyncio.Server | None = None
         self._client: asyncio.StreamWriter | None = None
@@ -158,8 +165,21 @@ class FakePanel:
         self._handlers.add(handler)
         handled = 0
         try:
+            prefix = b""
+            if self.transport == TRANSPORT_SI:
+                # A board request comes only as the first message
+                prefix = await self._read(reader, 4)
+                if prefix == b"FIND":
+                    self.find_requests += 1
+                    if not self.answer_find:
+                        return
+                    await self._send(writer, self._find_reply())
+                    if self.close_after_find:
+                        return
+                    prefix = b""
             while True:
-                request = await self._read_request(reader)
+                request = await self._read_request(reader, prefix)
+                prefix = b""
                 if request is None:
                     continue
                 handled += 1
@@ -196,7 +216,16 @@ class FakePanel:
         async with asyncio.timeout(self.idle_timeout):
             return await reader.readexactly(count)
 
-    async def _read_request(self, reader: asyncio.StreamReader) -> Request | None:
+    def _find_reply(self) -> bytes:
+        if self.find_reply is not None:
+            return self.find_reply
+        from .discovery import si_reply  # noqa: PLC0415 - it imports this module
+
+        return si_reply(self.host, self.port)
+
+    async def _read_request(
+        self, reader: asyncio.StreamReader, prefix: bytes = b""
+    ) -> Request | None:
         if self.transport == TRANSPORT_G:
             first = await self._read(reader, 16)
             header = self._cipher.decryptor().update(first)[:8]
@@ -213,7 +242,7 @@ class FakePanel:
                 return None
             header, payload = plain[:8], plain[8:]
         else:
-            header = await self._read(reader, 8)
+            header = prefix + await self._read(reader, 8 - len(prefix))
             payload = b""
             if header[0] in (c.OP_WRITE, c.OP_PERIPHERAL_WRITE):
                 payload = await self._read(reader, header[6])

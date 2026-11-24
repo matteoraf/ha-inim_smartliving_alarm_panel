@@ -23,6 +23,7 @@ This version keeps the panel configuration in a new format. Your entity IDs and 
 | The event log no longer shows events twice after a poll that failed | Nothing |
 | Entity names are translated and no longer repeat the panel name; *Firmware version* and *System type* are diagnostic | Nothing: entity IDs don't change; a name you set yourself is kept |
 | The single polling interval is replaced by an interval for each part of the panel's state; the panel is read much more often | Nothing; to read less often, see the *Polling* options; to use the Inim app or the installer software on a SmartLAN/SI board, turn on *Slow polling mode* |
+| System reports read a SmartLAN/SI board's details from the board itself, across subnets too; a *Full confidential* report shows the installer code | Nothing |
 
 ??? note "Details"
 
@@ -35,6 +36,7 @@ This version keeps the panel configuration in a new format. Your entity IDs and 
     *   ***Firmware version* and *System type*** move to the *Diagnostic* section of the device page.
     *   **New installations no longer get the panel's name twice in entity IDs** (for example `switch.home_area_3` rather than `switch.home_home_area_3`). Entity IDs of an existing installation stay as they are; to remove a doubled name, rename the entity ID in the entity's settings (**Settings** → **Devices & services** → **Entities**, the entity, then the gear icon), and update the automations and dashboards that use it.
     *   **The panel is read in parts, each at its own interval** ([Polling](options.md#polling)): zones and outputs every second, areas and the active scenario every 2 seconds, the event log every 10 seconds, the zone bypass and dimmer levels every 30 seconds, the panel state every 60 seconds, and every part at once after a command sent from Home Assistant. The old **Polling Interval** option is dropped and the new defaults apply, whatever it was set to; set the intervals in **Settings** → **Devices & services** → **Inim SmartLiving Alarm**, the gear icon on your panel's row, **Polling**. While it reads the panel at these intervals, Home Assistant keeps its connection to the board open; the SmartLAN/SI board accepts one local client at a time, so other apps on your network cannot connect to it meanwhile. To let the Inim app or the installer software connect, turn on the new **Slow polling mode** switch on the device page: Home Assistant then reads the whole panel every 30 seconds and closes its connection after each read, as earlier versions did, and the switch turns itself off after 60 minutes (see [Slow polling mode](options.md#slow-polling-mode)).
+    *   **System reports read the SmartLAN/SI board's details from the board itself** (its network settings and firmware), so they are included when Home Assistant is on another subnet too. A **Full confidential** report also shows the panel's installer code (see [Finding the installer code](system-report.md#finding-the-installer-code)), and the board's dynamic-DNS user name now shows only at *Full confidential*, like its passwords.
 
 ## From 0.4.0b1 or 0.4.0b2
 

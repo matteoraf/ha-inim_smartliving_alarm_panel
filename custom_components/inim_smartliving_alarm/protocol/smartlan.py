@@ -2,9 +2,12 @@
 
 SmartLAN/SI: its reply to FIND (163 bytes, 190 with the status tail of
 board firmware 5.05) starts with IMIN and the board's MAC address, then the
-board's stored configuration. Besides the addresses it holds the dynamic-DNS
-credentials and the LAN password when they are set, so it is never logged
-or stored; each field's privacy is listed with it.
+board's stored configuration. The board answers FIND as a UDP broadcast on
+its own network, and as the first message of a TCP connection from
+anywhere. Besides the addresses it holds the dynamic-DNS credentials and
+the LAN password when they are set, so it is never logged or stored; each
+byte's privacy is listed below, and bytes the board does not use count as
+personal.
 
 SmartLAN/G: its reply is the text "firmware|model|panel name|board
 firmware|port", or "err" when it has no panel information.
@@ -19,8 +22,11 @@ from .masking import Fields, Privacy
 BOARD_SMARTLAN_SI = "smartlan_si"
 BOARD_SMARTLAN_G = "smartlan_g"
 
+SI_PROBE = b"FIND"
 SI_REPLY_MAGIC = b"IMIN"
 SI_REPLY_MIN_LENGTH = 25  # up to the TCP port
+SI_REPLY_LENGTH = 163
+SI_REPLY_TAIL_LENGTH = 27  # board firmware 5.05 only
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,38 +38,51 @@ class SiField:
     privacy: Privacy
 
 
-# The fields with a known meaning
+# Every byte of the reply, in order (the magic IMIN is bytes 0-3, public)
 MAC = SiField(4, 6, Privacy.PUBLIC)  # the last 2 bytes; the rest below
 MAC_HIDDEN = SiField(4, 4, Privacy.PERSONAL)
-CONFIG_TYPE = SiField(10, 1, Privacy.PUBLIC)
+CONFIG_TYPE = SiField(10, 1, Privacy.PERSONAL)  # not used by the board
 IP = SiField(11, 4, Privacy.PERSONAL)
 SUBNET_MASK = SiField(15, 4, Privacy.PERSONAL)
 GATEWAY = SiField(19, 4, Privacy.PERSONAL)
 TCP_PORT = SiField(23, 2, Privacy.PUBLIC)  # big-endian
+UNKNOWN_25 = SiField(25, 17, Privacy.PERSONAL)  # not used by the board
+CLOUD_INTERVAL = SiField(42, 1, Privacy.PUBLIC)  # a timer of the cloud link
+UNKNOWN_43 = SiField(43, 1, Privacy.PERSONAL)  # not used by the board
 FIRMWARE = SiField(44, 2, Privacy.PUBLIC)  # major, minor
+CLOUD_ENABLE = SiField(46, 1, Privacy.PUBLIC)  # turns the cloud link on
+CLOUD_GATE = SiField(47, 1, Privacy.PUBLIC)  # with byte 49, enables the cloud timer
+UNKNOWN_48 = SiField(48, 1, Privacy.PERSONAL)  # not used by the board
+NETWORK_CONFIGURED = SiField(49, 1, Privacy.PUBLIC)  # set when a DHCP lease applies
 DNS = SiField(50, 4, Privacy.PERSONAL)
 DDNS_HOST = SiField(54, 32, Privacy.PERSONAL)
-DDNS_USER = SiField(90, 32, Privacy.PERSONAL)
+UNKNOWN_86 = SiField(86, 4, Privacy.PERSONAL)  # not used by the board
+DDNS_USER = SiField(90, 32, Privacy.SECRET)  # with the host, an account
 DDNS_PASSWORD = SiField(122, 32, Privacy.SECRET)
 LAN_PASSWORD_ENABLED = SiField(154, 1, Privacy.PUBLIC)
 LAN_PASSWORD = SiField(155, 8, Privacy.SECRET)
+# Board firmware 5.05: a status block (version text, socket states)
+STATUS_TAIL = SiField(SI_REPLY_LENGTH, SI_REPLY_TAIL_LENGTH, Privacy.PERSONAL)
 
-# Every private part of the reply, unknown bytes as personal
+# Every private part of the reply; the bytes not listed are public
 SI_REPLY_FIELDS: Fields = tuple(
     (f.offset, f.length, f.privacy)
     for f in (
         MAC_HIDDEN,
+        CONFIG_TYPE,
         IP,
         SUBNET_MASK,
         GATEWAY,
-        SiField(25, 19, Privacy.PERSONAL),  # meaning not known
-        SiField(46, 4, Privacy.PERSONAL),  # meaning not known
+        UNKNOWN_25,
+        UNKNOWN_43,
+        UNKNOWN_48,
         DNS,
         DDNS_HOST,
-        SiField(86, 4, Privacy.PERSONAL),  # meaning not known
+        UNKNOWN_86,
         DDNS_USER,
         DDNS_PASSWORD,
         LAN_PASSWORD,
+        STATUS_TAIL,
     )
 )
 

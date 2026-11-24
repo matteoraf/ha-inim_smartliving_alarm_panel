@@ -164,6 +164,16 @@ class PanelModel:
         """Length of the PIN table."""
         return self.codes * self.pin_length
 
+    @property
+    def installer_code_index(self) -> int:
+        """Index of the installer code in the panel's PIN table.
+
+        The table holds the user codes, then two more entries; the first of
+        them is the installer code. pin_table_length covers the user codes
+        only, so the integration's PIN lookup never reads it.
+        """
+        return self.codes
+
 
 SMARTLIVING_1050_FW6 = PanelModel(
     name="SmartLiving 1050",

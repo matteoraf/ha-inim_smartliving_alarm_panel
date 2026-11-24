@@ -62,6 +62,7 @@ _BITS = {
 }
 _U16 = {"label_pointers", "event_pointers", "event_log_pointers"}
 _DIGITS = {"pin_table"}
+PIN_SIZE = 6  # bytes per PIN-table entry
 
 
 @dataclass(slots=True)
@@ -315,6 +316,29 @@ def _fields(
     return size, out
 
 
+def _pin_entries(
+    data: list[int | None], entries: Mapping[str, Any]
+) -> tuple[int, list[str]]:
+    """One line per PIN-table entry: the user codes, the installer code."""
+    try:
+        decode_pin = loader.module("protocol.commands").decode_pin
+    except Exception:  # noqa: BLE001 - the integration's modules are missing
+        return PIN_SIZE, []
+    installer = entries.get("installer_code")
+    out = []
+    for index in range(0, len(data) - PIN_SIZE + 1, PIN_SIZE):
+        number = index // PIN_SIZE
+        pin = decode_pin(bytes(b or 0 for b in data[index : index + PIN_SIZE]))
+        shown = pin if pin else "empty"
+        if number == installer:
+            out.append(f"installer code: {shown}")
+        elif installer is not None and number > installer:
+            out.append(f"entry {number + 1} (not a user code): {shown}")
+        else:
+            out.append(f"code {number + 1}: {shown}")
+    return PIN_SIZE, out
+
+
 # ------------------------------------------------------------------ blocks
 
 
@@ -371,6 +395,8 @@ def raw_blocks(report: Mapping[str, Any]) -> list[RawBlock]:
             label = "withheld" if block.get("withheld") else "not read"
             badge = f"{label}: {why}" if why else "no data"
         record, decoded = _fields(name, data, model)
+        if name == "pin_table" and data and None not in data:
+            record, decoded = _pin_entries(data, block.get("entries") or {})
         out.append(
             RawBlock(
                 name=name,

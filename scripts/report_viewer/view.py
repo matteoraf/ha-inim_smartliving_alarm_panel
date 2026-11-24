@@ -143,7 +143,13 @@ def summary(report: Mapping[str, Any], kind: Kind) -> Section:
     cloud = status.get("cloud") if isinstance(status, Mapping) else None
     reads = (report.get("transport") or {}).get("report_reads") or {}
     reply = board.get("reply")
-    board_text: Any = board.get("reply_note") if reply is None else "reply received"
+    board_text: Any = (
+        board.get("reply_note")
+        if reply is None
+        else f"reply received ({board['source']})"
+        if board.get("source")
+        else "reply received"
+    )
     reads_text = (
         f"{reads.get('requests')} requests, {reads.get('seconds')} s" if reads else None
     )
@@ -158,6 +164,7 @@ def summary(report: Mapping[str, Any], kind: Kind) -> Section:
             ("Experimental", panel.get("experimental"), "Panel"),
             ("Serial number", panel.get("serial"), "Panel"),
             ("User code", panel.get("user_code"), "Panel"),
+            *_installer_rows(panel.get("installer_code")),
             ("Board", f"{board.get('type') or '?'}, port {board.get('port')}", "Board"),
             ("Board address", board.get("host"), "Board"),
             ("Board reply", board_text, "Board"),
@@ -170,6 +177,15 @@ def summary(report: Mapping[str, Any], kind: Kind) -> Section:
             ("Report reads", reads_text, "Report"),
         ],
     )
+
+
+def _installer_rows(installer: Any) -> list[tuple[str, Any, str]]:
+    """The installer code, in a Full confidential report only."""
+    if not isinstance(installer, Mapping):
+        return []
+    pin = installer.get("pin")
+    text = f"{pin if pin else 'empty'} (PIN table entry {installer.get('entry')})"
+    return [("Installer code", text, "Panel")]
 
 
 def _cloud_rows(cloud: Any) -> list[tuple[str, Any, str]]:

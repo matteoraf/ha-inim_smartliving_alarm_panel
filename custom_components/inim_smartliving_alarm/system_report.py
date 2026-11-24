@@ -26,7 +26,7 @@ from .const import (
 )
 from .panel_view import configuration_view
 from .protocol import registers as reg
-from .protocol.commands import encode_pin
+from .protocol.commands import decode_pin, encode_pin
 from .protocol.events import (
     EVENT_RECORD_LENGTH,
     decode_event_pointers,
@@ -51,6 +51,8 @@ from .protocol.smartlan import (
     G_REPLY_FIELDS,
     MAC_HIDDEN,
     SI_REPLY_FIELDS,
+    SI_REPLY_LENGTH,
+    SI_REPLY_TAIL_LENGTH,
     decode_si_reply,
     split_g_reply,
 )
@@ -80,6 +82,7 @@ _CACHED: dict[str, str] = {
     "physical_map_keypads": stored_config.PHYSICAL_MAP,
 }
 _PHYSICAL_MAP = "physical_map"
+PIN_TABLE = "pin_table"  # the report block of the PIN table
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,6 +116,8 @@ class ReportInput:
     reads: ReportReads | None  # None when the panel could not be read
     read_error: str | None = None
     board_reply: bytes | None = None
+    # How the board's reply was read: "tcp", "udp" or None (no reply)
+    board_reply_source: str | None = None
     transport_stats: Mapping[str, Any] | None = None
     trace: Iterable[Mapping[str, Any]] = ()
     # The PIN's user code: found, its 1-based number and its areas
@@ -287,7 +292,49 @@ def _panel(data: ReportInput) -> dict[str, Any]:
         section["brand"] = area.brand
     if data.user_code is not None:
         section["user_code"] = dict(data.user_code)
+    if reads is not None and shown(Privacy.SECRET, level):
+        installer = _installer_code(reads)
+        if installer is not None:
+            section["installer_code"] = installer
     return section
+
+
+# The firmware families whose PIN table is known to hold the installer code
+# after the user codes
+_INSTALLER_CODE_FAMILIES = frozenset({"5.1", "6"})
+
+
+def _installer_code_index(reads: ReportReads) -> int | None:
+    """The installer code's index in the PIN table block read for the report.
+
+    None when the panel is read with another model's profile, or with a
+    layout whose PIN table is not known to hold it, or when the block does
+    not reach that entry.
+    """
+    if reads.fallback or reads.table.family not in _INSTALLER_CODE_FAMILIES:
+        return None
+    block = reads.table.block(PIN_TABLE)
+    index = reads.model.installer_code_index
+    if block is None or block.length < (index + 1) * reads.model.pin_length:
+        return None
+    return index
+
+
+def _installer_code(reads: ReportReads) -> dict[str, Any] | None:
+    """The installer code from the PIN table read for the report.
+
+    Its entry number (1-based) and its digits (None when empty); None when
+    it is not known (see _installer_code_index) or the table was not read.
+    """
+    index = _installer_code_index(reads)
+    read = _by_name(reads).get(PIN_TABLE)
+    if index is None or read is None or read.data is None:
+        return None
+    size = reads.model.pin_length
+    entry = read.data[index * size : (index + 1) * size]
+    if len(entry) < size:
+        return None
+    return {"entry": index + 1, "pin": decode_pin(entry)}
 
 
 def _si_reply_fields(raw: bytes, level: Level) -> dict[str, Any] | None:
@@ -299,7 +346,6 @@ def _si_reply_fields(raw: bytes, level: Level) -> dict[str, Any] | None:
         "mac": reply.mac.hex(":")
         if personal
         else "xx:" * MAC_HIDDEN.length + reply.mac_shown.hex(":"),
-        "type": reply.config_type,
         "port": reply.port,
         "board_firmware": reply.firmware,
         "lan_password_enabled": reply.lan_password_enabled,
@@ -309,14 +355,15 @@ def _si_reply_fields(raw: bytes, level: Level) -> dict[str, Any] | None:
     }
     if personal:
         result |= {
+            "type": reply.config_type,
             "ip": reply.ip,
             "subnet_mask": reply.subnet_mask,
             "gateway": reply.gateway,
             "dns": reply.dns,
-            "dynamic_dns_user": reply.ddns_user,
         }
     if shown(Privacy.SECRET, level):
         result |= {
+            "dynamic_dns_user": reply.ddns_user,
             "dynamic_dns_password": reply.ddns_password,
             "lan_password": reply.lan_password,
         }
@@ -329,12 +376,16 @@ def _board(data: ReportInput) -> dict[str, Any]:
         "type": entry.board,
         "host": _host_text(entry.host, level),
         "port": entry.port,
+        "source": data.board_reply_source,
         "reply": None,
     }
     if reply is None:
-        # The board answers with a broadcast on its own network only
         section["reply_note"] = (
-            "no reply (Home Assistant may not be on the board's network)"
+            # Asked over TCP first, then by broadcast
+            "no reply (the board can't be reached or is in use by another app)"
+            if entry.board != BOARD_SMARTLAN_G
+            # Only the broadcast, which reaches the board's own network
+            else "no reply (Home Assistant may not be on the board's network)"
         )
         return section
     if entry.board == BOARD_SMARTLAN_G:
@@ -344,6 +395,9 @@ def _board(data: ReportInput) -> dict[str, Any]:
                 parts[index] = _label_text(parts[index], level)
         section["reply"] = {"fields": parts}
         return section
+    # No more than a reply holds, whichever way it was read: bytes past it
+    # would be in no field, so shown at every level
+    reply = reply[: SI_REPLY_LENGTH + SI_REPLY_TAIL_LENGTH]
     masked, ranges = mask(reply, SI_REPLY_FIELDS, level)
     section["reply"] = {
         "rows": hex_rows(0, masked, ranges),
@@ -748,6 +802,12 @@ def build_report(data: ReportInput) -> dict[str, Any]:
             _block(read, stored, level, first_map and first_map.address)
             for read in data.reads.reads
         ]
+        installer = _installer_code_index(data.reads)
+        if installer is not None and shown(Privacy.SECRET, level):
+            # Which entry of the PIN table is the installer code
+            for block in blocks:
+                if block["name"] == PIN_TABLE and block["rows"]:
+                    block["entries"] = {"installer_code": installer}
     fallback = data.reads is not None and data.reads.fallback
     if fallback and not shown(Privacy.SECRET, level):
         # Read with another model's layout: its bytes may be anything
