@@ -2,13 +2,14 @@
 
 import logging
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er, issue_registry as ir
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.typing import ConfigType
 
-from .api import SmartLivingPanel, create_panel
+from .api import PANEL_ERRORS, SmartLivingPanel, create_panel
 from .const import (
     BOARD_SMARTLAN_SI,
     CONF_BOARD,
@@ -21,10 +22,12 @@ from .const import (
     CONF_POLLING_INTERVAL,
     CONF_PORT,
     CONF_READER_NAMES,
+    CONF_THERMOSTATS,
     CONF_USERNAME,
     DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
     DATA_PANEL,
+    DATA_SETUP_OPTIONS,
     DOMAIN,
     PLATFORMS,
 )
@@ -38,6 +41,7 @@ from .protocol.errors import UnsupportedPanelError
 from .protocol.model import model_for
 from .report_state import async_drop_report_state
 from .selection import (
+    available_thermostats,
     item_of_unique_id,
     migrated_selection,
     panel_config,
@@ -55,6 +59,7 @@ from .stored_config import (
     stored_model,
     stored_zones,
 )
+from .thermostats import first_selection, keypads_to_check, thermostats_signal
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -121,11 +126,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.data[DOMAIN][entry.entry_id] = {
             DATA_PANEL: panel,
             DATA_COORDINATOR: coordinator,
+            DATA_SETUP_OPTIONS: dict(entry.options),
         }
         _LOGGER.debug("(%s) Forwarding setup to platforms: %s", entry.title, PLATFORMS)
         await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
         # The groups are read at their intervals from now on
         coordinator.async_start_polling()
+        if keypads_to_check(entry.options):
+            entry.async_create_background_task(
+                hass,
+                _async_check_keypads(hass, entry, coordinator),
+                f"{coordinator_name} keypad check",
+            )
     except Exception:
         # Keep nothing of a failed setup: the panel's connection included
         await coordinator.async_stop_polling()
@@ -432,8 +444,59 @@ def _migrate_from_v1(hass: HomeAssistant, config_entry: ConfigEntry) -> None:
     _LOGGER.info("Migrated config entry %s to version 2.1", config_entry.title)
 
 
+async def _async_check_keypads(
+    hass: HomeAssistant, entry: ConfigEntry, coordinator: InimDataUpdateCoordinator
+) -> None:
+    """Select the thermostats of an entry whose keypads were never checked.
+
+    Runs once, after setup: the keypads whose room temperature read answers
+    are selected. Their entities are added without a reload (see
+    update_listener). If the panel cannot be read now, the check runs
+    again at the next start.
+    """
+    keypads = [number - 1 for number in available_thermostats(panel_config(entry.data))]
+    try:
+        found = await coordinator.async_probe_thermostats(keypads)
+    except PANEL_ERRORS as err:
+        _LOGGER.info(
+            "%s: the keypads were not checked for a thermostat (%s); they are "
+            "checked at the next start",
+            entry.title,
+            err,
+        )
+        return
+    # Once the entry's setup has ended
+    async with entry.setup_lock:
+        if entry.state is not ConfigEntryState.LOADED or not keypads_to_check(
+            entry.options  # chosen in the options meanwhile
+        ):
+            return
+        _LOGGER.info(
+            "%s: keypads with a thermostat: %s",
+            entry.title,
+            ", ".join(str(keypad + 1) for keypad in sorted(found)) or "none",
+        )
+        hass.config_entries.async_update_entry(
+            entry,
+            options={**entry.options, CONF_THERMOSTATS: sorted(k + 1 for k in found)},
+        )
+
+
 async def update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Handle options update."""
+    """Handle options update.
+
+    The entry's first thermostat selection (by the keypad check, or in the
+    options) needs no reload: the thermostats' entities are added and their
+    reads start.
+    """
+    data = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if data is not None and first_selection(
+        data.get(DATA_SETUP_OPTIONS), entry.options
+    ):
+        data[DATA_SETUP_OPTIONS] = dict(entry.options)
+        data[DATA_COORDINATOR].async_thermostats_selected()
+        async_dispatcher_send(hass, thermostats_signal(entry.entry_id))
+        return
     _LOGGER.info(
         "Inim Alarm configuration options updated for %s, reloading entry to apply changes.",
         entry.title,

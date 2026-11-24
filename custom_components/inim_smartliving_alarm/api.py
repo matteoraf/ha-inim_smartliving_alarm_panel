@@ -12,7 +12,7 @@ never logged or kept.
 """
 
 import asyncio
-from collections.abc import AsyncIterator, Callable, Iterable, Mapping
+from collections.abc import AsyncIterator, Callable, Collection, Iterable, Mapping
 import contextlib
 from dataclasses import dataclass, field, replace
 import logging
@@ -55,7 +55,7 @@ from .protocol.config import (
     label_address,
     refuses_arming_when_not_ready,
 )
-from .protocol.errors import ProtocolError, UnsupportedPanelError
+from .protocol.errors import ProtocolError, UnsupportedPanelError, UnsupportedReason
 from .protocol.events import (
     EVENT_RECORD_LENGTH,
     PanelEvent,
@@ -106,7 +106,30 @@ from .protocol.status import (
     decode_zone_memory,
     decode_zone_states,
 )
-from .transport.base import PanelTransport, Priority, Session, TransportError
+from .protocol.thermostat import (
+    HEAD_LENGTH as THERMOSTAT_HEAD_LENGTH,
+    KEYPAD_STATUS,
+    KEYPAD_STATUS_LENGTH,
+    TEMPERATURE_LENGTH,
+    ThermostatHead,
+    ThermostatMode,
+    ThermostatSetting,
+    decode_head,
+    decode_setpoint,
+    decode_temperature,
+    decode_thermostats_on,
+    encode_setpoint,
+    setting_write,
+    temperature_request,
+    thermostat_address,
+    weekly_offset,
+)
+from .transport.base import (
+    PanelTransport,
+    Priority,
+    Session,
+    TransportError,
+)
 from .transport.smartlan_g import SmartLanGTransport
 from .transport.smartlan_si import SmartLanSiTransport
 
@@ -149,6 +172,15 @@ class NotReadyError(Exception):
         self.zones = zones
         self.scenario = scenario
         self.areas = areas
+
+
+class ThermostatNotSetError(Exception):
+    """The panel did not keep a thermostat setting that was written."""
+
+    def __init__(self, keypad: int) -> None:
+        """keypad is 0-based."""
+        super().__init__(f"the thermostat of keypad {keypad + 1} kept another value")
+        self.keypad = keypad
 
 
 class ProgrammingModeError(Exception):
@@ -372,6 +404,8 @@ class PanelStatus:
     panel_state: PanelState | None  # None when the panel's model is not known
     raw: Mapping[int, bytes]  # reply data by register
     raw_active_scenario: bytes = b""  # the active scenario as reported
+    # The selected keypads' thermostats, by 0-based keypad
+    thermostats: Mapping[int, "ThermostatState"] = field(default_factory=dict)
 
     @property
     def scenario_matches(self) -> bool:
@@ -451,7 +485,38 @@ class PanelStateReading:
         )
 
 
-StatusReading = ZoneReading | AreaReading | InclusionReading | PanelStateReading
+@dataclass(frozen=True, slots=True)
+class ThermostatState:
+    """A keypad's thermostat as last read."""
+
+    head: ThermostatHead  # mode, season, manual setpoint, daily program
+    # This hour's weekly setpoint, read only in the weekly program
+    weekly_setpoint: float | None
+    # Whether it is heating or cooling now; None where the panel cannot tell
+    on: bool | None
+    # The room temperature; None when not read or not a room temperature
+    temperature: float | None
+
+
+@dataclass(frozen=True, slots=True)
+class ThermostatReading:
+    """The selected keypads' thermostats.
+
+    temperature_failed: the keypads (0-based) whose temperature read got
+    no answer, or none that could be read, this time.
+    """
+
+    thermostats: Mapping[int, ThermostatState]
+    temperature_failed: frozenset[int] = frozenset()
+
+    def apply(self, status: PanelStatus) -> PanelStatus:
+        """The status with these thermostats."""
+        return replace(status, thermostats=self.thermostats)
+
+
+StatusReading = (
+    ZoneReading | AreaReading | InclusionReading | PanelStateReading | ThermostatReading
+)
 
 
 def _zone_reading(raw: Mapping[int, bytes], model: PanelModel) -> ZoneReading:
@@ -868,6 +933,153 @@ class SmartLivingPanel:
             not_ready_request(scenario, model), model.zone_bitmap_length
         )
         return decode_not_ready_zones(data, model)
+
+    # ------------------------------------------------------------ thermostats
+
+    async def probe_thermostats(self, keypads: Iterable[int]) -> frozenset[int]:
+        """The keypads (0-based) whose thermostat can be used.
+
+        A keypad counts when its room temperature read answers with a room
+        temperature; a keypad whose read fails (no answer, or one that
+        cannot be read) does not. Each keypad is read in a session of its
+        own, so that a keypad that does not answer holds the connection for
+        that one request only. Nothing on a panel without a profile of
+        its own.
+        """
+        found: set[int] = set()
+        for keypad in sorted(set(keypads)):
+            async with self.transport.session() as session:
+                model = await self._identify(session)
+                if not self.reads_panel_state:
+                    return frozenset()
+                if not 0 <= keypad < model.keypads:
+                    continue
+                try:
+                    data = await session.read(
+                        temperature_request(keypad, model, self.transport.dialect),
+                        TEMPERATURE_LENGTH,
+                    )
+                except PANEL_ERRORS as err:
+                    # No answer, or not one that can be read: no thermostat
+                    _LOGGER.debug("Keypad %s: no temperature (%s)", keypad + 1, err)
+                    continue
+            if decode_temperature(data) is not None:
+                found.add(keypad)
+        return frozenset(found)
+
+    async def read_thermostats(
+        self,
+        keypads: Iterable[int],
+        *,
+        hour: int,
+        weekday: int,
+        skip_temperature: Collection[int] = (),
+    ) -> ThermostatReading:
+        """Read the thermostats of these keypads (0-based).
+
+        Per keypad: the first 27 bytes of its block, the weekly setpoint
+        for this hour and weekday (0 = Sunday) when it follows the weekly
+        program, and its room temperature unless in skip_temperature. A
+        temperature read that fails (no answer, or one that cannot be read)
+        leaves the temperature unknown and does not fail the reading. On firmware 6 the keypad status
+        block also says which thermostats are calling now. Nothing on a
+        panel without a profile of its own.
+        """
+        wanted = sorted(set(keypads))
+        failed: set[int] = set()
+        states: dict[int, ThermostatState] = {}
+        async with self.transport.session() as session:
+            model = await self._identify(session)
+            if not self.reads_panel_state or not wanted:
+                return ThermostatReading({})
+            dialect = self.transport.dialect
+            on: frozenset[int] | None = None
+            if model.keypad_status:
+                on = decode_thermostats_on(
+                    await session.read_ram(KEYPAD_STATUS, KEYPAD_STATUS_LENGTH), model
+                )
+            for keypad in wanted:
+                address = thermostat_address(model, keypad)
+                head = decode_head(
+                    await session.read_eeprom(address, THERMOSTAT_HEAD_LENGTH)
+                )
+                weekly = None
+                if head.mode is ThermostatMode.WEEKLY:
+                    raw = await session.read_eeprom(
+                        address + weekly_offset(hour, weekday), 1
+                    )
+                    weekly = decode_setpoint(raw[0])
+                temperature = None
+                if keypad not in skip_temperature:
+                    try:
+                        temperature = decode_temperature(
+                            await session.read(
+                                temperature_request(keypad, model, dialect),
+                                TEMPERATURE_LENGTH,
+                            )
+                        )
+                    except PANEL_ERRORS as err:
+                        # Unanswered or unreadable: unknown, the rest is read
+                        _LOGGER.debug(
+                            "Keypad %s: temperature not read (%s)", keypad + 1, err
+                        )
+                        failed.add(keypad)
+                states[keypad] = ThermostatState(
+                    head=head,
+                    weekly_setpoint=weekly,
+                    on=None if on is None else keypad in on,
+                    temperature=temperature,
+                )
+        return ThermostatReading(states, frozenset(failed))
+
+    async def set_thermostat(
+        self,
+        keypad: int,
+        *,
+        season: int | None = None,
+        setpoint: float | None = None,
+        mode: int | None = None,
+    ) -> ThermostatHead:
+        """Change a keypad's (0-based) thermostat: season, manual setpoint
+        (degrees Celsius) and regulation mode, each when given.
+
+        The settings that already hold the value asked for are not written.
+        The others are written one byte each, season first and mode last,
+        then the block is read back: ThermostatNotSetError if the panel did
+        not keep a value. Refused (ProgrammingModeError) while the panel is
+        in programming mode, and on a panel without a profile of its own.
+        Returns the first 27 bytes of the block as read back.
+        """
+        raw_setpoint = None if setpoint is None else encode_setpoint(setpoint)
+        async with self.transport.session(Priority.COMMAND) as session:
+            model = await self._identify(session)
+            if not self.reads_panel_state:
+                raise UnsupportedPanelError(
+                    "thermostats need the panel's own model profile",
+                    UnsupportedReason.FIRMWARE,
+                )
+            address = thermostat_address(model, keypad)
+            await self._check_not_programming(session)
+            current = await session.read_eeprom(address, len(ThermostatSetting))
+            asked = (
+                (ThermostatSetting.SEASON, season),
+                (ThermostatSetting.SETPOINT, raw_setpoint),
+                (ThermostatSetting.MODE, mode),
+            )
+            writes = [
+                (setting, int(value))
+                for setting, value in asked
+                if value is not None and current[setting] != int(value)
+            ]
+            for setting, value in writes:
+                frame, payload = setting_write(
+                    model, keypad, setting, value, self.transport.dialect
+                )
+                await session.write(frame, payload)
+            data = await session.read_eeprom(address, THERMOSTAT_HEAD_LENGTH)
+        if any(data[setting] != value for setting, value in writes):
+            raise ThermostatNotSetError(keypad)
+        return decode_head(data)
 
     async def read_ram(self, address: int, length: int) -> bytes:
         """Read RAM (in parts if needed)."""

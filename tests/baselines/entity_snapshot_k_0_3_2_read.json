@@ -5182,6 +5182,74 @@
   },
   {
    "attributes": {
+    "current_temperature": 24.5,
+    "friendly_name": "Test Panel Thermostat 1 (Tast Zona Giorno)",
+    "hvac_action": "off",
+    "hvac_modes": [
+     "off",
+     "heat",
+     "cool"
+    ],
+    "max_temp": 35.5,
+    "min_temp": 10.0,
+    "preset_mode": null,
+    "preset_modes": [
+     "manual",
+     "daily",
+     "weekly",
+     "antifreeze"
+    ],
+    "supported_features": 401,
+    "target_temp_step": 0.5,
+    "temperature": 20.0
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "climate.test_panel_thermostat_1",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": null,
+   "original_name": "Thermostat 1 (Tast Zona Giorno)",
+   "platform": "climate",
+   "state": "off",
+   "unique_id": "_thermostat_1"
+  },
+  {
+   "attributes": {
+    "current_temperature": 27.7,
+    "friendly_name": "Test Panel Thermostat 2 (Tast Garage)",
+    "hvac_action": "off",
+    "hvac_modes": [
+     "off",
+     "heat",
+     "cool"
+    ],
+    "max_temp": 35.5,
+    "min_temp": 10.0,
+    "preset_mode": null,
+    "preset_modes": [
+     "manual",
+     "daily",
+     "weekly",
+     "antifreeze"
+    ],
+    "supported_features": 401,
+    "target_temp_step": 0.5,
+    "temperature": 20.0
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "climate.test_panel_thermostat_2",
+   "hidden_by": null,
+   "original_device_class": null,
+   "original_icon": null,
+   "original_name": "Thermostat 2 (Tast Garage)",
+   "platform": "climate",
+   "state": "off",
+   "unique_id": "_thermostat_2"
+  },
+  {
+   "attributes": {
     "area_id": 1,
     "area_name": "Area 1",
     "auto_arm_partial": false,
@@ -5613,6 +5681,42 @@
    "platform": "sensor",
    "state": "6.07",
    "unique_id": "_firmware_version"
+  },
+  {
+   "attributes": {
+    "device_class": "temperature",
+    "friendly_name": "Test Panel Keypad 1 temperature (Tast Zona Giorno)",
+    "state_class": "measurement",
+    "unit_of_measurement": "°C"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "sensor.test_panel_keypad_1_temperature",
+   "hidden_by": null,
+   "original_device_class": "temperature",
+   "original_icon": null,
+   "original_name": "Keypad 1 temperature (Tast Zona Giorno)",
+   "platform": "sensor",
+   "state": "24.5",
+   "unique_id": "_keypad_temperature_1"
+  },
+  {
+   "attributes": {
+    "device_class": "temperature",
+    "friendly_name": "Test Panel Keypad 2 temperature (Tast Garage)",
+    "state_class": "measurement",
+    "unit_of_measurement": "°C"
+   },
+   "disabled_by": null,
+   "entity_category": null,
+   "entity_id": "sensor.test_panel_keypad_2_temperature",
+   "hidden_by": null,
+   "original_device_class": "temperature",
+   "original_icon": null,
+   "original_name": "Keypad 2 temperature (Tast Garage)",
+   "platform": "sensor",
+   "state": "27.7",
+   "unique_id": "_keypad_temperature_2"
   },
   {
    "attributes": {

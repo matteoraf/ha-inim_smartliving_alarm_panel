@@ -74,7 +74,7 @@ If the address, port or PIN of your panel change (or, for SmartLAN/G, the board'
 2.  Open the menu (⋮) of your panel's entry and choose **Reconfigure**.
 3.  Enter the new details and click **Submit**. The PIN and the board password are not filled in: leave them empty to keep the current ones.
 
-The integration contacts the panel with the new details, reads its configuration again and reloads. Your options, entities and entity IDs are kept.
+The integration contacts the panel with the new details, reads its configuration again and reloads. Your options, entities and entity IDs are kept; only a keypad enabled since, that reports a room temperature, gets its thermostat ticked.
 
 ??? note "What Reconfigure checks"
 
@@ -93,6 +93,6 @@ The integration then reloads with the new configuration.
 
 ??? note "What changes after a re-read"
 
-    *   Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel.
-    *   The areas, zones and scenarios you import are not changed either: a zone wired later or a new scenario is listed, unticked, in the options under **Areas, zones, scenarios and outputs**.
+    *   Your options are not changed, and entity IDs stay the same; entity names follow the new names from the panel. One exception: a keypad enabled since the last read that reports a room temperature gets its thermostat ticked; the thermostats you unticked stay unticked.
+    *   The areas, zones and scenarios you import are not changed either: a zone wired later or a new scenario is listed, unticked, in the options under **Areas, zones, scenarios, outputs and thermostats**.
     *   If the panel cannot be reached, or it is in programming mode, an error is shown and the stored configuration is kept: in programming mode, try again when programming has ended.

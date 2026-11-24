@@ -196,7 +196,7 @@ async def old_entry(hass: HomeAssistant, panel: FakePanel) -> MockConfigEntry:
             "panel_name": "Old",
             DATA_INITIAL_PANEL_CONFIG: config,
         },
-        options={"areas": [6], "zones": [1], "scenarios": [1]},
+        options={"areas": [6], "zones": [1], "scenarios": [1], "thermostats": []},
     )
     entry.add_to_hass(hass)
     return entry

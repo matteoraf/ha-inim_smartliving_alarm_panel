@@ -12,6 +12,8 @@ Known limitations of this version, and what you can do about them:
 
 *   Dimmer levels are read from the panel on firmware 6 only: firmware 5.1 does not report them. On firmware 5.1 a dimmer's brightness is the last one set from Home Assistant, so a level changed at a keypad is not shown.
 
+*   Keypad thermostats: the daily and weekly programs can only be changed at the keypad. The target shown for a program follows Home Assistant's clock, while the panel follows its own. Firmware 5.1 does not report whether a thermostat is heating or cooling right now, and the thermostats have been checked on a 1050 with firmware 6.07 over SmartLAN/SI only, not on firmware 5.1 or with a SmartLAN/G board. A room temperature below 0 °C is shown as unknown.
+
 *   Analogue outputs are not offered. A terminal output on one of the panel's first three terminal positions cannot be switched remotely: the panel's output command cannot address those positions.
 
 *   Support for firmware 5.1 is experimental and limited: it has not been tested on a real panel on firmware 5.1; the panel's state flags (such as programming mode) and the results of commands are assumed to work as on firmware 6; the free events that only firmware 5.1 has (free events 1 to 11) are shown as unknown events in the event log; and firmware 5.1 has no video sensors.

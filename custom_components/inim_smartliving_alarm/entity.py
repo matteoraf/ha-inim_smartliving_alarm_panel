@@ -6,7 +6,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .api import PanelStatus
+from .api import PanelStatus, ThermostatState
 from .const import CONF_PANEL_NAME, DEFAULT_PANEL_NAME, DOMAIN
 from .coordinator import InimDataUpdateCoordinator
 from .protocol.status import AreaMode, ZoneState
@@ -59,6 +59,11 @@ class InimCoordinatorEntity(CoordinatorEntity[InimDataUpdateCoordinator]):
         """The live status of the last poll; None before the first one."""
         data = self.coordinator.data
         return data.status if data is not None else None
+
+    def thermostat(self, keypad: int) -> ThermostatState | None:
+        """A keypad's (1-based) thermostat as last read."""
+        status = self.status
+        return None if status is None else status.thermostats.get(keypad - 1)
 
     def zone_state(self, zone: int) -> ZoneState | None:
         """A zone's state now."""

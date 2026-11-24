@@ -26,16 +26,18 @@ The setup proposes **Arm Away** and **Disarm** from what your scenarios do to th
 
     ![The options menu](images/options-menu.webp){ width="480" }
 
-    *   **Areas, zones, scenarios and outputs**: what to import. The same step as at setup.
+    *   **Areas, zones, scenarios, outputs and thermostats**: what to import. The same step as at setup.
     *   **Area switches arm mode per area**: the mode each area's switch arms in, if not the general one.
     *   **General settings**: everything else, including a new PIN.
     *   **Polling**: how often each part of the panel's state is read.
 
 4.  Click **Submit**. The integration reloads with the new options.
 
-### Areas, zones, scenarios and outputs
+### Areas, zones, scenarios, outputs and thermostats
 
-Tick what you want in Home Assistant. Unticking an area, zone, scenario or output **removes its entities**, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs.
+Tick what you want in Home Assistant. Unticking an area, zone, scenario, output or thermostat **removes its entities**, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs.
+
+The keypads that report a room temperature have their thermostat ticked at setup, also when you don't use it; untick those you don't want (see [Thermostats](entities.md#thermostats)).
 
 A scenario that an alarm panel mode uses cannot be unticked: choose another scenario for that mode in **General settings** first.
 
@@ -64,6 +66,7 @@ The integration reads the panel's state in parts, each at its own interval, in s
 | **Zone bypass and dimmer levels** | *Zone N included* switches, the zones' `test` attribute, the brightness of dimmers | 30 |
 | **Event log** | the event log sensor | 10 |
 | **Panel state** | the *Programming mode* sensor | 60 |
+| **Thermostats** | the thermostats and the keypad temperature sensors | 60 |
 
 *   After a command sent from Home Assistant (arming, a scenario, a bypass, an output), every part is read at once, whatever its interval.
 *   Shorter intervals show changes sooner and keep the board busier. At the defaults the integration sends about three requests a second, well within what the board answers.
@@ -84,6 +87,7 @@ With a SmartLAN/SI board, the panel's device page has a **Slow polling mode** sw
 *   While another app is connected, Home Assistant cannot reach the board: the entities are unavailable until the app disconnects, and commands sent from Home Assistant fail with a message that the board can't be reached or is in use by another app. While the installer software reads the panel's programming, this can last about a minute; the log may then say how long the panel did not answer.
 *   Home Assistant's own read can now and then take the board between two connections of the installer software. If the installer software then reports a connection error, try again.
 *   The mode turns itself off after **Turn off slow polling mode after** (60 minutes by default). Set it to 0 to keep it on until you turn it off, for example if you use the Inim app on your network every day. It stays on, with the same end time, when Home Assistant restarts. If another app holds the board while Home Assistant starts, the integration cannot set up at first and tries again by itself a little later.
+*   The thermostats are read together with the rest of the panel, on every read or every few reads: at the first multiple of the slow polling interval that is at least the **Thermostats** interval.
 *   When it turns off, every part of the panel is read at once, then at the intervals above.
 *   To have it on at set times, use an automation that turns the switch on and off.
 
@@ -127,6 +131,7 @@ With a SmartLAN/SI board, the panel's device page has a **Slow polling mode** sw
 | **Zone bypass and dimmer levels** | Polling | 5 to 300 | 30 | Seconds between reads of the zone bypass and test flags and the dimmer levels. |
 | **Event log** | Polling | 1 to 300 | 10 | Seconds between reads of the event log. |
 | **Panel state** | Polling | 10 to 600 | 60 | Seconds between reads of the panel state (programming mode). |
+| **Thermostats** | Polling | 10 to 600 | 60 | Seconds between reads of the keypads' thermostats and temperatures; only with a thermostat imported. |
 | **Reading interval in slow polling mode** | Polling (SmartLAN/SI) | 10 to 300 | 30 | Seconds between reads of the whole panel while [slow polling mode](#slow-polling-mode) is on. |
 | **Turn off slow polling mode after** | Polling (SmartLAN/SI) | 0 to 1440 | 60 | Minutes after which slow polling mode turns itself off; 0 keeps it on until you turn it off. |
 

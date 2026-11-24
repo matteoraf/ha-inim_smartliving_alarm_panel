@@ -34,7 +34,8 @@ def test_names_fit_the_panel() -> None:
 
 
 async def test_what_the_setup_offers(hass: HomeAssistant, socket_enabled) -> None:
-    """The items step proposes the five areas, every zone and six scenarios."""
+    """The items step proposes the five areas, every zone, six scenarios and
+    both keypads' thermostats."""
     fake = FakePanel(panel_demo())
     await fake.start()
     try:
@@ -53,6 +54,8 @@ async def test_what_the_setup_offers(hass: HomeAssistant, socket_enabled) -> Non
         assert offered(result, "zones") == [*range(1, 13), 54]
         assert proposed(result, "scenarios") == [1, 2, 3, 4, 5, 6]
         assert offered(result, "outputs") == proposed(result, "outputs") == [21, 22, 23]
+        assert offered(result, "thermostats") == proposed(result, "thermostats")
+        assert proposed(result, "thermostats") == [1, 2]
         assert result["description_placeholders"]["expanders"] == "Bedroom expander"
     finally:
         await fake.stop()

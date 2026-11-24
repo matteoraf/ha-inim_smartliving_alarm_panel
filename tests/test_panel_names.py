@@ -179,7 +179,7 @@ async def test_old_configuration_is_read_again_once(
             "panel_name": "Old",
             DATA_INITIAL_PANEL_CONFIG: stored,
         },
-        options={"areas": [1], "zones": [1], "scenarios": [1]},
+        options={"areas": [1], "zones": [1], "scenarios": [1], "thermostats": []},
     )
     entry.add_to_hass(hass)
     with caplog.at_level(logging.INFO):
@@ -255,7 +255,7 @@ async def test_each_required_block_is_read_again_once(
             "panel_name": "Old",
             DATA_INITIAL_PANEL_CONFIG: stored,
         },
-        options={"areas": [1], "zones": [1], "scenarios": [1]},
+        options={"areas": [1], "zones": [1], "scenarios": [1], "thermostats": []},
     )
     entry.add_to_hass(hass)
     with caplog.at_level(logging.INFO):

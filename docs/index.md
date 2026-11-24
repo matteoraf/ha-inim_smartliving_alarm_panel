@@ -29,6 +29,7 @@ Coming from version 0.3? Read [Upgrading](upgrading.md#from-03x) first. Somethin
 | Each zone | See whether it is open, in tamper or has an alarm memory; bypass it | [Entities](entities.md#zones) |
 | Each scenario | Run it with a button; see whether it is active | [Entities](entities.md#scenarios) |
 | Outputs | Switch lights, gates and other outputs; dim dimmers | [Entities](entities.md#outputs) |
+| Keypad thermostats | Set the temperature and the mode of each keypad's thermostat; see the room temperature | [Entities](entities.md#thermostats) |
 | Event log | See the panel's recent events, with names | [Entities](entities.md#sensors) |
 | Automations | Arm areas, run scenarios and reset the alarm memory with actions; react to events | [Actions and events](actions-events.md) |
 

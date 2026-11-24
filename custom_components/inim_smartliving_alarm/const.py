@@ -9,6 +9,7 @@ PLATFORMS = [
     "alarm_control_panel",
     "binary_sensor",
     "button",
+    "climate",
     "light",
     "select",
     "sensor",
@@ -33,6 +34,9 @@ CONF_AREAS = "areas"
 CONF_ZONES = "zones"
 CONF_SCENARIOS = "scenarios"
 CONF_OUTPUTS = "outputs"  # output numbers: terminals 1-L, then O1-O3
+# Keypads (1-based) whose thermostat gets entities; absent until the keypads
+# have been checked once (at setup, or at the first start of an older entry)
+CONF_THERMOSTATS = "thermostats"
 # Counts stored by versions before the lists ("the first N"); migrated to them
 CONF_LIMIT_AREAS = "limit_areas"
 CONF_LIMIT_ZONES = "limit_zones"
@@ -46,6 +50,7 @@ CONF_POLL_INTERVAL_AREAS = "poll_interval_areas"
 CONF_POLL_INTERVAL_INCLUSION = "poll_interval_inclusion"
 CONF_POLL_INTERVAL_EVENTS = "poll_interval_events"
 CONF_POLL_INTERVAL_FAULTS = "poll_interval_faults"
+CONF_POLL_INTERVAL_THERMOSTATS = "poll_interval_thermostats"
 # Slow polling mode (SmartLAN/SI): the reading interval in seconds, and the
 # minutes after which the mode turns itself off (0: until turned off);
 # stored only when set otherwise than the default
@@ -72,6 +77,7 @@ DEFAULT_POLL_INTERVAL_AREAS = 2.0
 DEFAULT_POLL_INTERVAL_INCLUSION = 30.0
 DEFAULT_POLL_INTERVAL_EVENTS = 10.0
 DEFAULT_POLL_INTERVAL_FAULTS = 60.0
+DEFAULT_POLL_INTERVAL_THERMOSTATS = 60.0
 DEFAULT_SLOW_POLLING_INTERVAL = 30.0  # seconds
 DEFAULT_SLOW_POLLING_DURATION = 60.0  # minutes
 DEFAULT_PORT = 5004  # SmartLAN/SI default; also proposed for SmartLAN/G (no default)
@@ -93,6 +99,7 @@ SYSTEM_MAX_EVENT_LOG_SIZE = 100  # System limit of events to store, increasing t
 DATA_PANEL = "panel"  # the entry's SmartLivingPanel
 DATA_COORDINATOR = "coordinator"
 DATA_ALARM_PANEL = "alarm_panel"  # the entry's alarm panel entity
+DATA_SETUP_OPTIONS = "setup_options"  # the options the entry was set up with
 # entry.data key: the panel configuration read at setup or Re-read, as
 # stored by stored_config
 DATA_INITIAL_PANEL_CONFIG = "initial_panel_config"

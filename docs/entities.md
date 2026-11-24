@@ -11,6 +11,7 @@ Your panel appears in Home Assistant as one device, named as you chose at setup.
 | [Each zone](#zones) | a binary sensor, a switch, two more binary sensors | See whether the zone is open; bypass it; see tamper and alarm memory |
 | [Each scenario](#scenarios) | a button, a binary sensor | Run the scenario; see whether it is active |
 | [Each output](#outputs) | a switch, or a light for dimmers | Switch or dim the output |
+| [Each keypad thermostat](#thermostats) | a climate entity, a temperature sensor | Set the temperature, heat or cool, the program; see the room temperature |
 | [The panel's state](#sensors) | sensors | The event log, the active scenario, firmware and model |
 | [Diagnostics](#diagnostic-and-configuration-entities) | sensors, a select, a button, a switch | The user code, the devices found, programming mode, system reports, re-reading the configuration, slow polling mode |
 
@@ -261,7 +262,7 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
 ??? note "Which outputs are offered and ticked"
 
     *   **What is offered**: outputs programmed on the panel as on/off, monostable or dimmer outputs (terminal outputs and O1 to O3) that your user code may switch. Analogue outputs are not offered. A terminal output on one of the panel's first three terminal positions cannot be switched remotely (the panel reserves those numbers for O1 to O3), so it is not listed.
-    *   **What is ticked for you**: only the outputs the installer marked as *home automation* outputs in the panel's programming (firmware 6; on firmware 5.1 the integration cannot read this mark, so nothing is ticked). The panel cannot tell what an output drives, so check them, and pick any other outputs yourself, in the setup or later in the options under **Areas, zones, scenarios and outputs**. The first time an existing installation shows the outputs in the options, the home automation outputs are ticked there too; after you save, your choice is kept.
+    *   **What is ticked for you**: only the outputs the installer marked as *home automation* outputs in the panel's programming (firmware 6; on firmware 5.1 the integration cannot read this mark, so nothing is ticked). The panel cannot tell what an output drives, so check them, and pick any other outputs yourself, in the setup or later in the options under **Areas, zones, scenarios, outputs and thermostats**. The first time an existing installation shows the outputs in the options, the home automation outputs are ticked there too; after you save, your choice is kept.
     *   **Nothing is switched by itself**: no output is switched at setup, at start, at a reload or when Home Assistant restores its state.
     *   **When the panel refuses**: an output your user code may not switch, or one locked while its areas are armed, gives an error with the reason (see [When the panel refuses a command](troubleshooting.md#when-the-panel-refuses-a-command)). While the panel is in programming mode, no command is sent.
 
@@ -281,3 +282,44 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
     | `keep_on_restoral` | `true` or `false` |
     | `toggle` | `true` or `false` |
     | `relay_use` | `true` or `false` |
+
+## Thermostats
+
+A keypad with a temperature sensor measures the room temperature, and the panel can use it as a thermostat: it switches heating or cooling through the outputs and notifications programmed on its *Thermostat ON* event. Each keypad whose thermostat you import gets:
+
+| ID ends with | Name | States |
+|---|---|---|
+| `climate.…_thermostat_N` | Thermostat N (*keypad name*) | off, heat, cool |
+| `sensor.…_keypad_N_temperature` | Keypad N temperature (*keypad name*) | the room temperature, in °C |
+
+The keypad's room temperature is also the thermostat's current temperature; the sensor keeps its history as a statistic.
+
+| On the panel | Mode | Preset | Target temperature |
+|---|---|---|---|
+| Off | off | – | the manual setpoint, kept for when it is turned on |
+| Manual | heat (winter) or cool (summer) | *Manual* | the manual setpoint |
+| Daily program | heat or cool | *Daily program* | this hour's setpoint of the daily program |
+| Weekly program | heat or cool | *Weekly program* | this hour's setpoint of the weekly program |
+| Antifreeze | heat | *Antifreeze* | 5.0 °C |
+
+*   **Heat or cool** is the panel's season: winter heats below the target, summer cools above it. Antifreeze always heats. On firmware 6 the card shows whether the thermostat is heating or cooling right now; firmware 5.1 does not report it.
+*   **What a change does on the panel**:
+
+    *   **Heat** or **cool** sets the season. From off it also turns the thermostat back to the mode it was last in (manual, daily or weekly program; manual the first time). In antifreeze, **heat** changes nothing (it already heats), and **cool** leaves antifreeze for the mode it was last in, in summer.
+    *   **Off** sets the mode to off. A **preset** sets that mode.
+    *   **A target temperature** sets the manual setpoint, from 10.0 to 35.5 °C. In a program or antifreeze the thermostat also goes to manual. While it is off, it stays off with the new setpoint kept for later.
+*   **The panel acts at its next check of that keypad**, which can take a few minutes: heating or cooling starts or stops then, not at once.
+*   **The programs are not changed**: set them at the keypad. The target shown for a program follows Home Assistant's clock; the panel follows its own, so the two can differ for a few minutes if the clocks disagree.
+*   **Every change is written to the panel's memory.** Avoid automations that change the target temperature every few minutes.
+
+!!! warning
+
+    Turning a thermostat on raises the panel's *Thermostat ON* event when it calls for heat or cool. Outputs, calls or messages programmed on that event (by your installer, for example a boiler relay) follow it. Before using a thermostat for the first time, check what the panel does with its event.
+
+??? note "Which keypads get a thermostat"
+
+    *   **What is offered**: the enabled keypads.
+    *   **What is ticked for you**: the keypads that report a room temperature when the panel is added. An installation from an earlier version checks its keypads once, in the background after its first start, and adds their thermostats then.
+    *   **Every keypad with a sensor** gets a thermostat this way, also one whose thermostat you don't use. Untick it in the options under **Areas, zones, scenarios, outputs and thermostats** to remove its entities.
+    *   A keypad that stops answering keeps its thermostat; its temperature is unknown until it answers again, and it is asked less often meanwhile.
+    *   Checked on a SmartLiving 1050 with firmware 6.07 over SmartLAN/SI, where these changes do not restart the panel. Not tested on a SmartLAN/G board, nor on firmware 5.1.

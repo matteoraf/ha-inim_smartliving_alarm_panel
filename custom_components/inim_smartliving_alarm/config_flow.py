@@ -2,6 +2,7 @@
 
 from collections.abc import Mapping
 import contextlib
+from dataclasses import dataclass
 import logging
 from typing import Any
 
@@ -23,7 +24,7 @@ from homeassistant.helpers.selector import (
 )
 import voluptuous as vol
 
-from .api import create_panel
+from .api import PANEL_ERRORS, create_panel
 from .const import (
     AREA_SWITCH_USE_DEFAULT,
     ARM_MODE_INSTANT,
@@ -49,6 +50,7 @@ from .const import (
     CONF_SCENARIO_ARM_VACATION,
     CONF_SCENARIO_DISARM,
     CONF_SCENARIOS,
+    CONF_THERMOSTATS,
     CONF_USERNAME,
     CONF_ZONES,
     CONF_ZONES_NOT_READY,
@@ -78,11 +80,14 @@ from .protocol.errors import (
 from .protocol.model import model_for
 from .selection import (
     AVAILABLE,
+    OPT_IN_KEYS,
     SELECTION_KEYS,
+    available_thermostats,
     mapped_scenarios,
     numbers,
     output_label,
     outputs_shown,
+    panel_config,
     selected,
     suggested_mappings,
     suggested_selection,
@@ -90,10 +95,12 @@ from .selection import (
 from .stored_config import (
     area_label,
     area_names,
+    keypad_names,
     scenario_label,
     scenario_names,
     zone_names,
 )
+from .thermostats import with_new_keypads
 from .transport.base import TransportError
 from .user_code import user_code_placeholders
 
@@ -126,6 +133,8 @@ async def _validate_for_entry(
     hass: HomeAssistant,
     entry: config_entries.ConfigEntry,
     data: Mapping[str, Any],
+    *,
+    keypad_check: "KeypadCheck | None" = None,
 ) -> dict[str, Any]:
     """Check an entry's new connection details, as at setup.
 
@@ -134,7 +143,9 @@ async def _validate_for_entry(
     """
     running = hass.data.get(DOMAIN, {}).get(entry.entry_id, {}).get(DATA_PANEL)
     async with running.released() if running is not None else contextlib.nullcontext():
-        return await _validate_connection_and_fetch_initial_config(hass, data)
+        return await _validate_connection_and_fetch_initial_config(
+            hass, data, keypad_check=keypad_check
+        )
 
 
 # Secrets of an entry: never sent back to a form, shown as password fields
@@ -168,7 +179,10 @@ def _connection_schema(
 
 
 async def _validate_connection_and_fetch_initial_config(
-    hass: HomeAssistant, data: Mapping[str, Any]
+    hass: HomeAssistant,
+    data: Mapping[str, Any],
+    *,
+    keypad_check: "KeypadCheck | None" = None,
 ) -> dict[str, Any]:
     """Check the panel with these connection details and read its configuration.
 
@@ -176,6 +190,9 @@ async def _validate_connection_and_fetch_initial_config(
     (with an error key) if it is refused: firmware older than 5.1, a model
     without its own layout, a PIN that matches no user code, a panel in
     programming mode, or a configuration that cannot be read.
+
+    Given a KeypadCheck, the enabled keypads are then checked for a
+    thermostat (see KeypadCheck).
     """
     board = data.get(CONF_BOARD, BOARD_SMARTLAN_SI)
     try:
@@ -216,9 +233,29 @@ async def _validate_connection_and_fetch_initial_config(
             raise ValueError(f"unsupported_{err.reason}") from err
         if not panel.user_code_found:
             raise ValueError("invalid_pin")
-        return await async_fetch_panel_configuration(hass, panel)
+        config = await async_fetch_panel_configuration(hass, panel)
+        if keypad_check is not None:
+            keypads = [number - 1 for number in available_thermostats(config)]
+            try:
+                found = await panel.probe_thermostats(keypads)
+            except PANEL_ERRORS as err:
+                _LOGGER.info("The keypads were not checked for a thermostat: %s", err)
+            else:
+                keypad_check.keypads = sorted(keypad + 1 for keypad in found)
+        return config
     finally:
         await panel.close()  # the board may accept only one connection
+
+
+@dataclass
+class KeypadCheck:
+    """The keypads (1-based) whose room temperature read answered at setup.
+
+    None when they could not be checked: the entry checks them at its first
+    start instead.
+    """
+
+    keypads: list[int] | None = None
 
 
 # Per kind of item: the panel's labels and the word for an unnamed one
@@ -233,6 +270,11 @@ def _item_label(config: Mapping[str, Any], key: str, number: int) -> str:
     """How an item is listed: its number and the panel's label."""
     if key == CONF_OUTPUTS:
         return output_label(config, number)
+    if key == CONF_THERMOSTATS:
+        names = keypad_names(config)
+        if number <= len(names) and names[number - 1]:
+            return f"{number} - {names[number - 1]}"
+        return f"Keypad {number}"
     names_of, kind = _ITEM_FORMS[key]
     names = names_of(config)
     if number <= len(names) and names[number - 1]:
@@ -243,11 +285,12 @@ def _item_label(config: Mapping[str, Any], key: str, number: int) -> str:
 def _items_schema(
     config: Mapping[str, Any], chosen: Mapping[str, list[int]]
 ) -> vol.Schema:
-    """The areas, zones, scenarios and outputs of the panel to tick.
+    """The areas, zones, scenarios, outputs and thermostats to tick.
 
     One collapsible section of checkboxes per kind, so that what is left
     out stays in view; the outputs' section only when there are outputs
-    the user code can switch.
+    the user code can switch, the thermostats' only when keypads are
+    enabled.
     """
     fields: dict[Any, Any] = {}
     for key in SELECTION_KEYS:
@@ -255,7 +298,7 @@ def _items_schema(
             SelectOptionDict(value=str(number), label=_item_label(config, key, number))
             for number in AVAILABLE[key](config)
         ]
-        if key == CONF_OUTPUTS and not options:
+        if key in OPT_IN_KEYS and not options:
             continue
         checkboxes = SelectSelector(
             SelectSelectorConfig(
@@ -263,8 +306,9 @@ def _items_schema(
             )
         )
         suggested = [str(number) for number in chosen[key]]
-        # Outputs came later: a form sent without their section ticks none
-        marker = vol.Optional if key == CONF_OUTPUTS else vol.Required
+        # Outputs and thermostats came later: a form sent without their
+        # section ticks none
+        marker = vol.Optional if key in OPT_IN_KEYS else vol.Required
         fields[marker(key)] = section(
             vol.Schema(
                 {
@@ -440,8 +484,11 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             try:
                 _LOGGER.info("Validating Inim Alarm connection for: %s", host)
+                keypad_check = KeypadCheck()
                 initial_panel_config = (
-                    await _validate_connection_and_fetch_initial_config(self.hass, data)
+                    await _validate_connection_and_fetch_initial_config(
+                        self.hass, data, keypad_check=keypad_check
+                    )
                 )
             except ConnectionError:
                 _LOGGER.warning("Connection failed for %s", host)
@@ -458,6 +505,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
             else:
                 self._flow_data[DATA_INITIAL_PANEL_CONFIG] = initial_panel_config
+                self._flow_data[CONF_THERMOSTATS] = keypad_check.keypads
                 _LOGGER.info("Inim Alarm connection validated for %s", host)
                 return await self.async_step_items()
 
@@ -478,12 +526,20 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         Proposed: what the panel shows in use (see suggested_selection).
         """
         config = self._flow_data[DATA_INITIAL_PANEL_CONFIG]
+        checked = self._flow_data.get(CONF_THERMOSTATS)
         if user_input is not None:
-            self._flow_data["selection"] = _chosen_items(user_input)
+            chosen = _chosen_items(user_input)
+            if checked is None and not chosen[CONF_THERMOSTATS]:
+                # Not checked and none ticked: checked at the first start
+                del chosen[CONF_THERMOSTATS]
+            self._flow_data["selection"] = chosen
             return await self.async_step_initial_options()
+        suggested = suggested_selection(config)
+        if checked is not None:
+            suggested[CONF_THERMOSTATS] = checked
         return self.async_show_form(
             step_id="items",
-            data_schema=_items_schema(config, suggested_selection(config)),
+            data_schema=_items_schema(config, suggested),
             description_placeholders={
                 "panel_name": self._flow_data["user_input_step1"].get(
                     CONF_PANEL_NAME, DEFAULT_PANEL_NAME
@@ -619,9 +675,13 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ):
                 return self.async_abort(reason="already_configured")
 
+            keypad_check = KeypadCheck()
             try:
                 initial_panel_config = await _validate_for_entry(
-                    self.hass, entry, {CONF_BOARD: board, **details}
+                    self.hass,
+                    entry,
+                    {CONF_BOARD: board, **details},
+                    keypad_check=keypad_check,
                 )
             except ConnectionError:
                 _LOGGER.warning("Connection failed for %s:%s", host, port)
@@ -633,6 +693,17 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected error reconfiguring %s:%s", host, port)
                 errors["base"] = "unknown"
             else:
+                # Keypads enabled since are added to the thermostats
+                thermostats = with_new_keypads(
+                    entry.options,
+                    panel_config(entry.data),
+                    keypad_check.keypads or (),
+                )
+                options = (
+                    entry.options
+                    if thermostats is None
+                    else {**entry.options, CONF_THERMOSTATS: thermostats}
+                )
                 # A changed entry is reloaded by its update listener; reload an
                 # unchanged one here so that the flow always ends with one reload.
                 if not self.hass.config_entries.async_update_entry(
@@ -643,6 +714,7 @@ class InimAlarmConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         **details,
                         DATA_INITIAL_PANEL_CONFIG: initial_panel_config,
                     },
+                    options=options,
                 ):
                     self.hass.config_entries.async_schedule_reload(entry.entry_id)
                 return self.async_abort(reason="reconfigure_successful")

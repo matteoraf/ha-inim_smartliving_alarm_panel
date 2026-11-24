@@ -30,6 +30,8 @@ from .api import (
     PanelStatus,
     SmartLivingPanel,
     StatusReading,
+    ThermostatReading,
+    ThermostatState,
 )
 from .const import (
     BOARD_SMARTLAN_SI,
@@ -38,13 +40,16 @@ from .const import (
     DEFAULT_EVENT_LOG_SIZE,
 )
 from .polling import (
+    SLOW_RIDERS,
     PollGroup,
     PollSchedule,
     intervals,
     slow_intervals,
     slow_polling_minutes,
 )
+from .protocol.thermostat import ThermostatHead
 from .selection import imported_outputs, is_dimmer, panel_config
+from .thermostats import TemperatureBackoff, program_time, selected_keypads
 from .transport.base import ConnectError
 
 _LOGGER = logging.getLogger(__name__)
@@ -93,6 +98,16 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         # Whether the last event read failed (it is logged once)
         self._events_failing = False
         self._output_levels: Mapping[int, int | None] = {}
+        # Keypads whose temperature read went unanswered are left out a while
+        self._temperature_backoff = TemperatureBackoff(
+            self.intervals.get(PollGroup.THERMOSTATS, 60.0)
+        )
+        # Thermostat settings written from Home Assistant and not read back
+        # by a thermostat read since: keypad -> (write number, head). A read
+        # of other groups that began before a write must not show the old
+        # settings again.
+        self._writes = 0
+        self._written: dict[int, tuple[int, ThermostatHead]] = {}
         # Events read but not handed to the entities yet (a later group of
         # the same read failed), newest first
         self._pending_events: tuple[LoggedEvent, ...] = ()
@@ -149,6 +164,8 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
             try:
                 try:
                     status = await self.panel.read_status()
+                    if PollGroup.THERMOSTATS in self.schedule.intervals:
+                        status = (await self._read_thermostats()).apply(status)
                 except PANEL_ERRORS as err:
                     # Home Assistant logs the first failure and the recovery
                     raise self._failure(err) from err
@@ -270,8 +287,114 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
             PollGroup.AREAS: self.panel.read_areas,
             PollGroup.INCLUSION: self._read_inclusion,
             PollGroup.FAULTS: self.panel.read_panel_state,
+            PollGroup.THERMOSTATS: self._read_thermostats,
         }
         return await readers[group]()
+
+    async def _read_thermostats(self) -> ThermostatReading:
+        """The selected keypads' thermostats.
+
+        A keypad whose temperature read goes unanswered is left out of the
+        next reads for a while (see TemperatureBackoff); the first time is
+        logged, and when it answers again.
+        """
+        keypads = selected_keypads(
+            self.config_entry.options, panel_config(self.config_entry.data)
+        )
+        hour, weekday = program_time(dt_util.now())
+        skip = self._temperature_backoff.skipped()
+        writes_before = self._writes
+        reading = await self.panel.read_thermostats(
+            keypads, hour=hour, weekday=weekday, skip_temperature=skip
+        )
+        # Writes before this read are in it
+        self._written = {
+            keypad: written
+            for keypad, written in self._written.items()
+            if written[0] > writes_before
+        }
+        first, again = self._temperature_backoff.record(
+            (k for k in reading.thermostats if k not in skip),
+            reading.temperature_failed,
+        )
+        for keypad in sorted(first):
+            _LOGGER.warning(
+                "%s: keypad %s did not answer the temperature read; it is read "
+                "again later",
+                self.name,
+                keypad + 1,
+            )
+        for keypad in sorted(again):
+            _LOGGER.info(
+                "%s: keypad %s answers the temperature read again",
+                self.name,
+                keypad + 1,
+            )
+        return reading
+
+    async def async_probe_thermostats(self, keypads: list[int]) -> frozenset[int]:
+        """The keypads (0-based) whose thermostat can be used (see
+        SmartLivingPanel.probe_thermostats), one keypad between two group
+        reads: a keypad that does not answer holds the reads up for that
+        keypad only."""
+        found: set[int] = set()
+        for keypad in keypads:
+            async with self._reading:
+                found |= await self.panel.probe_thermostats([keypad])
+        return frozenset(found)
+
+    @callback
+    def async_thermostats_selected(self) -> None:
+        """The entry's first thermostat selection was made (see
+        thermostats.first_selection): read the thermostats from now on,
+        starting at once."""
+        options = self.config_entry.options
+        self.intervals = intervals(options)
+        group = PollGroup.THERMOSTATS
+        if group not in self.intervals or group in self.schedule.intervals:
+            return
+        self._temperature_backoff = TemperatureBackoff(self.intervals[group])
+        seconds = (slow_intervals(options) if self.slow_polling else self.intervals)[
+            group
+        ]
+        self.schedule.add(group, seconds)
+        self._temperature_backoff.interval = seconds
+        self._schedule_tick()
+        self.config_entry.async_create_background_task(
+            self.hass, self.async_refresh(), f"{self.name} thermostats"
+        )
+
+    @callback
+    def async_thermostat_written(self, keypad: int, head: ThermostatHead) -> None:
+        """A keypad's (0-based) thermostat as read back after a write: shown
+        at once. Whether it heats or cools follows with the next read: the
+        panel acts on a change at its next check of that keypad."""
+        self._writes += 1
+        self._written[keypad] = (self._writes, head)
+        if self.data is None:
+            return
+        self.data = replace(
+            self.data, status=self._with_written(self.data.status), new_events=()
+        )
+        self.async_update_listeners()
+
+    def _with_written(self, status: PanelStatus) -> PanelStatus:
+        """The status with the thermostat settings written since its
+        thermostats were read."""
+        if not self._written:
+            return status
+        thermostats = dict(status.thermostats)
+        for keypad, (_, head) in self._written.items():
+            old = thermostats.get(keypad)
+            thermostats[keypad] = ThermostatState(
+                head=head,
+                weekly_setpoint=old.weekly_setpoint
+                if old is not None and old.head.mode is head.mode
+                else None,
+                on=None if old is None else old.on,
+                temperature=None if old is None else old.temperature,
+            )
+        return replace(status, thermostats=thermostats)
 
     async def _read_inclusion(self) -> StatusReading:
         """The zone inclusion, and the dimmer levels with it."""
@@ -296,7 +419,10 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         failure.__cause__ = err
         self._note_failure(started)
         self.data = replace(
-            self.data, status=status, new_events=(), output_levels=self._output_levels
+            self.data,
+            status=self._with_written(status),
+            new_events=(),
+            output_levels=self._output_levels,
         )
         self.async_set_update_error(failure)
 
@@ -431,7 +557,8 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
             self.panel.set_shared(True)
             slow = slow_intervals(self.config_entry.options)
             async with self._reading:
-                self.schedule = PollSchedule(slow)
+                self.schedule = PollSchedule(slow, riders=SLOW_RIDERS)
+                self._backoff_follows_schedule()
                 self.schedule.read_all(_now())  # the next read is one interval away
                 await self.panel.release()
             _LOGGER.info(
@@ -455,6 +582,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
             self.panel.set_shared(False)
             async with self._reading:
                 self.schedule = PollSchedule(self.intervals)  # every group due
+                self._backoff_follows_schedule()
             _LOGGER.info(
                 "%s: slow polling mode off: the panel is read at the Polling "
                 "intervals again",
@@ -489,6 +617,13 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         if self.slow_polling and self.slow_polling_until == until:
             await self._async_end_slow_polling()
 
+    def _backoff_follows_schedule(self) -> None:
+        """Cap a silent keypad's wait in time at the thermostats' interval
+        now in use."""
+        seconds = self.schedule.intervals.get(PollGroup.THERMOSTATS)
+        if seconds is not None:
+            self._temperature_backoff.interval = seconds
+
     def _cancel_slow_polling_end(self) -> None:
         if self._unsub_slow_polling_end is not None:
             self._unsub_slow_polling_end()
@@ -500,7 +635,7 @@ class InimDataUpdateCoordinator(DataUpdateCoordinator[PanelData]):
         """The data to hand over, with the events not handed over yet."""
         new_events, self._pending_events = self._pending_events, ()
         return PanelData(
-            status=status,
+            status=self._with_written(status),
             new_events=new_events,
             latest_event_index=self._latest_event_index,
             output_levels=self._output_levels,

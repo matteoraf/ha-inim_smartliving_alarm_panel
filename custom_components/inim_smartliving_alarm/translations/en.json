@@ -59,8 +59,8 @@
           }
         },
         "items": {
-          "title": "Areas, zones, scenarios and outputs",
-          "description": "Choose what to import from {panel_name}. Each one ticked gets its entities. Proposed: the zones that belong to an area, the areas of those zones and the scenarios that change an area; the outputs the installer marked as home automation outputs. You can change this later in the integration's options.\n\n**Found on the panel**\n- Keypads: {keypads}\n- Readers: {readers}\n- Expanders: {expanders}\n- Sirens: {sirens}",
+          "title": "Areas, zones, scenarios, outputs and thermostats",
+          "description": "Choose what to import from {panel_name}. Each one ticked gets its entities. Proposed: the zones that belong to an area, the areas of those zones and the scenarios that change an area; the outputs the installer marked as home automation outputs; the keypads that report a room temperature, for their thermostat. You can change this later in the integration's options.\n\n**Found on the panel**\n- Keypads: {keypads}\n- Readers: {readers}\n- Expanders: {expanders}\n- Sirens: {sirens}",
           "sections": {
             "areas": {
               "name": "Areas",
@@ -88,6 +88,13 @@
               "description": "The outputs your user code may switch: terminal outputs and the fixed outputs O1-O3. Only the outputs the installer marked as home automation outputs are ticked for you: an output can drive a siren, a lock or a gate, so tick only the ones you mean to switch from Home Assistant. An output on one of the panel's first three terminal positions cannot be switched remotely and is not listed.",
               "data": {
                 "outputs": "Outputs to import"
+              }
+            },
+            "thermostats": {
+              "name": "Thermostats",
+              "description": "The enabled keypads, for the thermostat each one has. The keypads that report a room temperature are ticked for you. A keypad's thermostat gets its entities even when it is not in use: untick the ones you don't want.",
+              "data": {
+                "thermostats": "Thermostats to import"
               }
             }
           }
@@ -145,14 +152,14 @@
           "title": "Inim SmartLiving Alarm Options",
           "description": "Choose what to change.",
           "menu_options": {
-            "items": "Areas, zones, scenarios and outputs",
+            "items": "Areas, zones, scenarios, outputs and thermostats",
             "area_switches": "Area switches arm mode per area",
             "general": "General settings",
             "polling": "Polling"
           }
         },
         "items": {
-          "title": "Areas, zones, scenarios and outputs",
+          "title": "Areas, zones, scenarios, outputs and thermostats",
           "description": "Choose what to import. Entities of the items you untick are removed; ticking them again brings them back. Zones wired later and new scenarios are not ticked by themselves: tick them here after re-reading the panel configuration.\n\n**Found on the panel**\n- Keypads: {keypads}\n- Readers: {readers}\n- Expanders: {expanders}\n- Sirens: {sirens}",
           "sections": {
             "areas": {
@@ -181,6 +188,13 @@
               "description": "The outputs your user code may switch: terminal outputs and the fixed outputs O1-O3. Only the outputs the installer marked as home automation outputs are ticked for you: an output can drive a siren, a lock or a gate, so tick only the ones you mean to switch from Home Assistant. An output on one of the panel's first three terminal positions cannot be switched remotely and is not listed.",
               "data": {
                 "outputs": "Outputs to import"
+              }
+            },
+            "thermostats": {
+              "name": "Thermostats",
+              "description": "The enabled keypads, for the thermostat each one has. The keypads that report a room temperature are ticked for you. A keypad's thermostat gets its entities even when it is not in use: untick the ones you don't want.",
+              "data": {
+                "thermostats": "Thermostats to import"
               }
             }
           }
@@ -218,6 +232,7 @@
             "poll_interval_inclusion": "Zone bypass and dimmer levels",
             "poll_interval_events": "Event log",
             "poll_interval_faults": "Panel state",
+            "poll_interval_thermostats": "Thermostats",
             "slow_polling_interval": "Reading interval in slow polling mode",
             "slow_polling_duration": "Turn off slow polling mode after"
           },
@@ -227,6 +242,7 @@
             "poll_interval_inclusion": "Zone included switches, the zones' test attribute and the brightness of dimmers.",
             "poll_interval_events": "Event log sensor.",
             "poll_interval_faults": "Programming mode sensor.",
+            "poll_interval_thermostats": "Thermostats and keypad temperature sensors. In slow polling mode they are read with the rest of the panel, at the first multiple of the slow polling interval that is at least this long.",
             "slow_polling_interval": "While slow polling mode is on, Home Assistant reads the whole panel at this interval and closes its connection after each read, so other apps can connect to the board in between.",
             "slow_polling_duration": "Slow polling mode turns itself off after this many minutes. 0 keeps it on until you turn it off."
           }
@@ -266,6 +282,9 @@
       },
       "command_failed": {
         "message": "The command for {target} could not be completed: {error}"
+      },
+      "thermostat_not_set": {
+        "message": "{target}: the panel did not keep the new setting. Try again; if it keeps happening, check the thermostat on the keypad."
       },
       "zones_not_ready": {
         "message": "{target} was not armed because these zones are not ready: {zones}. Close or bypass them, or set \"When zones are not ready\" to arm anyway in the integration's options."
@@ -328,10 +347,10 @@
         "message": "{title} is not loaded, so the command cannot be sent."
       },
       "area_not_imported": {
-        "message": "Areas {areas} are not imported from {title}. Import them in the integration's options, under Areas, zones, scenarios and outputs."
+        "message": "Areas {areas} are not imported from {title}. Import them in the integration's options, under Areas, zones, scenarios, outputs and thermostats."
       },
       "scenario_not_imported": {
-        "message": "Scenario {scenario} is not imported from {title}. Import it in the integration's options, under Areas, zones, scenarios and outputs."
+        "message": "Scenario {scenario} is not imported from {title}. Import it in the integration's options, under Areas, zones, scenarios, outputs and thermostats."
       },
       "notification_system_report_title": {
         "message": "Inim system report ready"
@@ -548,6 +567,12 @@
         },
         "user_code": {
           "name": "User code"
+        },
+        "keypad_temperature": {
+          "name": "Keypad {number} temperature ({label})"
+        },
+        "keypad_temperature_unnamed": {
+          "name": "Keypad {number} temperature"
         }
       },
       "switch": {
@@ -576,6 +601,34 @@
         },
         "fixed_output": {
           "name": "O{number}"
+        }
+      },
+      "climate": {
+        "thermostat": {
+          "name": "Thermostat {number} ({label})",
+          "state_attributes": {
+            "preset_mode": {
+              "state": {
+                "manual": "Manual",
+                "daily": "Daily program",
+                "weekly": "Weekly program",
+                "antifreeze": "Antifreeze"
+              }
+            }
+          }
+        },
+        "thermostat_unnamed": {
+          "name": "Thermostat {number}",
+          "state_attributes": {
+            "preset_mode": {
+              "state": {
+                "manual": "Manual",
+                "daily": "Daily program",
+                "weekly": "Weekly program",
+                "antifreeze": "Antifreeze"
+              }
+            }
+          }
         }
       },
       "light": {

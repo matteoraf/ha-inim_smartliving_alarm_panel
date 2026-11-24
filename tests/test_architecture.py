@@ -141,6 +141,7 @@ HA_FREE = [
     "selection",
     "stored_config",
     "system_report",
+    "thermostats",
     "user_code",
 ]
 
@@ -295,6 +296,7 @@ ENTITY_MODULES = [
     "alarm_control_panel",
     "binary_sensor",
     "button",
+    "climate",
     "entity",
     "light",
     "outputs",

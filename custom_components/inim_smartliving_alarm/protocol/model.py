@@ -84,6 +84,7 @@ class PanelModel:
     label_bank: int  # added to the label pointers read from RAM
     area_records: int  # A x 7 bytes: delays and options of each area
     fixed_output_records: int  # O1-O3, 2 bytes each: monostable time, options
+    thermostat_records: int  # 195 bytes per keypad: its thermostat
     # Profile not yet confirmed on a real panel
     experimental: bool = False
     sirens: int = 10  # siren labels, on every model
@@ -99,6 +100,9 @@ class PanelModel:
     # Extra output options, L + 3 bytes (terminals, then O1-O3; bit 0 = home
     # automation output); None where the address is not known
     extra_output_options: int | None = None
+    # The panel answers the keypad status block (thermostats on now);
+    # firmware 6
+    keypad_status: bool = True
 
     scenarios = SCENARIOS
     terminal_record_length = 12
@@ -201,6 +205,7 @@ SMARTLIVING_1050_FW6 = PanelModel(
     label_bank=0x10000,
     area_records=0x06126,
     fixed_output_records=0x05A2C,
+    thermostat_records=0x18400,
     extra_output_options=0x08C7D,
 )
 
@@ -231,6 +236,7 @@ SMARTLIVING_10100_FW6 = PanelModel(
     label_bank=0x10000,
     area_records=0x0A36B,
     fixed_output_records=0x0957D,
+    thermostat_records=0x18400,
     extra_output_options=0x0E7B9,
 )
 
@@ -260,6 +266,7 @@ SMARTLIVING_505_FW6 = PanelModel(
     label_bank=0,
     area_records=0x030E3,
     fixed_output_records=0x029E9,
+    thermostat_records=0x06B00,
     extra_output_options=0x04CCE,
     experimental=True,
 )
@@ -291,6 +298,7 @@ SMARTLIVING_515_FW6 = PanelModel(
     label_bank=0,
     area_records=0x03859,
     fixed_output_records=0x0315F,
+    thermostat_records=0x06B00,
     extra_output_options=0x054BF,
     experimental=True,
 )
@@ -311,6 +319,7 @@ _FW51 = {
     "event_codes": FW51_EVENT_CODES,
     "output_detail": False,
     "extra_output_options": None,
+    "keypad_status": False,
     "experimental": True,
 }
 
@@ -326,6 +335,7 @@ SMARTLIVING_505_FW51 = replace(
     event_log=0x0EE5C,
     area_records=0x0298C,
     fixed_output_records=0x022A6,
+    thermostat_records=0x07740,
     **_FW51,
 )
 
@@ -341,6 +351,7 @@ SMARTLIVING_515_FW51 = replace(
     event_log=0x0EE5C,
     area_records=0x02FEA,
     fixed_output_records=0x02904,
+    thermostat_records=0x07740,
     **_FW51,
 )
 
@@ -358,6 +369,7 @@ SMARTLIVING_1050_FW51 = replace(
     label_bank=0,
     area_records=0x051DC,
     fixed_output_records=0x04AF6,
+    thermostat_records=0x07740,
     **_FW51,
 )
 
@@ -373,6 +385,7 @@ SMARTLIVING_10100_FW51 = replace(
     event_log=0x19004,
     area_records=0x08A62,
     fixed_output_records=0x07C9C,
+    thermostat_records=0x18000,
     **_FW51,
 )
 

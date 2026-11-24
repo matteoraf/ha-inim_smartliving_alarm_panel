@@ -1,9 +1,10 @@
-"""Which areas, zones and scenarios of the panel get entities.
+"""Which areas, zones, scenarios, outputs and thermostats get entities.
 
 The user picks them in the setup and the options: the selection is stored in
 the entry options as lists of 1-based numbers. Only items that are on the
-panel are offered: every area and scenario of the model, and the zone numbers
-whose terminal is programmed as a zone.
+panel are offered: every area and scenario of the model, the zone numbers
+whose terminal is programmed as a zone, the outputs the user code can switch
+and the enabled keypads (for their thermostat).
 """
 
 from collections.abc import Collection, Iterable, Mapping
@@ -25,6 +26,7 @@ from .const import (
     CONF_SCENARIO_ARM_VACATION,
     CONF_SCENARIO_DISARM,
     CONF_SCENARIOS,
+    CONF_THERMOSTATS,
     CONF_ZONES,
     DATA_INITIAL_PANEL_CONFIG,
     DEFAULT_LIMIT_AREAS,
@@ -45,6 +47,8 @@ from .stored_config import (
     fixed_output_names,
     fixed_outputs,
     home_automation_flags,
+    own_model,
+    peripherals,
     physical_map,
     scenario_area_modes,
     stored_model,
@@ -55,7 +59,15 @@ from .stored_config import (
     zone_records,
 )
 
-SELECTION_KEYS = (CONF_AREAS, CONF_ZONES, CONF_SCENARIOS, CONF_OUTPUTS)
+SELECTION_KEYS = (
+    CONF_AREAS,
+    CONF_ZONES,
+    CONF_SCENARIOS,
+    CONF_OUTPUTS,
+    CONF_THERMOSTATS,
+)
+# Kinds nothing is selected of until the user (or the keypad check) picks
+OPT_IN_KEYS = (CONF_OUTPUTS, CONF_THERMOSTATS)
 
 # Alarm panel modes mapped to a scenario (option key -> stored 0-based index)
 SCENARIO_MAPPING_KEYS = (
@@ -82,6 +94,11 @@ _ITEM_UNIQUE_IDS: dict[str, tuple[tuple[re.Pattern[str], bool], ...]] = {
     # Terminal outputs by 1-based terminal = output number; fixed outputs
     # are handled in item_of_unique_id (their number depends on the model)
     CONF_OUTPUTS: ((re.compile(r"_terminal_output_(\d+)"), False),),
+    # Keypads by 1-based number
+    CONF_THERMOSTATS: (
+        (re.compile(r"_thermostat_(\d+)"), False),
+        (re.compile(r"_keypad_temperature_(\d+)"), False),
+    ),
 }
 _FIXED_OUTPUT_UNIQUE_ID = re.compile(r"_fixed_output_(\d)")
 
@@ -135,11 +152,22 @@ def available_outputs(config: Mapping[str, Any]) -> list[int]:
     ]
 
 
+def available_thermostats(config: Mapping[str, Any]) -> list[int]:
+    """The enabled keypads (1-based), whose thermostat may be selected.
+
+    None on a configuration read with another model's layout, or without
+    the stored enabled peripherals.
+    """
+    stored = peripherals(config) if own_model(config) is not None else None
+    return [] if stored is None else [keypad + 1 for keypad in stored.keypads]
+
+
 AVAILABLE = {
     CONF_AREAS: available_areas,
     CONF_ZONES: available_zones,
     CONF_SCENARIOS: available_scenarios,
     CONF_OUTPUTS: available_outputs,
+    CONF_THERMOSTATS: available_thermostats,
 }
 
 
@@ -152,13 +180,13 @@ def selected(
     """The selected items of one kind that are on the panel, in order.
 
     An entry without a stored selection (it should not happen once the
-    entry is migrated) gets every item, except outputs: none of them until
-    the user ticks them.
+    entry is migrated) gets every item, except outputs and thermostats:
+    none of them until they are picked.
     """
     available = AVAILABLE[key](config)
     stored = options.get(key)
     if stored is None:
-        return [] if key == CONF_OUTPUTS else available
+        return [] if key in OPT_IN_KEYS else available
     chosen = {int(number) for number in stored}
     return [number for number in available if number in chosen]
 
@@ -189,6 +217,8 @@ def suggested_selection(config: Mapping[str, Any]) -> dict[str, list[int]]:
         # The panel cannot tell what an output drives (a siren, a lock, ...):
         # only those the installer marked as home automation are proposed
         CONF_OUTPUTS: home_automation_outputs(config),
+        # Proposed after a check of the keypads (see thermostats.py)
+        CONF_THERMOSTATS: [],
     }
 
 

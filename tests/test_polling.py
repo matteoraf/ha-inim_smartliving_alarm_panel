@@ -61,7 +61,12 @@ from .test_init_baseline import ALARM_PANEL, ZONE_36_SWITCH, entity_id_for, stat
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
-DEFAULTS = {group: spec.default for group, spec in GROUPS.items()}
+# The groups of an entry without thermostats
+DEFAULTS = {
+    group: spec.default
+    for group, spec in GROUPS.items()
+    if group is not PollGroup.THERMOSTATS
+}
 ZONE_1 = ("binary_sensor", "_zone_1")
 EVENT_LOG = ("sensor", "_event_log")
 
@@ -134,7 +139,7 @@ def test_each_group_at_its_interval() -> None:
         PollGroup.INCLUSION: 2,
         PollGroup.FAULTS: 1,
     }
-    assert reads[60.0] == list(GROUPS)  # in reading order
+    assert reads[60.0] == list(DEFAULTS)  # in reading order
     assert reads[2.0] == [PollGroup.ZONES, PollGroup.AREAS]
 
 
@@ -549,7 +554,7 @@ async def test_polling_turned_off_for_the_entry(
         blocking=True,
     )
     await hass.async_block_till_done()
-    assert set(groups_read(panel, start)) == set(GROUPS)
+    assert set(groups_read(panel, start)) == set(DEFAULTS)
     await unload_all(hass)
 
 
@@ -569,7 +574,7 @@ async def test_a_command_reads_every_group_at_once(
         blocking=True,
     )
     await hass.async_block_till_done()
-    assert set(groups_read(panel, start)) == set(GROUPS)
+    assert set(groups_read(panel, start)) == set(DEFAULTS)
     await unload_all(hass)
 
 

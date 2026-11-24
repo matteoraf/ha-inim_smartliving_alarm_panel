@@ -21,6 +21,8 @@ At a glance
 
 *   Outputs the panel lets your user code switch: on/off, monostable and dimmers.
 
+*   The keypads' thermostats: mode, season and temperature, and each keypad's room temperature.
+
 *   The panel's event log, with the names programmed on the panel.
 
 *   Local connection through a SmartLAN/SI board, or a SmartLAN/G board.
