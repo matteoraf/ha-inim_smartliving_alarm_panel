@@ -36,10 +36,33 @@ class Dialect:
     name: str
     eeprom_device: int  # device byte of EEPROM requests
     max_transfer: int  # longest read in one request
+    # Reads of a peripheral's memory: op, and what is added to the
+    # peripheral class to give the device byte
+    peripheral_read_op: int
+    peripheral_device_offset: int
+    # The write a keypad thermostat's settings use: op and device byte
+    no_programming_write_op: int
+    no_programming_device: int
 
 
-SMARTLAN_SI = Dialect("SmartLAN/SI", DEVICE_EEPROM, 250)
-SMARTLAN_G = Dialect("SmartLAN/G", DEVICE_EEPROM_G, 2000)
+SMARTLAN_SI = Dialect(
+    "SmartLAN/SI",
+    DEVICE_EEPROM,
+    250,
+    peripheral_read_op=OP_PERIPHERAL_READ,
+    peripheral_device_offset=-1,
+    no_programming_write_op=OP_PERIPHERAL_WRITE,
+    no_programming_device=0xFC,
+)
+SMARTLAN_G = Dialect(
+    "SmartLAN/G",
+    DEVICE_EEPROM_G,
+    2000,
+    peripheral_read_op=OP_READ,
+    peripheral_device_offset=0,
+    no_programming_write_op=OP_WRITE,
+    no_programming_device=0xFD,
+)
 
 # Longest read on SmartLAN/SI, and longest write payload on both boards
 # (commands are at most 14 bytes)

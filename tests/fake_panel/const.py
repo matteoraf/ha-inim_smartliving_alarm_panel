@@ -32,6 +32,7 @@ DEVICE_KEYPAD = 0x01  # with a peripheral opcode (0x10 / 0x11)
 LOGICAL_EEPROM = 0xFF
 LOGICAL_FLASH = 0xFE
 LOGICAL_EEPROM_NO_PROG = 0xFD
+DEVICE_EEPROM_NO_PROG_SI = 0xFC  # with op 0x11 on SmartLAN/SI
 
 OP_READ = 0x00
 OP_WRITE = 0x01
@@ -70,6 +71,15 @@ RAM_ACTIVE_SCENARIO = 0x1FFB
 RAM_OUTPUT_DETAIL = 0x1FFD
 RAM_EVENT_POINTERS = 0x1FFE
 RAM_EVENT_TEXT = 0x1FFF
+RAM_KEYPAD_STATUS = 0x1FF2  # 21 bytes: keypads, thermostats on, seasons, modes
+KEYPAD_STATUS_LENGTH = 21
+THERMOSTAT_BLOCK_LENGTH = 195
+# A thermostat block as it comes from the factory (read on a 1050 6.07):
+# off, winter, then 20.0 degrees (byte 100) as the manual setpoint and in
+# every hour of both programs
+FACTORY_THERMOSTAT_BLOCK = bytes((0, 0)) + bytes((100,)) * (THERMOSTAT_BLOCK_LENGTH - 2)
+# What a keypad without a sensor answers in the fake (unknown on real ones)
+NO_SENSOR_TEMPERATURE = 0xFFFF
 
 # Label pointer table (each entry: 2-byte little-endian offset into EEPROM bank 1)
 RAM_LABELS_AREAS = 0x4014
@@ -232,6 +242,8 @@ class Layout:
     eeprom_fixed_outputs: int = 0x05A2C
     # Extra output options, L + 3 bytes (bit 0: home automation); firmware 6
     eeprom_extra_output_options: int | None = 0x08C7D
+    # Keypad thermostat blocks, 195 bytes per keypad
+    eeprom_thermostats: int = 0x18400
 
     @property
     def zones(self) -> int:
@@ -429,6 +441,7 @@ LAYOUT_505 = Layout(
     label_bank=0,
     eeprom_fixed_outputs=0x029E9,
     eeprom_extra_output_options=0x04CCE,
+    eeprom_thermostats=0x06B00,
 )
 
 # SmartLiving 515, firmware 6.x
@@ -459,6 +472,7 @@ LAYOUT_515 = Layout(
     label_bank=0,
     eeprom_fixed_outputs=0x0315F,
     eeprom_extra_output_options=0x054BF,
+    eeprom_thermostats=0x06B00,
 )
 
 
@@ -469,6 +483,7 @@ _FW51 = {
     "general_options_address": 0x00015,
     "firmware_51": True,
     "eeprom_extra_output_options": None,  # not known on firmware 5.1
+    "eeprom_thermostats": 0x07740,
 }
 
 LAYOUT_1050_FW51 = replace(

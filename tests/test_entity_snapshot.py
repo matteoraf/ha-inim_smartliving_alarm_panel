@@ -24,7 +24,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import __version__ as HA_VERSION
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr, entity_registry as er
@@ -34,7 +34,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.inim_smartliving_alarm.const import DOMAIN
 
-from .conftest import ALL, add_entry
+from .conftest import ALL, add_entry, wait_until
 from .fake_panel import (
     EventRecord,
     FakePanel,
@@ -198,8 +198,21 @@ def stored_entry(
 
 
 async def set_up(hass: HomeAssistant, entry: MockConfigEntry) -> None:
-    """Set up a stored entry and wait for its platforms."""
+    """Set up a stored entry and wait for its platforms, and for the
+    thermostats its keypad check adds at this first start, read."""
     await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+    await wait_until(
+        lambda: (
+            "thermostats" in entry.options and entry.state is ConfigEntryState.LOADED
+        )
+    )
+    await wait_until(
+        lambda: all(
+            hass.states.get(entity_id).state != "unavailable"
+            for entity_id in hass.states.async_entity_ids("climate")
+        )
+    )
     await hass.async_block_till_done()
 
 

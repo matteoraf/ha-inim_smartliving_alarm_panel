@@ -118,7 +118,10 @@ async def set_options(hass: HomeAssistant, entry: ConfigEntry, **options) -> Non
 
 def test_slow_intervals_and_minutes() -> None:
     """Every group at the one interval, within its range; the minutes too."""
-    assert slow_intervals({}) == dict.fromkeys(GROUPS, SLOW_POLLING_INTERVAL.default)
+    without_thermostats = [g for g in GROUPS if g is not PollGroup.THERMOSTATS]
+    assert slow_intervals({}) == dict.fromkeys(
+        without_thermostats, SLOW_POLLING_INTERVAL.default
+    )
     assert set(slow_intervals({"slow_polling_interval": 45}).values()) == {45}
     assert set(slow_intervals({"slow_polling_interval": 1}).values()) == {10}
     assert set(slow_intervals({"slow_polling_interval": "x"}).values()) == {30}

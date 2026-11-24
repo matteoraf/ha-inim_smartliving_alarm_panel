@@ -59,8 +59,8 @@
           }
         },
         "items": {
-          "title": "Aree, zone, scenari e uscite",
-          "description": "Scegli cosa importare da {panel_name}. Ogni voce selezionata ha le sue entità. Proposte: le zone che appartengono a un'area, le aree di quelle zone e gli scenari che cambiano un'area; le uscite che l'installatore ha indicato come domotiche. Potrai cambiarle in seguito nelle opzioni dell'integrazione.\n\n**Trovati sulla centrale**\n- Tastiere: {keypads}\n- Lettori: {readers}\n- Espansioni: {expanders}\n- Sirene: {sirens}",
+          "title": "Aree, zone, scenari, uscite e termostati",
+          "description": "Scegli cosa importare da {panel_name}. Ogni voce selezionata ha le sue entità. Proposte: le zone che appartengono a un'area, le aree di quelle zone e gli scenari che cambiano un'area; le uscite che l'installatore ha indicato come domotiche; le tastiere che rilevano la temperatura ambiente, per il loro termostato. Potrai cambiarle in seguito nelle opzioni dell'integrazione.\n\n**Trovati sulla centrale**\n- Tastiere: {keypads}\n- Lettori: {readers}\n- Espansioni: {expanders}\n- Sirene: {sirens}",
           "sections": {
             "areas": {
               "name": "Aree",
@@ -88,6 +88,13 @@
               "description": "Le uscite che il tuo codice utente può comandare: le uscite su terminale e le uscite fisse O1-O3. Sono selezionate per te solo le uscite che l'installatore ha indicato come uscite domotiche: un'uscita può comandare una sirena, una serratura o un cancello, quindi seleziona solo quelle che vuoi comandare da Home Assistant. Un'uscita su una delle prime tre posizioni dei terminali della centrale non si può comandare a distanza e non è elencata.",
               "data": {
                 "outputs": "Uscite da importare"
+              }
+            },
+            "thermostats": {
+              "name": "Termostati",
+              "description": "Le tastiere abilitate, per il termostato di ciascuna. Sono già selezionate le tastiere che rilevano la temperatura ambiente. Il termostato di una tastiera ha le sue entità anche se non è in uso: togli la selezione a quelli che non vuoi.",
+              "data": {
+                "thermostats": "Termostati da importare"
               }
             }
           }
@@ -145,14 +152,14 @@
           "title": "Opzioni Inim SmartLiving",
           "description": "Scegli cosa modificare.",
           "menu_options": {
-            "items": "Aree, zone, scenari e uscite",
+            "items": "Aree, zone, scenari, uscite e termostati",
             "area_switches": "Modalità di inserimento per area",
             "general": "Impostazioni generali",
             "polling": "Aggiornamento"
           }
         },
         "items": {
-          "title": "Aree, zone, scenari e uscite",
+          "title": "Aree, zone, scenari, uscite e termostati",
           "description": "Scegli cosa importare. Le entità delle voci deselezionate vengono rimosse; selezionandole di nuovo tornano. Le zone collegate in seguito e i nuovi scenari non vengono selezionati da soli: selezionali qui dopo aver riletto la configurazione della centrale.\n\n**Trovati sulla centrale**\n- Tastiere: {keypads}\n- Lettori: {readers}\n- Espansioni: {expanders}\n- Sirene: {sirens}",
           "sections": {
             "areas": {
@@ -181,6 +188,13 @@
               "description": "Le uscite che il tuo codice utente può comandare: le uscite su terminale e le uscite fisse O1-O3. Sono selezionate per te solo le uscite che l'installatore ha indicato come uscite domotiche: un'uscita può comandare una sirena, una serratura o un cancello, quindi seleziona solo quelle che vuoi comandare da Home Assistant. Un'uscita su una delle prime tre posizioni dei terminali della centrale non si può comandare a distanza e non è elencata.",
               "data": {
                 "outputs": "Uscite da importare"
+              }
+            },
+            "thermostats": {
+              "name": "Termostati",
+              "description": "Le tastiere abilitate, per il termostato di ciascuna. Sono già selezionate le tastiere che rilevano la temperatura ambiente. Il termostato di una tastiera ha le sue entità anche se non è in uso: togli la selezione a quelli che non vuoi.",
+              "data": {
+                "thermostats": "Termostati da importare"
               }
             }
           }
@@ -218,6 +232,7 @@
             "poll_interval_inclusion": "Esclusione zone e livelli dei dimmer",
             "poll_interval_events": "Registro eventi",
             "poll_interval_faults": "Stato della centrale",
+            "poll_interval_thermostats": "Termostati",
             "slow_polling_interval": "Intervallo di lettura in modalità aggiornamento lento",
             "slow_polling_duration": "Disattiva la modalità aggiornamento lento dopo"
           },
@@ -227,6 +242,7 @@
             "poll_interval_inclusion": "Interruttori di inclusione delle zone, attributo test delle zone e luminosità dei dimmer.",
             "poll_interval_events": "Sensore del registro eventi.",
             "poll_interval_faults": "Sensore della modalità programmazione.",
+            "poll_interval_thermostats": "Termostati e sensori di temperatura delle tastiere. In modalità polling lento vengono letti insieme al resto della centrale, al primo multiplo dell'intervallo di polling lento che sia almeno così lungo.",
             "slow_polling_interval": "Mentre la modalità aggiornamento lento è attiva, Home Assistant legge tutta la centrale a questo intervallo e chiude la connessione dopo ogni lettura, così le altre app possono collegarsi alla scheda nel frattempo.",
             "slow_polling_duration": "La modalità aggiornamento lento si disattiva da sola dopo questi minuti. Con 0 resta attiva finché non la disattivi."
           }
@@ -266,6 +282,9 @@
       },
       "command_failed": {
         "message": "Il comando per {target} non è stato completato: {error}"
+      },
+      "thermostat_not_set": {
+        "message": "{target}: la centrale non ha mantenuto la nuova impostazione. Riprova; se succede ancora, controlla il termostato sulla tastiera."
       },
       "zones_not_ready": {
         "message": "{target} non è stato inserito perché queste zone non sono pronte: {zones}. Chiudile o escludile, oppure imposta \"Quando le zone non sono pronte\" su inserisci comunque nelle opzioni dell'integrazione."
@@ -328,10 +347,10 @@
         "message": "{title} non è caricata, quindi il comando non può essere inviato."
       },
       "area_not_imported": {
-        "message": "Le aree {areas} non sono importate da {title}. Importale nelle opzioni dell'integrazione, in Aree, zone, scenari e uscite."
+        "message": "Le aree {areas} non sono importate da {title}. Importale nelle opzioni dell'integrazione, in Aree, zone, scenari, uscite e termostati."
       },
       "scenario_not_imported": {
-        "message": "Lo scenario {scenario} non è importato da {title}. Importalo nelle opzioni dell'integrazione, in Aree, zone, scenari e uscite."
+        "message": "Lo scenario {scenario} non è importato da {title}. Importalo nelle opzioni dell'integrazione, in Aree, zone, scenari, uscite e termostati."
       },
       "notification_system_report_title": {
         "message": "Report di sistema Inim pronto"
@@ -548,6 +567,12 @@
         },
         "user_code": {
           "name": "Codice utente"
+        },
+        "keypad_temperature": {
+          "name": "Temperatura tastiera {number} ({label})"
+        },
+        "keypad_temperature_unnamed": {
+          "name": "Temperatura tastiera {number}"
         }
       },
       "switch": {
@@ -576,6 +601,34 @@
         },
         "fixed_output": {
           "name": "O{number}"
+        }
+      },
+      "climate": {
+        "thermostat": {
+          "name": "Termostato {number} ({label})",
+          "state_attributes": {
+            "preset_mode": {
+              "state": {
+                "manual": "Manuale",
+                "daily": "Programma giornaliero",
+                "weekly": "Programma settimanale",
+                "antifreeze": "Antigelo"
+              }
+            }
+          }
+        },
+        "thermostat_unnamed": {
+          "name": "Termostato {number}",
+          "state_attributes": {
+            "preset_mode": {
+              "state": {
+                "manual": "Manuale",
+                "daily": "Programma giornaliero",
+                "weekly": "Programma settimanale",
+                "antifreeze": "Antigelo"
+              }
+            }
+          }
         }
       },
       "light": {

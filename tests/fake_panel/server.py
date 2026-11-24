@@ -33,6 +33,9 @@ class Request:
     address: int  # 24-bit for EEPROM/flash, 16-bit otherwise
     length: int  # 16-bit LEN field
     payload: bytes = b""
+    # A write of the EEPROM that does not count as programming (the keypad
+    # thermostats' settings): the panel does not restart after it
+    no_programming: bool = False
 
 
 def smartlan_g_cipher(username: str, password: str) -> Cipher:
@@ -97,6 +100,8 @@ class FakePanel:
         # EEPROM addresses whose reads always get a reply with a bad checksum,
         # as a block the panel cannot deliver (other reads are unaffected)
         self.unreadable_eeprom: list[range] = []
+        # Keypads (0-based) whose temperature reply has a bad checksum
+        self.unreadable_keypads: set[int] = set()
         # SmartLAN/G only: send read replies with the panel's checksum, as
         # no known board does (the board sends the data alone)
         self.g_reply_checksum = False
@@ -107,6 +112,9 @@ class FakePanel:
         self.answer_find = True
         self.close_after_find = False  # close the connection after the reply
         self.find_requests = 0
+        # EEPROM writes seen: (address, payload)
+        self.no_programming_writes: list[tuple[int, bytes]] = []
+        self.programming_writes: list[tuple[int, bytes]] = []
 
         self._server: asyncio.Server | None = None
         self._client: asyncio.StreamWriter | None = None
@@ -184,6 +192,8 @@ class FakePanel:
                     continue
                 handled += 1
                 reply = self._dispatch(request)
+                if reply is None:  # a request the panel drops (no reply)
+                    continue
                 if self._unreadable(request) and reply:
                     reply = reply[:-1] + bytes(((reply[-1] + 1) & 0xFF,))
                 await self._send(writer, reply)
@@ -201,7 +211,14 @@ class FakePanel:
             writer.close()
 
     def _unreadable(self, request: Request) -> bool:
-        """Whether an EEPROM read touches an address in unreadable_eeprom."""
+        """Whether an EEPROM read touches an address in unreadable_eeprom, or
+        a temperature read is of a keypad in unreadable_keypads."""
+        if (
+            not request.write
+            and request.space == SPACE_PERIPHERAL
+            and request.address == c.KEYPAD_TEMPERATURE
+        ):
+            return request.instance in self.unreadable_keypads
         if request.write or request.space != SPACE_EEPROM:
             return False
         read = range(request.address, request.address + request.length)
@@ -271,9 +288,12 @@ class FakePanel:
         length = header[5] << 8 | header[6]
         write = op in (c.OP_WRITE, c.OP_PERIPHERAL_WRITE)
         peripheral_op = op in (c.OP_PERIPHERAL_READ, c.OP_PERIPHERAL_WRITE)
+        no_programming = False
 
         if self.transport == TRANSPORT_SI:
-            if peripheral_op:
+            if op == c.OP_PERIPHERAL_WRITE and device == c.DEVICE_EEPROM_NO_PROG_SI:
+                space, peripheral, no_programming = SPACE_EEPROM, 0, True
+            elif peripheral_op:
                 space, peripheral = SPACE_PERIPHERAL, device + 1
             else:
                 space = {
@@ -288,6 +308,7 @@ class FakePanel:
                 space = SPACE_RAM
             elif device in (c.LOGICAL_EEPROM, c.LOGICAL_EEPROM_NO_PROG):
                 space = SPACE_EEPROM
+                no_programming = device == c.LOGICAL_EEPROM_NO_PROG
             elif device == c.LOGICAL_FLASH:
                 space = SPACE_FLASH
             else:
@@ -297,7 +318,15 @@ class FakePanel:
         if space in (SPACE_EEPROM, SPACE_FLASH):
             address = num_dev << 16 | address16
         return Request(
-            header, write, space, peripheral, num_dev, address, length, payload
+            header,
+            write,
+            space,
+            peripheral,
+            num_dev,
+            address,
+            length,
+            payload,
+            no_programming,
         )
 
     async def _send(self, writer: asyncio.StreamWriter, reply: bytes) -> None:
@@ -319,16 +348,18 @@ class FakePanel:
 
     # --------------------------------------------------------------- protocol
 
-    def _dispatch(self, request: Request) -> bytes:
+    def _dispatch(self, request: Request) -> bytes | None:
         if request.write:
             return self._handle_write(request)
         data = self._handle_read(request)
+        if data is None:
+            return None
         if self.transport == TRANSPORT_G and not self.g_reply_checksum:
             # the board checks the panel's checksum and sends the data alone
             return data
         return data + bytes((checksum(data),))
 
-    def _handle_read(self, request: Request) -> bytes:
+    def _handle_read(self, request: Request) -> bytes | None:
         state = self.state
         if request.space == SPACE_RAM:
             address = request.address
@@ -363,6 +394,15 @@ class FakePanel:
             c.RAM_CMD_SCENARIO: self.state.execute_scenario,
             c.RAM_CMD_STOP: self.state.execute_stop,
         }
+        if request.space == SPACE_EEPROM:
+            # Thermostat settings take effect at once; a programming write
+            # (which would restart a real panel) is only counted
+            if request.no_programming:
+                self.no_programming_writes.append((request.address, request.payload))
+                self.state.eeprom_extra[request.address] = request.payload
+            else:
+                self.programming_writes.append((request.address, request.payload))
+            return bytes((checksum(request.payload),))
         if request.space == SPACE_RAM and request.address in handlers:
             if self.state.enter_programming_on_command:
                 self.state.in_programming = True

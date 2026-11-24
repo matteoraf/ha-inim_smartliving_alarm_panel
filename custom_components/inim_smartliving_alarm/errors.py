@@ -17,7 +17,7 @@ import logging
 
 from homeassistant.exceptions import HomeAssistantError
 
-from .api import NotReadyError, ProgrammingModeError
+from .api import NotReadyError, ProgrammingModeError, ThermostatNotSetError
 from .const import DOMAIN
 from .protocol.commands import CommandResult
 from .protocol.errors import ProtocolError, UnsupportedPanelError
@@ -109,6 +109,18 @@ class CommandFailedError(InimCommandError):
         )
 
 
+class ThermostatSettingError(InimCommandError):
+    """The panel did not keep a thermostat setting that was written."""
+
+    def __init__(self, target: str) -> None:
+        """Name the thermostat."""
+        super().__init__(
+            translation_domain=DOMAIN,
+            translation_key="thermostat_not_set",
+            translation_placeholders={"target": target},
+        )
+
+
 def zone_text(zone: int, zone_names: Sequence[str]) -> str:
     """A zone (1-based) as its label and number, e.g. "Front door (3)"."""
     name = zone_names[zone - 1] if 0 < zone <= len(zone_names) else ""
@@ -146,3 +158,19 @@ async def async_send_command(
             result.code,
         )
         raise CommandRefusedError(target, result)
+
+
+async def async_write_thermostat[T](write: Awaitable[T], target: str) -> T:
+    """Wait for a thermostat write; raise an InimCommandError if it was not
+    carried out, else return its result."""
+    try:
+        return await write
+    except ProgrammingModeError as err:
+        _LOGGER.warning("%s: %s", target, err)
+        raise PanelProgrammingError(target, sent=err.sent) from err
+    except ThermostatNotSetError as err:
+        _LOGGER.warning("%s: %s", target, err)
+        raise ThermostatSettingError(target) from err
+    except _FAILURES as err:
+        _LOGGER.warning("%s: thermostat not changed: %s", target, err)
+        raise CommandFailedError(target, err) from err

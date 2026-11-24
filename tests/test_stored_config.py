@@ -290,7 +290,8 @@ def entry_of(panel: FakePanel, release: str) -> MockConfigEntry:
         minor_version=stored["minor_version"],
         title=stored["title"],
         data={**stored["data"], "host": panel.host, "port": panel.port},
-        options=stored["options"],
+        # Its keypads count as checked: no reload after the first start
+        options={**stored["options"], "thermostats": []},
     )
 
 
@@ -398,7 +399,12 @@ async def test_short_physical_map_is_read_again(
             "panel_name": "Short map",
             DATA_INITIAL_PANEL_CONFIG: stored,
         },
-        options={"areas": [1], "zones": list(range(1, 51)), "scenarios": [1]},
+        options={
+            "areas": [1],
+            "zones": list(range(1, 51)),
+            "scenarios": [1],
+            "thermostats": [],
+        },
     )
     entry.add_to_hass(hass)
     with caplog.at_level(logging.INFO):

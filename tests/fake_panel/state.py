@@ -157,7 +157,18 @@ class PanelState:
     # Fault flags and supply voltage (13.8 V): bytes 0-3 of the faults register,
     # which ends with the panel state flags
     faults: bytes = bytes((0, 0)) + (910).to_bytes(2, "little")
+    # Keypad room temperatures by 0-based keypad. A keypad not listed has
+    # no sensor: it answers with keypad_temperature_raw (an implausible
+    # value by default), or not at all when in silent_keypads
     keypad_temperatures: dict[int, float] = field(default_factory=dict)
+    keypad_temperature_raw: dict[int, int] = field(default_factory=dict)
+    silent_keypads: set[int] = field(default_factory=set)
+    # Thermostat blocks (195 bytes, or the first bytes of one) by 0-based
+    # keypad; the others read as a 1050 6.07 left them from the factory:
+    # off, winter, 20.0 degrees as the manual setpoint and every program hour
+    thermostat_blocks: dict[int, bytes] = field(default_factory=dict)
+    # Keypads whose thermostat is calling now ("Thermostat ON")
+    thermostats_on: set[int] = field(default_factory=set)
     command_result: int = c.RESULT_OK
     # Arming an area (directly or by scenario) with a zone not at rest is
     # accepted, as a real 1050 does; True refuses it with the "open zones"
@@ -230,6 +241,7 @@ class PanelState:
             c.RAM_ZONE_MEMORY: self.encode_zone_memory,
             c.RAM_COMMAND_RESULT: lambda: bytes((self.command_result,)),
             c.RAM_FAULTS: lambda: self.faults + self.encode_panel_state(),
+            c.RAM_KEYPAD_STATUS: self.encode_keypad_status,
         }
         if address in dynamic:
             return dynamic[address]()[:length].ljust(length, b"\x00")
@@ -321,9 +333,34 @@ class PanelState:
         for index, event in enumerate(self.events):
             if event is not None:
                 put(lay.eeprom_events + index * c.EVENT_RECORD_LENGTH, event.to_bytes())
+        for keypad in range(lay.keypads):
+            block = self.thermostat_blocks.get(keypad, c.FACTORY_THERMOSTAT_BLOCK)
+            put(lay.eeprom_thermostats + c.THERMOSTAT_BLOCK_LENGTH * keypad, block)
         for address, data in self.eeprom_extra.items():
             put(address, data)
         return image
+
+    def thermostat_head(self, keypad: int) -> bytes:
+        """Bytes 0-2 of a keypad's thermostat block: mode, season, setpoint."""
+        start = self.layout.eeprom_thermostats + c.THERMOSTAT_BLOCK_LENGTH * keypad
+        return self.eeprom_read(start, 3)
+
+    def encode_keypad_status(self) -> bytes:
+        """RAM 0x1FF2: keypads enabled, thermostats on, seasons and modes."""
+        enabled = sum(1 << k for k in self.peripherals.get("keypads", []))
+        on = sum(1 << k for k in self.thermostats_on)
+        seasons = 0
+        mode_bytes = bytearray(15)
+        for keypad in range(min(self.layout.keypads, 15)):
+            mode, season, _ = self.thermostat_head(keypad)
+            seasons |= (season & 1) << keypad
+            mode_bytes[keypad] = mode
+        return (
+            enabled.to_bytes(2, "little")
+            + on.to_bytes(2, "little")
+            + seasons.to_bytes(2, "little")
+            + bytes(mode_bytes)
+        )
 
     def eeprom_read(self, address: int, length: int) -> bytes:
         """Read EEPROM using a 24-bit address."""
@@ -473,10 +510,16 @@ class PanelState:
             2, "little"
         )
 
-    def keypad_temperature(self, keypad: int) -> bytes:
-        """Peripheral read of a keypad temperature, tenths of a degree."""
-        tenths = round(self.keypad_temperatures.get(keypad, 0.0) * 10)
-        return tenths.to_bytes(2, "little", signed=True)
+    def keypad_temperature(self, keypad: int) -> bytes | None:
+        """Peripheral read of a keypad temperature, tenths of a degree; None
+        for a keypad that does not answer."""
+        if keypad in self.silent_keypads:
+            return None
+        if keypad in self.keypad_temperatures:
+            tenths = round(self.keypad_temperatures[keypad] * 10)
+            return tenths.to_bytes(2, "little", signed=True)
+        raw = self.keypad_temperature_raw.get(keypad, c.NO_SENSOR_TEMPERATURE)
+        return raw.to_bytes(2, "little")
 
     # ---------------------------------------------------------------- commands
 
@@ -1044,6 +1087,13 @@ def panel_demo() -> PanelState:
         "expanders": [0],
         "sirens": [0],
     }
+    # The hall keypad's thermostat heats to 21.0 in manual; the garage
+    # keypad's is off
+    state.keypad_temperatures = {0: 20.4, 1: 12.8}
+    hall = bytearray(c.THERMOSTAT_BLOCK_LENGTH)
+    hall[0:3] = bytes((1, 0, 110))  # manual, winter, 21.0
+    state.thermostat_blocks = {0: bytes(hall)}
+    state.thermostats_on = {0}
 
     # A short event log: the house armed in the evening, disarmed this morning
     evening = state.clock - 13 * 3600

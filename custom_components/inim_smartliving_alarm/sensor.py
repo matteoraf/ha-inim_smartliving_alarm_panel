@@ -3,11 +3,16 @@
 import logging
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EntityCategory
+from homeassistant.const import EntityCategory, UnitOfTemperature
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
@@ -25,13 +30,15 @@ from .const import (
     SYSTEM_MAX_EVENT_LOG_SIZE,
 )
 from .coordinator import PanelData
-from .entity import InimCoordinatorEntity, panel_device_info
+from .entity import InimCoordinatorEntity, name_item, panel_device_info
 from .event_log import event_attributes
 from .peripherals import enabled_peripherals
 from .stored_config import (
     SystemInfo,
+    keypad_names,
     scenario_names,
 )
+from .thermostats import selected_keypads, thermostats_signal
 from .user_code import UserCodeInfo, user_code_info
 
 _LOGGER = logging.getLogger(__name__)
@@ -124,6 +131,35 @@ async def async_setup_entry(
             "No Inim Alarm 'sensor' entities added for %s",
             entry.title,
         )
+
+    # The room temperature of each keypad whose thermostat is selected; those
+    # of a first selection made later are added then
+    names = keypad_names(initial_panel_config)
+    added: set[int] = set()
+
+    @callback
+    def add_selected() -> None:
+        new = [
+            k
+            for k in selected_keypads(entry.options, initial_panel_config)
+            if k not in added
+        ]
+        added.update(new)
+        if new:
+            async_add_entities(
+                KeypadTemperatureSensor(
+                    coordinator,
+                    entry,
+                    keypad + 1,
+                    names[keypad] if keypad < len(names) else "",
+                )
+                for keypad in new
+            )
+
+    add_selected()
+    entry.async_on_unload(
+        async_dispatcher_connect(hass, thermostats_signal(entry.entry_id), add_selected)
+    )
 
 
 class BaseInimSensorEntity(InimCoordinatorEntity, SensorEntity):
@@ -442,3 +478,42 @@ class InimEventLogSensor(BaseInimSensorEntity):
             "event_log_count_current": len(self._event_log),
             "event_log": self._event_log,
         }
+
+
+class KeypadTemperatureSensor(InimCoordinatorEntity, SensorEntity):
+    """The room temperature of a keypad whose thermostat is selected."""
+
+    _attr_device_class = SensorDeviceClass.TEMPERATURE
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
+    _attr_suggested_display_precision = 1
+
+    def __init__(
+        self,
+        coordinator: Any,
+        entry: ConfigEntry,
+        keypad: int,
+        label: str,
+    ) -> None:
+        """A keypad's (1-based) temperature; label is the keypad's name."""
+        super().__init__(coordinator)
+        self._keypad = keypad
+        self._attr_unique_id = f"{entry.entry_id}_keypad_temperature_{keypad}"
+        self._attr_device_info = panel_device_info(entry)
+        name_item(self, "keypad_temperature", "Keypad", keypad, label)
+
+    @property
+    def suggested_object_id(self) -> str | None:
+        """Keypad N temperature: the ID does not depend on the keypad's name."""
+        return f"keypad_{self._keypad}_temperature"
+
+    @property
+    def available(self) -> bool:
+        """Available once the keypad's thermostat has been read."""
+        return super().available and self.thermostat(self._keypad) is not None
+
+    @property
+    def native_value(self) -> float | None:
+        """Degrees Celsius; unknown when the keypad did not answer."""
+        state = self.thermostat(self._keypad)
+        return None if state is None else state.temperature

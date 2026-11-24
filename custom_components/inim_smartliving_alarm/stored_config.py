@@ -336,6 +336,16 @@ def stored_model(stored: Mapping[str, Any]) -> PanelModel | None:
     return found[0] if found else None
 
 
+def own_model(stored: Mapping[str, Any]) -> PanelModel | None:
+    """The stored layout when it is the panel's own model profile.
+
+    None for the fallback layout of a panel without a profile of its own,
+    and as stored_model returns None.
+    """
+    found = _stored_model_and_fallback(stored)
+    return found[0] if found and not found[1] else None
+
+
 @dataclass(frozen=True, slots=True)
 class SystemInfo:
     """The panel's firmware version and type, from the stored model string."""

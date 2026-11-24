@@ -239,7 +239,12 @@ def entry_for(panel: FakePanel, config: dict) -> MockConfigEntry:
             "panel_name": "Old",
             DATA_INITIAL_PANEL_CONFIG: config,
         },
-        options={"areas": [1, 2], "zones": [1, 2, 45], "scenarios": [1]},
+        options={
+            "areas": [1, 2],
+            "zones": [1, 2, 45],
+            "scenarios": [1],
+            "thermostats": [],
+        },
     )
 
 

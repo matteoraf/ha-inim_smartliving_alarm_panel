@@ -7,16 +7,20 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
-from .api import ProgrammingModeError, SmartLivingPanel
+from .api import PANEL_ERRORS, ProgrammingModeError, SmartLivingPanel
 from .const import (
     BOARD_SMARTLAN_SI,
     CONF_BOARD,
+    CONF_THERMOSTATS,
+    DATA_COORDINATOR,
     DATA_INITIAL_PANEL_CONFIG,
     DATA_PANEL,
     DOMAIN,
 )
 from .protocol.errors import ProtocolError, UnsupportedPanelError
+from .selection import available_thermostats
 from .stored_config import store
+from .thermostats import with_new_keypads
 from .transport.base import TransportError
 
 # Error keys of PanelConfigError
@@ -94,9 +98,10 @@ async def async_reread_panel_configuration(
 ) -> None:
     """Read the panel configuration again, store it in the entry and reload it.
 
-    Options are left untouched. The entry's own panel connection is used, so
-    the read waits for any poll in progress instead of opening a second
-    socket.
+    The keypads are checked for a thermostat: those enabled since are added
+    to the thermostats (see thermostats.with_new_keypads); the other options
+    are left untouched. The entry's own panel connection is used, so the
+    reads wait for any poll in progress instead of opening a second socket.
     """
     panel: SmartLivingPanel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
     try:
@@ -123,10 +128,36 @@ async def async_reread_panel_configuration(
             translation_placeholders={"error": err.detail},
         ) from err
 
+    options = entry.options
+    if (thermostats := await _new_thermostats(hass, entry, panel_config)) is not None:
+        options = {**options, CONF_THERMOSTATS: thermostats}
     _LOGGER.info("Panel configuration re-read for %s, reloading", entry.title)
     # A changed entry is reloaded by the entry's update listener; reload an
     # unchanged one here so that the action always ends with exactly one reload.
     if not hass.config_entries.async_update_entry(
-        entry, data={**entry.data, DATA_INITIAL_PANEL_CONFIG: panel_config}
+        entry,
+        data={**entry.data, DATA_INITIAL_PANEL_CONFIG: panel_config},
+        options=options,
     ):
         hass.config_entries.async_schedule_reload(entry.entry_id)
+
+
+async def _new_thermostats(
+    hass: HomeAssistant, entry: ConfigEntry, config: dict[str, Any]
+) -> list[int] | None:
+    """The thermostat selection with the keypads enabled since, if they
+    answer the temperature read (None: no change, or not checked)."""
+    if CONF_THERMOSTATS not in entry.options:
+        return None  # checked at the next start
+    coordinator = hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR]
+    keypads = [number - 1 for number in available_thermostats(config)]
+    try:
+        found = await coordinator.async_probe_thermostats(keypads)
+    except PANEL_ERRORS as err:
+        _LOGGER.info("%s: the keypads were not checked again: %s", entry.title, err)
+        return None
+    return with_new_keypads(
+        entry.options,
+        entry.data.get(DATA_INITIAL_PANEL_CONFIG, {}),
+        (keypad + 1 for keypad in found),
+    )

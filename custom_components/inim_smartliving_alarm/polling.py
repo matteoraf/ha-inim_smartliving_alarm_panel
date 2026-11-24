@@ -9,7 +9,7 @@ nor waits, so the coordinator drives it and tests can move its clock by
 hand.
 """
 
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 from enum import StrEnum
 import math
@@ -20,13 +20,16 @@ from .const import (
     CONF_POLL_INTERVAL_EVENTS,
     CONF_POLL_INTERVAL_FAULTS,
     CONF_POLL_INTERVAL_INCLUSION,
+    CONF_POLL_INTERVAL_THERMOSTATS,
     CONF_POLL_INTERVAL_ZONES,
     CONF_SLOW_POLLING_DURATION,
     CONF_SLOW_POLLING_INTERVAL,
+    CONF_THERMOSTATS,
     DEFAULT_POLL_INTERVAL_AREAS,
     DEFAULT_POLL_INTERVAL_EVENTS,
     DEFAULT_POLL_INTERVAL_FAULTS,
     DEFAULT_POLL_INTERVAL_INCLUSION,
+    DEFAULT_POLL_INTERVAL_THERMOSTATS,
     DEFAULT_POLL_INTERVAL_ZONES,
     DEFAULT_SLOW_POLLING_DURATION,
     DEFAULT_SLOW_POLLING_INTERVAL,
@@ -53,6 +56,7 @@ class PollGroup(StrEnum):
     INCLUSION = "inclusion"  # zone inclusion and test, dimmer levels
     EVENTS = "events"  # the event log
     FAULTS = "faults"  # the faults register (panel state flags)
+    THERMOSTATS = "thermostats"  # the keypads' thermostats, when any is selected
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,6 +90,9 @@ GROUPS: dict[PollGroup, GroupSpec] = {
     PollGroup.FAULTS: GroupSpec(
         CONF_POLL_INTERVAL_FAULTS, DEFAULT_POLL_INTERVAL_FAULTS, 10, 600
     ),
+    PollGroup.THERMOSTATS: GroupSpec(
+        CONF_POLL_INTERVAL_THERMOSTATS, DEFAULT_POLL_INTERVAL_THERMOSTATS, 10, 600
+    ),
 }
 
 
@@ -110,15 +117,39 @@ def option_value(options: Mapping[str, Any], spec: GroupSpec) -> float:
     return min(max(value, spec.minimum), spec.maximum)
 
 
+def _groups(options: Mapping[str, Any]) -> list[PollGroup]:
+    """The groups read: the thermostats only when a keypad's is selected."""
+    return [
+        group
+        for group in GROUPS
+        if group is not PollGroup.THERMOSTATS or options.get(CONF_THERMOSTATS)
+    ]
+
+
 def intervals(options: Mapping[str, Any]) -> dict[PollGroup, float]:
     """Each group's interval: the option, else the default, within the range."""
-    return {group: option_value(options, spec) for group, spec in GROUPS.items()}
+    return {group: option_value(options, GROUPS[group]) for group in _groups(options)}
 
 
 def slow_intervals(options: Mapping[str, Any]) -> dict[PollGroup, float]:
-    """Each group's interval in slow polling mode: the same for every group."""
+    """Each group's interval in slow polling mode.
+
+    Every group is read at the slow interval, except the thermostats: on
+    every k-th of those reads, k being the thermostats' own interval over
+    the slow one, rounded up. They ride along (see SLOW_RIDERS): read with
+    the other groups, never on their own.
+    """
     seconds = option_value(options, SLOW_POLLING_INTERVAL)
-    return dict.fromkeys(GROUPS, seconds)
+    found = dict.fromkeys(_groups(options), seconds)
+    if PollGroup.THERMOSTATS in found:
+        own = option_value(options, GROUPS[PollGroup.THERMOSTATS])
+        found[PollGroup.THERMOSTATS] = math.ceil(own / seconds) * seconds
+    return found
+
+
+# Groups that never wake the schedule in slow polling mode: they are read
+# with the other groups (in the same connection), once they are due
+SLOW_RIDERS = frozenset({PollGroup.THERMOSTATS})
 
 
 def slow_polling_minutes(options: Mapping[str, Any]) -> float:
@@ -134,15 +165,42 @@ class PollSchedule:
     next read waits the shortest interval, and RETRY_INTERVAL (or the
     shortest interval, if longer) once reads have failed
     FAILURES_BEFORE_RETRY_INTERVAL times in a row.
+
+    Riders never set a wake-up of their own: a rider is read in a wake-up
+    of the other groups when it is due within half their shortest interval
+    (so that timers firing a little late never leave it due alone).
     """
 
-    def __init__(self, group_intervals: Mapping[PollGroup, float]) -> None:
+    def __init__(
+        self,
+        group_intervals: Mapping[PollGroup, float],
+        riders: Collection[PollGroup] = (),
+    ) -> None:
         """Start with every group due."""
         self.intervals = {g: group_intervals[g] for g in GROUPS if g in group_intervals}
+        self._asked_riders = frozenset(riders)
+        self._set_riders()
         self._last: dict[PollGroup, float] = {}
         self._failures = 0
         self._not_before = -math.inf
         self._late_reads: dict[PollGroup, int] = {}  # in a row, per group
+
+    def _set_riders(self) -> None:
+        leaders = [g for g in self.intervals if g not in self._asked_riders]
+        # Without another group a rider is read on its own after all
+        self.riders = (
+            self._asked_riders & set(self.intervals) if leaders else frozenset()
+        )
+        self._ride_window = (
+            min(self.intervals[g] for g in leaders) / 2 if self.riders else 0.0
+        )
+
+    def add(self, group: PollGroup, interval: float) -> None:
+        """Read one more group from now on, at this interval; it is due now."""
+        added = {**self.intervals, group: interval}
+        self.intervals = {g: added[g] for g in GROUPS if g in added}
+        self._last.pop(group, None)
+        self._set_riders()
 
     @property
     def failures(self) -> int:
@@ -158,15 +216,26 @@ class PollSchedule:
         """The groups due now, in reading order."""
         if now + DUE_TOLERANCE < self._not_before:
             return []
+        leading = [
+            group
+            for group in self.intervals
+            if group not in self.riders and self.due_at(group) <= now + DUE_TOLERANCE
+        ]
+        if not leading:
+            return []
         return [
             group
             for group in self.intervals
-            if self.due_at(group) <= now + DUE_TOLERANCE
+            if group in leading
+            or (group in self.riders and self.due_at(group) <= now + self._ride_window)
         ]
 
     def next_wake(self, now: float) -> float:
         """Seconds from now until a group is due (0: now)."""
-        earliest = min((self.due_at(group) for group in self.intervals), default=now)
+        earliest = min(
+            (self.due_at(g) for g in self.intervals if g not in self.riders),
+            default=now,
+        )
         return max(earliest, self._not_before, now) - now
 
     def read(self, group: PollGroup, started: float) -> None:

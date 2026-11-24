@@ -63,6 +63,18 @@ HA_ATTRIBUTES = {
     "color_mode",
     "supported_color_modes",
     "restored",
+    # Climate entities and sensors with a unit
+    "hvac_modes",
+    "hvac_action",
+    "min_temp",
+    "max_temp",
+    "target_temp_step",
+    "preset_modes",
+    "preset_mode",
+    "current_temperature",
+    "temperature",
+    "state_class",
+    "unit_of_measurement",
 }
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
@@ -226,7 +238,8 @@ def test_option_defaults_and_ranges() -> None:
 
 
 async def set_up(hass: HomeAssistant, fake: FakePanel) -> ConfigEntry:
-    """The demo panel with every area, zone, scenario and output imported."""
+    """The demo panel with every area, zone, scenario, output and thermostat
+    imported."""
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": "user"}
     )
@@ -236,7 +249,7 @@ async def set_up(hass: HomeAssistant, fake: FakePanel) -> ConfigEntry:
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], si_input(fake)
     )
-    kinds = ("areas", "zones", "scenarios", "outputs")
+    kinds = ("areas", "zones", "scenarios", "outputs", "thermostats")
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"],
         items_form(result, {kind: offered(result, kind) for kind in kinds}),

@@ -94,7 +94,7 @@ The integration does not notice a change to the programming by itself. To pick u
 
 *   Check the Home Assistant logs (**Settings** → **System** → **Logs**) for errors from the `inim_smartliving_alarm` integration.
 *   Check the intervals in the [Polling](options.md#polling) options. Too short can keep the board busy; too long delays updates. The log says when the panel cannot keep up with them.
-*   Only ticked items get entities: check the options under **Areas, zones, scenarios and outputs**.
+*   Only ticked items get entities: check the options under **Areas, zones, scenarios, outputs and thermostats**.
 *   A zone is listed only if its terminal is programmed as a zone on the panel. If you changed the panel's programming, use **Re-read panel configuration** first.
 
 ??? note "Rare cases: no switches, no scenario buttons"
