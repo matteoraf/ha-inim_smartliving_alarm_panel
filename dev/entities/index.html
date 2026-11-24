@@ -505,6 +505,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#thermostats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Thermostats
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -762,6 +773,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#thermostats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Thermostats
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -815,6 +837,11 @@
 <td><a href="#outputs">Each output</a></td>
 <td>a switch, or a light for dimmers</td>
 <td>Switch or dim the output</td>
+</tr>
+<tr>
+<td><a href="#thermostats">Each keypad thermostat</a></td>
+<td>a climate entity, a temperature sensor</td>
+<td>Set the temperature, heat or cool, the program; see the room temperature</td>
 </tr>
 <tr>
 <td><a href="#sensors">The panel's state</a></td>
@@ -1566,7 +1593,7 @@
 <summary>Which outputs are offered and ticked</summary>
 <ul>
 <li><strong>What is offered</strong>: outputs programmed on the panel as on/off, monostable or dimmer outputs (terminal outputs and O1 to O3) that your user code may switch. Analogue outputs are not offered. A terminal output on one of the panel's first three terminal positions cannot be switched remotely (the panel reserves those numbers for O1 to O3), so it is not listed.</li>
-<li><strong>What is ticked for you</strong>: only the outputs the installer marked as <em>home automation</em> outputs in the panel's programming (firmware 6; on firmware 5.1 the integration cannot read this mark, so nothing is ticked). The panel cannot tell what an output drives, so check them, and pick any other outputs yourself, in the setup or later in the options under <strong>Areas, zones, scenarios and outputs</strong>. The first time an existing installation shows the outputs in the options, the home automation outputs are ticked there too; after you save, your choice is kept.</li>
+<li><strong>What is ticked for you</strong>: only the outputs the installer marked as <em>home automation</em> outputs in the panel's programming (firmware 6; on firmware 5.1 the integration cannot read this mark, so nothing is ticked). The panel cannot tell what an output drives, so check them, and pick any other outputs yourself, in the setup or later in the options under <strong>Areas, zones, scenarios, outputs and thermostats</strong>. The first time an existing installation shows the outputs in the options, the home automation outputs are ticked there too; after you save, your choice is kept.</li>
 <li><strong>Nothing is switched by itself</strong>: no output is switched at setup, at start, at a reload or when Home Assistant restores its state.</li>
 <li><strong>When the panel refuses</strong>: an output your user code may not switch, or one locked while its areas are armed, gives an error with the reason (see <a href="../troubleshooting/#when-the-panel-refuses-a-command">When the panel refuses a command</a>). While the panel is in programming mode, no command is sent.</li>
 </ul>
@@ -1631,6 +1658,100 @@
 </tr>
 </tbody>
 </table>
+</details>
+<h2 id="thermostats">Thermostats<a class="headerlink" href="#thermostats" title="Permanent link">&para;</a></h2>
+<p>A keypad with a temperature sensor measures the room temperature, and the panel can use it as a thermostat: it switches heating or cooling through the outputs and notifications programmed on its <em>Thermostat ON</em> event. Each keypad whose thermostat you import gets:</p>
+<table>
+<thead>
+<tr>
+<th>ID ends with</th>
+<th>Name</th>
+<th>States</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>climate.…_thermostat_N</code></td>
+<td>Thermostat N (<em>keypad name</em>)</td>
+<td>off, heat, cool</td>
+</tr>
+<tr>
+<td><code>sensor.…_keypad_N_temperature</code></td>
+<td>Keypad N temperature (<em>keypad name</em>)</td>
+<td>the room temperature, in °C</td>
+</tr>
+</tbody>
+</table>
+<p>The keypad's room temperature is also the thermostat's current temperature; the sensor keeps its history as a statistic.</p>
+<table>
+<thead>
+<tr>
+<th>On the panel</th>
+<th>Mode</th>
+<th>Preset</th>
+<th>Target temperature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Off</td>
+<td>off</td>
+<td>–</td>
+<td>the manual setpoint, kept for when it is turned on</td>
+</tr>
+<tr>
+<td>Manual</td>
+<td>heat (winter) or cool (summer)</td>
+<td><em>Manual</em></td>
+<td>the manual setpoint</td>
+</tr>
+<tr>
+<td>Daily program</td>
+<td>heat or cool</td>
+<td><em>Daily program</em></td>
+<td>this hour's setpoint of the daily program</td>
+</tr>
+<tr>
+<td>Weekly program</td>
+<td>heat or cool</td>
+<td><em>Weekly program</em></td>
+<td>this hour's setpoint of the weekly program</td>
+</tr>
+<tr>
+<td>Antifreeze</td>
+<td>heat</td>
+<td><em>Antifreeze</em></td>
+<td>5.0 °C</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Heat or cool</strong> is the panel's season: winter heats below the target, summer cools above it. Antifreeze always heats. On firmware 6 the card shows whether the thermostat is heating or cooling right now; firmware 5.1 does not report it.</li>
+<li>
+<p><strong>What a change does on the panel</strong>:</p>
+<ul>
+<li><strong>Heat</strong> or <strong>cool</strong> sets the season. From off it also turns the thermostat back to the mode it was last in (manual, daily or weekly program; manual the first time). In antifreeze, <strong>heat</strong> changes nothing (it already heats), and <strong>cool</strong> leaves antifreeze for the mode it was last in, in summer.</li>
+<li><strong>Off</strong> sets the mode to off. A <strong>preset</strong> sets that mode.</li>
+<li><strong>A target temperature</strong> sets the manual setpoint, from 10.0 to 35.5 °C. In a program or antifreeze the thermostat also goes to manual. While it is off, it stays off with the new setpoint kept for later.</li>
+<li><strong>The panel acts at its next check of that keypad</strong>, which can take a few minutes: heating or cooling starts or stops then, not at once.</li>
+<li><strong>The programs are not changed</strong>: set them at the keypad. The target shown for a program follows Home Assistant's clock; the panel follows its own, so the two can differ for a few minutes if the clocks disagree.</li>
+<li><strong>Every change is written to the panel's memory.</strong> Avoid automations that change the target temperature every few minutes.</li>
+</ul>
+</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Turning a thermostat on raises the panel's <em>Thermostat ON</em> event when it calls for heat or cool. Outputs, calls or messages programmed on that event (by your installer, for example a boiler relay) follow it. Before using a thermostat for the first time, check what the panel does with its event.</p>
+</div>
+<details class="note">
+<summary>Which keypads get a thermostat</summary>
+<ul>
+<li><strong>What is offered</strong>: the enabled keypads.</li>
+<li><strong>What is ticked for you</strong>: the keypads that report a room temperature when the panel is added. An installation from an earlier version checks its keypads once, in the background after its first start, and adds their thermostats then.</li>
+<li><strong>Every keypad with a sensor</strong> gets a thermostat this way, also one whose thermostat you don't use. Untick it in the options under <strong>Areas, zones, scenarios, outputs and thermostats</strong> to remove its entities.</li>
+<li>A keypad that stops answering keeps its thermostat; its temperature is unknown until it answers again, and it is asked less often meanwhile.</li>
+<li>Checked on a SmartLiving 1050 with firmware 6.07 over SmartLAN/SI, where these changes do not restart the panel. Not tested on a SmartLAN/G board, nor on firmware 5.1.</li>
+</ul>
 </details>
 
 
