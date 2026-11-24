@@ -101,6 +101,8 @@ class PanelState:
 
     # Configuration
     pins: list[str | None] = field(default_factory=lambda: [None] * c.NUM_CODES)
+    # The installer code: the PIN-table entry after the user codes
+    installer_pin: str | None = None
     code_records: list[bytes] = field(
         default_factory=lambda: [bytes(c.CODE_RECORD_LENGTH)] * c.NUM_CODES
     )
@@ -277,6 +279,7 @@ class PanelState:
             put(c.EEPROM_PERIPHERALS + offset, bitmap.to_bytes(length, "little"))
         for index, pin in enumerate(self.pins):
             put(lay.eeprom_pins + index * c.PIN_LENGTH, encode_pin(pin))
+        put(lay.eeprom_pins + lay.codes * c.PIN_LENGTH, encode_pin(self.installer_pin))
         for index, record in enumerate(self.code_records):
             put(lay.eeprom_codes + index * lay.code_record_length, record)
         for index, areas in enumerate(self.zone_areas):

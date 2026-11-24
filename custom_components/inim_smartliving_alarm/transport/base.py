@@ -58,6 +58,10 @@ BRIEF_CONNECT_TIMEOUT = 2.0  # one attempt, when the board may be in use
 # requests that follow each other (the groups of one read, a command and
 # the read after it) still share one connection
 SHARED_IDLE_CLOSE = 0.5  # seconds
+# A board request answered only as the first message of a connection: the
+# reply comes in milliseconds, and a little more may follow it
+FIRST_MESSAGE_REPLY_TIMEOUT = 2.0
+FIRST_MESSAGE_MORE_WAIT = 0.3
 
 # When a connection to each address last closed, for every transport: a new
 # transport for the same board (after a reload, or a second client) must
@@ -538,6 +542,78 @@ class PanelTransport:
         if self._writer is None:
             await self._connect()
 
+    async def first_message(
+        self, request: bytes, length: int, *, more: int = 0
+    ) -> bytes:
+        """Send a request as the first message of a new connection.
+
+        For a request the board answers only at the start of a connection.
+        The current connection is closed first; the new one is opened with
+        one attempt (BRIEF_CONNECT_TIMEOUT), as a board in use ignores it,
+        and closed once the reply is read. The reply is length bytes, then
+        up to more bytes if they follow at once.
+
+        Neither the request nor the reply is logged or kept in the trace:
+        the reply may hold credentials. Only its length is logged.
+        """
+        async with self.session(Priority.COMMAND):
+            await self.disconnect()
+            await self._pause_after_close()
+            try:
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(self.host, self.port),
+                    BRIEF_CONNECT_TIMEOUT,
+                )
+            except OSError as err:  # refused, unreachable or timed out
+                _last_close[(self.host, self.port)] = time.monotonic()
+                raise ConnectError(
+                    f"cannot connect to {self.host}:{self.port} (the board can't "
+                    f"be reached{self.busy_hint}): {err!r}"
+                ) from err
+            try:
+                _LOGGER.debug("-> board request (first message of a connection)")
+                writer.write(self._encode(request))
+                await writer.drain()
+                reply = await asyncio.wait_for(
+                    reader.readexactly(length), FIRST_MESSAGE_REPLY_TIMEOUT
+                )
+                while more > 0:
+                    try:
+                        part = await asyncio.wait_for(
+                            reader.read(more), FIRST_MESSAGE_MORE_WAIT
+                        )
+                    except TimeoutError:
+                        break
+                    if not part:
+                        break
+                    reply += part
+                    more -= len(part)
+            except TimeoutError as err:
+                raise ReplyTimeout(f"no reply from {self.host}:{self.port}") from err
+            except asyncio.IncompleteReadError:
+                # Not chained: the error holds the part of the reply received
+                raise ConnectionLost(
+                    f"connection to {self.host}:{self.port} lost"
+                ) from None
+            except OSError as err:
+                raise ConnectionLost(
+                    f"connection to {self.host}:{self.port} lost"
+                ) from err
+            finally:
+                writer.close()
+                with contextlib.suppress(OSError, TimeoutError):
+                    await asyncio.wait_for(writer.wait_closed(), 2)
+                _last_close[(self.host, self.port)] = time.monotonic()
+            _LOGGER.debug("<- %d bytes, not logged", len(reply))
+            return reply
+
+    async def _pause_after_close(self) -> None:
+        """Wait until the reconnect pause after the last close has passed."""
+        closed = _last_close.get((self.host, self.port), float("-inf"))
+        wait = closed + self.reconnect_pause - time.monotonic()
+        if wait > 0:
+            await asyncio.sleep(wait)
+
     async def _connect(self) -> None:
         error: Exception | None = None
         attempts, timeout = (
@@ -546,10 +622,7 @@ class PanelTransport:
             else (self.connect_attempts, self.connect_timeout)
         )
         for attempt in range(1, attempts + 1):
-            closed = _last_close.get((self.host, self.port), float("-inf"))
-            wait = closed + self.reconnect_pause - time.monotonic()
-            if wait > 0:
-                await asyncio.sleep(wait)
+            await self._pause_after_close()
             started = time.monotonic()
             try:
                 self._reader, self._writer = await asyncio.wait_for(

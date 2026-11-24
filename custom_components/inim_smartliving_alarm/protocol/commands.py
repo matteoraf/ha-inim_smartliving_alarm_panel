@@ -66,6 +66,21 @@ def encode_pin(pin: str) -> bytes:
     )
 
 
+def decode_pin(entry: bytes) -> str | None:
+    """A PIN-table entry as its digits; None if empty or not a PIN.
+
+    The digits run up to the first unused digit (0xFF).
+    """
+    digits = []
+    for byte in entry[:PIN_LENGTH]:
+        if byte == PIN_UNUSED_DIGIT:
+            break
+        if byte > 9:
+            return None
+        digits.append(str(byte))
+    return "".join(digits) or None
+
+
 def arm_areas(pin: str, modes: Mapping[int, ArmMode], model: PanelModel) -> Command:
     """Arm or disarm areas; areas not listed keep their state.
 

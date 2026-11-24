@@ -338,3 +338,25 @@ async def test_report_while_the_entry_is_not_loaded(
     assert report["blocks"]
     assert report["errors"] == []
     monkeypatch.setitem(data, DATA_PANEL, panel)
+
+
+async def test_full_reports_say_how_the_board_was_read(
+    hass: HomeAssistant, entry: ConfigEntry, private_key: bytes, clock
+) -> None:
+    """The board's reply source survives the change of level: the encrypted
+    report, its Redacted view and the readable copy all say "tcp"."""
+    async_set_level(hass, entry.entry_id, Level.FULL)
+    with patch.object(diagnostics.persistent_notification, "async_create"):
+        first = await async_get_config_entry_diagnostics(hass, entry)
+    plain = json.loads(
+        report_crypto.decrypt(
+            first["encrypted"],
+            private_key,
+            report_id=first["report_id"],
+            level="full",
+        )
+    )
+    assert plain["board"]["source"] == "tcp"
+    assert first["redacted_view"]["board"]["source"] == "tcp"
+    second = await async_get_config_entry_diagnostics(hass, entry)
+    assert second["board"]["source"] == "tcp"

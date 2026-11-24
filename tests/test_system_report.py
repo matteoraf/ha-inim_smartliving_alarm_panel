@@ -668,8 +668,9 @@ def test_report_without_the_panel() -> None:
     assert report["blocks"] == []
     assert report["status"] is None
     assert report["board"]["reply"] is None
+    # A SmartLAN/SI board is asked over TCP too: it may be in use
     assert report["board"]["reply_note"] == (
-        "no reply (Home Assistant may not be on the board's network)"
+        "no reply (the board can't be reached or is in use by another app)"
     )
     assert report["errors"] == [{"where": "panel", "error": "connect_error"}]
     labels = [a["label"] for a in report["configuration"]["areas"]]

@@ -7,6 +7,7 @@ a readable copy of the same report, to check what is being shared. Then the
 level goes back to Redacted. Nothing is stored: the report waits in memory.
 """
 
+from dataclasses import replace
 from datetime import datetime
 import logging
 import secrets
@@ -128,18 +129,8 @@ async def async_get_device_diagnostics(
 
 
 def _at_level(data: ReportInput, level: Level) -> ReportInput:
-    return ReportInput(
-        report_id=data.report_id,
-        created=data.created,
-        level=level,
-        entry=data.entry,
-        reads=data.reads,
-        read_error=data.read_error,
-        board_reply=data.board_reply,
-        transport_stats=data.transport_stats,
-        trace=data.trace,
-        user_code=data.user_code,
-    )
+    """The same reading at another level: every other field kept."""
+    return replace(data, level=level)
 
 
 def _finish(report: dict[str, Any]) -> dict[str, Any]:
@@ -204,7 +195,15 @@ async def _async_report_input(
         if temporary:
             await panel.close()
     board = entry.data.get(CONF_BOARD, BOARD_SMARTLAN_SI)
-    reply = await async_board_reply(entry.data[CONF_HOST], board)
+    # The SmartLAN/SI board answers over TCP from anywhere; else (or when it
+    # is in use) the broadcast search, which only reaches its own network
+    reply, source = None, None
+    if board == BOARD_SMARTLAN_SI:
+        reply = await panel.board_reply()
+        source = "tcp" if reply is not None else None
+    if reply is None:
+        reply = await async_board_reply(entry.data[CONF_HOST], board)
+        source = "udp" if reply is not None else None
     integration = await async_get_integration(hass, DOMAIN)
     user_code = None
     if panel.user_code_index is not None or panel.user_code_found:
@@ -238,6 +237,7 @@ async def _async_report_input(
         reads=reads,
         read_error=read_error,
         board_reply=reply,
+        board_reply_source=source,
         transport_stats=stats.as_dict(),
         trace=list(stats.trace),
         user_code=user_code,
