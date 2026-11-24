@@ -521,6 +521,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#finding-the-installer-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Finding the installer code
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -648,6 +659,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#finding-the-installer-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Finding the installer code
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -712,11 +734,11 @@
 </tr>
 <tr>
 <td><strong>Full</strong></td>
-<td>Also the names, the serial number and the network addresses. PINs, phone numbers, key serials and passwords are still left out.</td>
+<td>Also the names, the serial number and the network addresses. PINs, phone numbers, key serials, passwords and the board's dynamic-DNS user name are still left out.</td>
 </tr>
 <tr>
 <td><strong>Full confidential</strong></td>
-<td>Everything, including the PINs, phone numbers, key serials and the board's passwords.</td>
+<td>Everything, including the PINs (the installer code too), phone numbers, key serials and the board's passwords and dynamic-DNS user name.</td>
 </tr>
 </tbody>
 </table>
@@ -732,8 +754,15 @@
 </details>
 <details class="note">
 <summary>What is and is not read</summary>
-<p>The board's own details (its network settings and firmware) are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys.</p>
+<p>The board's own details (its network settings and firmware) are read from the board itself. A SmartLAN/SI board is asked directly, so they are included even when Home Assistant is on another subnet; if the board is in use by another app at that moment, the report falls back to a search of Home Assistant's own network. A SmartLAN/G board's details are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys.</p>
 </details>
+<h3 id="finding-the-installer-code">Finding the installer code<a class="headerlink" href="#finding-the-installer-code" title="Permanent link">&para;</a></h3>
+<p>If you don't have your panel's installer code, a <strong>Full confidential</strong> report shows it (panel firmware 5.1 or newer):</p>
+<ol>
+<li>Set the <em>Diagnostics level</em> to <em>Full confidential</em> and download diagnostics twice, as described above.</li>
+<li>Open the second file, the readable copy, with the viewer: <code>python3 scripts/inim_report.py show REPORT.json</code>. The summary's <strong>Installer code</strong> row shows it, with its entry in the panel's PIN table. In the file itself it is under <code>panel</code> → <code>installer_code</code>.</li>
+</ol>
+<p>The readable copy holds every PIN of your panel: keep it private, and delete it once you have the code. Reports at other levels never show the installer code.</p>
 <h2 id="reading-a-report">Reading a report<a class="headerlink" href="#reading-a-report" title="Permanent link">&para;</a></h2>
 <p>The repository has a small viewer for reports, <code>scripts/inim_report.py</code> (Python 3.13 or newer; nothing to install for reading). Download the repository from GitHub, then:</p>
 <ul>
