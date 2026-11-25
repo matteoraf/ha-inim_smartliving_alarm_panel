@@ -31,7 +31,8 @@ from .const import (
 )
 from .coordinator import PanelData
 from .entity import InimCoordinatorEntity, name_item, panel_device_info
-from .event_log import event_attributes
+from .event_log import EventLog
+from .notifications import ENGLISH, async_texts
 from .peripherals import enabled_peripherals
 from .stored_config import (
     SystemInfo,
@@ -375,7 +376,14 @@ class PanelUserCodeSensor(SensorEntity):
 
 
 class InimEventLogSensor(BaseInimSensorEntity):
-    """Sensor to display the latest Inim alarm events."""
+    """Sensor to display the latest Inim alarm events.
+
+    The event list is not kept in the recorder's history: it is rebuilt from
+    the panel's own log after a restart, and a long one is larger than the
+    recorder keeps.
+    """
+
+    _unrecorded_attributes = frozenset({"event_log"})
 
     def __init__(
         self,
@@ -400,6 +408,9 @@ class InimEventLogSensor(BaseInimSensorEntity):
 
         # The poll whose events are in the log
         self._processed_data: PanelData | None = None
+        # How events are shown, built when the sensor is added (once the
+        # texts are loaded); events wait for it
+        self._events: EventLog | None = None
         self._event_log: list[
             dict[str, Any]
         ] = []  # Stores the enriched event log for attributes
@@ -410,6 +421,27 @@ class InimEventLogSensor(BaseInimSensorEntity):
     def suggested_object_id(self) -> str | None:
         """Return a suggested object ID for the entity."""
         return SENSOR_LAST_EVENT_LOG_SUFFIX
+
+    async def async_added_to_hass(self) -> None:
+        """Load the event texts, then show the events read so far."""
+        self._events = await self._async_event_log()
+        await super().async_added_to_hass()
+        self._update_state_from_coordinator()
+
+    async def _async_event_log(self) -> EventLog:
+        """How the events are shown: decoded with the panel's model (the
+        stored configuration's until it is identified), named from the
+        stored configuration, in English and Home Assistant's language."""
+        try:
+            model = self.coordinator.panel.model
+        except RuntimeError:
+            model = None
+        return EventLog(
+            self._initial_panel_config,
+            model,
+            await async_texts(self.hass, ENGLISH),
+            await async_texts(self.hass),
+        )
 
     @property
     def available(self) -> bool:
@@ -440,8 +472,9 @@ class InimEventLogSensor(BaseInimSensorEntity):
             # back after a failed poll, with the last poll's data. A poll is
             # told by its data object (ring indexes wrap around, so they cannot
             # tell a new event from an old one).
-            fresh = data is not self._processed_data
-            self._processed_data = data
+            fresh = data is not self._processed_data and self._events is not None
+            if fresh:
+                self._processed_data = data
             if fresh and data.new_events:  # the log keeps its events between polls
                 _LOGGER.debug(
                     "Processing %s new raw events for event log sensor",
@@ -449,9 +482,10 @@ class InimEventLogSensor(BaseInimSensorEntity):
                 )
                 # the panel's local time, in Home Assistant's time zone
                 time_zone = dt_util.get_default_time_zone()
+                events = self._events
+                assert events is not None
                 new_items = [
-                    event_attributes(logged, self._initial_panel_config, time_zone)
-                    for logged in data.new_events
+                    events.attributes(logged, time_zone) for logged in data.new_events
                 ]
                 # newest first: the new events go before the ones already shown
                 self._event_log = (new_items + self._event_log)[

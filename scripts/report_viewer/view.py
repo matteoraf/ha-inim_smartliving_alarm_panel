@@ -614,7 +614,7 @@ def events(report: Mapping[str, Any], limit: int | None = 50) -> Section:
     shown = records if limit is None else records[:limit]
     section = Section(
         "Events",
-        ["#", "Time", "Code", "On", "Agent", "Location", "Areas"],
+        ["#", "Time", "Code", "Event", "On", "Agent", "Location", "Areas"],
         note=f"{len(shown)} of {len(records)} events, newest first",
     )
     for record in shown:
@@ -623,7 +623,7 @@ def events(report: Mapping[str, Any], limit: int | None = 50) -> Section:
             section.tags.append(frozenset())
             section.rows.append(
                 [cell(record.get("index")), Cell(f"cannot decode {record.get('raw')}")]
-                + [Cell("")] * 5
+                + [Cell("")] * 6
             )
             continue
         areas = decoded.get("areas") or []
@@ -635,6 +635,7 @@ def events(report: Mapping[str, Any], limit: int | None = 50) -> Section:
                 cell(record.get("index")),
                 cell(decoded.get("timestamp")),
                 cell(decoded.get("code")),
+                Cell(_event_name(decoded.get("code"))),
                 cell(decoded.get("activation")),
                 cell(decoded.get("agent")),
                 cell(decoded.get("location")),
@@ -642,6 +643,14 @@ def events(report: Mapping[str, Any], limit: int | None = 50) -> Section:
             ]
         )
     return section
+
+
+def _event_name(code: Any) -> str:
+    """An event code's name (firmware 6 numbering), from the integration."""
+    if not isinstance(code, int):
+        return ""
+    kind = loader.module("protocol.event_types").event_type(code)
+    return "" if kind is None else kind.key.replace("_", " ")
 
 
 def transport(report: Mapping[str, Any]) -> list[Section]:

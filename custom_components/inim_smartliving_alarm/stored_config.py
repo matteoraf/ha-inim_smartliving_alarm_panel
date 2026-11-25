@@ -33,6 +33,7 @@ from .protocol.config import (
     decode_terminals,
     decode_zone_records,
     is_zone_terminal,
+    output_fault_is_dirty_detector,
     refuses_arming_when_not_ready,
     scenario_record_modes,
 )
@@ -57,6 +58,7 @@ READER_LABELS = "reader_labels"
 EXPANDER_LABELS = "expander_labels"
 TIMER_LABELS = "timer_labels"
 SIREN_LABELS = "siren_labels"
+PHONE_LABELS = "phone_labels"
 ZONE_RECORDS = "zone_records"
 TERMINAL_RECORDS = "terminal_records"
 SCENARIO_RECORDS = "scenario_records"
@@ -82,6 +84,7 @@ BLOCKS = (
     EXPANDER_LABELS,
     TIMER_LABELS,
     SIREN_LABELS,
+    PHONE_LABELS,
     ZONE_RECORDS,
     TERMINAL_RECORDS,
     SCENARIO_RECORDS,
@@ -103,6 +106,7 @@ NAME_TABLES = {
     "expanders": EXPANDER_LABELS,
     "timers": TIMER_LABELS,
     "sirens": SIREN_LABELS,
+    "phone_numbers": PHONE_LABELS,
 }
 
 
@@ -123,6 +127,7 @@ def store(config: PanelConfiguration) -> dict[str, str]:
         EXPANDER_LABELS: config.expander_labels.raw,
         TIMER_LABELS: config.timer_labels.raw,
         SIREN_LABELS: config.siren_labels.raw,
+        PHONE_LABELS: config.phone_labels.raw,
         ZONE_RECORDS: config.zone_records,
         TERMINAL_RECORDS: config.terminal_records,
         SCENARIO_RECORDS: config.scenario_records,
@@ -155,6 +160,7 @@ def _block_lengths(model: PanelModel) -> dict[str, frozenset[int]]:
         EXPANDER_LABELS: labels(model.expanders),
         TIMER_LABELS: labels(model.timers),
         SIREN_LABELS: labels(model.sirens),
+        PHONE_LABELS: labels(model.phone_numbers),
         FIXED_OUTPUT_LABELS: labels(FIXED_OUTPUTS),
         ZONE_RECORDS: frozenset({model.zones * model.zone_record_length}),
         TERMINAL_RECORDS: frozenset({model.terminals * model.terminal_record_length}),
@@ -519,6 +525,19 @@ def refuses_not_ready(stored: Mapping[str, Any]) -> bool | None:
         return refuses_arming_when_not_ready(raw)
     except ProtocolError:
         return None
+
+
+def output_fault_is_dirty_detector_option(stored: Mapping[str, Any]) -> bool:
+    """Whether output faults report a dirty smoke detector (see
+    protocol.config.output_fault_is_dirty_detector); False when the general
+    options are not stored or cannot be decoded."""
+    raw = raw_block(stored, GENERAL_OPTIONS)
+    if raw is None or stored_model(stored) is None:
+        return False
+    try:
+        return output_fault_is_dirty_detector(raw)
+    except ProtocolError:
+        return False
 
 
 def scenario_area_modes(stored: Mapping[str, Any]) -> dict[int, dict[int, int]]:

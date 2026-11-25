@@ -8,12 +8,27 @@ import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.inim_smartliving_alarm import async_migrate_entry
-from custom_components.inim_smartliving_alarm.api import SmartLivingPanel
+from custom_components.inim_smartliving_alarm.api import LoggedEvent, SmartLivingPanel
 from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
 )
-from custom_components.inim_smartliving_alarm.event_log import EventNames
+from custom_components.inim_smartliving_alarm.event_log import (
+    EventNames,
+    event_attributes,
+)
+from custom_components.inim_smartliving_alarm.protocol.event_types import (
+    ObjectType,
+    Ref,
+    event_refs,
+)
+from custom_components.inim_smartliving_alarm.protocol.events import (
+    decode_event_record,
+)
+from custom_components.inim_smartliving_alarm.protocol.model import (
+    SMARTLIVING_1050_FW6 as SL1050,
+    SMARTLIVING_10100_FW6,
+)
 from custom_components.inim_smartliving_alarm.stored_config import (
     BLOCKS,
     name_table,
@@ -83,6 +98,14 @@ CONFIG_1050 = {
 }
 
 
+def shown(agent: int, location: int, config=CONFIG_1050) -> tuple[str, str]:
+    """(device, authorized_by) of an arming event, "-" where there is none."""
+    raw = bytes.fromhex("bc03602f0100") + bytes((agent, location, 0x8A))
+    event = decode_event_record(raw, SL1050)
+    item = event_attributes(LoggedEvent(0, raw, event), config, None)
+    return item.get("device", "-"), item.get("authorized_by", "-")
+
+
 @pytest.mark.parametrize(
     ("location", "expected"),
     [
@@ -97,7 +120,7 @@ CONFIG_1050 = {
 )
 def test_event_locations(location: int, expected: str) -> None:
     """Keypads, then readers, then remote and none."""
-    assert EventNames(CONFIG_1050).location(location) == expected
+    assert shown(0xFF if location == 0xFF else 0, location)[0] == expected
 
 
 @pytest.mark.parametrize(
@@ -113,28 +136,33 @@ def test_event_locations(location: int, expected: str) -> None:
 )
 def test_event_agents(agent: int, location: int, expected: str) -> None:
     """User codes, or keys on a reader."""
-    assert EventNames(CONFIG_1050).agent(agent, location) == expected
+    assert shown(agent, location)[1] == expected
 
 
-def test_readers_follow_the_keypad_count() -> None:
+def test_readers_follow_the_models_keypads() -> None:
     """A 10100 has 15 keypads: its first reader is location 15."""
     config = {
         "keypad_labels": label_block([""] * 15),
         "reader_labels": label_block(["Gate"]),
     }
     names = EventNames(config)
-    assert names.location(12) == "Keypad 13"
-    assert names.location(15) == "Gate"
+    event = decode_event_record(
+        bytes.fromhex("bc03602f010000 0c8a".replace(" ", "")), SL1050
+    )
+    keypad = event_refs(event, SMARTLIVING_10100_FW6).where
+    assert names.of(keypad) == "Keypad 13"
+    event = decode_event_record(bytes.fromhex("bc03602f0100000f8a"), SL1050)
+    assert names.of(event_refs(event, SMARTLIVING_10100_FW6).where) == "Gate"
 
 
 def test_configuration_without_the_names() -> None:
     """A configuration stored by an earlier version names them as before."""
     names = EventNames({})
-    assert names.agent(0, 0xFE) == "Master Code"
-    assert names.agent(3, 0) == "User 3"
-    assert names.location(9) == "Keypad 10"
-    assert names.location(10) == "Reader 1"
-    assert names.agent(4, 12) == "Key 5"
+    assert names.user_code(0) == "Master Code"
+    assert names.user_code(3) == "User 3"
+    assert names.of(Ref(ObjectType.KEYPAD, 9)) == "Keypad 10"
+    assert names.of(Ref(ObjectType.READER, 0)) == "Reader 1"
+    assert names.of(Ref(ObjectType.KEY, 4)) == "Key 5"
 
 
 async def test_event_log_shows_the_names(
@@ -213,6 +241,7 @@ REQUIRED_BLOCKS = (
     "expander_labels",
     "timer_labels",
     "siren_labels",
+    "phone_labels",
     "zone_records",
     "terminal_records",
     "scenario_records",

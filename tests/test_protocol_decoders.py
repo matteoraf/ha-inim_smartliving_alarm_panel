@@ -32,7 +32,6 @@ from custom_components.inim_smartliving_alarm.protocol.events import (
     decode_timestamp,
     event_address,
     newest_indexes,
-    reader_index,
 )
 from custom_components.inim_smartliving_alarm.protocol.frames import (
     parse_read_reply,
@@ -441,12 +440,3 @@ def test_scenario_record_modes() -> None:
     assert scenario_record_modes(record, 6) == {1: 1, 2: 2, 3: 3, 4: 15, 5: 0, 6: 4}
     assert scenario_record_modes(record, 8) == {1: 1, 2: 2, 3: 3, 4: 15, 5: 0, 6: 4}
     assert scenario_record_modes(b"", 4) == {}
-
-
-def test_reader_index() -> None:
-    """Keypads first, then readers; special locations are no reader."""
-    assert reader_index(3, keypads=10) is None  # a keypad
-    assert reader_index(10, keypads=10) == 0
-    assert reader_index(29, keypads=10) == 19
-    assert reader_index(0xF0, keypads=10) is None
-    assert reader_index(REMOTE_LOCATION, keypads=10) is None

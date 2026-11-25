@@ -283,6 +283,360 @@
       "command_failed": {
         "message": "The command for {target} could not be completed: {error}"
       },
+      "event_zone_alarm": {
+        "message": "Zone alarm"
+      },
+      "event_terminal_tamper": {
+        "message": "Terminal tamper"
+      },
+      "event_area_alarm": {
+        "message": "Area alarm"
+      },
+      "event_perimeter_alarm": {
+        "message": "Perimeter alarm"
+      },
+      "event_area_tamper": {
+        "message": "Area tamper"
+      },
+      "event_zone_bypassed": {
+        "message": "Zone bypassed"
+      },
+      "event_real_time_zone": {
+        "message": "Real-time zone"
+      },
+      "event_area_not_ready_to_arm": {
+        "message": "Area not ready to arm"
+      },
+      "event_area_away_arm_request": {
+        "message": "Area away arm request"
+      },
+      "event_area_stay_arm_request": {
+        "message": "Area stay arm request"
+      },
+      "event_area_armed_in_away_mode": {
+        "message": "Area armed in away mode"
+      },
+      "event_area_armed_in_stay_mode": {
+        "message": "Area armed in stay mode"
+      },
+      "event_area_disarmed": {
+        "message": "Area disarmed"
+      },
+      "event_area_alarm_memory_reset": {
+        "message": "Area alarm memory reset"
+      },
+      "event_area_exit_time": {
+        "message": "Area exit time"
+      },
+      "event_area_entry_time": {
+        "message": "Area entry time"
+      },
+      "event_area_pre_arm_time": {
+        "message": "Area pre-arm time"
+      },
+      "event_overtime_request": {
+        "message": "Overtime request"
+      },
+      "event_chime_on_area": {
+        "message": "Chime on area"
+      },
+      "event_forced_area_arming": {
+        "message": "Forced area arming"
+      },
+      "event_area_failed_to_arm": {
+        "message": "Area failed to arm"
+      },
+      "event_valid_user_code": {
+        "message": "Valid user code"
+      },
+      "event_valid_key": {
+        "message": "Valid key"
+      },
+      "event_valid_code_at_keypad": {
+        "message": "Valid code at keypad"
+      },
+      "event_valid_key_at_reader": {
+        "message": "Valid key at reader"
+      },
+      "event_valid_code_on_area": {
+        "message": "Valid code on area"
+      },
+      "event_valid_key_on_area": {
+        "message": "Valid key on area"
+      },
+      "event_failed_call": {
+        "message": "Failed call"
+      },
+      "event_timer_event": {
+        "message": "Timer event"
+      },
+      "event_thermostat_on": {
+        "message": "Thermostat on"
+      },
+      "event_scenario_activated": {
+        "message": "Scenario activated"
+      },
+      "event_programmable_event": {
+        "message": "Programmable event"
+      },
+      "event_emergency_key": {
+        "message": "Emergency key"
+      },
+      "event_panic": {
+        "message": "Panic"
+      },
+      "event_periodic_event": {
+        "message": "Periodic event"
+      },
+      "event_open_panel_tamper": {
+        "message": "Open panel tamper"
+      },
+      "event_dislodged_panel_tamper": {
+        "message": "Dislodged panel tamper"
+      },
+      "event_zone_fuse_fault": {
+        "message": "Zone fuse fault"
+      },
+      "event_ibus_fuse_fault": {
+        "message": "IBUS fuse fault"
+      },
+      "event_battery_failure": {
+        "message": "Battery failure"
+      },
+      "event_mains_failure": {
+        "message": "Mains failure"
+      },
+      "event_expander_tamper": {
+        "message": "Expander tamper"
+      },
+      "event_keypad_tamper": {
+        "message": "Keypad tamper"
+      },
+      "event_reader_tamper": {
+        "message": "Reader tamper"
+      },
+      "event_siren_tamper": {
+        "message": "Siren tamper"
+      },
+      "event_nexus_tamper": {
+        "message": "Nexus tamper"
+      },
+      "event_livpwr100_tamper": {
+        "message": "LIVPWR100 tamper"
+      },
+      "event_video_sensor_tamper": {
+        "message": "Video sensor tamper"
+      },
+      "event_expander_loss": {
+        "message": "Expander loss"
+      },
+      "event_keypad_loss": {
+        "message": "Keypad loss"
+      },
+      "event_reader_loss": {
+        "message": "Reader loss"
+      },
+      "event_siren_loss": {
+        "message": "Siren loss"
+      },
+      "event_nexus_loss": {
+        "message": "Nexus loss"
+      },
+      "event_livpwr100_loss": {
+        "message": "LIVPWR100 loss"
+      },
+      "event_video_sensor_loss": {
+        "message": "Video sensor loss"
+      },
+      "event_radio_jamming": {
+        "message": "Radio jamming"
+      },
+      "event_low_battery_wireless_zone": {
+        "message": "Low battery wireless zone"
+      },
+      "event_wireless_zone_loss": {
+        "message": "Wireless zone loss"
+      },
+      "event_valid_installer_code": {
+        "message": "Valid installer code"
+      },
+      "event_invalid_code": {
+        "message": "Invalid code"
+      },
+      "event_false_key": {
+        "message": "False key"
+      },
+      "event_nexus_fault": {
+        "message": "Nexus fault"
+      },
+      "event_telephone_line_down": {
+        "message": "Telephone line down"
+      },
+      "event_date_and_time_lost": {
+        "message": "Date and time lost"
+      },
+      "event_call_queue_full": {
+        "message": "Call queue full"
+      },
+      "event_successful_call": {
+        "message": "Successful call"
+      },
+      "event_programming_mode": {
+        "message": "Programming mode"
+      },
+      "event_ongoing_call": {
+        "message": "Ongoing call"
+      },
+      "event_failed_to_send_sms_text_message": {
+        "message": "Failed to send SMS text message"
+      },
+      "event_output_fault": {
+        "message": "Output fault"
+      },
+      "event_credit_running_low": {
+        "message": "Credit running low"
+      },
+      "event_date_and_time_changed": {
+        "message": "Date and time changed"
+      },
+      "event_battery_internal_resistance": {
+        "message": "Battery internal resistance"
+      },
+      "event_shorted_battery": {
+        "message": "Shorted battery"
+      },
+      "event_battery_disconnected": {
+        "message": "Battery disconnected"
+      },
+      "event_power_supply_overload": {
+        "message": "Power supply overload"
+      },
+      "event_power_supply_overheating": {
+        "message": "Power supply overheating"
+      },
+      "event_ground_fault": {
+        "message": "Ground fault"
+      },
+      "event_overvoltage_output_1": {
+        "message": "Overvoltage output 1"
+      },
+      "event_overvoltage_output_2": {
+        "message": "Overvoltage output 2"
+      },
+      "event_overvoltage_output_3": {
+        "message": "Overvoltage output 3"
+      },
+      "event_overvoltage_bus": {
+        "message": "Overvoltage BUS"
+      },
+      "event_low_voltage_output_1": {
+        "message": "Low voltage output 1"
+      },
+      "event_low_voltage_output_2": {
+        "message": "Low voltage output 2"
+      },
+      "event_low_voltage_output_3": {
+        "message": "Low voltage output 3"
+      },
+      "event_low_voltage_output_bus": {
+        "message": "Low voltage output BUS"
+      },
+      "event_short_circuit_output_1": {
+        "message": "Short circuit output 1"
+      },
+      "event_short_circuit_output_2": {
+        "message": "Short circuit output 2"
+      },
+      "event_short_circuit_output_3": {
+        "message": "Short circuit output 3"
+      },
+      "event_short_circuit_output_bus": {
+        "message": "Short circuit output BUS"
+      },
+      "event_output_overload_1": {
+        "message": "Output overload 1"
+      },
+      "event_output_overload_2": {
+        "message": "Output overload 2"
+      },
+      "event_output_overload_3": {
+        "message": "Output overload 3"
+      },
+      "event_output_overload_bus": {
+        "message": "Output overload BUS"
+      },
+      "event_communication_with_the_power_supply_failed": {
+        "message": "Communication with the power supply failed"
+      },
+      "event_ongoing_call_on_number_1": {
+        "message": "Ongoing call on number 1"
+      },
+      "event_ongoing_call_on_number_15": {
+        "message": "Ongoing call on number 15"
+      },
+      "event_data_sync_between_panel_and_ip2rx": {
+        "message": "Data sync between panel and IP2RX"
+      },
+      "event_ip_connection_lost": {
+        "message": "IP connection lost"
+      },
+      "event_gprs_connection_lost": {
+        "message": "GPRS connection lost"
+      },
+      "event_sia_ip_polling_failed": {
+        "message": "SIA-IP polling failed"
+      },
+      "event_onvif_camera_2_alarm": {
+        "message": "ONVIF camera 2 alarm"
+      },
+      "event_onvif_camera_3_alarm": {
+        "message": "ONVIF camera 3 alarm"
+      },
+      "event_onvif_camera_4_alarm": {
+        "message": "ONVIF camera 4 alarm"
+      },
+      "event_onvif_camera_5_alarm": {
+        "message": "ONVIF camera 5 alarm"
+      },
+      "event_free_event_1": {
+        "message": "Free event 1"
+      },
+      "event_free_event_2": {
+        "message": "Free event 2"
+      },
+      "event_free_event_3": {
+        "message": "Free event 3"
+      },
+      "event_free_event_4": {
+        "message": "Free event 4"
+      },
+      "event_free_event_5": {
+        "message": "Free event 5"
+      },
+      "event_free_event_6": {
+        "message": "Free event 6"
+      },
+      "event_free_event_7": {
+        "message": "Free event 7"
+      },
+      "event_free_event_8": {
+        "message": "Free event 8"
+      },
+      "event_free_event_9": {
+        "message": "Free event 9"
+      },
+      "event_ended": {
+        "message": "{event} (ended)"
+      },
+      "event_unknown": {
+        "message": "Unknown event (code {code})"
+      },
+      "event_detector_dusty": {
+        "message": "Detector dusty"
+      },
+      "event_free": {
+        "message": "Free event {number}"
+      },
       "thermostat_not_set": {
         "message": "{target}: the panel did not keep the new setting. Try again; if it keeps happening, check the thermostat on the keypad."
       },

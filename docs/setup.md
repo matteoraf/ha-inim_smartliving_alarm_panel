@@ -20,9 +20,9 @@ After [installing](installation.md#installing) the integration and restarting Ho
     ![The SmartLAN/SI connection form](images/setup-connection.webp){ width="480" }
 
 5.  Click **Submit**. The integration connects to the panel, checks it and reads its configuration. If the setup is refused, the message says why (see [below](#why-the-setup-can-be-refused)).
-6.  Choose the **areas, zones, scenarios and outputs** to import. Each one you tick gets its entities. What the panel shows in use is already ticked; change it if you like.
+6.  Choose the **areas, zones, scenarios, outputs and thermostats** to import. Each one you tick gets its entities. What the panel shows in use is already ticked; change it if you like.
 
-    ![Choosing the areas, zones, scenarios and outputs](images/setup-items.webp){ width="560" }
+    ![Choosing the areas, zones, scenarios, outputs and thermostats](images/setup-items.webp){ width="560" }
 
 7.  Set the **Initial Options**: how many events to keep and which scenarios the alarm panel card uses. See [Options](options.md#initial-options).
 
@@ -84,7 +84,7 @@ The integration contacts the panel with the new details, reads its configuration
 
 ## Re-reading the panel configuration
 
-The integration reads the panel's names and programming when you add it: the names of areas, zones, scenarios, user codes, keys, keypads, readers, expanders, timers and sirens; which keypads, readers, expanders and sirens are enabled; the zone setup and the scenario definitions. If you change them on the panel later (from a keypad or the installer software), read them again with either:
+The integration reads the panel's names and programming when you add it: the names of areas, zones, scenarios, user codes, keys, keypads, readers, expanders, timers, sirens and phone numbers (only their names); which keypads, readers, expanders and sirens are enabled; the zone setup and the scenario definitions. If you change them on the panel later (from a keypad or the installer software), read them again with either:
 
 *   the **Re-read panel configuration** button, in the *Configuration* section of your panel's device page, or
 *   the **Re-read panel configuration** action, `inim_smartliving_alarm.reread_panel_configuration` (see [Actions](actions-events.md#action-reread-panel-configuration)).

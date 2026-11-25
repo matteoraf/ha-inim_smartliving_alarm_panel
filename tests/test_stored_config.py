@@ -89,6 +89,7 @@ NOT_IN_VERSION_1 = {
     "expander_labels",
     "timer_labels",
     "siren_labels",
+    "phone_labels",
 }
 # Blocks the releases before 0.4.0a3 / 0.4.0b1 did not store at all
 NOT_BEFORE_0_4_0A3 = {"peripherals"}
@@ -144,7 +145,7 @@ def test_entries_of_this_version_are_major_version_2() -> None:
 
 @pytest.mark.parametrize("release", RELEASES)
 def test_migrate_v1_keeps_the_blocks_as_read(release: str) -> None:
-    """Each block version 1 stored as read is kept under its name; the six
+    """Each block version 1 stored as read is kept under its name; the seven
     name tables (and what a release did not store) are left to the re-read."""
     old = fixture(release)["data"][DATA_INITIAL_PANEL_CONFIG]
     migrated = migrate_v1(old)
@@ -606,7 +607,7 @@ async def test_system_info_from_the_model_string(fake_panel: FakePanel) -> None:
     assert system_info({}) is None
 
 
-def test_name_tables_are_the_six_blocks() -> None:
+def test_name_tables_are_the_seven_blocks() -> None:
     """The event-name tables map to the blocks version 1 never kept."""
     assert set(NAME_TABLES.values()) == NOT_IN_VERSION_1
 

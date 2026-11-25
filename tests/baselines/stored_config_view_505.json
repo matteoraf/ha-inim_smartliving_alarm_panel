@@ -545,6 +545,68 @@
     "toggle": false
    }
   ],
+  "phone_numbers": [
+   {
+    "label": "",
+    "number": 1
+   },
+   {
+    "label": "",
+    "number": 2
+   },
+   {
+    "label": "",
+    "number": 3
+   },
+   {
+    "label": "",
+    "number": 4
+   },
+   {
+    "label": "",
+    "number": 5
+   },
+   {
+    "label": "",
+    "number": 6
+   },
+   {
+    "label": "",
+    "number": 7
+   },
+   {
+    "label": "",
+    "number": 8
+   },
+   {
+    "label": "",
+    "number": 9
+   },
+   {
+    "label": "",
+    "number": 10
+   },
+   {
+    "label": "",
+    "number": 11
+   },
+   {
+    "label": "",
+    "number": 12
+   },
+   {
+    "label": "",
+    "number": 13
+   },
+   {
+    "label": "",
+    "number": 14
+   },
+   {
+    "label": "",
+    "number": 15
+   }
+  ],
   "readers": [
    {
     "label": "",

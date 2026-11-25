@@ -243,10 +243,10 @@ def test_unsupported(text: bytes, reason) -> None:
         (51, 53),
         (52, 55),
         (96, 99),
-        (97, None),  # free events 1-11: none on firmware 6
+        (97, None),  # free events 1-14: none on firmware 6
         (107, None),
-        (108, 105),  # free events 12-14
-        (110, 107),
+        (108, None),
+        (110, None),
         (111, None),
     ],
 )
@@ -263,7 +263,7 @@ def test_normalized_event_record() -> None:
         record[:8] + b"\x9e"
     )
     assert normalized_event_record(record, SMARTLIVING_505_FW6) == record
-    free = record[:8] + bytes((100,))  # a free event, restoral
+    free = record[:8] + bytes((100,))  # a free event that ended
     assert normalized_event_record(free, SMARTLIVING_505_FW51)[8] == 0x7F
     event = decode_event_record(free, SMARTLIVING_505_FW51)
     assert event.code is None
@@ -343,9 +343,9 @@ async def test_events_in_firmware_6_numbering(fw51_panel: FakePanel) -> None:
         await connection.close()
     shown = [event_attributes(logged, {}, None) for logged in events]
     assert [item["description"] for item in shown] == [
-        "Scenario Activated",
-        "End of Area(s) Armed",  # firmware 5.1 has no "area disarmed" event
-        "Area(s) Armed",
+        "Scenario activated",
+        "Area armed in away mode (ended)",  # 5.1 has no "area disarmed" event
+        "Area armed in away mode",
     ]
     # Decoded in firmware 6 numbering, the raw bytes as the panel stored them
     assert events[0].event.action == 0x9E
