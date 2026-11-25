@@ -1345,6 +1345,8 @@
 <ul>
 <li><strong>The event log</strong> keeps the recent events, with the names programmed on the panel: who did it and where. It keeps its last events while the panel cannot be reached. To show it on a dashboard, see <a href="../actions-events/#the-event-log-on-a-dashboard">The event log on a dashboard</a>.</li>
 </ul>
+<p>The events and their keys are in the sensor's attributes: open the sensor, then the menu (⋮) → <strong>Details</strong>:</p>
+<p><img alt="The event log's attributes: each event with its description, key, code, how it happened, who did it and the areas" src="../images/event-log-attributes.webp" width="480" /></p>
 <details class="note">
 <summary>The event log in detail</summary>
 <p>The state is the position of the newest event in the panel's event log: 0 to 999, or 0 to 499 on panels that keep 500 events (the SmartLiving 505 and 515, and the 1050 on firmware 5.1). It starts again from 0 when the log wraps around, so it changes with every new event. Before the first read it is <code>Unknown Index</code>.</p>
@@ -1370,7 +1372,7 @@
 </tr>
 <tr>
 <td><code>latest_event_description</code></td>
-<td>the newest event's description</td>
+<td>the newest event's description, in English</td>
 </tr>
 <tr>
 <td><code>latest_event_timestamp</code></td>
@@ -1378,6 +1380,7 @@
 </tr>
 </tbody>
 </table>
+<p>The <code>event_log</code> list is not kept in Home Assistant's history (the recorder): it can be larger than the recorder keeps, and after a restart the list is read again from the panel, which keeps its own log. Dashboards, templates and automations read it as usual; the other attributes are kept in the history.</p>
 <p>Each event in <code>event_log</code> has:</p>
 <table>
 <thead>
@@ -1393,7 +1396,27 @@
 </tr>
 <tr>
 <td><code>description</code></td>
-<td>what happened, for example <code>Area(s) Armed</code></td>
+<td>what happened, in English, the name the panel gives the event, for example <code>Area armed in away mode</code>; <code>(ended)</code> is added when the panel logs the end of something, for example <code>Zone alarm (ended)</code></td>
+</tr>
+<tr>
+<td><code>description_local</code></td>
+<td>the same in Home Assistant's language (English or Italian), for example <code>Inserimento effettivo di area</code> or <code>Allarme zona (ripristino)</code></td>
+</tr>
+<tr>
+<td><code>event</code></td>
+<td>the event's key, the same in every language: use it in automations, for example <code>area_armed_in_away_mode</code>, <code>zone_alarm</code>; <code>detector_dusty</code> for an output fault the installer set to report a dirty smoke detector; <code>free_event</code> and <code>unknown</code> for events without a name</td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td>the event's code in firmware 6 numbering (0 to 113), also on firmware 5.1 panels; a code firmware 6 does not name can be 114 to 127; empty (<code>null</code>) for the free events only firmware 5.1 has</td>
+</tr>
+<tr>
+<td><code>ended</code></td>
+<td><code>true</code> when the panel logs the end of something (an alarm, a bypass, a fault); <code>false</code> when it starts or happens</td>
+</tr>
+<tr>
+<td><code>via</code></td>
+<td>how it happened, for the events that tell: <code>keypad_code</code>, <code>reader_key</code>, <code>remote</code> (the app, the cloud, Home Assistant or the installer software), <code>command_zone</code>, <code>patrol_time</code>, <code>timer</code>, <code>keypad_shortcut</code>, <code>telephone</code>, <code>user_code</code> (a zone bypassed by a user), <code>automatic</code> (a zone bypassed by the panel)</td>
 </tr>
 <tr>
 <td><code>authorized_by</code></td>
@@ -1401,15 +1424,11 @@
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>the keypad or reader, by name; <code>Remote</code> for commands from the app, the cloud, Home Assistant or the installer software</td>
+<td>the keypad or reader, by name; <code>Remote</code> for commands from the app, the cloud, Home Assistant or the installer software; <code>From telephone</code></td>
 </tr>
 <tr>
 <td><code>affected_areas</code></td>
 <td>the areas, by name</td>
-</tr>
-<tr>
-<td><code>area</code></td>
-<td>the area, for events about one area</td>
 </tr>
 <tr>
 <td><code>zone</code></td>
@@ -1418,6 +1437,22 @@
 <tr>
 <td><code>scenario</code></td>
 <td>the scenario, for scenario events</td>
+</tr>
+<tr>
+<td><code>keypad</code>, <code>reader</code>, <code>expander</code>, <code>siren</code>, <code>timer</code></td>
+<td>the device the event is about (a tamper, a loss, a timer), by name</td>
+</tr>
+<tr>
+<td><code>phone_number</code></td>
+<td>the phone number a call was made to, by the name it has on the panel (only the name, never the number), for example <code>Cloud</code>; <code>Number 12</code> when it has none</td>
+</tr>
+<tr>
+<td><code>emergency_key</code>, <code>programmable_event</code></td>
+<td>the object the event is about, by number (<em>Emergency key 1</em>, <em>Programmable event 2</em>): their names are not read from the panel</td>
+</tr>
+<tr>
+<td><code>number</code></td>
+<td>the number of a panic or periodic event, as the panel shows it, for example <code>001</code></td>
 </tr>
 <tr>
 <td><code>authorized_id</code>, <code>device_id</code></td>
@@ -1429,7 +1464,8 @@
 </tr>
 </tbody>
 </table>
-<p>Keys that do not apply to an event are left out.</p>
+<p>Keys that do not apply to an event are left out. <em>Remote</em>, <em>From telephone</em> and the <code>via</code> values are the integration's own words: the panel leaves those places blank.</p>
+<p>The panel logs an arming as the end of the last disarming and a disarming as the end of the last arming: each disarming adds <em>Area armed in away mode (ended)</em> (or <em>in stay mode</em>) next to <em>Area disarmed</em>, and each arming adds <em>Area disarmed (ended)</em>.</p>
 </details>
 <details class="note">
 <summary>The active scenario in detail</summary>

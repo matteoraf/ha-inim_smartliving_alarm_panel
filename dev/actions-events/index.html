@@ -994,7 +994,7 @@
 <span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
 <span class="w">  </span><span class="no">{% for e in (state_attr('sensor.home_event_log', 'event_log') or [])[:10] %}</span>
 <span class="w">  </span><span class="no">- {{ as_timestamp(e.timestamp) | timestamp_custom('%d/%m %H:%M') }}</span>
-<span class="w">  </span><span class="no">· {{ e.description }}{% if e.authorized_by %} · {{ e.authorized_by }}{% endif %}{% if e.affected_areas %} · {{ e.affected_areas }}{% endif %}</span>
+<span class="w">  </span><span class="no">· {{ e.description_local }}{% if e.authorized_by %} · {{ e.authorized_by }}{% endif %}{% if e.affected_areas %} · {{ e.affected_areas }}{% endif %}</span>
 <span class="w">  </span><span class="no">{% endfor %}</span>
 </code></pre></div>
 <p>The repository's <a href="https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/tree/main/Examples">Examples</a> folder has a larger dashboard, made for version 0.3: its entity IDs and some cards may need changes.</p>

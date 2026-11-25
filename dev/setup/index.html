@@ -770,8 +770,8 @@
 <p>Click <strong>Submit</strong>. The integration connects to the panel, checks it and reads its configuration. If the setup is refused, the message says why (see <a href="#why-the-setup-can-be-refused">below</a>).</p>
 </li>
 <li>
-<p>Choose the <strong>areas, zones, scenarios and outputs</strong> to import. Each one you tick gets its entities. What the panel shows in use is already ticked; change it if you like.</p>
-<p><img alt="Choosing the areas, zones, scenarios and outputs" src="../images/setup-items.webp" width="560" /></p>
+<p>Choose the <strong>areas, zones, scenarios, outputs and thermostats</strong> to import. Each one you tick gets its entities. What the panel shows in use is already ticked; change it if you like.</p>
+<p><img alt="Choosing the areas, zones, scenarios, outputs and thermostats" src="../images/setup-items.webp" width="560" /></p>
 </li>
 <li>
 <p>Set the <strong>Initial Options</strong>: how many events to keep and which scenarios the alarm panel card uses. See <a href="../options/#initial-options">Options</a>.</p>
@@ -894,7 +894,7 @@
 </ul>
 </details>
 <h2 id="re-reading-the-panel-configuration">Re-reading the panel configuration<a class="headerlink" href="#re-reading-the-panel-configuration" title="Permanent link">&para;</a></h2>
-<p>The integration reads the panel's names and programming when you add it: the names of areas, zones, scenarios, user codes, keys, keypads, readers, expanders, timers and sirens; which keypads, readers, expanders and sirens are enabled; the zone setup and the scenario definitions. If you change them on the panel later (from a keypad or the installer software), read them again with either:</p>
+<p>The integration reads the panel's names and programming when you add it: the names of areas, zones, scenarios, user codes, keys, keypads, readers, expanders, timers, sirens and phone numbers (only their names); which keypads, readers, expanders and sirens are enabled; the zone setup and the scenario definitions. If you change them on the panel later (from a keypad or the installer software), read them again with either:</p>
 <ul>
 <li>the <strong>Re-read panel configuration</strong> button, in the <em>Configuration</em> section of your panel's device page, or</li>
 <li>the <strong>Re-read panel configuration</strong> action, <code>inim_smartliving_alarm.reread_panel_configuration</code> (see <a href="../actions-events/#action-reread-panel-configuration">Actions</a>).</li>
