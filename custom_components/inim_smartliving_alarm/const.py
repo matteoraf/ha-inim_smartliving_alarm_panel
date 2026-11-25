@@ -81,7 +81,7 @@ DEFAULT_POLL_INTERVAL_THERMOSTATS = 60.0
 DEFAULT_SLOW_POLLING_INTERVAL = 30.0  # seconds
 DEFAULT_SLOW_POLLING_DURATION = 60.0  # minutes
 DEFAULT_PORT = 5004  # SmartLAN/SI default; also proposed for SmartLAN/G (no default)
-DEFAULT_PANEL_NAME = "Inim Smartliving"  # Default if user doesn't provide one
+DEFAULT_PANEL_NAME = "Inim SmartLiving"  # Default if user doesn't provide one
 
 # Counts an entry migrated from the limits uses when none was stored:
 # everything
@@ -93,7 +93,10 @@ DEFAULT_LIMIT_SCENARIOS = 30
 
 # Default limits for imported events
 DEFAULT_EVENT_LOG_SIZE = 50  # Default number of events to store
-SYSTEM_MAX_EVENT_LOG_SIZE = 100  # System limit of events to store, increasing this may cause exceeding the maximum size of 16384 bytes for the sensor attribute
+# The most events the event log keeps: the cap keeps the sensor's state
+# attributes a reasonable size (100 long events are about 56 KB). The list
+# is not recorded.
+SYSTEM_MAX_EVENT_LOG_SIZE = 100
 
 # Data keys for hass.data[DOMAIN][entry.entry_id]
 DATA_PANEL = "panel"  # the entry's SmartLivingPanel

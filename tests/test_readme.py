@@ -81,6 +81,7 @@ def test_the_rest_stays() -> None:
     for heading in (
         "Installation\n------------",
         "Documentation\n-------------",
+        "Upgrading from 0.4\n------------------",
         "Upgrading from 0.3.x\n--------------------",
         "Sharing a system report\n-----------------------",
         "Troubleshooting\n---------------",

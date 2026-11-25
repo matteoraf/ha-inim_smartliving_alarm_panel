@@ -38,7 +38,7 @@ The integration is installed as a custom repository; it needs Home Assistant 202
 
 [![Open your Home Assistant instance and open this repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=matteoraf&repository=ha-inim_smartliving_alarm_panel&category=integration)
 
-The button opens this repository in your Home Assistant: in the Marketplace on 2026.11 or later, in HACS on earlier versions (HACS must be installed). Download **Inim Smartliving Alarm** there and restart Home Assistant. Or add it yourself:
+The button opens this repository in your Home Assistant: in the Marketplace on 2026.11 or later, in HACS on earlier versions (HACS must be installed). Download **Inim SmartLiving Alarm** there and restart Home Assistant. Or add it yourself:
 
 **Home Assistant 2026.11 or later (Marketplace):**
 
@@ -46,14 +46,14 @@ The button opens this repository in your Home Assistant: in the Marketplace on 2
     
 2.  Add `https://github.com/matteoraf/ha-inim_smartliving_alarm_panel` as a custom repository of type **Integration**. Adding custom repositories needs the Marketplace's GitHub connection.
     
-3.  Open **Inim Smartliving Alarm** in the Marketplace, install it and restart Home Assistant.
+3.  Open **Inim SmartLiving Alarm** in the Marketplace, install it and restart Home Assistant.
     
 
 **Home Assistant 2026.1 to 2026.10 (HACS):**
 
 1.  In HACS, open the menu (⋮) -> **Custom repositories** and add the same URL with type **Integration**.
     
-2.  Search for **Inim Smartliving Alarm**, download it and restart Home Assistant.
+2.  Search for **Inim SmartLiving Alarm**, download it and restart Home Assistant.
     
 
 **Manual installation:**
@@ -86,6 +86,11 @@ Documentation
 *   [Upgrading](https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/upgrading/)
 
 *   [Known limitations](https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/limitations/)
+
+Upgrading from 0.4
+------------------
+
+Take a Home Assistant backup before you update: to go back to 0.4, you restore it. Then see [Upgrading](https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/upgrading/#from-04).
 
 Upgrading from 0.3.x
 --------------------

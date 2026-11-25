@@ -1,6 +1,6 @@
 {
     "domain": "inim_smartliving_alarm",
-    "name": "Inim Smartliving Alarm",
+    "name": "Inim SmartLiving Alarm",
     "categories": ["security_safety.alarm_systems"],
     "codeowners": ["@matteoraf"],
     "config_flow": true,

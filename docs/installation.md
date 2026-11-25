@@ -25,7 +25,7 @@ Zone numbers above the number of terminals are the second zones of double termin
 
 ??? note "What experimental means, and other firmware versions"
 
-    *   **Experimental models** use the panel's memory map but have not been tested on a real panel yet; a warning in the log says so. Please report how it works for you.
+    *   **Experimental models** use their own memory layout but have not been tested on a real panel yet; a warning in the log says so. Please report how it works for you.
     *   **Firmware 6.x** is supported as in the table above.
     *   **Firmware 5.1x is supported experimentally, and with limits**, on all four models:
 
@@ -48,20 +48,20 @@ The integration is installed as a custom repository. Use the button to open it i
 
 [Open your Home Assistant instance and open this repository in the Marketplace.](https://my.home-assistant.io/redirect/marketplace_repository/?owner=matteoraf&repository=ha-inim_smartliving_alarm_panel&category=integration){ .md-button }
 
-The button opens the repository in the Marketplace on Home Assistant 2026.11 or later, and in HACS on earlier versions (HACS must be installed). Download **Inim Smartliving Alarm** there and restart Home Assistant.
+The button opens the repository in the Marketplace on Home Assistant 2026.11 or later, and in HACS on earlier versions (HACS must be installed). Download **Inim SmartLiving Alarm** there and restart Home Assistant.
 
 === "Marketplace (2026.11 or later)"
 
     1.  Go to **Settings** → **Marketplace**.
     2.  Add `https://github.com/matteoraf/ha-inim_smartliving_alarm_panel` as a custom repository of type **Integration**. Adding custom repositories needs the Marketplace's GitHub connection.
-    3.  Open **Inim Smartliving Alarm** in the Marketplace and install it.
+    3.  Open **Inim SmartLiving Alarm** in the Marketplace and install it.
     4.  Restart Home Assistant.
 
 === "HACS (2026.1 to 2026.10)"
 
     1.  In HACS, open the menu (⋮) → **Custom repositories**.
     2.  Add `https://github.com/matteoraf/ha-inim_smartliving_alarm_panel` with type **Integration**.
-    3.  Search for **Inim Smartliving Alarm** and download it.
+    3.  Search for **Inim SmartLiving Alarm** and download it.
     4.  Restart Home Assistant.
 
 === "Manual"

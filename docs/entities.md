@@ -13,7 +13,7 @@ Your panel appears in Home Assistant as one device, named as you chose at setup.
 | [Each output](#outputs) | a switch, or a light for dimmers | Switch or dim the output |
 | [Each keypad thermostat](#thermostats) | a climate entity, a temperature sensor | Set the temperature, heat or cool, the program; see the room temperature |
 | [The panel's state](#sensors) | sensors | The event log, the active scenario, firmware and model |
-| [Diagnostics](#diagnostic-and-configuration-entities) | sensors, a select, a button, a switch | The user code, the devices found, programming mode, system reports, re-reading the configuration, slow polling mode |
+| [Diagnostics](#diagnostic-and-configuration-entities) | sensors, binary sensors, a select, a button, a switch | The user code, the devices found, programming mode, system reports, re-reading the configuration, slow polling mode |
 
 For example, the tile cards of an area: its arming mode, its switch and its alarm memory.
 
@@ -203,8 +203,8 @@ The events and their keys are in the sensor's attributes: open the sensor, then 
     | `ended` | `true` when the panel logs the end of something (an alarm, a bypass, a fault); `false` when it starts or happens |
     | `via` | how it happened, for the events that tell: `keypad_code`, `reader_key`, `remote` (the app, the cloud, Home Assistant or the installer software), `command_zone`, `patrol_time`, `timer`, `keypad_shortcut`, `telephone`, `user_code` (a zone bypassed by a user), `automatic` (a zone bypassed by the panel) |
     | `authorized_by` | the user code or key that did it, by name |
-    | `device` | the keypad or reader, by name; `Remote` for commands from the app, the cloud, Home Assistant or the installer software; `From telephone` |
-    | `affected_areas` | the areas, by name |
+    | `device` | the keypad or reader, by name; `Remote` for commands from the app, the cloud, Home Assistant or the installer software; `From telephone`; `Location N` when the panel logs a place this event does not use |
+    | `affected_areas` | the areas, by name; `None` when no area is concerned |
     | `zone` | the zone, for zone events |
     | `scenario` | the scenario, for scenario events |
     | `keypad`, `reader`, `expander`, `siren`, `timer` | the device the event is about (a tamper, a loss, a timer), by name |
@@ -220,7 +220,7 @@ The events and their keys are in the sensor's attributes: open the sensor, then 
 
 ??? note "The active scenario in detail"
 
-    The state is the active scenario's name followed by its index (0-based). It is `No scenario matches` when the state of the areas matches no scenario, `Unknown Scenario (Index n)` for an index without a scenario name, and `Unknown (No data)` before the panel has been read.
+    The state is the active scenario's name followed by its index (0-based). It is `No scenario matches` when the state of the areas matches no scenario, `Scenario N (Index n)` for a scenario without a name, `Unknown Scenario (Index n)` for an index the panel does not have, and `Unknown (No data)` before the panel has been read.
 
     | Attribute | Values |
     |---|---|
@@ -241,7 +241,7 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
 | `binary_sensor.…_programming_mode` | Programming mode | on while the panel is in programming mode |
 | `binary_sensor.…_refuses_arming_with_zones_not_ready` | Refuses arming with zones not ready | on when the installer set the panel to refuse arming with zones not ready |
 | `select.…_diagnostics_level` | Diagnostics level | Redacted, Full, Full confidential; disabled by default |
-| `switch.…_slow_polling_mode` | Slow polling mode | on while the panel is read every 30 seconds, so that other apps can connect to the board; SmartLAN/SI only (see [Slow polling mode](options.md#slow-polling-mode)) |
+| `switch.…_slow_polling_mode` | Slow polling mode | on while the panel is read every 30 seconds by default (**Reading interval in slow polling mode**), so that other apps can connect to the board; SmartLAN/SI only (see [Slow polling mode](options.md#slow-polling-mode)) |
 
 ??? note "Details and attributes"
 

@@ -18,7 +18,7 @@ This integration connects Home Assistant to an Inim SmartLiving alarm panel on y
 3.  **[Add your panel](setup.md#adding-a-panel)**: enter the board's address and the PIN, then choose what to import.
 4.  **[Find your entities](entities.md)** on the panel's device page, and add them to a dashboard.
 
-Coming from version 0.3? Read [Upgrading](upgrading.md#from-03x) first. Something not working? See [Troubleshooting](troubleshooting.md).
+Coming from an earlier version? Read [Upgrading](upgrading.md) first, and take a backup before you update. Something not working? See [Troubleshooting](troubleshooting.md).
 
 ## What you get
 
