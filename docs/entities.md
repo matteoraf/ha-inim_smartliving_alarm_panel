@@ -173,6 +173,10 @@ The zone sensor's attributes are the zone's programming, as read from the panel.
 
 *   **The event log** keeps the recent events, with the names programmed on the panel: who did it and where. It keeps its last events while the panel cannot be reached. To show it on a dashboard, see [The event log on a dashboard](actions-events.md#the-event-log-on-a-dashboard).
 
+The events and their keys are in the sensor's attributes: open the sensor, then the menu (⋮) → **Details**:
+
+![The event log's attributes: each event with its description, key, code, how it happened, who did it and the areas](images/event-log-attributes.webp){ width="480" }
+
 ??? note "The event log in detail"
 
     The state is the position of the newest event in the panel's event log: 0 to 999, or 0 to 499 on panels that keep 500 events (the SmartLiving 505 and 515, and the 1050 on firmware 5.1). It starts again from 0 when the log wraps around, so it changes with every new event. Before the first read it is `Unknown Index`.
@@ -182,25 +186,37 @@ The zone sensor's attributes are the zone's programming, as read from the panel.
     | `event_log` | the recent events, newest first (see below) |
     | `event_log_count_current` | how many events are in `event_log` now |
     | `event_log_size_configured` | the **Number of Events to store in log** option |
-    | `latest_event_description` | the newest event's description |
+    | `latest_event_description` | the newest event's description, in English |
     | `latest_event_timestamp` | the newest event's time |
+
+    The `event_log` list is not kept in Home Assistant's history (the recorder): it can be larger than the recorder keeps, and after a restart the list is read again from the panel, which keeps its own log. Dashboards, templates and automations read it as usual; the other attributes are kept in the history.
 
     Each event in `event_log` has:
 
     | Key | Values |
     |---|---|
     | `timestamp` | the event's time: the panel's clock read in Home Assistant's time zone, with daylight saving time |
-    | `description` | what happened, for example `Area(s) Armed` |
+    | `description` | what happened, in English, the name the panel gives the event, for example `Area armed in away mode`; `(ended)` is added when the panel logs the end of something, for example `Zone alarm (ended)` |
+    | `description_local` | the same in Home Assistant's language (English or Italian), for example `Inserimento effettivo di area` or `Allarme zona (ripristino)` |
+    | `event` | the event's key, the same in every language: use it in automations, for example `area_armed_in_away_mode`, `zone_alarm`; `detector_dusty` for an output fault the installer set to report a dirty smoke detector; `free_event` and `unknown` for events without a name |
+    | `code` | the event's code in firmware 6 numbering (0 to 113), also on firmware 5.1 panels; a code firmware 6 does not name can be 114 to 127; empty (`null`) for the free events only firmware 5.1 has |
+    | `ended` | `true` when the panel logs the end of something (an alarm, a bypass, a fault); `false` when it starts or happens |
+    | `via` | how it happened, for the events that tell: `keypad_code`, `reader_key`, `remote` (the app, the cloud, Home Assistant or the installer software), `command_zone`, `patrol_time`, `timer`, `keypad_shortcut`, `telephone`, `user_code` (a zone bypassed by a user), `automatic` (a zone bypassed by the panel) |
     | `authorized_by` | the user code or key that did it, by name |
-    | `device` | the keypad or reader, by name; `Remote` for commands from the app, the cloud, Home Assistant or the installer software |
+    | `device` | the keypad or reader, by name; `Remote` for commands from the app, the cloud, Home Assistant or the installer software; `From telephone` |
     | `affected_areas` | the areas, by name |
-    | `area` | the area, for events about one area |
     | `zone` | the zone, for zone events |
     | `scenario` | the scenario, for scenario events |
+    | `keypad`, `reader`, `expander`, `siren`, `timer` | the device the event is about (a tamper, a loss, a timer), by name |
+    | `phone_number` | the phone number a call was made to, by the name it has on the panel (only the name, never the number), for example `Cloud`; `Number 12` when it has none |
+    | `emergency_key`, `programmable_event` | the object the event is about, by number (*Emergency key 1*, *Programmable event 2*): their names are not read from the panel |
+    | `number` | the number of a panic or periodic event, as the panel shows it, for example `001` |
     | `authorized_id`, `device_id` | the numbers of the user code or key, and of the keypad or reader (hexadecimal) |
     | `raw_hex_data` | the event as stored by the panel |
 
-    Keys that do not apply to an event are left out.
+    Keys that do not apply to an event are left out. *Remote*, *From telephone* and the `via` values are the integration's own words: the panel leaves those places blank.
+
+    The panel logs an arming as the end of the last disarming and a disarming as the end of the last arming: each disarming adds *Area armed in away mode (ended)* (or *in stay mode*) next to *Area disarmed*, and each arming adds *Area disarmed (ended)*.
 
 ??? note "The active scenario in detail"
 

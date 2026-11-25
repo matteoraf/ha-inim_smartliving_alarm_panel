@@ -806,6 +806,9 @@ def panel_1050() -> PanelState:
         c.RAM_LABELS_EXPANDERS: ["Exp Kitchen"],
         c.RAM_LABELS_TIMERS: ["Timer 1"],
         c.RAM_LABELS_SIRENS: ["Outdoor siren"],
+        # Phone number 12 is the cloud's slot, named so by the installer
+        # software in cloud mode; the others have no name
+        c.RAM_LABELS_PHONES: [""] * 11 + ["Cloud"],
     }
     # Two keypads, three readers (the third without a name), one expander
     # and one siren

@@ -5546,13 +5546,25 @@
     "event_log": [
      {
       "affected_areas": "Area 7",
-      "description": "Zone Excluded",
+      "code": 5,
+      "description": "Zone bypassed",
+      "description_local": "Zone bypassed",
+      "device": "Remote",
+      "device_id": "fe",
+      "ended": false,
+      "event": "zone_bypassed",
       "raw_hex_data": "97358832400023fe85",
       "timestamp": "2026-11-12T08:30:15+01:00",
+      "via": "remote",
       "zone": "Zone 36"
      },
      {
-      "description": "Scenario Activated",
+      "affected_areas": "Area 1, Area 2, Area 3, Area 4, Area 5, Area 6, Area 7",
+      "code": 30,
+      "description": "Scenario activated",
+      "description_local": "Scenario activated",
+      "ended": false,
+      "event": "scenario_activated",
       "raw_hex_data": "973588327f0000fe9d",
       "scenario": "Scenario 1",
       "timestamp": "2026-11-12T08:30:15+01:00"
@@ -5561,18 +5573,23 @@
       "affected_areas": "Area 3",
       "authorized_by": "Master",
       "authorized_id": "00",
-      "description": "Area(s) Armed",
+      "code": 10,
+      "description": "Area armed in away mode",
+      "description_local": "Area armed in away mode",
       "device": "Remote",
       "device_id": "fe",
+      "ended": false,
+      "event": "area_armed_in_away_mode",
       "raw_hex_data": "97358832040000fe8a",
-      "timestamp": "2026-11-12T08:30:15+01:00"
+      "timestamp": "2026-11-12T08:30:15+01:00",
+      "via": "remote"
      }
     ],
     "event_log_count_current": 3,
     "event_log_size_configured": 5,
     "friendly_name": "Test Panel Event log",
     "icon": "mdi:format-list-bulleted-type",
-    "latest_event_description": "Zone Excluded",
+    "latest_event_description": "Zone bypassed",
     "latest_event_timestamp": "2026-11-12T08:30:15+01:00"
    },
    "disabled_by": null,

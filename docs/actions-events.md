@@ -71,7 +71,7 @@ title: Alarm events
 content: >-
   {% for e in (state_attr('sensor.home_event_log', 'event_log') or [])[:10] %}
   - {{ as_timestamp(e.timestamp) | timestamp_custom('%d/%m %H:%M') }}
-  · {{ e.description }}{% if e.authorized_by %} · {{ e.authorized_by }}{% endif %}{% if e.affected_areas %} · {{ e.affected_areas }}{% endif %}
+  · {{ e.description_local }}{% if e.authorized_by %} · {{ e.authorized_by }}{% endif %}{% if e.affected_areas %} · {{ e.affected_areas }}{% endif %}
   {% endfor %}
 ```
 

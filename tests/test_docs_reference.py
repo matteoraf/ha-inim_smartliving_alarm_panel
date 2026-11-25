@@ -495,5 +495,5 @@ async def test_event_log_card_renders(hass: HomeAssistant, demo: ConfigEntry) ->
     ]
     content = card["content"].replace("sensor.home_event_log", log)
     rendered = Template(content, hass).async_render(parse_result=False)
-    assert "Area(s) Disarmed" in rendered
+    assert "Area disarmed" in rendered  # description_local, English here
     assert "Family" in rendered

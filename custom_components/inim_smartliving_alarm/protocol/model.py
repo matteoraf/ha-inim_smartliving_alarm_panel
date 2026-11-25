@@ -6,6 +6,7 @@ from .errors import ProtocolError, UnsupportedPanelError, UnsupportedReason
 from .event_codes import FW51_EVENT_CODES
 
 SCENARIOS = 30  # on every model
+PHONE_NUMBERS = 15  # on every model
 LABEL_LENGTH = 16
 FIXED_OUTPUTS = 3  # O1-O3 on the panel board
 # Which keypads, readers, expanders and sirens are enabled: one bit per
@@ -105,6 +106,7 @@ class PanelModel:
     keypad_status: bool = True
 
     scenarios = SCENARIOS
+    phone_numbers = PHONE_NUMBERS
     terminal_record_length = 12
     area_record_length = 7
     pin_length = 6

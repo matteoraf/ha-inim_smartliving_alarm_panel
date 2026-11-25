@@ -283,6 +283,360 @@
       "command_failed": {
         "message": "Il comando per {target} non è stato completato: {error}"
       },
+      "event_zone_alarm": {
+        "message": "Allarme zona"
+      },
+      "event_terminal_tamper": {
+        "message": "Sabotaggio terminale"
+      },
+      "event_area_alarm": {
+        "message": "Allarme area"
+      },
+      "event_perimeter_alarm": {
+        "message": "Allarme area inserita in modalità perimetrale"
+      },
+      "event_area_tamper": {
+        "message": "Sabotaggio area"
+      },
+      "event_zone_bypassed": {
+        "message": "Esclusione zona"
+      },
+      "event_real_time_zone": {
+        "message": "Tempo reale di zona"
+      },
+      "event_area_not_ready_to_arm": {
+        "message": "Area non pronta all'inserimento"
+      },
+      "event_area_away_arm_request": {
+        "message": "Richiesta di inserimento area"
+      },
+      "event_area_stay_arm_request": {
+        "message": "Richiesta di inserimento parziale di area"
+      },
+      "event_area_armed_in_away_mode": {
+        "message": "Inserimento effettivo di area"
+      },
+      "event_area_armed_in_stay_mode": {
+        "message": "Inserimento effettivo parziale di area"
+      },
+      "event_area_disarmed": {
+        "message": "Disinserimento di area"
+      },
+      "event_area_alarm_memory_reset": {
+        "message": "Reset memorie di area"
+      },
+      "event_area_exit_time": {
+        "message": "Tempo di uscita area"
+      },
+      "event_area_entry_time": {
+        "message": "Tempo di ingresso area"
+      },
+      "event_area_pre_arm_time": {
+        "message": "Tempo di preavviso area"
+      },
+      "event_overtime_request": {
+        "message": "Richiesta straordinario su area"
+      },
+      "event_chime_on_area": {
+        "message": "Campanello area"
+      },
+      "event_forced_area_arming": {
+        "message": "Forzatura inserimento area"
+      },
+      "event_area_failed_to_arm": {
+        "message": "Mancato inserimento area"
+      },
+      "event_valid_user_code": {
+        "message": "Riconoscimento codice utente valido"
+      },
+      "event_valid_key": {
+        "message": "Riconoscimento chiave valida"
+      },
+      "event_valid_code_at_keypad": {
+        "message": "Riconoscimento codice su tastiera"
+      },
+      "event_valid_key_at_reader": {
+        "message": "Riconoscimento chiave su lettore"
+      },
+      "event_valid_code_on_area": {
+        "message": "Riconoscimento codice su area"
+      },
+      "event_valid_key_on_area": {
+        "message": "Riconoscimento chiave su area"
+      },
+      "event_failed_call": {
+        "message": "Telefonata fallita"
+      },
+      "event_timer_event": {
+        "message": "Timer"
+      },
+      "event_thermostat_on": {
+        "message": "Termostato su tastiera"
+      },
+      "event_scenario_activated": {
+        "message": "Applicazione scenario"
+      },
+      "event_programmable_event": {
+        "message": "Evento programmabile"
+      },
+      "event_emergency_key": {
+        "message": "Tasto di emergenza"
+      },
+      "event_panic": {
+        "message": "Panico"
+      },
+      "event_periodic_event": {
+        "message": "Evento periodico"
+      },
+      "event_open_panel_tamper": {
+        "message": "Sabotaggio centrale da antiapertura"
+      },
+      "event_dislodged_panel_tamper": {
+        "message": "Sabotaggio centrale da antistrappo"
+      },
+      "event_zone_fuse_fault": {
+        "message": "Guasto fusibile zone"
+      },
+      "event_ibus_fuse_fault": {
+        "message": "Guasto fusibile ibus"
+      },
+      "event_battery_failure": {
+        "message": "Batteria inefficiente"
+      },
+      "event_mains_failure": {
+        "message": "Mancanza rete a.c."
+      },
+      "event_expander_tamper": {
+        "message": "Sabotaggio espansione"
+      },
+      "event_keypad_tamper": {
+        "message": "Sabotaggio tastiera"
+      },
+      "event_reader_tamper": {
+        "message": "Sabotaggio lettore"
+      },
+      "event_siren_tamper": {
+        "message": "Sabotaggio sirena"
+      },
+      "event_nexus_tamper": {
+        "message": "Sabotaggio Nexus"
+      },
+      "event_livpwr100_tamper": {
+        "message": "Sabotaggio LIVPWR100"
+      },
+      "event_video_sensor_tamper": {
+        "message": "Sabotaggio sensore video"
+      },
+      "event_expander_loss": {
+        "message": "Scomparsa espansione I/O"
+      },
+      "event_keypad_loss": {
+        "message": "Scomparsa tastiera"
+      },
+      "event_reader_loss": {
+        "message": "Scomparsa lettore"
+      },
+      "event_siren_loss": {
+        "message": "Scomparsa sirena"
+      },
+      "event_nexus_loss": {
+        "message": "Scomparsa Nexus"
+      },
+      "event_livpwr100_loss": {
+        "message": "Scomparsa LIVPWR100"
+      },
+      "event_video_sensor_loss": {
+        "message": "Scomparsa sensore video"
+      },
+      "event_radio_jamming": {
+        "message": "Oscuramento Radio"
+      },
+      "event_low_battery_wireless_zone": {
+        "message": "Batteria bassa zona wireless"
+      },
+      "event_wireless_zone_loss": {
+        "message": "Scomparsa zona wireless"
+      },
+      "event_valid_installer_code": {
+        "message": "Riconoscimento codice installatore"
+      },
+      "event_invalid_code": {
+        "message": "Codice falso"
+      },
+      "event_false_key": {
+        "message": "Chiave falsa"
+      },
+      "event_nexus_fault": {
+        "message": "Guasto GSM"
+      },
+      "event_telephone_line_down": {
+        "message": "Guasto linea telefonica"
+      },
+      "event_date_and_time_lost": {
+        "message": "Perdita datario"
+      },
+      "event_call_queue_full": {
+        "message": "Coda telefonica piena"
+      },
+      "event_successful_call": {
+        "message": "Telefonata OK"
+      },
+      "event_programming_mode": {
+        "message": "Ingresso in programmazione"
+      },
+      "event_ongoing_call": {
+        "message": "Telefonata in corso"
+      },
+      "event_failed_to_send_sms_text_message": {
+        "message": "Fallito invio del messaggio sms"
+      },
+      "event_output_fault": {
+        "message": "Malfunzionamento uscita"
+      },
+      "event_credit_running_low": {
+        "message": "Credito scarso"
+      },
+      "event_date_and_time_changed": {
+        "message": "Cambiamento della data e dell'ora"
+      },
+      "event_battery_internal_resistance": {
+        "message": "Resistenza interna batteria"
+      },
+      "event_shorted_battery": {
+        "message": "Corto circuito batteria"
+      },
+      "event_battery_disconnected": {
+        "message": "Disconnessione batteria"
+      },
+      "event_power_supply_overload": {
+        "message": "Sovraccarico alimentatore"
+      },
+      "event_power_supply_overheating": {
+        "message": "Sovratemperatura alimentatore"
+      },
+      "event_ground_fault": {
+        "message": "Difetto di terra"
+      },
+      "event_overvoltage_output_1": {
+        "message": "Sovratensione uscita 1"
+      },
+      "event_overvoltage_output_2": {
+        "message": "Sovratensione uscita 2"
+      },
+      "event_overvoltage_output_3": {
+        "message": "Sovratensione uscita 3"
+      },
+      "event_overvoltage_bus": {
+        "message": "Sovratensione BUS"
+      },
+      "event_low_voltage_output_1": {
+        "message": "Tensione bassa uscita 1"
+      },
+      "event_low_voltage_output_2": {
+        "message": "Tensione bassa uscita 2"
+      },
+      "event_low_voltage_output_3": {
+        "message": "Tensione bassa uscita 3"
+      },
+      "event_low_voltage_output_bus": {
+        "message": "Tensione bassa uscita BUS"
+      },
+      "event_short_circuit_output_1": {
+        "message": "Corto circuito uscita 1"
+      },
+      "event_short_circuit_output_2": {
+        "message": "Corto circuito uscita 2"
+      },
+      "event_short_circuit_output_3": {
+        "message": "Corto circuito uscita 3"
+      },
+      "event_short_circuit_output_bus": {
+        "message": "Corto circuito uscita BUS"
+      },
+      "event_output_overload_1": {
+        "message": "Sovraccarico uscita 1"
+      },
+      "event_output_overload_2": {
+        "message": "Sovraccarico uscita 2"
+      },
+      "event_output_overload_3": {
+        "message": "Sovraccarico uscita 3"
+      },
+      "event_output_overload_bus": {
+        "message": "Sovraccarico uscita BUS"
+      },
+      "event_communication_with_the_power_supply_failed": {
+        "message": "Mancata comunicazione alimentatore"
+      },
+      "event_ongoing_call_on_number_1": {
+        "message": "Telefonata su Numero 1 in corso"
+      },
+      "event_ongoing_call_on_number_15": {
+        "message": "Telefonata su Numero 15 in corso"
+      },
+      "event_data_sync_between_panel_and_ip2rx": {
+        "message": "Sincronismo dati tra centrale e IP2RX"
+      },
+      "event_ip_connection_lost": {
+        "message": "Connessione IP persa"
+      },
+      "event_gprs_connection_lost": {
+        "message": "Connessione GPRS persa"
+      },
+      "event_sia_ip_polling_failed": {
+        "message": "Fallito polling Sia-IP"
+      },
+      "event_onvif_camera_2_alarm": {
+        "message": "Allarme telecamera Onvif 2"
+      },
+      "event_onvif_camera_3_alarm": {
+        "message": "Allarme telecamera Onvif 3"
+      },
+      "event_onvif_camera_4_alarm": {
+        "message": "Allarme telecamera Onvif 4"
+      },
+      "event_onvif_camera_5_alarm": {
+        "message": "Allarme telecamera Onvif 5"
+      },
+      "event_free_event_1": {
+        "message": "Evento libero 1"
+      },
+      "event_free_event_2": {
+        "message": "Evento libero 2"
+      },
+      "event_free_event_3": {
+        "message": "Evento libero 3"
+      },
+      "event_free_event_4": {
+        "message": "Evento libero 4"
+      },
+      "event_free_event_5": {
+        "message": "Evento libero 5"
+      },
+      "event_free_event_6": {
+        "message": "Evento libero 6"
+      },
+      "event_free_event_7": {
+        "message": "Evento libero 7"
+      },
+      "event_free_event_8": {
+        "message": "Evento libero 8"
+      },
+      "event_free_event_9": {
+        "message": "Evento libero 9"
+      },
+      "event_ended": {
+        "message": "{event} (ripristino)"
+      },
+      "event_unknown": {
+        "message": "Evento sconosciuto (codice {code})"
+      },
+      "event_detector_dusty": {
+        "message": "Sensore fumo sporco"
+      },
+      "event_free": {
+        "message": "Evento libero {number}"
+      },
       "thermostat_not_set": {
         "message": "{target}: la centrale non ha mantenuto la nuova impostazione. Riprova; se succede ancora, controlla il termostato sulla tastiera."
       },

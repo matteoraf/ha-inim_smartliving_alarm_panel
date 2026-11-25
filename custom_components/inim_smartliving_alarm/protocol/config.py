@@ -688,6 +688,15 @@ def refuses_arming_when_not_ready(options: bytes) -> bool:
     return bool(options[1] & 0x20)
 
 
+def output_fault_is_dirty_detector(options: bytes) -> bool:
+    """Whether the installer set the output fault event to report a dirty
+    smoke detector (general options byte 4 bit 0): the panel then names
+    the event so, and its agent is the zone of the detector."""
+    if len(options) < 5:
+        raise ProtocolError(f"general options: {len(options)} bytes, 5 needed")
+    return bool(options[4] & 0x01)
+
+
 def find_code_index(pin_table: bytes, pin: str, model: PanelModel) -> int | None:
     """Index of the user code with this PIN, or None.
 

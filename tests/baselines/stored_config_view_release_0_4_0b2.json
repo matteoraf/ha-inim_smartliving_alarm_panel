@@ -329,6 +329,7 @@
     "toggle": false
    }
   ],
+  "phone_numbers": [],
   "readers": [],
   "refuses_arming_with_zones_not_ready": false,
   "scenarios": [

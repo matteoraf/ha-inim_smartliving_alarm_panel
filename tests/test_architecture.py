@@ -274,7 +274,7 @@ def test_stored_lookups_are_found(source: str, found: set[str]) -> None:
 
 def test_every_block_has_a_constant() -> None:
     """The guard knows every stored block by its constant."""
-    assert len(BLOCK_CONSTANTS) == 22
+    assert len(BLOCK_CONSTANTS) == 23
 
 
 @pytest.mark.parametrize("module", sorted(m for m in MODULES if m != "stored_config"))

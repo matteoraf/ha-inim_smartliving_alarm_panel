@@ -14,6 +14,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.translation import async_get_translations
 
 from .const import DOMAIN
+from .event_log import fill_text
 
 ENGLISH = "en"
 _PREFIX = f"component.{DOMAIN}.exceptions."
@@ -29,9 +30,9 @@ class Texts:
         self._english = english
 
     def __call__(self, key: str, **placeholders: Any) -> str:
-        """A text with its placeholders filled in."""
-        template = self._strings.get(key) or self._english[key]
-        return template.format(**placeholders)
+        """A text with its placeholders filled in: English where the language
+        has none, the key itself where there is no text at all."""
+        return fill_text(key, placeholders, self._strings, self._english)
 
     def translated(self, key: str) -> bool:
         """Whether a text differs from its English one in this language."""

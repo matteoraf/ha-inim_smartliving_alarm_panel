@@ -46,6 +46,7 @@ _NAME_TABLES: tuple[tuple[str, Callable[[Mapping[str, Any]], list[str]]], ...] =
     ("keys", _names("keys")),
     ("timers", _names("timers")),
     ("sirens", _names("sirens")),
+    ("phone_numbers", _names("phone_numbers")),
 )
 
 

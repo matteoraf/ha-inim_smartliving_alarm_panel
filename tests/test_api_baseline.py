@@ -294,9 +294,9 @@ async def test_recent_events(hass: HomeAssistant, api: SmartLivingPanel) -> None
     assert [logged.event.action for logged in events] == [0x05, 0x85, 0x00]
     shown = [event_attributes(logged, {}, ROME) for logged in events]
     assert [item["description"] for item in shown] == [
-        "End of Zone Excluded",
-        "Zone Excluded",
-        "Area/Zone Alarm End",
+        "Zone bypassed (ended)",
+        "Zone bypassed",
+        "Zone alarm (ended)",
     ]
     assert all(logged.event.areas == {7} for logged in events)
     assert all(logged.event.agent == 35 for logged in events)  # zone 36

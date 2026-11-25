@@ -80,8 +80,8 @@ def test_event_action_in_firmware_6_numbering() -> None:
     does not have."""
     record = bytes(4) + bytes((1, 0, 0xFF, 0xFE, 0x8A))
     assert decode_event_record(record, MODEL).action == 0x8A
-    restoral = bytes(4) + bytes((1, 0, 0xFF, 0xFE, 0x0A))
-    assert decode_event_record(restoral, MODEL).action == 0x0A
+    ended = bytes(4) + bytes((1, 0, 0xFF, 0xFE, 0x0A))
+    assert decode_event_record(ended, MODEL).action == 0x0A
     event = PanelEvent(
         timestamp=decode_event_record(record, MODEL).timestamp,
         areas=frozenset(),

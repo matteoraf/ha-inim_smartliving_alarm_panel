@@ -6,7 +6,7 @@ Known limitations of this version, and what you can do about them:
 
 *   While Home Assistant reads the panel at the [Polling](options.md#polling) intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network (such as the Inim app or the installer software) cannot connect to it meanwhile. Turn on [slow polling mode](options.md#slow-polling-mode) to let them connect between Home Assistant's reads, which then come every 30 seconds. Remote access through Inim Cloud is not affected.
 
-*   The event log names the most common events: alarms, arming, disarming and resets, zone bypasses, scenarios, programming, valid codes and keys, and failed calls. Other events show as *Unknown Action* with their code. Decoding the remaining events is planned for an upcoming release.
+*   The event log names every event the panel logs, and who and what it refers to. Emergency keys and programmable events are shown by number (*Emergency key 1*, *Programmable event 2*): their names are not read from the panel.
 
 *   Panels on firmware 5.0x or of another model that were set up with an earlier version keep running with the 1050's firmware 6 layout, so their names, zones, scenarios and event log may be wrong and their areas' delays are not shown. A repair notice says so. New setups of such panels are refused.
 
@@ -16,4 +16,4 @@ Known limitations of this version, and what you can do about them:
 
 *   Analogue outputs are not offered. A terminal output on one of the panel's first three terminal positions cannot be switched remotely: the panel's output command cannot address those positions.
 
-*   Support for firmware 5.1 is experimental and limited: it has not been tested on a real panel on firmware 5.1; the panel's state flags (such as programming mode) and the results of commands are assumed to work as on firmware 6; the free events that only firmware 5.1 has (free events 1 to 11) are shown as unknown events in the event log; and firmware 5.1 has no video sensors.
+*   Support for firmware 5.1 is experimental and limited: it has not been tested on a real panel on firmware 5.1; the panel's state flags (such as programming mode) and the results of commands are assumed to work as on firmware 6; the free events that only firmware 5.1 has are shown as *Free event 1* to *Free event 14*; and firmware 5.1 has no video sensors.

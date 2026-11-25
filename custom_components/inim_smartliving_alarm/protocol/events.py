@@ -11,58 +11,10 @@ EPOCH = datetime(2000, 1, 1)  # timestamps count seconds from here, panel local 
 NO_AGENT = 0xFF
 NO_LOCATION = 0xFF
 REMOTE_LOCATION = 0xFE  # app, cloud or installer software
-# The action code of a valid key on a reader (with the activation bit)
-VALID_KEY_ACTION = 0x96
 # Written in place of a code that firmware 6 does not have (it uses 0-113)
 NO_FW6_CODE = 0x7F
 CODE_OFFSET = 8  # byte with the event code (bits 0-6) and activation (bit 7)
 ACTIVATION_BIT = 0x80
-
-# Event actions: the code byte in firmware 6 numbering, activation bit
-# included (a restoral has it clear)
-AREA_ZONE_ALARM = 0x80
-AREA_ZONE_ALARM_END = 0x00
-AREAS_ARMED = 0x8A
-AREAS_DISARMED = 0x8C
-AREAS_RESET = 0x8D
-ZONE_EXCLUDED = 0x85
-ZONE_EXCLUDED_END = 0x05
-AREAS_ARMED_END = 0x0A
-AREAS_DISARMED_END = 0x0C
-INSTALLER_CODE_INSERTED = 0xBA
-PROGRAMMING_STARTED = 0xC2
-PROGRAMMING_ENDED = 0x42
-FAILED_CALL = 0x9B
-FAILED_CALL_END = 0x1B
-VALID_CODE = 0x95
-SCENARIO_ACTIVATED = 0x9E
-# Actions whose agent and location are a user code (or key) and a device,
-# and whose areas are those affected
-AREA_ACTIONS = frozenset(
-    (
-        AREAS_ARMED,
-        AREAS_DISARMED,
-        AREAS_RESET,
-        AREAS_ARMED_END,
-        AREAS_DISARMED_END,
-        VALID_CODE,
-        VALID_KEY_ACTION,
-    )
-)
-# Actions whose agent is a zone (0-based)
-ZONE_ACTIONS = frozenset(
-    (AREA_ZONE_ALARM, AREA_ZONE_ALARM_END, ZONE_EXCLUDED, ZONE_EXCLUDED_END)
-)
-
-
-def reader_index(location: int, keypads: int) -> int | None:
-    """The reader (0-based) an event location is; None if it is not one.
-
-    Locations count the keypads first, then the readers; locations from
-    0xF0 up are not devices.
-    """
-    index = location - keypads
-    return index if location < 0xF0 and index >= 0 else None
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,7 +39,7 @@ class PanelEvent:
     agent: int | None  # user code, key, zone, ... depending on the event code
     location: int | None  # keypad, reader, REMOTE_LOCATION, ...
     code: int | None  # event type, firmware 6 numbering; None if it has none
-    activation: bool  # False = restoral
+    activation: bool  # False: the event ended
 
     @property
     def action(self) -> int:

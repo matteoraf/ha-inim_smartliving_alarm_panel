@@ -262,6 +262,7 @@ class PanelConfiguration:
     expander_labels: Labels
     timer_labels: Labels
     siren_labels: Labels
+    phone_labels: Labels  # the names of the phone numbers, never the numbers
     peripherals: Peripherals
     peripherals_raw: bytes
     general_options_raw: bytes
@@ -745,6 +746,7 @@ class SmartLivingPanel:
             expander_labels = await labels(reg.LABELS_EXPANDERS, model.expanders)
             timer_labels = await labels(reg.LABELS_TIMERS, model.timers)
             siren_labels = await labels(reg.LABELS_SIRENS, model.sirens)
+            phone_labels = await labels(reg.LABELS_PHONES, model.phone_numbers)
             fixed_output_labels = await labels(reg.LABELS_FIXED_OUTPUTS, FIXED_OUTPUTS)
             # The enabled peripherals and the general options, in one go
             setup_block = await session.read_eeprom(
@@ -795,6 +797,7 @@ class SmartLivingPanel:
             expander_labels=expander_labels,
             timer_labels=timer_labels,
             siren_labels=siren_labels,
+            phone_labels=phone_labels,
             peripherals=decode_peripherals(peripherals, model),
             peripherals_raw=peripherals,
             general_options_raw=general_options,
