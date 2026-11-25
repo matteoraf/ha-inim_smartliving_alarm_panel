@@ -984,9 +984,13 @@ class SmartLivingPanel:
         for this hour and weekday (0 = Sunday) when it follows the weekly
         program, and its room temperature unless in skip_temperature. A
         temperature read that fails (no answer, or one that cannot be read)
-        leaves the temperature unknown and does not fail the reading. On firmware 6 the keypad status
-        block also says which thermostats are calling now. Nothing on a
-        panel without a profile of its own.
+        leaves the temperature unknown and does not fail the reading. On
+        firmware 6 the keypad status block also says which thermostats are
+        calling now. Nothing on a panel without a profile of its own.
+
+        The keypad status block is read in a short session of its own, then
+        each keypad in one of its own, so that a keypad that does not answer
+        keeps a waiting command out for that keypad only.
         """
         wanted = sorted(set(keypads))
         failed: set[int] = set()
@@ -995,13 +999,14 @@ class SmartLivingPanel:
             model = await self._identify(session)
             if not self.reads_panel_state or not wanted:
                 return ThermostatReading({})
-            dialect = self.transport.dialect
             on: frozenset[int] | None = None
             if model.keypad_status:
                 on = decode_thermostats_on(
                     await session.read_ram(KEYPAD_STATUS, KEYPAD_STATUS_LENGTH), model
                 )
-            for keypad in wanted:
+        dialect = self.transport.dialect
+        for keypad in wanted:
+            async with self.transport.session() as session:
                 address = thermostat_address(model, keypad)
                 head = decode_head(
                     await session.read_eeprom(address, THERMOSTAT_HEAD_LENGTH)

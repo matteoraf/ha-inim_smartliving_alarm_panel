@@ -134,7 +134,8 @@ class InimThermostat(InimCoordinatorEntity, ClimateEntity, RestoreEntity):
         super().__init__(coordinator)
         self.panel = panel
         self._keypad = keypad
-        self._target = f"Thermostat {keypad}" + (f" ({label})" if label else "")
+        # Named in error messages by the keypad's label, as areas and zones
+        self._target = label or f"Keypad {keypad}"
         self._attr_unique_id = f"{entry.entry_id}_thermostat_{keypad}"
         self._attr_device_info = panel_device_info(entry)
         name_item(self, "thermostat", "Keypad", keypad, label)
