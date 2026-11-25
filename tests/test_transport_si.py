@@ -409,8 +409,9 @@ async def test_cancelled_read_closes_the_connection(
     # The late reply is still on its way on the first connection
     fake_panel.single_client = False
     fake_panel.reply_delay = 0.2
+    start = len(fake_panel.requests)
     task = asyncio.create_task(transport.read(MODEL, 12))
-    await asyncio.sleep(0.05)
+    await wait_until(lambda: len(fake_panel.requests) > start)  # the reply is late
     task.cancel()
     with pytest.raises(asyncio.CancelledError):
         await task

@@ -21,7 +21,6 @@ from custom_components.inim_smartliving_alarm.attribute_values import (
     zone_state_text,
 )
 from custom_components.inim_smartliving_alarm.const import DATA_COORDINATOR, DOMAIN
-from custom_components.inim_smartliving_alarm.event_log import event_attributes
 from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
 from custom_components.inim_smartliving_alarm.protocol.events import (
     NO_FW6_CODE,
@@ -43,6 +42,7 @@ from custom_components.inim_smartliving_alarm.protocol.status import (
 from custom_components.inim_smartliving_alarm.transport.base import TransportError
 
 from .conftest import add_entry
+from .event_texts import event_attributes
 from .fake_panel import FakePanel, PanelState, const as c, panel_1050, panel_1050_fw51
 from .test_config_flow import unload_all
 from .test_zones import stored_configuration

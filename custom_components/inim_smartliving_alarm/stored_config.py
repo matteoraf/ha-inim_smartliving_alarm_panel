@@ -36,6 +36,7 @@ from .protocol.config import (
     output_fault_is_dirty_detector,
     refuses_arming_when_not_ready,
     scenario_record_modes,
+    zone_terminal,
 )
 from .protocol.errors import ProtocolError
 from .protocol.model import (
@@ -365,11 +366,11 @@ def system_info(stored: Mapping[str, Any]) -> SystemInfo | None:
     raw = raw_block(stored, MODEL_STRING)
     if raw is None:
         return None
-    parts = raw.decode("ascii", errors="ignore").strip().split(" ")
-    return SystemInfo(
-        version=parts[0] if parts else "Unknown",
-        type=parts[1] if len(parts) > 1 else "Unknown",
-    )
+    try:
+        firmware = parse_model_string(raw)
+    except ProtocolError:
+        return SystemInfo(version="Unknown", type="Unknown")
+    return SystemInfo(version=firmware.version, type=firmware.type_text)
 
 
 # ----------------------------------------------------------------- labels
@@ -647,8 +648,7 @@ def stored_zones(stored: Mapping[str, Any]) -> list[StoredZone]:
     slots = physical_map(stored)
     found = []
     for index, zone in enumerate(zones):
-        terminal = index % len(terminals)
-        second_zone = index >= len(terminals)
+        terminal, second_zone = zone_terminal(index, len(terminals))
         terminal_type = terminals[terminal].terminal_type
         found.append(
             StoredZone(

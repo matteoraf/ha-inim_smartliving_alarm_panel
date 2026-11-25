@@ -6,11 +6,12 @@ Switching is only tested on the fake panel.
 from collections.abc import AsyncGenerator, Callable
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, State
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import entity_registry as er
 import pytest
+from pytest_homeassistant_custom_component.common import mock_restore_cache
 
 from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
@@ -610,6 +611,50 @@ async def test_no_home_automation_on_firmware_51(
         gate = entity_of(hass, "switch", entry, "terminal_output_41")
         assert "home_automation" not in gate.attributes
         assert "home automation" not in output_label(config, 41)
+        await unload_all(hass)
+    finally:
+        await fake.stop()
+
+
+async def test_already_in_state_is_no_error(
+    hass: HomeAssistant, outputs_panel: FakePanel
+) -> None:
+    """An output the panel reports as already in the requested state counts
+    as switched: no error."""
+    entry = await add_entry(hass, outputs_panel)
+    await import_outputs(hass, entry, [41])
+    gate = entity_of(hass, "switch", entry, "terminal_output_41").entity_id
+    outputs_panel.state.outputs[GATE] = 1  # on, before Home Assistant polls it
+    sent = len(output_commands(outputs_panel))
+    await hass.services.async_call(
+        "switch", "turn_on", {"entity_id": gate}, blocking=True
+    )
+    await hass.async_block_till_done()
+    assert len(output_commands(outputs_panel)) == sent + 1  # sent, and refused
+    assert outputs_panel.state.outputs[GATE] == 1
+    assert hass.states.get(gate).state == "on"
+    await unload_all(hass)
+
+
+async def test_dimmer_level_restored_at_start(
+    hass: HomeAssistant, socket_enabled
+) -> None:
+    """On firmware 5.1 the panel does not report the level: the last
+    brightness Home Assistant set is restored at start and used again."""
+    fake = FakePanel(with_outputs(panel_1050_fw51()))
+    await fake.start()
+    try:
+        entry = await add_entry(hass, fake)
+        await import_outputs(hass, entry, [43])
+        lounge = entity_of(hass, "light", entry, "terminal_output_43").entity_id
+        assert await hass.config_entries.async_unload(entry.entry_id)
+        mock_restore_cache(hass, [State(lounge, "off", {"brightness": 64})])
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+        await hass.services.async_call(
+            "light", "turn_on", {"entity_id": lounge}, blocking=True
+        )
+        assert fake.state.outputs[DIMMER] == 25  # the level of brightness 64
         await unload_all(hass)
     finally:
         await fake.stop()

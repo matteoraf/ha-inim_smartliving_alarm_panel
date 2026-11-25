@@ -29,6 +29,11 @@ class FirmwareInfo:
     text: str  # the whole string, trimmed
 
     @property
+    def type_text(self) -> str:
+        """The model number as the panel writes it, five digits ("01050")."""
+        return self.model.zfill(5)
+
+    @property
     def family(self) -> str | None:
         """The firmware family with its own memory layout: "6" or "5.1".
 

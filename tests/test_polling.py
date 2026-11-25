@@ -1,7 +1,6 @@
 """The polling groups: their schedule, the reads on the panel, failures,
 the refresh after commands, the Polling options and the migration."""
 
-import asyncio
 from collections import Counter
 from collections.abc import Callable
 from datetime import timedelta
@@ -53,7 +52,7 @@ from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
-from .conftest import add_entry
+from .conftest import add_entry, wait_until
 from .fake_panel import FakePanel, PanelState, const as c, panel_1050
 from .fake_panel.state import panel_1050_fw51, panel_10100
 from .test_config_flow import open_options, unload_all
@@ -518,7 +517,8 @@ async def test_a_command_goes_between_two_groups(
     panel.reply_delay = 0.2
     start = len(panel.requests)
     reads = hass.async_create_task(advance(hass, clock, 1))  # zones and areas
-    await asyncio.sleep(0.05)  # the zones' first request is on its way
+    # the zones' first request is on its way
+    await wait_until(lambda: len(panel.requests) > start)
     await coordinator.panel.arm_areas({3: ArmMode.AWAY})
     await reads
     order = [
@@ -824,12 +824,16 @@ async def test_unload_during_a_read(
     await advance(hass, clock, 1)
     opened = old.transport.connections_opened
     panel.reply_delay = 0.2
+    start = len(panel.requests)
     reads = hass.async_create_task(advance(hass, clock, 1))  # zones, then areas
-    await asyncio.sleep(0.05)  # the zones' first request is on its way
+    # the zones' first request is on its way
+    await wait_until(lambda: len(panel.requests) > start)
     assert await hass.config_entries.async_unload(entry.entry_id)
     assert not old.transport.connected
     await reads
-    await asyncio.sleep(0.3)
+    # every timer that was due, and later ones: none reads again
+    await advance(hass, clock, 10)
+    await hass.async_block_till_done()
     assert not old.transport.connected
     assert old.transport.connections_opened == opened
     panel.reply_delay = 0

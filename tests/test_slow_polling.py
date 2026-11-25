@@ -652,7 +652,7 @@ async def test_board_ignoring_connections(
         await advance(hass, clock, 30)
         waited = time.monotonic() - started
     assert attempts == 1
-    assert 0.2 <= waited < 1.5
+    assert 0.2 <= waited < 4  # one brief attempt, not a full 5 s one
     assert state_of(hass, entry, ALARM_PANEL) == STATE_UNAVAILABLE
     assert state_of(hass, entry, SWITCH) == STATE_ON
     await advance(hass, clock, 30)

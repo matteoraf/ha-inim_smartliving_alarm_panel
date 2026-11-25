@@ -10,10 +10,12 @@ from collections.abc import AsyncGenerator
 from datetime import datetime
 import logging
 import time
+from unittest.mock import AsyncMock
 
 from homeassistant.components.climate import (
     ATTR_CURRENT_TEMPERATURE,
     ATTR_HVAC_ACTION,
+    ATTR_HVAC_MODE,
     ATTR_PRESET_MODE,
     DOMAIN as CLIMATE,
     SERVICE_SET_HVAC_MODE,
@@ -89,6 +91,7 @@ from custom_components.inim_smartliving_alarm.thermostats import (
     TemperatureBackoff,
     program_time,
 )
+from custom_components.inim_smartliving_alarm.transport.base import TransportError
 
 from .conftest import items_form, offered, proposed, wait_until
 from .fake_panel import (
@@ -1296,4 +1299,126 @@ async def test_reread_adds_new_keypads(
     assert entry.options["thermostats"] == [2, 3]
     assert entity_id(hass, entry, CLIMATE, "thermostat_3") is not None
     assert entity_id(hass, entry, CLIMATE, "thermostat_1") is None
+    await unload_all(hass)
+
+
+async def test_released_holds_writes_and_reads(
+    fake: FakePanel, api: SmartLivingPanel, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """While the connection is released for another client, a thermostat
+    write and a poll wait: they neither connect nor send. Both go out once
+    the hold ends."""
+    await api.identify()
+    transport = api.transport
+    connecting: list[bool] = []
+    ensure = transport._ensure_connected
+
+    async def recorded() -> None:
+        connecting.append(True)
+        await ensure()
+
+    monkeypatch.setattr(transport, "_ensure_connected", recorded)
+    async with api.released():
+        requests = len(fake.requests)
+        write = asyncio.create_task(api.set_thermostat(1, setpoint=22.5))
+        read = asyncio.create_task(api.read_status())
+        for _ in range(50):  # every step the tasks can take without I/O
+            await asyncio.sleep(0)
+        assert connecting == []
+        assert not write.done() and not read.done()
+        assert len(fake.requests) == requests
+        assert thermostat_writes(fake) == []
+    head = await write
+    assert head.setpoint == 22.5
+    assert await read is not None
+    assert thermostat_writes(fake) != []
+    # The write's session first (its writes, then the read-back of the
+    # block), then the status read, which reads only RAM
+    after = fake.requests[requests:]
+    last_write = max(i for i, request in enumerate(after) if request.write)
+    read_back = max(i for i, r in enumerate(after) if r.space == "eeprom")
+    assert last_write < read_back
+    status = after[read_back + 1 :]
+    assert status
+    assert all(not r.write and r.space == "ram" for r in status)
+
+
+@pytest.mark.parametrize(
+    ("failure", "service", "data", "key"),
+    [
+        (
+            "not_kept",
+            SERVICE_SET_TEMPERATURE,
+            {ATTR_TEMPERATURE: 23.5},
+            "thermostat_not_set",
+        ),
+        (
+            "programming",
+            SERVICE_SET_TEMPERATURE,
+            {ATTR_TEMPERATURE: 23.5},
+            "panel_programming",
+        ),
+        (
+            "connection",
+            SERVICE_SET_TEMPERATURE,
+            {ATTR_TEMPERATURE: 23.5},
+            "command_failed",
+        ),
+        (
+            "no_profile",
+            SERVICE_SET_TEMPERATURE,
+            {ATTR_TEMPERATURE: 23.5},
+            "command_failed",
+        ),
+        (
+            "not_kept",
+            SERVICE_SET_HVAC_MODE,
+            {ATTR_HVAC_MODE: HVACMode.OFF},
+            "thermostat_not_set",
+        ),
+    ],
+)
+async def test_failed_write_leaves_the_entity_as_it_was(
+    hass: HomeAssistant,
+    thermostats_fake: FakePanel,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
+    service: str,
+    data: dict,
+    key: str,
+) -> None:
+    """A change the panel did not make raises with its key, and the entity
+    keeps showing what the panel has."""
+    entry, target = await setup_one(hass, thermostats_fake, mode=1)
+    before = hass.states.get(target)
+    if failure == "not_kept":
+        kept = dict(thermostats_fake.state.eeprom_extra)
+        original = thermostats_fake._handle_write
+
+        def forget(request):
+            reply = original(request)
+            thermostats_fake.state.eeprom_extra.clear()
+            thermostats_fake.state.eeprom_extra.update(kept)
+            return reply
+
+        monkeypatch.setattr(thermostats_fake, "_handle_write", forget)
+    elif failure == "programming":
+        thermostats_fake.state.in_programming = True
+    elif failure == "connection":
+        monkeypatch.setattr(
+            SmartLivingPanel,
+            "set_thermostat",
+            AsyncMock(side_effect=TransportError("connection lost")),
+        )
+    else:  # the panel now identifies as a model without its own profile
+        thermostats_fake.state.firmware = "5.05 01050  "
+        hass.data[DOMAIN][entry.entry_id][DATA_COORDINATOR].panel._model = None
+    with pytest.raises(HomeAssistantError) as err:
+        await call(hass, service, target, **data)
+    assert err.value.translation_key == key
+    if failure == "programming":
+        assert thermostats_fake.no_programming_writes == []  # nothing written
+    after = hass.states.get(target)
+    assert after.state == before.state
+    assert after.attributes == before.attributes
     await unload_all(hass)

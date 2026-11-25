@@ -22,6 +22,7 @@ from custom_components.inim_smartliving_alarm.protocol.config import (
     find_code_index,
     label_address,
     scenario_record_modes,
+    zone_terminal,
 )
 from custom_components.inim_smartliving_alarm.protocol.errors import ProtocolError
 from custom_components.inim_smartliving_alarm.protocol.events import (
@@ -31,13 +32,16 @@ from custom_components.inim_smartliving_alarm.protocol.events import (
     decode_event_record,
     decode_timestamp,
     event_address,
+    fw51_free_event,
     newest_indexes,
+    raw_event_code,
 )
 from custom_components.inim_smartliving_alarm.protocol.frames import (
     parse_read_reply,
 )
 from custom_components.inim_smartliving_alarm.protocol.model import (
     SMARTLIVING_1050_FW6 as SL1050,
+    SMARTLIVING_1050_FW51,
 )
 from custom_components.inim_smartliving_alarm.protocol.status import (
     AreaMode,
@@ -51,6 +55,9 @@ from custom_components.inim_smartliving_alarm.protocol.status import (
     decode_zone_inclusion,
     decode_zone_memory,
     decode_zone_states,
+)
+from custom_components.inim_smartliving_alarm.protocol.thermostat import (
+    panel_weekday,
 )
 
 from .fake_panel import captures as cap, const as c, panel_1050
@@ -440,3 +447,45 @@ def test_scenario_record_modes() -> None:
     assert scenario_record_modes(record, 6) == {1: 1, 2: 2, 3: 3, 4: 15, 5: 0, 6: 4}
     assert scenario_record_modes(record, 8) == {1: 1, 2: 2, 3: 3, 4: 15, 5: 0, 6: 4}
     assert scenario_record_modes(b"", 4) == {}
+
+
+def _event_byte(code: int, *, started: bool) -> bytes:
+    """A record whose code byte holds this code and activation."""
+    return bytes(8) + bytes([(0x80 if started else 0) | code])
+
+
+@pytest.mark.parametrize("started", [True, False])
+@pytest.mark.parametrize(
+    ("code", "number"), [(96, None), (97, 1), (110, 14), (111, None)]
+)
+def test_fw51_free_events(code: int, number: int | None, started: bool) -> None:
+    """Firmware 5.1's free events 1-14 are its codes 97-110, started or ended."""
+    raw = _event_byte(code, started=started)
+    assert raw_event_code(raw) == code
+    assert fw51_free_event(raw, SMARTLIVING_1050_FW51) == number
+    assert fw51_free_event(raw, SL1050) is None  # firmware 6 has none
+
+
+@pytest.mark.parametrize(("python_weekday", "panel"), [(0, 1), (5, 6), (6, 0)])
+def test_panel_weekday(python_weekday: int, panel: int) -> None:
+    """The panel counts from Sunday, Python from Monday."""
+    assert panel_weekday(python_weekday) == panel
+
+
+def test_panel_weekday_out_of_range() -> None:
+    with pytest.raises(ValueError):
+        panel_weekday(7)
+
+
+@pytest.mark.parametrize(
+    ("index", "expected"),
+    [(0, (0, False)), (49, (49, False)), (50, (0, True)), (99, (49, True))],
+)
+def test_zone_terminal(index: int, expected: tuple[int, bool]) -> None:
+    """Zone numbers 1-L are the terminals' first zones, L+1-2L their second."""
+    assert zone_terminal(index, 50) == expected
+
+
+def test_zone_terminal_without_terminals() -> None:
+    with pytest.raises(ValueError):
+        zone_terminal(0, 0)

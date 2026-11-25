@@ -17,7 +17,6 @@ from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
 )
-from custom_components.inim_smartliving_alarm.event_log import event_attributes
 from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
 from custom_components.inim_smartliving_alarm.protocol.config import (
     decode_peripherals,
@@ -61,6 +60,7 @@ from custom_components.inim_smartliving_alarm.stored_config import (
 )
 
 from .conftest import add_entry
+from .event_texts import event_attributes
 from .fake_panel import FakePanel, panel_505_fw51, panel_1050_fw51
 from .test_config_flow import unload_all
 from .test_model_profiles import entry_for

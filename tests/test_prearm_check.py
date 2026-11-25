@@ -160,6 +160,32 @@ async def test_api_area_without_open_zones(fake_panel: FakePanel) -> None:
     assert result.ok
 
 
+async def test_api_trusts_the_panels_list(fake_panel: FakePanel) -> None:
+    """The panel's list of zones not ready decides, not the zone states: a
+    zone in alarm it reports ready lets the area arm, a zone at rest it
+    reports not ready stops it."""
+    fake_panel.state.zone_states[36] = c.ZONE_ALARM
+    fake_panel.state.forced_ready = {36}
+    panel = make_panel(fake_panel)
+    try:
+        result = await panel.arm_areas(
+            {3: ArmMode.AWAY}, on_not_ready=lambda z: pytest.fail(f"asked: {z}")
+        )
+        assert result.ok
+        assert fake_panel.state.armed_areas() == [3]
+        await panel.arm_areas({3: ArmMode.DISARM})
+
+        fake_panel.state.zone_states[36] = c.ZONE_REST
+        fake_panel.state.forced_ready = set()
+        fake_panel.state.extra_not_ready = {36}
+        with pytest.raises(NotReadyError) as err:
+            await panel.arm_areas({3: ArmMode.AWAY}, on_not_ready=lambda z: False)
+        assert err.value.zones == {36}
+        assert fake_panel.state.armed_areas() == []
+    finally:
+        await panel.close()
+
+
 @pytest.mark.parametrize("block", [False, True])
 async def test_installer_option_stored(
     hass: HomeAssistant, panel: FakePanel, block: bool

@@ -32,7 +32,12 @@ def auto_enable_custom_integrations(enable_custom_integrations):
 
 @pytest.fixture
 async def fake_panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
-    """A fake SmartLiving 1050 on SmartLAN/SI, listening on a free local port."""
+    """A fake SmartLiving 1050 on SmartLAN/SI, listening on a free local port.
+
+    It accepts one client at a time, like the SmartLAN/SI board: the
+    integration holds one connection per entry and closes it on unload; the
+    config flow closes its own before the entry connects.
+    """
     panel = FakePanel()
     await panel.start()
     yield panel
@@ -68,16 +73,9 @@ def no_scheduled_polling(
 
 
 @pytest.fixture
-async def panel(socket_enabled: None) -> AsyncGenerator[FakePanel]:
-    """Fake panel accepting one client at a time, like the SmartLAN/SI board.
-
-    The integration holds one connection per entry and closes it on unload;
-    the config flow closes its own before the entry connects.
-    """
-    fake = FakePanel()
-    await fake.start()
-    yield fake
-    await fake.stop()
+def panel(fake_panel: FakePanel) -> FakePanel:
+    """The fake panel (fake_panel), under the name the entry tests use."""
+    return fake_panel
 
 
 @pytest.fixture(autouse=True)

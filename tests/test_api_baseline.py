@@ -20,7 +20,6 @@ from custom_components.inim_smartliving_alarm.attribute_values import (
     area_status_text,
     zone_state_text,
 )
-from custom_components.inim_smartliving_alarm.event_log import event_attributes
 from custom_components.inim_smartliving_alarm.protocol.commands import (
     ArmMode,
 )
@@ -36,6 +35,7 @@ from custom_components.inim_smartliving_alarm.stored_config import (
 )
 
 from .conftest import accepted
+from .event_texts import event_attributes
 from .fake_panel import FakePanel, captures, const as c
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")

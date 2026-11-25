@@ -5,6 +5,7 @@ location type, areas), and the texts against Inim's English and Italian
 names.
 """
 
+import ast
 import json
 from pathlib import Path
 from unittest.mock import patch
@@ -17,9 +18,8 @@ from custom_components.inim_smartliving_alarm.api import LoggedEvent
 from custom_components.inim_smartliving_alarm.const import DOMAIN
 from custom_components.inim_smartliving_alarm.event_log import (
     ABOUT_KEYS,
-    BundledTexts,
+    EventLog,
     EventNames,
-    event_attributes,
 )
 from custom_components.inim_smartliving_alarm.notifications import Texts
 from custom_components.inim_smartliving_alarm.protocol.event_codes import (
@@ -48,6 +48,7 @@ from custom_components.inim_smartliving_alarm.protocol.model import (
 from custom_components.inim_smartliving_alarm.sensor import InimEventLogSensor
 
 from .conftest import add_entry, label_block
+from .event_texts import BundledTexts, event_attributes
 from .test_config_flow import unload_all
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
@@ -559,3 +560,38 @@ async def test_sensor_in_italian(hass: HomeAssistant, panel) -> None:
     assert first["description_local"] != first["description"]
     assert first["description"].startswith(("Zone alarm", "Zone bypassed", "Area"))
     await unload_all(hass)
+
+
+def test_event_log_takes_its_texts() -> None:
+    """The texts come from the caller (Home Assistant's translations): the
+    event log has no default and reads no file."""
+    with pytest.raises(TypeError):
+        EventLog(CONFIG, SL1050)  # type: ignore[call-arg]
+    source = (COMPONENT / "event_log.py").read_text(encoding="utf-8")
+    imported = {
+        alias.name.split(".")[0]
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Import | ast.ImportFrom)
+        for alias in (
+            node.names
+            if isinstance(node, ast.Import)
+            else [ast.alias(node.module or "")]
+        )
+    }
+    assert not {"json", "pathlib", "os", "io"} & imported
+
+
+@pytest.mark.parametrize("started", [True, False])
+@pytest.mark.parametrize("code", range(114))
+def test_every_code_renders_in_both_languages(code: int, started: bool) -> None:
+    """Every firmware 6 code, started and ended, takes its own text in English
+    and in Italian: no placeholder left, and no fallback to English."""
+    key = event_type(code).key
+    shown = item(record(code, on=started), local=BundledTexts("it"))
+    assert shown["event"] == key
+    for field, language in (("description", "en"), ("description_local", "it")):
+        texts = messages(language)
+        name = texts[f"event_{key}"]
+        expected = name if started else texts["event_ended"].format(event=name)
+        assert shown[field] == expected
+        assert "{" not in shown[field]

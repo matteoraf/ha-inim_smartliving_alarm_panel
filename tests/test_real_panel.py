@@ -73,7 +73,6 @@ from custom_components.inim_smartliving_alarm.errors import (
     PanelProgrammingError,
     async_send_command,
 )
-from custom_components.inim_smartliving_alarm.event_log import event_attributes
 from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
 from custom_components.inim_smartliving_alarm.protocol.errors import (
     ProtocolError,
@@ -90,6 +89,7 @@ from custom_components.inim_smartliving_alarm.stored_config import (
 )
 from custom_components.inim_smartliving_alarm.transport.base import TransportError
 
+from .event_texts import event_attributes
 from .fake_panel import FakePanel, checksum
 from .real_panel.proxy import CONNECT_DEADLINE, PanelProxy, WriteGuard
 

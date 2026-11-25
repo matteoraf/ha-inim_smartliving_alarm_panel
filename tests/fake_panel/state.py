@@ -177,6 +177,9 @@ class PanelState:
     # Zones (0-based) reported as not ready although at rest, as a real panel
     # reports delayed zones
     extra_not_ready: set[int] = field(default_factory=set)
+    # Zones (0-based) reported as ready whatever their state: the panel's
+    # list, not the zone states, decides
+    forced_ready: set[int] = field(default_factory=set)
     # Programming mode: shown in the panel state flags; commands are ignored
     # and the result register keeps the previous result, as on a real panel
     in_programming: bool = False
@@ -423,7 +426,8 @@ class PanelState:
         else:  # one area, 0-based, in the mode of bits 5-6 (not used here)
             areas = [(selector & 0x1F) + 1]
         bits = [
-            any(
+            zone not in self.forced_ready
+            and any(
                 self._zone_open_in_area(zone, area)
                 or (
                     zone in self.extra_not_ready

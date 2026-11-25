@@ -155,6 +155,20 @@ def test_modules_free_of_home_assistant(module: str) -> None:
     assert importing_ha == []
 
 
+@pytest.mark.parametrize("module", HA_FREE)
+def test_modules_free_of_other_packages(module: str) -> None:
+    """Loaded alone, they need only the standard library and cryptography
+    (as the transport does), through everything they import: no package
+    that comes with Home Assistant, such as voluptuous."""
+    needed = sorted(
+        f"{target}: {name}"
+        for target in _reach(module)
+        for name in _third_party(_imports(target)[1])
+        if name != "cryptography"
+    )
+    assert needed == []
+
+
 def test_lower_layers_never_import_the_integration() -> None:
     """protocol, transport and the API never reach an integration module."""
     lower = {"protocol", "transport", "api"}

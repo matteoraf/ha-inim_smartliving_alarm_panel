@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from .errors import ProtocolError
+from .event_codes import FW51_FREE_EVENTS
 from .model import PanelModel
 
 EVENT_RECORD_LENGTH = 9
@@ -14,6 +15,7 @@ REMOTE_LOCATION = 0xFE  # app, cloud or installer software
 # Written in place of a code that firmware 6 does not have (it uses 0-113)
 NO_FW6_CODE = 0x7F
 CODE_OFFSET = 8  # byte with the event code (bits 0-6) and activation (bit 7)
+CODE_MASK = 0x7F
 ACTIVATION_BIT = 0x80
 
 
@@ -113,6 +115,22 @@ def fw6_event_code(code: int, model: PanelModel) -> int | None:
     return model.event_codes[code]
 
 
+def raw_event_code(data: bytes) -> int:
+    """A record's event code as the panel numbers it (0-127)."""
+    return data[CODE_OFFSET] & CODE_MASK
+
+
+def fw51_free_event(data: bytes, model: PanelModel) -> int | None:
+    """The number (1-14) of a firmware 5.1 free event, None for other events.
+
+    data is the raw record; on firmware 6 there are no free events.
+    """
+    code = raw_event_code(data)
+    if model.event_codes is None or code not in FW51_FREE_EVENTS:
+        return None
+    return code - FW51_FREE_EVENTS.start + 1
+
+
 def normalized_event_record(data: bytes, model: PanelModel) -> bytes:
     """The record with its event code in firmware 6 numbering.
 
@@ -122,8 +140,8 @@ def normalized_event_record(data: bytes, model: PanelModel) -> bytes:
     _check_record(data)
     if model.event_codes is None:
         return data
-    code = fw6_event_code(data[CODE_OFFSET] & 0x7F, model)
-    flags = data[CODE_OFFSET] & 0x80
+    code = fw6_event_code(raw_event_code(data), model)
+    flags = data[CODE_OFFSET] & ACTIVATION_BIT
     return data[:CODE_OFFSET] + bytes([flags | (NO_FW6_CODE if code is None else code)])
 
 
@@ -141,7 +159,7 @@ def decode_event_record(data: bytes, model: PanelModel) -> PanelEvent:
         areas=frozenset(a for a in range(1, model.areas + 1) if mask >> (a - 1) & 1),
         agent=None if data[6] == NO_AGENT else data[6],
         location=None if data[7] == NO_LOCATION else data[7],
-        code=fw6_event_code(data[CODE_OFFSET] & 0x7F, model),
+        code=fw6_event_code(raw_event_code(data), model),
         activation=bool(data[CODE_OFFSET] & ACTIVATION_BIT),
     )
 

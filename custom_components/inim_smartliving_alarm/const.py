@@ -87,9 +87,10 @@ DEFAULT_PANEL_NAME = "Inim SmartLiving"  # Default if user doesn't provide one
 # everything
 MAX_LIMIT_AREAS = 15  # areas on the SmartLiving 10100
 MAX_LIMIT_ZONES = 200  # zone numbers 1-2L; 2L = 200 on the SmartLiving 10100
+MAX_LIMIT_SCENARIOS = 30  # the 0.3 option's maximum
 DEFAULT_LIMIT_AREAS = MAX_LIMIT_AREAS
 DEFAULT_LIMIT_ZONES = MAX_LIMIT_ZONES
-DEFAULT_LIMIT_SCENARIOS = 30
+DEFAULT_LIMIT_SCENARIOS = MAX_LIMIT_SCENARIOS
 
 # Default limits for imported events
 DEFAULT_EVENT_LOG_SIZE = 50  # Default number of events to store
@@ -137,14 +138,10 @@ ATTR_AREAS = "areas"
 ATTR_MODE = "mode"
 ATTR_SCENARIO = "scenario"
 ATTR_FORCE_ARM = "force"  # arm even when zones are not ready
-# arm_area modes (also the values of the area switch's arm mode option)
-ARM_MODE_TOTAL = "total"
-ARM_MODE_PARTIAL = "partial"
-ARM_MODE_INSTANT = "instant"
-ARM_MODE_DISARM = "disarm"
 # Option: the mode every area switch arms in (total/partial/instant)
 CONF_AREA_SWITCHES_DEFAULT_ARM_MODE = "area_switches_default_arm_mode"
-DEFAULT_AREA_SWITCHES_ARM_MODE = ARM_MODE_TOTAL
+# attribute_values.ARM_MODE_TEXT[ArmMode.AWAY] (a test checks it)
+DEFAULT_AREA_SWITCHES_ARM_MODE = "total"
 # Option: the mode of single areas' switches, {"3": "partial"}; areas not
 # listed use CONF_AREA_SWITCHES_DEFAULT_ARM_MODE
 CONF_AREA_SWITCH_ARM_MODE_BY_AREA = "area_switch_arm_mode_by_area"

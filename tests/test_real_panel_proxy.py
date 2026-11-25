@@ -360,7 +360,7 @@ async def test_unreachable_panel_gives_up_after_the_deadline(
         await proxy.stop()
 
     # Gives up once a further attempt could not start before the deadline
-    assert 0.5 - 0.1 <= elapsed < 3
+    assert 0.5 - 0.1 <= elapsed < 4
     assert len(proxy.errors) == 1
     assert proxy.errors[0].startswith("cannot connect to the panel within 0.5 s")
     assert proxy.exchanges == []

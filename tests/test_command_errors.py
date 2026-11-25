@@ -44,6 +44,7 @@ from .test_init_baseline import (
     call,
     refresh,
 )
+from .test_prearm_check import activate
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
@@ -316,6 +317,31 @@ async def test_scenario_refused_by_the_panel(
     assert events[0]["reason"] == "invalid_code"
     assert events[0]["panel_result"] == "invalid_code"
     assert events[0]["message"] == str(err.value)
+
+
+@pytest.mark.parametrize("source", ["button", "action"])
+async def test_a_refused_scenario_logs_one_warning(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    panel: FakePanel,
+    caplog: pytest.LogCaptureFixture,
+    source: str,
+) -> None:
+    """One refusal, one line at warning level or above from the integration."""
+    panel.state.pins[0] = "9999"
+    caplog.clear()
+    with caplog.at_level(logging.DEBUG), pytest.raises(CommandRefusedError):
+        if source == "button":
+            await call(hass, entry, "button", "press", SCENARIO_3_BUTTON)
+        else:
+            await activate(hass, entry, 3)
+    ours = [
+        record
+        for record in caplog.records
+        if record.name.startswith("custom_components.inim_smartliving_alarm")
+        and record.levelno >= logging.WARNING
+    ]
+    assert len(ours) == 1, [record.getMessage() for record in ours]
 
 
 async def test_scenario_refused_without_reason(

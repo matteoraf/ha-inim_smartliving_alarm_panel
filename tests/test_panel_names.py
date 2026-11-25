@@ -13,10 +13,7 @@ from custom_components.inim_smartliving_alarm.const import (
     DATA_INITIAL_PANEL_CONFIG,
     DOMAIN,
 )
-from custom_components.inim_smartliving_alarm.event_log import (
-    EventNames,
-    event_attributes,
-)
+from custom_components.inim_smartliving_alarm.event_log import EventNames
 from custom_components.inim_smartliving_alarm.protocol.event_types import (
     ObjectType,
     Ref,
@@ -39,6 +36,7 @@ from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
 )
 
 from .conftest import label_block
+from .event_texts import event_attributes
 from .fake_panel import FakePanel, panel_10100
 from .test_config_flow import open_options, unload_all
 from .test_init_baseline import entity_id_for
