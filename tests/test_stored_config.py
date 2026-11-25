@@ -448,12 +448,13 @@ async def test_failed_setup_closes_the_panel(
     ("error", "key"),
     [
         (ProgrammingModeError(), "panel_programming"),
-        # As before: a reply that does not decrypt is an invalid
-        # configuration, whatever its message says
+        # A SmartLAN/G reply that does not decrypt: the board's user name or
+        # password is not the stored one
         (
             DecryptionError("reply cannot be decrypted (wrong user name or password?)"),
-            "invalid_panel_configuration",
+            "auth_failed",
         ),
+        # Another reply error is an invalid configuration, whatever it says
         (ProtocolError("authentication refused"), "invalid_panel_configuration"),
         (ProtocolError("reply checksum"), "invalid_panel_configuration"),
         (ValueError("labels"), "invalid_panel_configuration"),

@@ -474,6 +474,34 @@ async def test_unanswered_temperature(fake: FakePanel, api: SmartLivingPanel) ->
     assert temperature_reads == []
 
 
+async def test_a_command_goes_between_keypads(
+    fake: FakePanel, api: SmartLivingPanel
+) -> None:
+    """Each keypad is read in a session of its own: a command sent while a
+    keypad's temperature gets no answer goes out before the next keypad is
+    read, not after every keypad."""
+    fake.state.silent_keypads = {0}
+    second = thermostat_address(SMARTLIVING_1050_FW6, 1)
+    await api.identify()
+    start = len(fake.requests)
+    reading = asyncio.create_task(api.read_thermostats([0, 1], hour=8, weekday=1))
+    await wait_until(
+        lambda: any(
+            r.space == "peripheral" and r.instance == 0 for r in fake.requests[start:]
+        )
+    )  # keypad 1's temperature asked, no answer coming
+    await api.set_thermostat(0, setpoint=22.5)
+    result = await reading
+    after = fake.requests[start:]
+    write = next(i for i, r in enumerate(after) if r.write)
+    second_head = next(
+        i for i, r in enumerate(after) if r.space == "eeprom" and r.address == second
+    )
+    assert write < second_head
+    assert result.temperature_failed == {0}
+    assert result.thermostats[1].temperature == 27.7
+
+
 async def test_probe(fake: FakePanel, api: SmartLivingPanel) -> None:
     """Keypads that answer with a room temperature; not one without a
     sensor, nor one that does not answer."""
@@ -901,6 +929,23 @@ async def test_refused_in_programming(
         await call(hass, SERVICE_TURN_OFF, target)
     assert err.value.translation_key == "panel_programming"
     assert thermostats_fake.no_programming_writes == []
+    await unload_all(hass)
+
+
+@pytest.mark.parametrize(
+    ("label", "named"), [("Tast Zona Giorno", "Tast Zona Giorno"), ("", "Keypad 1")]
+)
+async def test_errors_name_the_keypad(
+    hass: HomeAssistant, thermostats_fake: FakePanel, label: str, named: str
+) -> None:
+    """An error names the thermostat by its keypad's label, as areas and
+    zones are named by theirs; a keypad without one as Keypad N."""
+    thermostats_fake.state.labels[c.RAM_LABELS_KEYPADS][0] = label
+    entry, target = await setup_one(hass, thermostats_fake, mode=1)
+    thermostats_fake.state.in_programming = True
+    with pytest.raises(HomeAssistantError) as err:
+        await call(hass, SERVICE_TURN_OFF, target)
+    assert err.value.translation_placeholders["target"] == named
     await unload_all(hass)
 
 

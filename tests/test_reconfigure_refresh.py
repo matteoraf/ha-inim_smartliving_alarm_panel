@@ -28,7 +28,10 @@ from custom_components.inim_smartliving_alarm.const import (
     DOMAIN,
     SERVICE_REREAD_PANEL_CONFIGURATION,
 )
-from custom_components.inim_smartliving_alarm.protocol.errors import ProtocolError
+from custom_components.inim_smartliving_alarm.protocol.errors import (
+    DecryptionError,
+    ProtocolError,
+)
 from custom_components.inim_smartliving_alarm.stored_config import (
     area_names,
     scenario_names,
@@ -300,5 +303,28 @@ async def test_reread_incomplete_configuration(
         await reread(hass, entry.entry_id)
 
     assert err.value.translation_key == "invalid_panel_configuration"
+    assert dict(entry.data) == data
+    assert setups.call_count == 0
+
+
+async def test_reread_with_changed_credentials(
+    hass: HomeAssistant, entry: ConfigEntry, setups: AsyncMock
+) -> None:
+    """A SmartLAN/G reply that no longer decrypts (the board's user name or
+    password changed) says so, and points to Reconfigure; nothing is stored."""
+    data = dict(entry.data)
+    panel = hass.data[DOMAIN][entry.entry_id][DATA_PANEL]
+
+    with (
+        patch.object(
+            panel,
+            "read_configuration",
+            side_effect=DecryptionError("reply cannot be decrypted"),
+        ),
+        pytest.raises(HomeAssistantError) as err,
+    ):
+        await reread(hass, entry.entry_id)
+
+    assert err.value.translation_key == "auth_failed_config"
     assert dict(entry.data) == data
     assert setups.call_count == 0

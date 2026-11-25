@@ -129,7 +129,7 @@
       },
       "error": {
         "cannot_connect": "Connessione fallita. Controlla l'Host e la Porta (e, per SmartLAN/G, nome utente e password) e assicurati che la centrale sia raggiungibile e che nessun altro client sia collegato.",
-        "auth_failed": "Autenticazione fallita.",
+        "auth_failed": "La scheda SmartLAN/G non ha accettato nome utente e password durante la lettura della configurazione della centrale. Controllali.",
         "invalid_panel_response": "Ricevuta una risposta non valida dalla centrale. Controlla la connessione e la configurazione.",
         "validation_error_detail": "Si è verificato un errore di validazione durante il recupero dei dati iniziali dalla centrale.",
         "unknown": "Si è verificato un errore sconosciuto. Controlla i log per maggiori dettagli.",
@@ -250,7 +250,7 @@
       },
       "error": {
         "cannot_connect": "Connessione fallita. Controlla l'Host e la Porta (e, per SmartLAN/G, nome utente e password) e assicurati che la centrale sia raggiungibile e che nessun altro client sia collegato.",
-        "auth_failed": "Autenticazione fallita.",
+        "auth_failed": "La scheda SmartLAN/G non ha accettato nome utente e password durante la lettura della configurazione della centrale. Controllali.",
         "invalid_panel_response": "Ricevuta una risposta non valida dalla centrale. Controlla la connessione e la configurazione.",
         "validation_error_detail": "Si è verificato un errore di validazione durante il recupero dei dati iniziali dalla centrale.",
         "unknown": "Si è verificato un errore sconosciuto. Controlla i log per maggiori dettagli.",
@@ -651,6 +651,9 @@
       },
       "panel_programming_config": {
         "message": "La centrale è in programmazione, quindi la configurazione non è stata letta. Riprova al termine della programmazione. La configurazione della centrale non è stata modificata."
+      },
+      "auth_failed_config": {
+        "message": "La scheda SmartLAN/G non ha accettato nome utente e password, quindi la configurazione della centrale non è stata letta. Inserisci quelli attuali con Riconfigura. La configurazione della centrale non è stata modificata."
       },
       "refused_invalid_code": {
         "message": "La centrale non ha accettato il PIN per {target}. Il PIN potrebbe essere stato cambiato o cancellato sulla centrale: inserisci quello attuale con Riconfigura."

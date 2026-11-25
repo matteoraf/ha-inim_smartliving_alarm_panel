@@ -88,6 +88,33 @@ async def test_alarm_reset_with_two_panels(
     assert await hass.config_entries.async_unload(second.entry_id)
 
 
+async def test_alarm_reset_goes_past_a_panel_not_loaded(
+    hass: HomeAssistant, panel: FakePanel, second_panel: FakePanel
+) -> None:
+    """A targeted panel that is not loaded does not stop the others: they
+    are reset, then the action says which one was not."""
+    first = await add_entry(hass, panel, name="First")
+    second = await add_entry(hass, second_panel, name="Second")
+    second_panel.state.area_alarm_memory = 1 << 3
+    await refresh(hass, second)
+    targets = [
+        entity_id_for(hass, first, ALARM_PANEL),
+        entity_id_for(hass, second, ALARM_PANEL),
+    ]
+    assert targets == sorted(targets)  # the panel not loaded comes first
+    assert await hass.config_entries.async_unload(first.entry_id)
+    await hass.async_block_till_done()
+
+    with pytest.raises(ServiceValidationError) as err:
+        await hass.services.async_call(
+            DOMAIN, SERVICE_ALARM_RESET, {"entity_id": targets}, blocking=True
+        )
+    assert err.value.translation_key == "entry_not_loaded_command"
+    assert err.value.translation_placeholders == {"title": "First"}
+    assert second_panel.state.area_alarm_memory == 0
+    assert await hass.config_entries.async_unload(second.entry_id)
+
+
 async def test_removing_an_entry_removes_its_repair_issue(
     hass: HomeAssistant, panel: FakePanel
 ) -> None:

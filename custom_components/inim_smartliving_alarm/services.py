@@ -11,7 +11,7 @@ from homeassistant.components.alarm_control_panel import (
 from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.const import ATTR_CONFIG_ENTRY_ID
 from homeassistant.core import HomeAssistant, ServiceCall, callback
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.service import (
@@ -183,7 +183,8 @@ def async_register_services(hass: HomeAssistant) -> None:
     async def async_alarm_reset_service(call: ServiceCall) -> None:
         """Reset the alarm and tamper memories of the targeted panels' areas."""
         registry = er.async_get(hass)
-        failures: list[InimCommandError] = []
+        # Failures are raised once every targeted panel has been tried
+        failures: list[HomeAssistantError] = []
         for entity_id in sorted(await async_extract_entity_ids(call)):
             registered = registry.async_get(entity_id)
             if (
@@ -193,9 +194,13 @@ def async_register_services(hass: HomeAssistant) -> None:
                 or registered.config_entry_id is None
             ):
                 continue
-            entry = _loaded_entry(
-                hass, registered.config_entry_id, "entry_not_loaded_command"
-            )
+            try:
+                entry = _loaded_entry(
+                    hass, registered.config_entry_id, "entry_not_loaded_command"
+                )
+            except ServiceValidationError as err:
+                failures.append(err)
+                continue
             alarm_panel = hass.data[DOMAIN][entry.entry_id].get(DATA_ALARM_PANEL)
             if alarm_panel is None:
                 continue

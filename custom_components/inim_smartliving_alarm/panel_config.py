@@ -17,7 +17,7 @@ from .const import (
     DATA_PANEL,
     DOMAIN,
 )
-from .protocol.errors import ProtocolError, UnsupportedPanelError
+from .protocol.errors import DecryptionError, ProtocolError, UnsupportedPanelError
 from .selection import available_thermostats
 from .stored_config import store
 from .thermostats import with_new_keypads
@@ -53,8 +53,9 @@ class SetupError(ValueError):
 class PanelConfigError(SetupError):
     """The panel's configuration could not be read; key tells why.
 
-    One of PANEL_PROGRAMMING, AUTH_FAILED, INVALID_PANEL_RESPONSE and
-    INVALID_PANEL_CONFIGURATION.
+    One of PANEL_PROGRAMMING, AUTH_FAILED (a SmartLAN/G reply that cannot
+    be decrypted: the board's user name or password is not the one stored),
+    INVALID_PANEL_RESPONSE and INVALID_PANEL_CONFIGURATION.
     """
 
 
@@ -69,8 +70,8 @@ async def async_fetch_panel_configuration(
 
     Raises PanelUnreachable if the panel cannot be reached and
     PanelConfigError if the configuration cannot be read: the panel is in
-    programming mode, a reply is invalid, or the panel gives no model
-    string.
+    programming mode, a SmartLAN/G reply cannot be decrypted (AUTH_FAILED),
+    a reply is invalid, or the panel gives no model string.
     """
     where = _where(panel)
     _LOGGER.debug("Fetching the panel configuration from %s", where)
@@ -86,6 +87,13 @@ async def async_fetch_panel_configuration(
     except TransportError as err:
         _LOGGER.error("Cannot read the panel configuration from %s: %s", where, err)
         raise PanelUnreachable(str(err)) from err
+    except DecryptionError as err:
+        _LOGGER.error(
+            "The board at %s did not accept the user name and password: %s",
+            where,
+            err,
+        )
+        raise PanelConfigError(AUTH_FAILED, str(err)) from err
     except (ProtocolError, UnsupportedPanelError, ValueError) as err:
         _LOGGER.error("Invalid panel configuration from %s: %s", where, err)
         raise PanelConfigError(INVALID_PANEL_CONFIGURATION, str(err)) from err
@@ -124,6 +132,10 @@ async def async_reread_panel_configuration(
         if err.key == PANEL_PROGRAMMING:
             raise HomeAssistantError(
                 translation_domain=DOMAIN, translation_key="panel_programming_config"
+            ) from err
+        if err.key == AUTH_FAILED:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN, translation_key="auth_failed_config"
             ) from err
         raise HomeAssistantError(
             translation_domain=DOMAIN,

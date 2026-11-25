@@ -264,6 +264,31 @@ async def test_undecryptable_reply_means_wrong_credentials(
     assert result["errors"] == {"base": "invalid_auth"}
 
 
+async def test_smartlan_g_credentials_refused_while_reading(
+    hass: HomeAssistant, g_panel: FakePanel
+) -> None:
+    """A reply that stops decrypting after the panel answered (the board's
+    password changed meanwhile) points at the user name and password."""
+    flow_id = await board_form(hass, "smartlan_g")
+    with patch.object(
+        SmartLivingPanel,
+        "read_configuration",
+        side_effect=DecryptionError("reply cannot be decrypted"),
+    ):
+        result = await submit(
+            hass,
+            flow_id,
+            {
+                "host": g_panel.host,
+                "port": g_panel.port,
+                "username": USERNAME,
+                "password": PASSWORD,
+                "pin": "1234",
+            },
+        )
+    assert result["errors"] == {"base": "auth_failed"}
+
+
 async def test_unexpected_smartlan_g_reply(
     hass: HomeAssistant, g_panel: FakePanel, caplog: pytest.LogCaptureFixture
 ) -> None:

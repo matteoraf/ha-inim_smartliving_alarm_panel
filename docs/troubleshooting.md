@@ -56,6 +56,7 @@ A failed scenario also shows a notification and fires the [`inim_smartliving_ala
 *   Make sure Home Assistant can reach the board's address on that port (check firewalls and network segmentation).
 *   Make sure the board is powered and connected to the network.
 *   If the board's address or port has changed, update it with **Reconfigure** (see [Changing the connection details](setup.md#changing-the-connection-details-reconfigure)) instead of removing the integration.
+*   If a SmartLAN/G board's user name or password has changed, **Re-read panel configuration** says the board did not accept them: enter the current ones with **Reconfigure** (see [Changing the connection details](setup.md#changing-the-connection-details-reconfigure)).
 
 ### Search finds no board
 

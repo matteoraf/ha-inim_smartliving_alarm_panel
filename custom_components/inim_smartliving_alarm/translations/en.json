@@ -129,7 +129,7 @@
       },
       "error": {
         "cannot_connect": "Failed to connect. Please check the Host and Port (and, for SmartLAN/G, the user name and password) and ensure the panel is reachable and no other client is connected to it.",
-        "auth_failed": "Authentication failed. Please check your connection.",
+        "auth_failed": "The SmartLAN/G board did not accept the user name and password while the panel configuration was read. Please check them.",
         "invalid_panel_response": "Received an invalid response from the panel. Please check your connection and configuration.",
         "validation_error_detail": "A validation error occurred while fetching initial data from the panel.",
         "unknown": "An unknown error occurred. Please check the logs for more details.",
@@ -250,7 +250,7 @@
       },
       "error": {
         "cannot_connect": "Failed to connect. Please check the Host and Port (and, for SmartLAN/G, the user name and password) and ensure the panel is reachable and no other client is connected to it.",
-        "auth_failed": "Authentication failed. Please check your connection.",
+        "auth_failed": "The SmartLAN/G board did not accept the user name and password while the panel configuration was read. Please check them.",
         "invalid_panel_response": "Received an invalid response from the panel. Please check your connection and configuration.",
         "validation_error_detail": "A validation error occurred while fetching initial data from the panel.",
         "unknown": "An unknown error occurred. Please check the logs for more details.",
@@ -651,6 +651,9 @@
       },
       "panel_programming_config": {
         "message": "The panel is in programming mode, so its configuration was not read. Try again when programming has ended. The panel configuration was not changed."
+      },
+      "auth_failed_config": {
+        "message": "The SmartLAN/G board did not accept the user name and password, so the panel configuration was not read. Enter the current ones with Reconfigure. The panel configuration was not changed."
       },
       "refused_invalid_code": {
         "message": "The panel did not accept the PIN for {target}. The PIN may have been changed or deleted on the panel: enter the current one with Reconfigure."
