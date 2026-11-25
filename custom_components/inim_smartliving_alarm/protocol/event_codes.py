@@ -29,3 +29,6 @@ def _table(runs: tuple[tuple[int, int, int], ...]) -> tuple[int | None, ...]:
 
 # Firmware 6 code of each firmware 5.1 code, None where there is none
 FW51_EVENT_CODES = _table(_FW51_RUNS)
+
+# Firmware 5.1's free events 1-14: codes with no firmware 6 code
+FW51_FREE_EVENTS = range(97, 111)

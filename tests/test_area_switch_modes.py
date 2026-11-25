@@ -7,6 +7,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 import pytest
 
+from custom_components.inim_smartliving_alarm.attribute_values import (
+    ARM_MODE_TEXT,
+    SWITCH_ARM_MODE_OPTIONS,
+    switch_arm_mode,
+)
+from custom_components.inim_smartliving_alarm.const import (
+    DEFAULT_AREA_SWITCHES_ARM_MODE,
+)
+from custom_components.inim_smartliving_alarm.protocol.commands import ArmMode
+
 from .fake_panel import FakePanel, const as c
 from .test_config_flow import form_defaults, open_options
 from .test_init_baseline import entity_id_for
@@ -130,3 +140,16 @@ async def test_areas_not_imported_are_dropped(
     )
     await hass.async_block_till_done()
     assert entry.options["area_switch_arm_mode_by_area"] == {"3": "partial"}
+
+
+def test_switch_options_are_the_arm_mode_words() -> None:
+    """The stored option values stay "total", "partial" and "instant"."""
+    assert SWITCH_ARM_MODE_OPTIONS == ("total", "partial", "instant")
+    assert DEFAULT_AREA_SWITCHES_ARM_MODE == ARM_MODE_TEXT[ArmMode.AWAY]
+    assert [switch_arm_mode(option) for option in SWITCH_ARM_MODE_OPTIONS] == [
+        ArmMode.AWAY,
+        ArmMode.STAY,
+        ArmMode.INSTANT,
+    ]
+    assert switch_arm_mode("disarm") is ArmMode.AWAY  # not an option: the default
+    assert switch_arm_mode(None) is ArmMode.AWAY

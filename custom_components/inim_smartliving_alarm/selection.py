@@ -33,6 +33,7 @@ from .const import (
     DEFAULT_LIMIT_SCENARIOS,
     DEFAULT_LIMIT_ZONES,
     MAX_LIMIT_AREAS,
+    MAX_LIMIT_SCENARIOS,
     MAX_LIMIT_ZONES,
 )
 from .protocol.commands import ArmMode
@@ -453,7 +454,11 @@ def migrated_selection(settings: Mapping[str, Any]) -> dict[str, list[int]]:
         return min(int(value) if value else default, maximum)
 
     scenarios = set(
-        range(1, count(CONF_LIMIT_SCENARIOS, DEFAULT_LIMIT_SCENARIOS, 30) + 1)
+        range(
+            1,
+            count(CONF_LIMIT_SCENARIOS, DEFAULT_LIMIT_SCENARIOS, MAX_LIMIT_SCENARIOS)
+            + 1,
+        )
     )
     scenarios.update(mapped_scenarios(settings).values())
     return {

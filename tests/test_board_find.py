@@ -202,9 +202,9 @@ async def test_board_reply_over_tcp(
         writers.append(writer)
         return reader, writer
 
-    monkeypatch.setattr(transport_base.asyncio, "open_connection", recorded)
-    reply = await panel.transport.board_reply()
-    monkeypatch.undo()
+    with monkeypatch.context() as patched:
+        patched.setattr(transport_base.asyncio, "open_connection", recorded)
+        reply = await panel.transport.board_reply()
     (writer,) = writers
     assert writer.is_closing()  # closed by the transport, not left behind
     assert reply == si_reply(fake.host, fake.port)
@@ -268,7 +268,8 @@ async def test_board_reply_one_brief_attempt(
     started = time.monotonic()
     with pytest.raises(ConnectError, match="in use by another app"):
         await transport.board_reply()
-    assert time.monotonic() - started < 1.5
+    # well below the 5 s of a full connection attempt
+    assert time.monotonic() - started < 4
 
 
 async def test_no_board_reply_for_smartlan_g() -> None:

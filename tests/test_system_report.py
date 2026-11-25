@@ -70,7 +70,8 @@ G_PANEL_NAME = "Villa Rossi panel"
 
 
 def planted_state(state: PanelState) -> PanelState:
-    """A panel with the PIN, a phone number, a key serial and a canary."""
+    """A panel with the PIN and a serial number; the report test then writes
+    a key serial and a canary into its EEPROM."""
     state.pins[0] = PIN
     state.serial_number = SERIAL
     return state

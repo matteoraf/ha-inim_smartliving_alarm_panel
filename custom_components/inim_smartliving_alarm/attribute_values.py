@@ -49,6 +49,18 @@ ARM_MODE_TEXT: dict[ArmMode, str] = {
     ArmMode.DISARM: "disarm",
 }
 
+# The modes an area switch can arm in; its option values are their words
+SWITCH_ARM_MODES = (ArmMode.AWAY, ArmMode.STAY, ArmMode.INSTANT)
+SWITCH_ARM_MODE_OPTIONS = tuple(ARM_MODE_TEXT[mode] for mode in SWITCH_ARM_MODES)
+
+
+def switch_arm_mode(option: str | None) -> ArmMode:
+    """The mode of an area switch option; away (total) for any other value."""
+    for mode in SWITCH_ARM_MODES:
+        if ARM_MODE_TEXT[mode] == option:
+            return mode
+    return ArmMode.AWAY
+
 
 _AREA_MODE_TEXT = {
     AreaMode.AWAY: AREA_MODE_TOTAL,

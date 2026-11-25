@@ -17,11 +17,8 @@ from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.util import dt as dt_util
 
 from .api import SmartLivingPanel
-from .attribute_values import area_mode_text, area_status_text
+from .attribute_values import area_mode_text, area_status_text, switch_arm_mode
 from .const import (
-    ARM_MODE_INSTANT,
-    ARM_MODE_PARTIAL,
-    ARM_MODE_TOTAL,
     BOARD_SMARTLAN_SI,
     CONF_AREA_SWITCH_ARM_MODE_BY_AREA,
     CONF_AREA_SWITCHES_DEFAULT_ARM_MODE,
@@ -53,13 +50,6 @@ from .stored_config import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-# The area switch's arm mode option -> command
-SWITCH_ARM_MODES = {
-    ARM_MODE_TOTAL: ArmMode.AWAY,
-    ARM_MODE_PARTIAL: ArmMode.STAY,
-    ARM_MODE_INSTANT: ArmMode.INSTANT,
-}
 
 
 async def async_setup_entry(
@@ -219,7 +209,7 @@ class InimAreaSwitch(InimCoordinatorEntity, SwitchEntity):
         ) or options.get(
             CONF_AREA_SWITCHES_DEFAULT_ARM_MODE, DEFAULT_AREA_SWITCHES_ARM_MODE
         )
-        mode = SWITCH_ARM_MODES.get(option, ArmMode.AWAY)
+        mode = switch_arm_mode(option)
         await async_arm(
             self.hass,
             self.config_entry,

@@ -93,6 +93,14 @@ TERMINAL_NOT_ASSIGNED = 0xFF
 ZONE_TYPES = frozenset((TerminalType.INPUT, TerminalType.IN_OUT, TerminalType.DOUBLE))
 
 
+def zone_terminal(index: int, terminals: int) -> tuple[int, bool]:
+    """The terminal (0-based) of a zone index (0-based, of 2L zone numbers),
+    and whether it is the terminal's second zone (zone L+n)."""
+    if terminals <= 0:
+        raise ValueError(f"no terminals: {terminals}")
+    return index % terminals, index >= terminals
+
+
 def is_zone_terminal(terminal_type: TerminalType | int, second_zone: bool) -> bool:
     """Whether a zone number is a zone on the panel, by its terminal's type.
 

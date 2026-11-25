@@ -402,7 +402,9 @@ async def test_k_stored_by_a_release(
     """(k) An entry stored by a release, at the first start after the update.
 
     Unreadable: the panel cannot deliver the user code names, so a
-    configuration read at this start fails.
+    configuration read at this start fails. An entry of 0.3.2 then has no
+    zone bypass switches (0.3.2 stored no physical slots) and no thermostats
+    (it stored no peripherals, so no keypad is known); 0.4.0b2 stored both.
     """
     state = panel_1050()
     panel = await make_panel(state)

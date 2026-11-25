@@ -37,6 +37,7 @@ from custom_components.inim_smartliving_alarm.transport.smartlan_g import (
     encrypted_length,
 )
 
+from .conftest import wait_until
 from .fake_panel import FakePanel
 from .fake_panel.server import SPACE_EEPROM, TRANSPORT_G
 
@@ -239,8 +240,9 @@ async def test_cancelled_read_closes_the_connection(
     # The late reply is still on its way on the first connection
     g_panel.single_client = False
     g_panel.reply_delay = 0.2
+    start = len(g_panel.requests)
     task = asyncio.create_task(transport.read(MODEL, 12))
-    await asyncio.sleep(0.05)
+    await wait_until(lambda: len(g_panel.requests) > start)  # the reply is late
     task.cancel()
     with pytest.raises(asyncio.CancelledError):
         await task

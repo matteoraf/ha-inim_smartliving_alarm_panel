@@ -30,6 +30,7 @@ from custom_components.inim_smartliving_alarm.transport.smartlan_si import (
     SmartLanSiTransport,
 )
 
+from .conftest import wait_until
 from .fake_panel import FakePanel, const as c
 from .fake_panel.server import TRANSPORT_G
 
@@ -218,8 +219,9 @@ async def test_connection_held_after_an_accepted_command(
     await panel.identify()
     fake_panel.reply_delay = 0.05  # the poll queues while the command runs
 
+    start = len(fake_panel.requests)
     command = asyncio.create_task(panel.arm_areas({3: ArmMode.AWAY}))
-    await asyncio.sleep(0.01)
+    await wait_until(lambda: len(fake_panel.requests) > start)  # command running
     poll = asyncio.create_task(panel.read_status())
     result = await command
     accepted = time.monotonic()

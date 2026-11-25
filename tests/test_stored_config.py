@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 import pytest
@@ -448,12 +449,12 @@ async def test_failed_setup_closes_the_panel(
     [
         (ProgrammingModeError(), "panel_programming"),
         # As before: a reply that does not decrypt is an invalid
-        # configuration; an error that names authentication is auth_failed
+        # configuration, whatever its message says
         (
             DecryptionError("reply cannot be decrypted (wrong user name or password?)"),
             "invalid_panel_configuration",
         ),
-        (ProtocolError("authentication refused"), "auth_failed"),
+        (ProtocolError("authentication refused"), "invalid_panel_configuration"),
         (ProtocolError("reply checksum"), "invalid_panel_configuration"),
         (ValueError("labels"), "invalid_panel_configuration"),
     ],
@@ -621,3 +622,45 @@ async def test_outputs_profile_is_stored(socket_enabled: None) -> None:
     finally:
         await fake.stop()
     assert missing_blocks(stored) == set()
+
+
+@pytest.mark.parametrize(
+    ("model_string", "version", "type_"),
+    [
+        (b"6.07 01050  ", "6.07", "01050"),
+        (b"6.07 10100  ", "6.07", "10100"),
+        (b"5.10 00515  ", "5.10", "00515"),
+        (b"garbage", "Unknown", "Unknown"),
+    ],
+)
+def test_system_info(model_string: bytes, version: str, type_: str) -> None:
+    """The firmware version and the panel type as the model string writes them."""
+    info = system_info({"model_string": model_string.hex()})
+    assert info is not None
+    assert (info.version, info.type) == (version, type_)
+
+
+@pytest.mark.parametrize("release", RELEASES)
+async def test_every_release_entry_sets_up(
+    hass: HomeAssistant,
+    panel: FakePanel,
+    caplog: pytest.LogCaptureFixture,
+    release: str,
+) -> None:
+    """An entry stored by each release is migrated and set up at its first
+    start, with nothing logged as an error."""
+    entry = entry_of(panel, release)
+    entry.add_to_hass(hass)
+    with caplog.at_level(logging.INFO):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+    assert entry.state is ConfigEntryState.LOADED
+    errors = [
+        record.getMessage()
+        for record in caplog.records
+        if record.levelno >= logging.ERROR
+        and record.name.startswith("custom_components.inim_smartliving_alarm")
+    ]
+    assert errors == []
+    assert not missing_blocks(entry.data[DATA_INITIAL_PANEL_CONFIG])
+    assert await hass.config_entries.async_unload(entry.entry_id)

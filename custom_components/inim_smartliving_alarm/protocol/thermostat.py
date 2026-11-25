@@ -108,6 +108,14 @@ def thermostat_address(model: PanelModel, keypad: int) -> int:
     return model.thermostat_records + BLOCK_LENGTH * keypad
 
 
+def panel_weekday(python_weekday: int) -> int:
+    """The panel's weekday (0 = Sunday ... 6 = Saturday) for Python's
+    (0 = Monday ... 6 = Sunday)."""
+    if not 0 <= python_weekday < WEEKDAYS:
+        raise ValueError(f"weekday out of range: {python_weekday}")
+    return (python_weekday + 1) % WEEKDAYS
+
+
 def weekly_offset(hour: int, weekday: int) -> int:
     """Offset in the block of the weekly setpoint for an hour and weekday.
 

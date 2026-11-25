@@ -168,7 +168,8 @@ async def async_handle_scenario_activation_failure(
     action_name's text in the translations (e.g. arm_away).
     """
 
-    _LOGGER.error(
+    # errors.async_send_command has logged the failure as a warning
+    _LOGGER.debug(
         "%s: Failed to %s (scenario index %s): %s",
         entity_name,
         action_name,

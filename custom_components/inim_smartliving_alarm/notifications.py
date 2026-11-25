@@ -3,7 +3,10 @@
 Home Assistant translates exceptions, entities and forms, but a persistent
 notification takes plain text. These texts are kept with the exception
 messages in the translations (keys starting with notification_ or choice_)
-and looked up here, in Home Assistant's language.
+and looked up here, in Home Assistant's language. The event log's event
+names (keys starting with event_) are kept there too: the translations
+have no section for free texts, and an exception message takes any text
+with placeholders, which translators then find under exceptions.
 """
 
 from collections.abc import Mapping

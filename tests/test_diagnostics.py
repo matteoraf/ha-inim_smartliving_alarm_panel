@@ -31,8 +31,9 @@ from custom_components.inim_smartliving_alarm.report_state import (
     async_drop_report_state,
 )
 
-from .fake_panel import FakePanel
-from .fake_panel.discovery import si_reply
+from .fake_panel import TRANSPORT_G, FakePanel
+from .fake_panel.discovery import g_reply, si_reply
+from .test_config_flow import OPTIONS, board_form, pick_items, submit, unload_all
 
 pytestmark = pytest.mark.usefixtures("socket_enabled")
 
@@ -360,3 +361,54 @@ async def test_full_reports_say_how_the_board_was_read(
     assert first["redacted_view"]["board"]["source"] == "tcp"
     second = await async_get_config_entry_diagnostics(hass, entry)
     assert second["board"]["source"] == "tcp"
+
+
+async def test_smartlan_g_downloads_hold_no_credentials(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+    private_key: bytes,
+    clock,
+) -> None:
+    """A SmartLAN/G entry's Redacted and Full reports, the board answering
+    over UDP only: neither holds the user name or the password."""
+    username, password = "g-user-7314", "g-pass-5521"
+    fake = FakePanel(transport=TRANSPORT_G, username=username, password=password)
+    await fake.start()
+    try:
+        flow_id = await board_form(hass, "smartlan_g")
+        result = await submit(
+            hass,
+            flow_id,
+            {
+                "host": fake.host,
+                "port": fake.port,
+                "username": username,
+                "password": password,
+                "pin": "1234",
+                "panel_name": "Panel G",
+            },
+        )
+        await pick_items(hass, flow_id, result)
+        entry = (await submit(hass, flow_id, OPTIONS))["result"]
+
+        async def reply(host: str, board: str, *args, **kwargs) -> bytes:
+            return g_reply(fake, "Panel G")
+
+        monkeypatch.setattr(diagnostics, "async_board_reply", reply)
+
+        redacted = json.dumps(await async_get_config_entry_diagnostics(hass, entry))
+        async_set_level(hass, entry.entry_id, Level.FULL)
+        with patch.object(diagnostics.persistent_notification, "async_create"):
+            first = await async_get_config_entry_diagnostics(hass, entry)
+        full = report_crypto.decrypt(
+            first["encrypted"], private_key, report_id=first["report_id"], level="full"
+        ).decode()
+        readable = json.dumps(await async_get_config_entry_diagnostics(hass, entry))
+        assert json.loads(full)["level"] == "full"
+        for report in (redacted, json.dumps(first), full, readable):
+            assert username not in report
+            assert password not in report
+        assert fake.protocol_errors == []
+    finally:
+        await unload_all(hass)
+        await fake.stop()

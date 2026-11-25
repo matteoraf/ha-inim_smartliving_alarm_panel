@@ -36,12 +36,11 @@ class PanelUnreachable(ConnectionError):
     """The panel could not be reached to read its configuration."""
 
 
-class PanelConfigError(ValueError):
-    """The panel's configuration could not be read; key tells why.
+class SetupError(ValueError):
+    """A panel cannot be set up with these details; key tells why.
 
-    One of PANEL_PROGRAMMING, AUTH_FAILED, INVALID_PANEL_RESPONSE and
-    INVALID_PANEL_CONFIGURATION; the message is the key, the detail the
-    underlying error.
+    The key is the setup form's error key; the message is the key, the
+    detail the underlying error.
     """
 
     def __init__(self, key: str, detail: str = "") -> None:
@@ -49,6 +48,14 @@ class PanelConfigError(ValueError):
         super().__init__(key)
         self.key = key
         self.detail = detail or key
+
+
+class PanelConfigError(SetupError):
+    """The panel's configuration could not be read; key tells why.
+
+    One of PANEL_PROGRAMMING, AUTH_FAILED, INVALID_PANEL_RESPONSE and
+    INVALID_PANEL_CONFIGURATION.
+    """
 
 
 def _where(panel: SmartLivingPanel) -> str:
@@ -62,8 +69,8 @@ async def async_fetch_panel_configuration(
 
     Raises PanelUnreachable if the panel cannot be reached and
     PanelConfigError if the configuration cannot be read: the panel is in
-    programming mode, a reply is invalid (AUTH_FAILED when its error names
-    authentication), or the panel gives no model string.
+    programming mode, a reply is invalid, or the panel gives no model
+    string.
     """
     where = _where(panel)
     _LOGGER.debug("Fetching the panel configuration from %s", where)
@@ -81,11 +88,7 @@ async def async_fetch_panel_configuration(
         raise PanelUnreachable(str(err)) from err
     except (ProtocolError, UnsupportedPanelError, ValueError) as err:
         _LOGGER.error("Invalid panel configuration from %s: %s", where, err)
-        # A reply error that names authentication is reported as such
-        auth = not isinstance(err, ValueError) and "auth" in str(err).lower()
-        raise PanelConfigError(
-            AUTH_FAILED if auth else INVALID_PANEL_CONFIGURATION, str(err)
-        ) from err
+        raise PanelConfigError(INVALID_PANEL_CONFIGURATION, str(err)) from err
     if not config.model_string.strip(b" \x00"):
         _LOGGER.error("System information is missing from the panel configuration")
         raise PanelConfigError(INVALID_PANEL_RESPONSE)

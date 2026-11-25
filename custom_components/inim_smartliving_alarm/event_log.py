@@ -9,9 +9,6 @@ imports.
 
 from collections.abc import Mapping
 from datetime import tzinfo
-from functools import cache
-import json
-from pathlib import Path
 from typing import Any, Protocol
 
 from .api import LoggedEvent
@@ -26,7 +23,7 @@ from .protocol.event_types import (
     event_refs,
     event_type,
 )
-from .protocol.events import CODE_OFFSET, NO_LOCATION
+from .protocol.events import NO_LOCATION, fw51_free_event, raw_event_code
 from .protocol.model import FALLBACK_MODEL, PanelModel
 from .stored_config import (
     area_names,
@@ -38,8 +35,6 @@ from .stored_config import (
     zone_names,
 )
 
-# Firmware 5.1's free events 1-14 (its codes 97-110) have no firmware 6 code
-_FW51_FREE_EVENTS = range(97, 111)
 UNKNOWN_EVENT = "unknown"
 FREE_EVENT = "free_event"
 # The output fault event when the installer set it to report a dirty smoke
@@ -88,60 +83,31 @@ def fill_text(
     return key
 
 
-class BundledTexts:
-    """The texts of one of the integration's translation files.
-
-    It reads the file: use it outside Home Assistant's event loop (or once,
-    before it).
-    """
-
-    def __init__(self, language: str = "en") -> None:
-        """Load the event texts of a language, English where there are none."""
-        self._strings = _messages(language)
-        self._english = _messages("en")
-
-    def __call__(self, key: str, **placeholders: Any) -> str:
-        """A text with its placeholders filled in (see fill_text)."""
-        return fill_text(key, placeholders, self._strings, self._english)
-
-
-@cache
-def _messages(language: str) -> dict[str, str]:
-    """A translation file's messages; none if it cannot be read."""
-    path = Path(__file__).parent / "translations" / f"{language}.json"
-    try:
-        exceptions = json.loads(path.read_text(encoding="utf-8")).get("exceptions", {})
-        return {key: value["message"] for key, value in exceptions.items()}
-    except (OSError, ValueError, AttributeError, KeyError, TypeError):
-        return {}
-
-
 class EventLog:
     """How the event log sensor shows the panel's events.
 
     Built once for a series of events: it decodes the stored names and the
     general option it needs. model is the profile the events were decoded
-    with (the panel's, at run time); by default the stored configuration's.
-    description is in English (english texts; the bundled English ones by
-    default), description_local in Home Assistant's language (local texts;
-    English by default). A text that cannot be found falls back to fixed
-    English rather than failing.
+    with (the panel's, at run time); None for the stored configuration's.
+    description is in English (english texts), description_local in Home
+    Assistant's language (local texts). A text that cannot be found falls
+    back to fixed English rather than failing.
     """
 
     def __init__(
         self,
         stored: Mapping[str, Any],
-        model: PanelModel | None = None,
-        english: EventTexts | None = None,
-        local: EventTexts | None = None,
+        model: PanelModel | None,
+        english: EventTexts,
+        local: EventTexts,
     ) -> None:
         """Take what the events need from the stored configuration."""
         self._model = model or stored_model(stored) or FALLBACK_MODEL
         self._names = EventNames(stored)
         self._areas = area_names(stored)
         self._dirty_detector = output_fault_is_dirty_detector_option(stored)
-        self._english = english or BundledTexts()
-        self._local = local or self._english
+        self._english = english
+        self._local = local
 
     def attributes(
         self, logged: LoggedEvent, time_zone: tzinfo | None
@@ -188,14 +154,14 @@ class EventLog:
         """The event's key, and its description given the texts of a language."""
         event = logged.event
         kind = event_type(event.code)
-        panel_code = logged.raw[CODE_OFFSET] & 0x7F
-        free = self._model.event_codes is not None and panel_code in _FW51_FREE_EVENTS
+        panel_code = raw_event_code(logged.raw)
+        free = fw51_free_event(logged.raw, self._model)
         dirty_detector = event.code == OUTPUT_FAULT and self._dirty_detector
         if dirty_detector:
             key = DIRTY_DETECTOR
         elif kind is not None:
             key = kind.key
-        elif free:
+        elif free is not None:
             key = FREE_EVENT
         else:
             key = UNKNOWN_EVENT
@@ -203,9 +169,8 @@ class EventLog:
         def name(texts: EventTexts) -> str:
             if dirty_detector or kind is not None:
                 return _say(texts, f"event_{key}", key.replace("_", " ").capitalize())
-            if free:
-                number = panel_code - _FW51_FREE_EVENTS[0] + 1
-                return _say(texts, "event_free", f"Free event {number}", number=number)
+            if free is not None:
+                return _say(texts, "event_free", f"Free event {free}", number=free)
             return _say(
                 texts,
                 "event_unknown",
@@ -220,19 +185,6 @@ class EventLog:
             return _say(texts, "event_ended", f"{text} (ended)", event=text)
 
         return key, describe
-
-
-def event_attributes(
-    logged: LoggedEvent,
-    stored: Mapping[str, Any],
-    time_zone: tzinfo | None,
-    english: EventTexts | None = None,
-    local: EventTexts | None = None,
-    model: PanelModel | None = None,
-) -> dict[str, Any]:
-    """One event of the event log sensor (see EventLog); for a series of
-    events, build an EventLog once instead."""
-    return EventLog(stored, model, english, local).attributes(logged, time_zone)
 
 
 def _say(texts: EventTexts, key: str, fallback: str, **placeholders: Any) -> str:

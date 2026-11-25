@@ -20,9 +20,14 @@ from custom_components.inim_smartliving_alarm import async_migrate_entry, discov
 from custom_components.inim_smartliving_alarm.api import SmartLivingPanel
 from custom_components.inim_smartliving_alarm.config_flow import (
     InimAlarmConfigFlow,
+    _error_key,
 )
 from custom_components.inim_smartliving_alarm.const import DOMAIN
 from custom_components.inim_smartliving_alarm.discovery import DiscoveryError
+from custom_components.inim_smartliving_alarm.panel_config import (
+    PanelConfigError,
+    SetupError,
+)
 from custom_components.inim_smartliving_alarm.protocol.errors import (
     DecryptionError,
     ProtocolError,
@@ -586,3 +591,19 @@ async def test_options_offer_none_for_an_unknown_scenario(
     await hass.async_block_till_done()
     result = await open_options(hass, entry)
     assert form_defaults(result)["scenario_arm_night"] == "none"
+
+
+@pytest.mark.parametrize(
+    ("error", "key"),
+    [
+        (SetupError("invalid_pin"), "invalid_pin"),
+        (SetupError("unsupported_firmware"), "unsupported_firmware"),
+        (PanelConfigError("panel_programming"), "panel_programming"),
+        (SetupError("not_a_form_error"), "validation_error_detail"),
+        # A plain ValueError is never read as a key, whatever its message
+        (ValueError("invalid_pin"), "validation_error_detail"),
+    ],
+)
+def test_setup_error_keys(error: ValueError, key: str) -> None:
+    """The form shows a setup error's own key; anything else is general."""
+    assert _error_key(error) == key

@@ -13,6 +13,7 @@ from datetime import datetime
 from typing import Any
 
 from .const import CONF_THERMOSTATS, DOMAIN
+from .protocol.thermostat import panel_weekday
 from .selection import available_thermostats, selected
 
 # A keypad whose temperature read got no answer is left out of the next
@@ -71,7 +72,7 @@ def selected_keypads(
 
 def program_time(now: datetime) -> tuple[int, int]:
     """(hour, weekday) for the programs: weekday 0 = Sunday ... 6 = Saturday."""
-    return now.hour, (now.weekday() + 1) % 7
+    return now.hour, panel_weekday(now.weekday())
 
 
 @dataclass

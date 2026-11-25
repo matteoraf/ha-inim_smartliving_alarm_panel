@@ -526,7 +526,10 @@ async def test_smartlan_g_wrong_key_gets_nothing_useful() -> None:
         async with Client(panel, "admin", "wrong") as client:
             with pytest.raises((TimeoutError, ValueError, asyncio.IncompleteReadError)):
                 await client.read(captures.FIRMWARE_REQUEST, 12)
-        assert panel.requests == [] or panel.protocol_errors
+        assert panel.requests == []
+        assert [e.split(":")[0] for e in panel.protocol_errors] == [
+            "cannot decrypt request"
+        ]
     finally:
         await panel.stop()
 

@@ -25,11 +25,9 @@ from homeassistant.helpers.selector import (
 import voluptuous as vol
 
 from .api import PANEL_ERRORS, create_panel
+from .attribute_values import SWITCH_ARM_MODE_OPTIONS
 from .const import (
     AREA_SWITCH_USE_DEFAULT,
-    ARM_MODE_INSTANT,
-    ARM_MODE_PARTIAL,
-    ARM_MODE_TOTAL,
     BOARD_SMARTLAN_G,
     BOARD_SMARTLAN_SI,
     CONF_AREA_SWITCH_ARM_MODE_BY_AREA,
@@ -68,7 +66,7 @@ from .const import (
 )
 from .discovery import DiscoveredBoard, DiscoveryError, discover
 from .notifications import Texts, async_texts
-from .panel_config import PanelConfigError, async_fetch_panel_configuration
+from .panel_config import SetupError, async_fetch_panel_configuration
 from .peripherals import peripheral_placeholders
 from .polling import GROUPS, SLOW_POLLING_DURATION, SLOW_POLLING_INTERVAL, GroupSpec
 from .protocol.errors import (
@@ -125,7 +123,8 @@ _ERROR_KEYS = frozenset(
 
 
 def _error_key(err: ValueError) -> str:
-    key = err.key if isinstance(err, PanelConfigError) else str(err)
+    """The form's error key: a setup error's own, else a general one."""
+    key = err.key if isinstance(err, SetupError) else None
     return key if key in _ERROR_KEYS else "validation_error_detail"
 
 
@@ -186,8 +185,8 @@ async def _validate_connection_and_fetch_initial_config(
 ) -> dict[str, Any]:
     """Check the panel with these connection details and read its configuration.
 
-    Raises ConnectionError if the panel cannot be reached and ValueError
-    (with an error key) if it is refused: firmware older than 5.1, a model
+    Raises ConnectionError if the panel cannot be reached and SetupError
+    (with the form's error key) if it is refused: firmware older than 5.1, a model
     without its own layout, a PIN that matches no user code, a panel in
     programming mode, or a configuration that cannot be read.
 
@@ -205,7 +204,7 @@ async def _validate_connection_and_fetch_initial_config(
             password=data.get(CONF_PASSWORD, ""),
         )
     except InvalidPinError as err:
-        raise ValueError("invalid_pin_format") from err
+        raise SetupError("invalid_pin_format") from err
     try:
         try:
             firmware = await panel.identify()
@@ -213,7 +212,7 @@ async def _validate_connection_and_fetch_initial_config(
             raise ConnectionError(str(err)) from err
         except DecryptionError as err:
             # A SmartLAN/G reply that does not decrypt: wrong credentials
-            raise ValueError("invalid_auth") from err
+            raise SetupError("invalid_auth") from err
         except ProtocolError as err:
             # The reply decrypted (or needs no decryption) but has the wrong
             # form. On SmartLAN/G a wrong password may, rarely, decrypt to
@@ -221,7 +220,7 @@ async def _validate_connection_and_fetch_initial_config(
             _LOGGER.error(
                 "Unexpected reply from %s:%s: %s", data[CONF_HOST], data[CONF_PORT], err
             )
-            raise ValueError(
+            raise SetupError(
                 "invalid_board_reply"
                 if board == BOARD_SMARTLAN_G
                 else "invalid_panel_response"
@@ -230,9 +229,9 @@ async def _validate_connection_and_fetch_initial_config(
             model_for(firmware)
         except UnsupportedPanelError as err:
             _LOGGER.warning("Not set up: %s", err)
-            raise ValueError(f"unsupported_{err.reason}") from err
+            raise SetupError(f"unsupported_{err.reason}") from err
         if not panel.user_code_found:
-            raise ValueError("invalid_pin")
+            raise SetupError("invalid_pin")
         config = await async_fetch_panel_configuration(hass, panel)
         if keypad_check is not None:
             keypads = [number - 1 for number in available_thermostats(config)]
@@ -840,12 +839,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
             )
 
         stored = options.get(CONF_AREA_SWITCH_ARM_MODE_BY_AREA) or {}
-        choices = [
-            AREA_SWITCH_USE_DEFAULT,
-            ARM_MODE_TOTAL,
-            ARM_MODE_PARTIAL,
-            ARM_MODE_INSTANT,
-        ]
+        choices = [AREA_SWITCH_USE_DEFAULT, *SWITCH_ARM_MODE_OPTIONS]
         selector = SelectSelector(
             SelectSelectorConfig(
                 options=choices,
@@ -1019,7 +1013,7 @@ class InimAlarmOptionsFlowHandler(config_entries.OptionsFlow):
                 ),
             ): SelectSelector(
                 SelectSelectorConfig(
-                    options=[ARM_MODE_TOTAL, ARM_MODE_PARTIAL, ARM_MODE_INSTANT],
+                    options=list(SWITCH_ARM_MODE_OPTIONS),
                     translation_key=CONF_AREA_SWITCHES_DEFAULT_ARM_MODE,
                     mode=SelectSelectorMode.DROPDOWN,
                 )
