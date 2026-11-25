@@ -850,7 +850,7 @@
 </tr>
 <tr>
 <td><a href="#diagnostic-and-configuration-entities">Diagnostics</a></td>
-<td>sensors, a select, a button, a switch</td>
+<td>sensors, binary sensors, a select, a button, a switch</td>
 <td>The user code, the devices found, programming mode, system reports, re-reading the configuration, slow polling mode</td>
 </tr>
 </tbody>
@@ -1424,11 +1424,11 @@
 </tr>
 <tr>
 <td><code>device</code></td>
-<td>the keypad or reader, by name; <code>Remote</code> for commands from the app, the cloud, Home Assistant or the installer software; <code>From telephone</code></td>
+<td>the keypad or reader, by name; <code>Remote</code> for commands from the app, the cloud, Home Assistant or the installer software; <code>From telephone</code>; <code>Location N</code> when the panel logs a place this event does not use</td>
 </tr>
 <tr>
 <td><code>affected_areas</code></td>
-<td>the areas, by name</td>
+<td>the areas, by name; <code>None</code> when no area is concerned</td>
 </tr>
 <tr>
 <td><code>zone</code></td>
@@ -1469,7 +1469,7 @@
 </details>
 <details class="note">
 <summary>The active scenario in detail</summary>
-<p>The state is the active scenario's name followed by its index (0-based). It is <code>No scenario matches</code> when the state of the areas matches no scenario, <code>Unknown Scenario (Index n)</code> for an index without a scenario name, and <code>Unknown (No data)</code> before the panel has been read.</p>
+<p>The state is the active scenario's name followed by its index (0-based). It is <code>No scenario matches</code> when the state of the areas matches no scenario, <code>Scenario N (Index n)</code> for a scenario without a name, <code>Unknown Scenario (Index n)</code> for an index the panel does not have, and <code>Unknown (No data)</code> before the panel has been read.</p>
 <table>
 <thead>
 <tr>
@@ -1543,7 +1543,7 @@
 <tr>
 <td><code>switch.…_slow_polling_mode</code></td>
 <td>Slow polling mode</td>
-<td>on while the panel is read every 30 seconds, so that other apps can connect to the board; SmartLAN/SI only (see <a href="../options/#slow-polling-mode">Slow polling mode</a>)</td>
+<td>on while the panel is read every 30 seconds by default (<strong>Reading interval in slow polling mode</strong>), so that other apps can connect to the board; SmartLAN/SI only (see <a href="../options/#slow-polling-mode">Slow polling mode</a>)</td>
 </tr>
 </tbody>
 </table>
