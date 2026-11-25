@@ -7,7 +7,7 @@ When you report a problem, a system report tells what the integration knows abou
 1.  Open your panel's device page: **Settings** → **Devices & services** → **Inim SmartLiving Alarm** → your panel.
 2.  Click **Download diagnostics** in the *Device info* card.
 
-    ![Download diagnostics on the device page](images/download-diagnostics.webp){ width="344" }
+    ![Download diagnostics on the device page](images/download-diagnostics.webp){ width="352" }
 
 3.  Wait for the file: it takes about 40 seconds on SmartLAN/SI. Commands are not held up meanwhile.
 4.  Attach the file to your GitHub issue. If GitHub refuses the file, zip it first.

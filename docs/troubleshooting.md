@@ -18,7 +18,7 @@ Start with the table: find your problem, then follow the link for the details.
 
 ## When the panel refuses a command
 
-Arming, disarming, bypassing a zone, running a scenario, resetting the alarm memory and switching an output fail with a message when they are not carried out. The message says which of three things happened.
+Arming, disarming, bypassing a zone, running a scenario, resetting the alarm memory, switching an output and changing a thermostat fail with a message when they are not carried out. The message says which of three things happened.
 
 **1. The integration did not send the command.**
 
@@ -71,7 +71,7 @@ The setup says *"The SmartLAN/G board answered, but its reply was not in the exp
 
 The SmartLAN/SI board accepts only one local connection at a time. While Home Assistant reads the panel at the [Polling](options.md#polling) intervals, it keeps its connection to the board open, so the app cannot connect locally meanwhile. Remote access through Inim Cloud is not affected.
 
-Turn on **Slow polling mode** on the panel's device page (see [Slow polling mode](options.md#slow-polling-mode)). Home Assistant then reads the panel every 30 seconds and closes its connection after each read, so the app, or the installer software, can connect in between. While another app is connected, the entities are unavailable; while the installer software reads the panel's programming, that can last about a minute. If the installer software reports a connection error, try again: Home Assistant's read may have taken the board for a moment. The mode turns itself off after 60 minutes, unless you set it otherwise.
+Turn on **Slow polling mode** on the panel's device page (see [Slow polling mode](options.md#slow-polling-mode)). Home Assistant then reads the panel every 30 seconds by default (**Reading interval in slow polling mode**, in [Polling](options.md#polling)) and closes its connection after each read, so the app, or the installer software, can connect in between. While another app is connected, the entities are unavailable; while the installer software reads the panel's programming, that can last about a minute. If the installer software reports a connection error, try again: Home Assistant's read may have taken the board for a moment. The mode turns itself off after 60 minutes, unless you set it otherwise.
 
 ### Programming mode
 

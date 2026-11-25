@@ -71,7 +71,7 @@ title: Alarm events
 content: >-
   {% for e in (state_attr('sensor.home_event_log', 'event_log') or [])[:10] %}
   - {{ as_timestamp(e.timestamp) | timestamp_custom('%d/%m %H:%M') }}
-  · {{ e.description_local }}{% if e.authorized_by %} · {{ e.authorized_by }}{% endif %}{% if e.affected_areas %} · {{ e.affected_areas }}{% endif %}
+  · {{ e.description_local }}{% if e.authorized_by %} · {{ e.authorized_by }}{% endif %}{% if e.affected_areas and e.affected_areas != 'None' %} · {{ e.affected_areas }}{% endif %}
   {% endfor %}
 ```
 
@@ -171,13 +171,13 @@ triggers:
 
 | Field | Values |
 |---|---|
-| `entity_unique_id` | the unique ID of the entity that ran it |
-| `entity_name` | the name of that entity |
-| `action` | what was asked, in English, for example `arm away` or `activate scenario 'Night'` |
+| `entity_unique_id` | the unique ID of the entity that ran it, or `<entry id>_activate_scenario_action` for the **Activate scenario** action |
+| `entity_name` | the name of that entity, or the panel's entry title for the action |
+| `action` | what was asked, in English, for example `arm away`, `activate scenario 'Night'` (the action) or `activate scenario 'Night' (index 1)` (a scenario button) |
 | `scenario_index` | the scenario number minus 1 |
 | `scenario_name` | the scenario's name |
-| `reason` | `zones_blocked`, `no_areas_identified`, `unknown_zones_error`, `no_data_available`, `disarm_failed`, `panel_programming`, `command_failed`, `unknown`, or the reason the panel gave (see below) |
-| `panel_result` | the panel's reason when it refused the command, `unknown` for a reason the integration does not know, or `null` when the panel did not refuse it |
+| `reason` | `zones_blocked`, `no_areas_identified`, `unknown_zones_error`, `no_data_available`, `disarm_failed`, `panel_programming`, `command_failed`, `unknown`, or the reason the panel gave (see below), except `open_zones` and `refused`, which give `zones_blocked` or `unknown_zones_error` |
+| `panel_result` | the panel's reason when it refused the command (`open_zones` and `refused` included), `unknown` for a reason the integration does not know, or `null` when the panel did not refuse it |
 | `blocking_zones` | the zones that stopped it, each with `zone_id`, `zone_name`, `status` (`not_ready`, `alarmed`, `short` or `tamper`) and `areas` (by name) |
 | `message` | a description, always in English, whatever Home Assistant's language |
 
