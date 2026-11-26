@@ -1,8 +1,8 @@
-# System report
+# System report { #system-report }
 
 When you report a problem, a system report tells what the integration knows about your panel: model and firmware, board, the panel's programming as read from it, status, the event log, the integration's options and entities, and connection statistics.
 
-## Sharing a report
+## Sharing a report { #sharing-a-report }
 
 1.  Open your panel's device page: **Settings** → **Devices & services** → **Inim SmartLiving Alarm** → your panel.
 2.  Click **Download diagnostics** in the *Device info* card.
@@ -14,7 +14,7 @@ When you report a problem, a system report tells what the integration knows abou
 
 The same entry is in the menu (⋮) of your panel on the integration's page.
 
-### How much the report shows
+### How much the report shows { #how-much-the-report-shows }
 
 The *Diagnostics level* select chooses how much the next report shows. It is disabled by default: enable it on the device page, in the *Diagnostic* section.
 
@@ -39,7 +39,7 @@ At **Redacted**, one download gives a plain file you can attach to a GitHub issu
 
     The board's own details (its network settings and firmware) are read from the board itself. A SmartLAN/SI board is asked directly, so they are included even when Home Assistant is on another subnet; if the board is in use by another app at that moment, the report falls back to a search of Home Assistant's own network. A SmartLAN/G board's details are included only when Home Assistant is on the same network as the board. What is never read, at any level: the panel's cloud keys, account ID and address, and the board's internal keys.
 
-### Finding the installer code
+### Finding the installer code { #finding-the-installer-code }
 
 If you don't have your panel's installer code, a **Full confidential** report shows it (panel firmware 5.1 or newer):
 
@@ -48,7 +48,7 @@ If you don't have your panel's installer code, a **Full confidential** report sh
 
 The readable copy holds every PIN of your panel: keep it private, and delete it once you have the code. Reports at other levels never show the installer code.
 
-## Reading a report
+## Reading a report { #reading-a-report }
 
 The repository has a small viewer for reports, `scripts/inim_report.py` (Python 3.13 or newer; nothing to install for reading). Download the repository from GitHub, then:
 

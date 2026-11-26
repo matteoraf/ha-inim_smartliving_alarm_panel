@@ -4,11 +4,13 @@ Home Assistant Integration for Inim SmartLiving Alarm Systems
 > [!WARNING]
 > This is an experimental component. I am not affiliated with Inim Electronics and this is not an official component from Inim. Use at your own risk.
 > 
-> SmartLiving 1050 on firmware 6 has been tested and confirmed by multiple users. SmartLiving 10100 with a SmartLAN/G board has been tested by one user. The SmartLiving 505, 515 and all four models on firmware 5.1, are supported experimentally. Contributors are welcome.
+> The SmartLiving 1050 and 10100 on firmware 6 have been tested and reported working by several users, with both SmartLAN/SI and SmartLAN/G boards. The SmartLiving 505 and 515, and all four models on firmware 5.1, are supported experimentally. Contributors are welcome.
 
 This custom integration allows you to connect Home Assistant with Inim SmartLiving series alarm control panels that are equipped with a SmartLAN/SI or SmartLAN/G network interface. It enables monitoring and control of your alarm system directly from Home Assistant.
 
 **Documentation: <https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/>**
+
+**Documentazione in italiano: <https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/>**
 
 At a glance
 -----------

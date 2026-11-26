@@ -1,8 +1,8 @@
-# Entities
+# Entities { #entities }
 
 Your panel appears in Home Assistant as one device, named as you chose at setup. Its entities are the areas, zones, scenarios and outputs you import, plus a few sensors about the panel itself. Open the device page from **Settings** → **Devices & services** → **Inim SmartLiving Alarm**.
 
-## What you get
+## What you get { #what-you-get }
 
 | Part | Entities | What you do with them |
 |---|---|---|
@@ -24,7 +24,7 @@ For example, the tile cards of an area: its arming mode, its switch and its alar
 
     Entity IDs start with your panel's name: with the name *Home*, area 1's switch is `switch.home_area_1`. The tables below give the end of each ID; *N* is the area, zone or scenario number (scenario IDs count from 0). Names are shown after the panel's name, in your Home Assistant language; *(name)* is the item's name on the panel, shown when it has one. Every entity is enabled by default, except **Diagnostics level**.
 
-## The alarm panel
+## The alarm panel { #the-alarm-panel }
 
 | ID ends with | Name | States |
 |---|---|---|
@@ -41,7 +41,7 @@ The alarm panel arms and disarms with the scenarios you mapped in the [options](
     *   The state follows the scenario mapping: map as Disarm the scenario that disarms all your areas, otherwise a disarmed panel is not shown as *Disarmed*.
     *   Only the arm modes with a mapped scenario are offered. Disarming or arming without a mapped scenario fails with a message (*"No scenario is mapped to … choose one in the integration options"*).
 
-## Areas
+## Areas { #areas }
 
 | ID ends with | Name | States | Device class |
 |---|---|---|---|
@@ -78,7 +78,7 @@ Arming from the switch or the select checks the zones first: see [Zones not read
 
     The switch shows `status_text` and `arming_mode` once the panel's state has been read. The select's delays and options are as programmed on the panel; they are not shown for panels handled with another model's layout (see [Known limitations](limitations.md)).
 
-## Zones
+## Zones { #zones }
 
 Only zones that exist on the panel get entities: zones of input, input/output and double terminals. Output terminals (for example a siren) and unused terminals have none. Zones 1 to N are the zones of the panel's N terminals (50 on the SmartLiving 1050, 100 on the 10100); a double terminal *n* also has a second zone, numbered N + *n* (51 to 100 on the 1050, 101 to 200 on the 10100).
 
@@ -146,7 +146,7 @@ The zone sensor's attributes are the zone's programming, as read from the panel.
 
     The programming attributes (from `zone_type` on) are not shown when the panel data stored for the zone cannot be read; use **Re-read panel configuration** then. Options that only apply to wireless zones are not shown.
 
-## Scenarios
+## Scenarios { #scenarios }
 
 | ID ends with | Name | States |
 |---|---|---|
@@ -164,7 +164,7 @@ The zone sensor's attributes are the zone's programming, as read from the panel.
     | `scenario_name` | button, binary sensor | the scenario's name on the panel |
     | `area_actions_details` | button | what the scenario does to each area, by area number: `keep`, `total`, `partial`, `instant`, `disarm`, `unknown` |
 
-## Sensors
+## Sensors { #sensors }
 
 | ID ends with | Name | State |
 |---|---|---|
@@ -227,7 +227,7 @@ The events and their keys are in the sensor's attributes: open the sensor, then 
     | `active_scenario_index` | the index alone; empty when no scenario matches |
     | `raw_active_scenario_hex` | the panel's raw value |
 
-## Diagnostic and configuration entities
+## Diagnostic and configuration entities { #diagnostic-and-configuration-entities }
 
 These are shown in the *Diagnostic* and *Configuration* sections of the device page.
 
@@ -260,7 +260,7 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
     | `keypads`, `readers`, `expanders`, `sirens` | Peripherals | the names of the enabled devices |
     | `until` | Slow polling mode | when the mode turns itself off; empty while it is off or kept on until turned off |
 
-## Outputs
+## Outputs { #outputs }
 
 !!! warning
 
@@ -299,7 +299,7 @@ These are shown in the *Diagnostic* and *Configuration* sections of the device p
     | `toggle` | `true` or `false` |
     | `relay_use` | `true` or `false` |
 
-## Thermostats
+## Thermostats { #thermostats }
 
 A keypad with a temperature sensor measures the room temperature, and the panel can use it as a thermostat: it switches heating or cooling through the outputs and notifications programmed on its *Thermostat ON* event. Each keypad whose thermostat you import gets:
 

@@ -4,6 +4,7 @@ A made-up SmartLiving 1050 (firmware 6.07, SmartLAN/SI) with plain names,
 served on this computer only, with a console to change its state:
 
     python3 scripts/docs_demo_panel.py            # panel on 127.0.0.1:15004
+    python3 scripts/docs_demo_panel.py --language it   # Italian names
     nc 127.0.0.1 15099                            # console; type "help"
 
 Taking the screenshots again (for example after an interface change):
@@ -18,6 +19,8 @@ Taking the screenshots again (for example after an interface change):
 5.  Capture at twice the screen resolution and crop to the dialog or card.
 6.  Save as WebP (lossless, at most 200 kB and 1600 px wide) in docs/images/,
     named as the image it replaces.
+    For the Italian pages, do the same with "--language it", Home Assistant's
+    language set to Italian (the user profile), and save in docs/it/images/.
 7.  Run: pytest tests/test_docs_assets.py tests/test_demo_panel.py
 """
 
@@ -149,9 +152,15 @@ async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--port", type=int, default=15004, help="panel port")
     parser.add_argument("--console", type=int, default=15099, help="console port")
+    parser.add_argument(
+        "--language",
+        choices=["en", "it"],
+        default="en",
+        help="the language of the panel's names (it: for the Italian pages)",
+    )
     args = parser.parse_args()
 
-    panel = FakePanel(panel_demo())
+    panel = FakePanel(panel_demo(args.language))
     await panel.start("127.0.0.1", args.port)
     console = Console(panel)
 

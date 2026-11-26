@@ -980,14 +980,58 @@ def panel_505_fw51() -> PanelState:
     return state
 
 
-def panel_demo() -> PanelState:
+# The demo's names on the Italian pages' screenshots: the same panel, with
+# the names an Italian installer would program
+DEMO_NAMES_IT = {
+    "Ground floor": "Piano terra",
+    "First floor": "Primo piano",
+    "Garage": "Garage",
+    "Garden": "Giardino",
+    "Office": "Ufficio",
+    "Front door": "Porta ingresso",
+    "Hall motion": "Movim. ingresso",
+    "Kitchen window": "Finestra cucina",
+    "Lounge window": "Finestra salotto",
+    "Bedroom window": "Finestra camera",
+    "Landing motion": "Movim. corridoio",
+    "Bathroom window": "Finestra bagno",
+    "Garage door": "Porta garage",
+    "Garage motion": "Movim. garage",
+    "Garden barrier": "Barriera esterna",
+    "Office door": "Porta ufficio",
+    "Kitchen smoke": "Fumo cucina",
+    "Lounge shutter": "Tapparella sala",
+    "Garden lights": "Luci giardino",
+    "Gate": "Cancello",
+    "Porch light": "Luce portico",
+    "Master": "Master",
+    "Family": "Famiglia",
+    "User": "Utente",
+    "Key": "Chiave",
+    "Hall keypad": "Tastiera atrio",
+    "Garage keypad": "Tastiera garage",
+    "Garage reader": "Lettore garage",
+    "Bedroom expander": "Espans. camera",
+    "Evening timer": "Timer sera",
+    "Main siren": "Sirena esterna",
+    "Away": "Fuori",
+    "Night": "Notte",
+    "Disarm": "Disinserito",
+    "Garage only": "Solo garage",
+    "Holiday": "Vacanza",
+    "Office closed": "Ufficio chiuso",
+}
+
+
+def panel_demo(language: str = "en") -> PanelState:
     """A made-up 1050 (firmware 6.07) with plain names, for the documentation.
 
     Nothing comes from captures. Five named areas; twelve zones, among them a
     double terminal (its second zone is 54), a shock sensor and a 24-hour
     smoke detector; three home automation outputs (on/off, a 3 s monostable
     and a dimmer); six scenarios; codes "Master" (PIN 1234, every area and
-    the outputs) and "Family" (PIN 5678, areas 1-2).
+    the outputs) and "Family" (PIN 5678, areas 1-2). With ``language="it"``
+    the same panel has Italian names (``DEMO_NAMES_IT``).
     """
     state = PanelState()
     terminals = c.NUM_TERMINALS
@@ -1122,4 +1166,19 @@ def panel_demo() -> PanelState:
         "Area disarmed",
     )
     state.event_head = 3
+    if language == "it":
+        state.labels = {
+            block: [_italian(name) for name in names]
+            for block, names in state.labels.items()
+        }
     return state
+
+
+def _italian(name: str) -> str:
+    """A demo name in Italian; numbered placeholders keep their number."""
+    if name in DEMO_NAMES_IT:
+        return DEMO_NAMES_IT[name]
+    word, _, number = name.rpartition(" ")
+    if word in DEMO_NAMES_IT and number.isdigit():
+        return f"{DEMO_NAMES_IT[word]} {number}"
+    return name

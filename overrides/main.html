@@ -7,6 +7,11 @@
 {% endblock %}
 
 {% block outdated %}
+  {%- if config.theme.language == "it" %}
+  Questa è la documentazione di un'altra versione.
+  <a href="{{ '../' ~ base_url }}"><strong>Vai alla versione attuale.</strong></a>
+  {%- else %}
   This is the documentation of another version.
   <a href="{{ '../' ~ base_url }}"><strong>Go to the current version.</strong></a>
+  {%- endif %}
 {% endblock %}

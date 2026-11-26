@@ -1,0 +1,106 @@
+# The Italian documentation site: the pages in docs/it/, published under
+# it/ next to the English versions (see mkdocs.yml for writing the pages).
+# Everything else is the same as mkdocs.yml, and a test keeps it so: change
+# both files together. Only the site name and address, docs_dir, the theme
+# language, the theme toggle and footer link texts, and the nav titles
+# differ.
+
+site_name: Inim SmartLiving Alarm per Home Assistant
+site_url: https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/
+# No repo_url: the theme's repository widget asks the GitHub API for star and
+# fork counts. The repository is linked in the footer instead (extra.social).
+edit_uri: ""
+docs_dir: docs/it
+
+theme:
+  name: material
+  custom_dir: overrides
+  language: it
+  logo: assets/icon.png
+  favicon: assets/icon.png
+  font: false
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Passa al tema scuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Passa al tema chiaro
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra:
+  version:
+    provider: mike
+    # Pages of other versions say so. Set by the Documentation workflow:
+    # a beta while no stable version is published, latest otherwise, as an
+    # anchored pattern (^0\.4$), which the theme reads as a regular expression.
+    default: !ENV [DOCS_DEFAULT_VERSION, "^latest$"]
+  # The banner on every page: set by the Documentation workflow for the
+  # version under development and for betas, empty otherwise.
+  notice: !ENV [DOCS_NOTICE, ""]
+  # The language selector. Set by the Documentation workflow to this version
+  # in each language; the theme opens the same page in the other language.
+  alternate:
+    - name: English
+      link: !ENV [DOCS_LINK_EN, "/"]
+      lang: en
+    - name: Italiano
+      link: !ENV [DOCS_LINK_IT, "/it/"]
+      lang: it
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/matteoraf/ha-inim_smartliving_alarm_panel
+      name: L'integrazione su GitHub
+
+validation:
+  nav:
+    omitted_files: warn
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    anchors: warn
+    absolute_links: warn
+    unrecognized_links: warn
+
+nav:
+  - Home: index.md
+  - Installazione: installation.md
+  - Configurazione: setup.md
+  - Opzioni: options.md
+  - Entità: entities.md
+  - Azioni ed eventi: actions-events.md
+  - Risoluzione dei problemi: troubleshooting.md
+  - Report di sistema: system-report.md
+  - Aggiornare la versione: upgrading.md
+  - Limitazioni note: limitations.md

@@ -1,18 +1,18 @@
-# Upgrading
+# Upgrading { #upgrading }
 
-## From 0.4
+## From 0.4 { #from-04 }
 
 This version keeps the panel configuration in a new format. Your entity IDs and options stay as they are, and your configuration entry is updated automatically. Coming from 0.4.0b1 or 0.4.0b2, read also [the section below](#from-040b1-or-040b2).
 
-### Before you update
+### Before you update { #before-you-update }
 
 1.  **Take a Home Assistant backup** (**Settings** → **System** → **Backups**). **To go back to 0.4, restore that backup**: 0.4 does not load a configuration entry in the new format.
 
-### After you update
+### After you update { #after-you-update }
 
 1.  **Look at the log** after the first start. The integration reads the panel configuration again once by itself, and says so. If it cannot, it tries again at every start (see below).
 
-### What changed
+### What changed { #what-changed }
 
 | Change | What to do |
 |---|---|
@@ -44,20 +44,20 @@ This version keeps the panel configuration in a new format. Your entity IDs and 
     *   **Keypad thermostats are new** ([Thermostats](entities.md#thermostats)): each keypad that reports a room temperature gets a climate entity (off, heat or cool; the panel's manual, daily program, weekly program and antifreeze modes as presets) and a temperature sensor. At the first start, once the integration is running, it checks which keypads report a temperature, ticks their thermostats in the options and adds their entities. A keypad whose thermostat you don't use gets one too: untick it in the options to remove its entities. Changes from Home Assistant set only the mode, the season and the manual setpoint; the programs are not changed.
     *   **The event log names every event** ([Sensors](entities.md#sensors)). Before, only the most common ones had a description and the others showed as *Unknown Action*. `description` now uses the names the panel gives its events, in English: for example *Area armed in away mode* (was *Area(s) Armed*), *Area disarmed* (*Area(s) Disarmed*), *Zone bypassed (ended)* (*End of Zone Excluded*), *Scenario activated* (*Scenario Activated*). New keys tell the event's key (`event`, the same in every language), its code, whether it ended, how it happened (`via`), and what it is about (a keypad, a timer, an expander…); `description_local` gives the description in Home Assistant's language. An area armed by a command zone or a timer now says so, where before the zone's number was shown as a user code or the timer as a reader. When an event has no user code, key, keypad or reader, `authorized_by`, `device`, `authorized_id` and `device_id` are left out: before, they read `-` or `ff`. The `event_log` list itself is no longer kept in Home Assistant's history.
 
-## From 0.4.0b1 or 0.4.0b2
+## From 0.4.0b1 or 0.4.0b2 { #from-040b1-or-040b2 }
 
 *   **Check your automations:** in the `inim_smartliving_alarm_zones_not_ready` event, `zone_name` is now the zone's plain name (for example `Kitchen window`), as in the zone entities and the scenario failure event. Automations that match a name with the number in brackets, such as `Kitchen window (12)`, need updating; `zone_id` still gives the number.
 
-## From 0.3.x
+## From 0.3.x { #from-03x }
 
 Version 0.4 reworks how the integration talks to the panel. Your entity IDs and options stay as they are, and your configuration entry is updated automatically.
 
-### Before you update
+### Before you update { #before-you-update_1 }
 
 1.  **Take a Home Assistant backup** (**Settings** → **System** → **Backups**), above all for a preview or a beta (see [Preview versions](installation.md#preview-versions)).
 2.  **Read the changes below**, above all those marked *check your automations*.
 
-### After you update
+### After you update { #after-you-update_1 }
 
 1.  **Look at the log** after the first start. The integration may read the panel configuration again by itself, once, and says so.
 2.  **Delete leftover entities**: entities of terminals that are not zones, or of zones and areas your panel does not have, stay as unavailable entities and are listed in the log at every start. Delete them in **Settings** → **Devices & services** → **Entities**.
@@ -65,9 +65,9 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
 4.  **Choose what happens with zones not ready**: arming now checks the zones, and refuses by default (see [Zones not ready](actions-events.md#zones-not-ready)).
 5.  **Check your automations and templates** against the changes marked *check your automations*.
 
-### What changed
+### What changed { #what-changed_1 }
 
-#### Areas and the alarm panel
+#### Areas and the alarm panel { #areas-and-the-alarm-panel }
 
 | Change | What to do |
 |---|---|
@@ -87,7 +87,7 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
     *   **Each area switch can arm in its own mode**: the new options step **Area switches arm mode per area** has one choice per imported area (use the default, total, partial or instant). Areas left at *Use the default* follow **Area switches default arm mode**, as before. The general option, called **Area switches arm in** in the 0.4.0a3 preview, is now **Area switches default arm mode**: if you changed it in that preview, set it again (it is back to total).
     *   **Each area's delays are shown**: the *Area X arming mode* select's attributes now include the area's exit and entry times, entry time 2, pre-arm warning and patrol times, timer program and three options, read from the panel. At the first start the integration reads the panel configuration again once by itself to get them (the log says so); if it cannot, they appear after the next start or a **Re-read panel configuration**.
 
-#### Zones
+#### Zones { #zones }
 
 | Change | What to do |
 |---|---|
@@ -105,7 +105,7 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
     *   **Zone attributes now show the zone's real programming**, read from the panel configuration already stored (nothing is read again). Before, most zone types and balancings showed as *Unknown*, and two times were read wrongly. Some attributes are renamed, so check templates and automations that use them: `activation_type` is now `zone_type`, `balancing_type` is `balancing`, `sensor_type` is `sensor_kind`, `duration_ms` is now `alarm_pulse_duration` (or `shock_sensitivity` for shock sensors), `time` is `pulse_window_time` and `pulses` is `pulse_count`. New: `alarm_cycles`. Values are now lower-case English keys (for example `delayed`, `double_eol`, `input` instead of *Delayed*, *Double Balancing*, *Input*).
     *   **Zone device classes follow the zone's programming.** Single EOL zones are now *opening* (before, no class), shock sensors are *vibration* (before, *opening* or none), and roller-blind sensors are *opening* (before, *motion*). Normally open, normally closed and double EOL zones keep their class. To keep the old class on a zone, set it with **Show as** in the entity's settings.
 
-#### Scenarios
+#### Scenarios { #scenarios }
 
 | Change | What to do |
 |---|---|
@@ -119,7 +119,7 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
     *   **Scenarios that arm partially or instantly are read correctly.** The `area_actions_details` attribute of the scenario buttons now says `total`, `partial` or `instant` for the areas a scenario arms (before, `arm` for total and `unknown` for the other two). A scenario that disarms some areas and arms others partially or instantly was treated as a disarm scenario, so if the panel refused it, the message did not list the zones that blocked it; now it does.
     *   **A scenario stopped by zones not ready lists the zones the panel reported.** The persistent notification and the `blocking_zones` of the `inim_smartliving_alarm_scenario_activation_failed` event now list the same zones as the error message, including zones at rest that the panel counts as not ready (delayed zones, for example), each with `status` `not_ready`. Before, they listed only the zones in alarm or tamper, and could say that no zones were found.
 
-#### Commands and errors
+#### Commands and errors { #commands-and-errors }
 
 | Change | What to do |
 |---|---|
@@ -131,7 +131,7 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
     *   **Commands that are not carried out now show an error.** Before, a refused arm, disarm, bypass or reset was only written to the log, and the alarm panel's error notifications did not appear at all. Now the action fails with a message that tells why (for example a PIN the panel no longer accepts, or a PIN not enabled for that area), in the dashboard and in automation traces; see [When the panel refuses a command](troubleshooting.md#when-the-panel-refuses-a-command). An automation step that fails stops that automation unless the step has `continue_on_error: true`. The `inim_smartliving_alarm_scenario_activation_failed` event has a new `panel_result` field (the panel's answer, or `null` when the panel did not refuse the command), and its `reason` can now also be `command_failed` or `invalid_code`.
     *   **Programming mode is now detected.** While the panel is being programmed from a keypad, it ignores commands, and earlier versions reported such a command as carried out. Now no command is sent while the panel is in programming mode: the action fails with a message instead, and setup, **Reconfigure** and **Re-read panel configuration** are refused with a message: try again when programming has ended. A new diagnostic sensor, *Programming mode*, shows it. The `reason` of the `inim_smartliving_alarm_scenario_activation_failed` event can now also be `panel_programming`.
 
-#### Event log and names
+#### Event log and names { #event-log-and-names }
 
 | Change | What to do |
 |---|---|
@@ -145,7 +145,7 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
     *   **The event log shows the names programmed on the panel**: who caused an event (the user code's or key's name, instead of *User 3* or *Key 5*) and where (the keypad's or reader's name). Commands sent remotely, from the app, the cloud, Home Assistant or the installer software, show *Remote* (before, *Mobile App*). The **Reader names** option is removed: reader names now come from the panel, and names typed in that option are no longer used. Your configuration entry is updated once more (version 1.5), and at the first start the integration reads the panel configuration again by itself to get the names (the log says so). A new diagnostic sensor, *Peripherals*, lists the keypads, readers, expanders and sirens enabled on the panel, and so does the **Areas, zones, scenarios, outputs and thermostats** step.
     *   **Names with accented letters now show them in full.** Area, zone, scenario and keypad names programmed with letters such as à, è, é or ù lost them before; they are now read with the panel's own character set, like the names of user codes, keys and other devices. The names come from the panel data already stored, so nothing is read again. Entity IDs do not change, and names you changed in Home Assistant stay as you set them.
 
-#### Setup, options and connection
+#### Setup, options and connection { #setup-options-and-connection }
 
 | Change | What to do |
 |---|---|
@@ -168,7 +168,7 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
     *   **Changing the PIN in the options works again**, and the PIN is no longer shown. The **New PIN Code** field in **General settings** is now empty: leave it empty to keep the current PIN, or enter a new one, which is checked with the panel as at setup. Before, the field showed the current PIN in clear text and any new PIN was refused. The PIN (and, for SmartLAN/G, the board password) is now a password field at setup and in **Reconfigure**, where it is no longer filled in: leave it empty to keep the current one. A new diagnostic sensor, *User code*, names the user code the PIN belongs to, and **General settings** says it too.
     *   **More of the integration is translated.** The notifications (a scenario blocked or failed, an area armed with zones not ready), the scenario choices of the alarm panel's modes in the options, and the names and fields of the actions now follow Home Assistant's language (English or Italian). The `message` of the `inim_smartliving_alarm_scenario_activation_failed` event stays in English. The `alarm_reset` action on a panel whose integration is not loaded now fails with a message, instead of doing nothing.
 
-#### Panels and firmware
+#### Panels and firmware { #panels-and-firmware }
 
 | Change | What to do |
 |---|---|
@@ -183,7 +183,7 @@ Version 0.4 reworks how the integration talks to the panel. Your entity IDs and 
     *   **Firmware 5.1 (experimental):** panels on firmware 5.1 now use their own memory layout. Earlier versions read them as if they were a 1050 on firmware 6, so their names, zones, scenarios and event log were wrong. At the first start after the update the integration reads the panel configuration again by itself (the log says so), and the "panel not supported" repair notice goes away. Event log descriptions are now right on these panels. See the [limits of firmware 5.1 support](limitations.md). Please report how it works.
     *   **Firmware 5.0x and other models cannot be set up any more**: a new setup of a panel on firmware older than 5.1, or of a SmartLiving model without its own layout, is refused with a message. A panel of such a model, or one on firmware 5.0x, that is already set up keeps working as before and shows a repair notice, as its data may be wrong.
 
-#### New features
+#### New features { #new-features }
 
 | Change | What to do |
 |---|---|

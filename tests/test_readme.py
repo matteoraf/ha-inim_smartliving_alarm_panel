@@ -11,6 +11,7 @@ MKDOCS = ROOT / "mkdocs.yml"
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from docs_version import (  # noqa: E402
+    LANGUAGES,
     MANIFEST,
     SITE_URL,
     manifest_version,
@@ -87,7 +88,9 @@ def test_the_rest_stays() -> None:
         "Troubleshooting\n---------------",
     ):
         assert heading in shown
-    assert f"**Documentation: <{site_version(manifest_version()).url}>**" in shown
+    found = site_version(manifest_version())
+    assert f"**Documentation: <{found.url}>**" in shown
+    assert f"**Documentazione in italiano: <{found.link('it')}>**" in shown
 
 
 def test_site_links_match_the_version() -> None:
@@ -95,9 +98,11 @@ def test_site_links_match_the_version() -> None:
 
     The development branch links to the dev version, a release branch to its
     own version (0.4 for 0.4.0b1 and 0.4.0): a release changes the manifest
-    version, and these links with it.
+    version, and these links with it. The Italian link is the same version in
+    Italian; the manifest links to the English pages.
     """
-    expected = site_version(manifest_version()).url
+    found = site_version(manifest_version())
+    expected = tuple(found.link(language) for language in LANGUAGES)
     links = re.findall(
         rf"{re.escape(SITE_URL)}[^)>\s]*", README.read_text(encoding="utf-8")
     )
@@ -105,7 +110,7 @@ def test_site_links_match_the_version() -> None:
     for link in links:
         assert link.startswith(expected), link
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    assert manifest["documentation"] == expected
+    assert manifest["documentation"] == found.url
 
 
 def heading_ids(page: Path) -> set[str]:

@@ -31,6 +31,8 @@ jobs:
         run: pip install -r requirements_docs.txt
       - name: Build (warnings, broken links and anchors fail)
         run: mkdocs build --strict
+      - name: Build the Italian pages
+        run: mkdocs build --strict -f mkdocs.it.yml
 
   publish:
     name: Publish
@@ -50,14 +52,44 @@ jobs:
         run: pip install -r requirements_docs.txt
       - name: Publish this branch's version
         run: |
-          # NAME (dev or X.Y), TITLE, STABLE, BETA and NOTICE, from the manifest version.
-          eval "$(python3 scripts/docs_version.py --shell)"
-          echo "Publishing $NAME as \"$TITLE\""
+          echo "Publishing $(python3 scripts/docs_version.py) in English and Italian"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+          # Each language has its own versions, menu and default: English at the
+          # site's root, Italian under it/ (mike's deploy prefix).
           has_latest() {
-            mike list --json | python3 -c 'import json, sys; sys.exit(not any("latest" in v["aliases"] for v in json.load(sys.stdin)))'
+            mike list --json "$@" 2>/dev/null | python3 -c 'import json, sys; text = sys.stdin.read().strip(); sys.exit(not any("latest" in v["aliases"] for v in (json.loads(text) if text else [])))'
+          }
+
+          # No version other than dev in this language yet (none at all before its first run).
+          dev_only() {
+            mike list --json "$@" 2>/dev/null | python3 -c 'import json, sys; text = sys.stdin.read().strip(); sys.exit(any(v["version"] != "dev" for v in (json.loads(text) if text else [])))'
+          }
+
+          publish_language() {
+            language="$1" config="$2"
+            shift 2
+            # NAME (dev or X.Y), TITLE, STABLE, BETA, NOTICE, LINK_EN and LINK_IT, from the manifest version.
+            eval "$(python3 scripts/docs_version.py --shell --language "$language")" || return 1
+            echo "Publishing $NAME as \"$TITLE\" ($language)"
+            # Until a stable version is published, a beta is the default; dev while it is the only one.
+            if has_latest "$@"; then published=latest-published
+            elif dev_only "$@"; then published=dev-only
+            else published=no-latest; fi
+            DEFAULT="$(python3 scripts/docs_version.py --default "$published")" || return 1
+            PATTERN="$(python3 scripts/docs_version.py --default "$published" --pattern)" || return 1
+            export DOCS_NOTICE="$NOTICE" DOCS_DEFAULT_VERSION="$PATTERN"
+            export DOCS_LINK_EN="$LINK_EN" DOCS_LINK_IT="$LINK_IT"
+            if [ "$STABLE" = true ]; then
+              # latest/ as redirects, not a symbolic link: Pages does not serve symlinks.
+              mike deploy -F "$config" "$@" --title "$TITLE" --alias-type redirect --update-aliases "$NAME" latest || return 1
+            else
+              mike deploy -F "$config" "$@" --title "$TITLE" "$NAME" || return 1
+            fi
+            if [ "$STABLE" = true ] || [ "$DEFAULT" = "$NAME" ]; then
+              mike set-default -F "$config" "$@" "$DEFAULT" || return 1
+            fi
           }
 
           publish() {
@@ -65,20 +97,8 @@ jobs:
             if git fetch --depth=1 origin +gh-pages:refs/remotes/origin/gh-pages; then
               git update-ref refs/heads/gh-pages refs/remotes/origin/gh-pages || return 1
             fi
-            # Until a stable version is published, a beta is the site's default.
-            if has_latest; then published=latest-published; else published=no-latest; fi
-            DEFAULT="$(python3 scripts/docs_version.py --default "$published")" || return 1
-            PATTERN="$(python3 scripts/docs_version.py --default "$published" --pattern)" || return 1
-            export DOCS_NOTICE="$NOTICE" DOCS_DEFAULT_VERSION="$PATTERN"
-            if [ "$STABLE" = true ]; then
-              # latest/ as redirects, not a symbolic link: Pages does not serve symlinks.
-              mike deploy --title "$TITLE" --alias-type redirect --update-aliases "$NAME" latest || return 1
-            else
-              mike deploy --title "$TITLE" "$NAME" || return 1
-            fi
-            if [ "$STABLE" = true ] || [ "$DEFAULT" = "$NAME" ]; then
-              mike set-default "$DEFAULT" || return 1
-            fi
+            publish_language en mkdocs.yml || return 1
+            publish_language it mkdocs.it.yml --deploy-prefix it || return 1
             git push origin gh-pages || return 1
           }
 
