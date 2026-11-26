@@ -1,0 +1,1210 @@
+
+<!doctype html>
+<html lang="it" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/options/">
+      
+      
+        <link rel="prev" href="../setup/">
+      
+      
+        <link rel="next" href="../entities/">
+      
+      
+        
+          <link rel="alternate" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/" hreflang="en">
+        
+          <link rel="alternate" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/" hreflang="it">
+        
+      
+      
+      <link rel="icon" href="../assets/icon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
+    
+    
+      
+        <title>Opzioni - Inim SmartLiving Alarm per Home Assistant</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#options" class="md-skip">
+          Vai al contenuto
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            Questa è la documentazione della versione in sviluppo: descrive modifiche non ancora rilasciate. Scegli la tua versione dal menu in alto.
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  Questa è la documentazione di un'altra versione.
+  <a href="../.."><strong>Vai alla versione attuale.</strong></a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Intestazione">
+    <a href=".." title="Inim SmartLiving Alarm per Home Assistant" class="md-header__button md-logo" aria-label="Inim SmartLiving Alarm per Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Inim SmartLiving Alarm per Home Assistant
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Opzioni
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal"  aria-label="Passa al tema scuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Passa al tema scuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="teal"  aria-label="Passa al tema chiaro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Passa al tema chiaro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Seleziona la lingua">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/" hreflang="it" class="md-select__link">
+              Italiano
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Cerca" placeholder="Cerca" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Cerca">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Cancella" aria-label="Cancella" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inizializza la ricerca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigazione" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Inim SmartLiving Alarm per Home Assistant" class="md-nav__button md-logo" aria-label="Inim SmartLiving Alarm per Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    Inim SmartLiving Alarm per Home Assistant
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installazione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurazione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Opzioni
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Opzioni
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Indice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Indice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#initial-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opzioni iniziali
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-the-options-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cambiare le opzioni in seguito
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cambiare le opzioni in seguito">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#areas-zones-scenarios-outputs-and-thermostats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aree, zone, scenari, uscite e termostati
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#area-switches-arm-mode-per-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modalità di inserimento per area
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Impostazioni generali
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggiornamento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slow-polling-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modalità aggiornamento lento
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#all-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutte le opzioni
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entità
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Azioni ed eventi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risoluzione dei problemi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Report di sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Aggiornare la versione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitazioni note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Indice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Indice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#initial-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opzioni iniziali
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changing-the-options-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cambiare le opzioni in seguito
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cambiare le opzioni in seguito">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#areas-zones-scenarios-outputs-and-thermostats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aree, zone, scenari, uscite e termostati
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#area-switches-arm-mode-per-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modalità di inserimento per area
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Impostazioni generali
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#polling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggiornamento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#slow-polling-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modalità aggiornamento lento
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#all-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tutte le opzioni
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="options">Opzioni<a class="headerlink" href="#options" title="Permanent link">&para;</a></h1>
+<p>Le opzioni stabiliscono come l'integrazione legge la tua centrale e cosa fa quando inserisci. Alcune le scegli quando aggiungi la centrale, e puoi cambiarle tutte in seguito.</p>
+<h2 id="initial-options">Opzioni iniziali<a class="headerlink" href="#initial-options" title="Permanent link">&para;</a></h2>
+<p>Quando aggiungi una centrale, l'ultimo passaggio chiede:</p>
+<ul>
+<li><strong>Numero di eventi da conservare nel registro</strong>: quanti eventi recenti conserva il sensore del registro eventi.</li>
+<li><strong>Scenario inserimento parziale (casa), totale (fuori), notte, vacanza e Scenario disinserimento</strong>: quale dei tuoi scenari attiva la scheda <em>Pannello degli Allarmi</em> per ogni pulsante. Una modalità di inserimento senza scenario non viene proposta; il disinserimento senza scenario non riesce, con un messaggio.</li>
+</ul>
+<p>La configurazione propone lo scenario di <strong>inserimento totale (fuori)</strong> e quello di <strong>disinserimento</strong> in base a cosa fanno i tuoi scenari alle aree che importi. Controlla la mappatura proposta e cambiala se necessario.</p>
+<details class="note">
+<summary>Come vengono proposti gli scenari di inserimento totale e di disinserimento</summary>
+<ul>
+<li><strong>Inserimento totale (fuori)</strong>: uno scenario importato che inserisce tutte le aree importate (prima uno che le inserisce tutte in modalità totale, poi quello con il numero più basso).</li>
+<li><strong>Disinserimento</strong>: lo scenario importato con il numero più basso che disinserisce tutte le aree importate.</li>
+</ul>
+<p>Quello che uno scenario fa alle aree che non importi non conta. Se nessuno scenario va bene, la modalità resta senza scenario. Vengono proposti solo gli scenari che importi, e i campi di associazione compaiono solo se è importato almeno uno scenario.</p>
+</details>
+<h2 id="changing-the-options-later">Cambiare le opzioni in seguito<a class="headerlink" href="#changing-the-options-later" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Vai in <strong>Impostazioni</strong> → <strong>Dispositivi e servizi</strong> e apri <strong>Inim SmartLiving Alarm</strong>.</li>
+<li>Fai clic sull'icona dell'ingranaggio (⚙) nella riga della tua centrale (nelle versioni di Home Assistant precedenti alla 2026.11, <strong>Configura</strong>).</li>
+<li>
+<p>Scegli cosa cambiare:</p>
+<p><img alt="Il menu delle opzioni" src="../images/options-menu.webp" width="480" /></p>
+<ul>
+<li><strong>Aree, zone, scenari, uscite e termostati</strong>: cosa importare. Lo stesso passaggio della configurazione.</li>
+<li><strong>Modalità di inserimento per area</strong>: la modalità in cui l'interruttore di ogni area inserisce, se non è quella generale.</li>
+<li><strong>Impostazioni generali</strong>: tutto il resto, compreso un nuovo PIN.</li>
+<li><strong>Aggiornamento</strong>: ogni quanto viene letta ciascuna parte dello stato della centrale.</li>
+</ul>
+</li>
+<li>
+<p>Fai clic su <strong>Invia</strong>. L'integrazione si ricarica con le nuove opzioni.</p>
+</li>
+</ol>
+<h3 id="areas-zones-scenarios-outputs-and-thermostats">Aree, zone, scenari, uscite e termostati<a class="headerlink" href="#areas-zones-scenarios-outputs-and-thermostats" title="Permanent link">&para;</a></h3>
+<p>Seleziona quello che vuoi in Home Assistant. Deselezionare un'area, una zona, uno scenario, un'uscita o un termostato <strong>rimuove le sue entità</strong>, insieme a ogni nome o ID entità che gli hai dato; selezionandolo di nuovo, le entità tornano con i loro ID originali.</p>
+<p>Le tastiere che rilevano la temperatura ambiente hanno il termostato selezionato durante la configurazione, anche se non lo usi; deseleziona quelli che non vuoi (vedi <a href="../entities/#thermostats">Termostati</a>).</p>
+<p>Uno scenario usato da una modalità del pannello di allarme non si può deselezionare: prima scegli un altro scenario per quella modalità in <strong>Impostazioni generali</strong>.</p>
+<h3 id="area-switches-arm-mode-per-area">Modalità di inserimento per area<a class="headerlink" href="#area-switches-arm-mode-per-area" title="Permanent link">&para;</a></h3>
+<p>L'interruttore di ogni area, quando lo accendi, inserisce nella modalità scelta qui. <em>Usa la predefinita</em> segue <strong>Modalità di inserimento predefinita delle aree</strong> in <strong>Impostazioni generali</strong>. Per esempio, puoi impostare le camere da letto su <em>Parziale</em> e lasciare le altre sulla predefinita.</p>
+<p><img alt="La scelta di una modalità di inserimento per l'interruttore di ogni area" src="../images/options-area-switches.webp" width="480" /></p>
+<h3 id="general-settings">Impostazioni generali<a class="headerlink" href="#general-settings" title="Permanent link">&para;</a></h3>
+<p><img alt="Le impostazioni generali" src="../images/options-general.webp" width="480" /></p>
+<p>Il passaggio indica il codice utente a cui appartiene il PIN attuale e le aree che comanda. Lascia vuoto <strong>Nuovo codice PIN</strong> per mantenere il PIN attuale; un nuovo PIN viene verificato con la centrale come durante la configurazione.</p>
+<h3 id="polling">Aggiornamento<a class="headerlink" href="#polling" title="Permanent link">&para;</a></h3>
+<p><img alt="Le opzioni di aggiornamento" src="../images/options-polling.webp" width="480" /></p>
+<p>L'integrazione legge lo stato della centrale a parti, ciascuna con il proprio intervallo, in secondi:</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Aggiorna</th>
+<th>Predefinito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Zone e uscite</strong></td>
+<td>sensori delle zone, memorie allarmi e manomissioni, interruttori delle uscite e luci</td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>Aree e scenario attivo</strong></td>
+<td>il pannello di allarme, gli interruttori e i sensori delle aree, i selettori della modalità di inserimento, i sensori dello scenario attivo</td>
+<td>2</td>
+</tr>
+<tr>
+<td><strong>Esclusione zone e livelli dei dimmer</strong></td>
+<td>gli interruttori <em>Zona N inclusa</em>, l'attributo <code>test</code> delle zone, la luminosità dei dimmer</td>
+<td>30</td>
+</tr>
+<tr>
+<td><strong>Registro eventi</strong></td>
+<td>il sensore del registro eventi</td>
+<td>10</td>
+</tr>
+<tr>
+<td><strong>Stato della centrale</strong></td>
+<td>il sensore <em>Modalità programmazione</em></td>
+<td>60</td>
+</tr>
+<tr>
+<td><strong>Termostati</strong></td>
+<td>i termostati e i sensori di temperatura delle tastiere</td>
+<td>60</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Dopo un comando inviato da Home Assistant (un inserimento, uno scenario, un'esclusione, un'uscita), ogni parte viene letta subito, qualunque sia il suo intervallo.</li>
+<li>Intervalli più brevi mostrano prima i cambiamenti e tengono la scheda più occupata. Con i valori predefiniti l'integrazione invia circa tre richieste al secondo.</li>
+<li>Se la centrale non riesce a rispondere alla velocità che un intervallo chiede, le letture arrivano semplicemente più tardi, e il log lo segnala una volta.</li>
+<li>L'impostazione di Home Assistant <strong>Abilita il rilevamento delle variazioni</strong> (voce della centrale, menu ⋮, <strong>Opzioni di sistema</strong>) disattiva tutte le letture programmate; i comandi e l'azione <code>homeassistant.update_entity</code> leggono comunque la centrale.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Una connessione locale alla volta</p>
+<p>Mentre Home Assistant legge la centrale a questi intervalli, tiene aperta la connessione alla scheda. La scheda SmartLAN/SI accetta un client locale alla volta, quindi nel frattempo le altre app sulla tua rete (come l'app Inim o il software dell'installatore) non riescono a collegarsi. Per lasciarle collegare, attiva la <a href="#slow-polling-mode">modalità aggiornamento lento</a>. L'accesso remoto tramite Inim Cloud non ne risente.</p>
+</div>
+<h3 id="slow-polling-mode">Modalità aggiornamento lento<a class="headerlink" href="#slow-polling-mode" title="Permanent link">&para;</a></h3>
+<p><img alt="L'interruttore Modalità aggiornamento lento nella pagina del dispositivo" src="../images/device-page-slow-polling.webp" width="400" /></p>
+<p>Con una scheda SmartLAN/SI, la pagina del dispositivo della centrale ha un interruttore <strong>Modalità aggiornamento lento</strong> (nella sezione <em>Configurazione</em>). Mentre è attivo, Home Assistant legge tutta la centrale una volta ogni <strong>Intervallo di lettura in modalità aggiornamento lento</strong> (30 secondi per impostazione predefinita) e chiude la connessione dopo ogni lettura e ogni comando. Tra una lettura e l'altra, l'app Inim e il software dell'installatore possono collegarsi alla scheda.</p>
+<ul>
+<li>I cambiamenti sulla centrale compaiono fino a un intervallo più tardi, come con l'unico intervallo di aggiornamento delle versioni precedenti.</li>
+<li>Mentre un'altra app è collegata, Home Assistant non riesce a raggiungere la scheda: le entità non sono disponibili finché l'altra app non si scollega, e i comandi inviati da Home Assistant non riescono, con un messaggio che la scheda non è raggiungibile o è usata da un'altra app. Mentre il software dell'installatore legge la programmazione della centrale (può durare circa un minuto) il log può indicare per quanto tempo la centrale non ha risposto.</li>
+<li>La lettura di Home Assistant può a volte occupare la scheda tra due connessioni del software dell'installatore. Se poi il software dell'installatore segnala un errore di connessione, riprova.</li>
+<li>La modalità si disattiva da sola dopo <strong>Disattiva la modalità aggiornamento lento dopo</strong> (60 minuti per impostazione predefinita). Impostalo a 0 per tenerla attiva finché non la disattivi tu, per esempio se usi ogni giorno l'app Inim sulla tua rete. Resta attiva, con la stessa ora di fine, quando Home Assistant si riavvia. Se un'altra app occupa la scheda mentre Home Assistant si avvia, l'integrazione all'inizio non riesce a configurarsi e riprova da sola poco dopo.</li>
+<li>Per effettuare in sicurezza la programmazione sulla centrale tramite Software, è ad ogni modo consigliabile disabilitare l'integrazione per il tempo necessario al compmletamento, in modo da assicurarsi che non vi siano interferenze.</li>
+<li>I termostati vengono letti insieme al resto della centrale, a ogni lettura o a una ogni tanto: al primo multiplo dell'intervallo dell'aggiornamento lento che sia almeno pari all'intervallo <strong>Termostati</strong>.</li>
+<li>Quando si disattiva, ogni parte della centrale viene letta subito, poi agli intervalli qui sopra.</li>
+<li>Per averla attiva a orari stabiliti, usa un'automazione che accende e spegne l'interruttore.</li>
+</ul>
+<details class="example">
+<summary>Automazione: modalità aggiornamento lento la sera</summary>
+<p>Nell'editor delle automazioni, <strong>Modifica in YAML</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">alias</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Modalità aggiornamento lento la sera</span>
+<span class="nt">triggers</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">trigger</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">time</span>
+<span class="w">    </span><span class="nt">at</span><span class="p">:</span><span class="w"> </span><span class="s">"19:00:00"</span>
+<span class="w">    </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"on"</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">trigger</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">time</span>
+<span class="w">    </span><span class="nt">at</span><span class="p">:</span><span class="w"> </span><span class="s">"23:00:00"</span>
+<span class="w">    </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"off"</span>
+<span class="nt">actions</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">switch.turn_{{ trigger.id }}</span>
+<span class="w">    </span><span class="nt">target</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">entity_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">switch.home_slow_polling_mode</span>
+</code></pre></div>
+<p>Imposta <strong>Disattiva la modalità aggiornamento lento dopo</strong> a 0, o ad almeno 240 minuti, così che non finisca prima delle 23:00. Sostituisci <code>switch.home_slow_polling_mode</code> con l'ID entità del tuo interruttore.</p>
+</details>
+<h2 id="all-options">Tutte le opzioni<a class="headerlink" href="#all-options" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Opzione</th>
+<th>Dove</th>
+<th>Valori</th>
+<th>Predefinito</th>
+<th>Cosa fa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Numero di eventi da conservare nel registro</strong></td>
+<td>configurazione, Impostazioni generali</td>
+<td>da 1 a 100</td>
+<td>50</td>
+<td>Quanti eventi recenti il sensore del registro eventi conserva nei suoi attributi.</td>
+</tr>
+<tr>
+<td><strong>Scenario inserimento parziale (casa)</strong></td>
+<td>configurazione, Impostazioni generali</td>
+<td><em>Nessuno (non assegnare)</em> o uno scenario importato</td>
+<td>nessuno</td>
+<td>Lo scenario che attiva il pulsante <em>Attiva in casa</em> del pannello di allarme.</td>
+</tr>
+<tr>
+<td><strong>Scenario inserimento totale (fuori)</strong></td>
+<td>configurazione, Impostazioni generali</td>
+<td>come sopra</td>
+<td>proposto</td>
+<td>Lo scenario che attiva il pulsante <em>Attiva fuori casa</em> del pannello di allarme.</td>
+</tr>
+<tr>
+<td><strong>Scenario inserimento notte</strong></td>
+<td>configurazione, Impostazioni generali</td>
+<td>come sopra</td>
+<td>nessuno</td>
+<td>Lo scenario che attiva il pulsante <em>Attiva notte</em> del pannello di allarme.</td>
+</tr>
+<tr>
+<td><strong>Scenario inserimento vacanza</strong></td>
+<td>configurazione, Impostazioni generali</td>
+<td>come sopra</td>
+<td>nessuno</td>
+<td>Lo scenario che attiva il pulsante <em>Attiva in vacanza</em> del pannello di allarme.</td>
+</tr>
+<tr>
+<td><strong>Scenario disinserimento</strong></td>
+<td>configurazione, Impostazioni generali</td>
+<td>come sopra</td>
+<td>proposto</td>
+<td>Lo scenario che attiva il pulsante <em>Disattiva</em> del pannello di allarme.</td>
+</tr>
+<tr>
+<td><strong>Modalità di inserimento predefinita delle aree</strong></td>
+<td>Impostazioni generali</td>
+<td><em>Totale</em>, <em>Parziale</em>, <em>Immediata</em></td>
+<td><em>Totale</em></td>
+<td>La modalità in cui l'interruttore di un'area inserisce quando viene acceso. Il selettore della modalità di inserimento di ogni area offre tutte le modalità.</td>
+</tr>
+<tr>
+<td><strong>Modalità di inserimento per area</strong></td>
+<td>un passaggio a sé</td>
+<td><em>Usa la predefinita</em>, <em>Totale</em>, <em>Parziale</em>, <em>Immediata</em>, per ogni area</td>
+<td><em>Usa la predefinita</em></td>
+<td>Una modalità diversa per gli interruttori di singole aree.</td>
+</tr>
+<tr>
+<td><strong>Quando le zone non sono pronte</strong></td>
+<td>Impostazioni generali</td>
+<td><em>Rifiuta</em>, <em>Inserisci comunque e avvisa</em></td>
+<td><em>Rifiuta</em></td>
+<td>Cosa succede quando all'inserimento ci sono zone non pronte; vedi <a href="../actions-events/#zones-not-ready">Zone non pronte</a>.</td>
+</tr>
+<tr>
+<td><strong>Nuovo codice PIN</strong></td>
+<td>Impostazioni generali</td>
+<td>da 1 a 6 cifre, o vuoto</td>
+<td>vuoto</td>
+<td>Un nuovo PIN, verificato con la centrale. Vuoto mantiene il PIN attuale.</td>
+</tr>
+<tr>
+<td><strong>Zone e uscite</strong></td>
+<td>Aggiornamento</td>
+<td>da 0,5 a 60</td>
+<td>1</td>
+<td>Secondi tra una lettura e l'altra delle zone e delle uscite.</td>
+</tr>
+<tr>
+<td><strong>Aree e scenario attivo</strong></td>
+<td>Aggiornamento</td>
+<td>da 0,5 a 60</td>
+<td>2</td>
+<td>Secondi tra una lettura e l'altra delle aree e dello scenario attivo.</td>
+</tr>
+<tr>
+<td><strong>Esclusione zone e livelli dei dimmer</strong></td>
+<td>Aggiornamento</td>
+<td>da 5 a 300</td>
+<td>30</td>
+<td>Secondi tra una lettura e l'altra dell'esclusione e del test delle zone e dei livelli dei dimmer.</td>
+</tr>
+<tr>
+<td><strong>Registro eventi</strong></td>
+<td>Aggiornamento</td>
+<td>da 1 a 300</td>
+<td>10</td>
+<td>Secondi tra una lettura e l'altra del registro eventi.</td>
+</tr>
+<tr>
+<td><strong>Stato della centrale</strong></td>
+<td>Aggiornamento</td>
+<td>da 10 a 600</td>
+<td>60</td>
+<td>Secondi tra una lettura e l'altra dello stato della centrale (modalità programmazione).</td>
+</tr>
+<tr>
+<td><strong>Termostati</strong></td>
+<td>Aggiornamento</td>
+<td>da 10 a 600</td>
+<td>60</td>
+<td>Secondi tra una lettura e l'altra dei termostati e delle temperature delle tastiere; solo con un termostato importato.</td>
+</tr>
+<tr>
+<td><strong>Intervallo di lettura in modalità aggiornamento lento</strong></td>
+<td>Aggiornamento (SmartLAN/SI)</td>
+<td>da 10 a 300</td>
+<td>30</td>
+<td>Secondi tra una lettura e l'altra di tutta la centrale mentre la <a href="#slow-polling-mode">modalità aggiornamento lento</a> è attiva.</td>
+</tr>
+<tr>
+<td><strong>Disattiva la modalità aggiornamento lento dopo</strong></td>
+<td>Aggiornamento (SmartLAN/SI)</td>
+<td>da 0 a 1440</td>
+<td>60</td>
+<td>Minuti dopo i quali la modalità aggiornamento lento si disattiva da sola; 0 la tiene attiva finché non la disattivi tu.</td>
+</tr>
+</tbody>
+</table>
+<p>L'indirizzo, la porta, il nome utente e la password della scheda si cambiano con <strong>Riconfigura</strong> (vedi <a href="../setup/#changing-the-connection-details-reconfigure">Configurazione</a>).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Torna su
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Piede" >
+        
+          
+          <a href="../setup/" class="md-footer__link md-footer__link--prev" aria-label="Precedente: Configurazione">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Precedente
+              </span>
+              <div class="md-ellipsis">
+                Configurazione
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../entities/" class="md-footer__link md-footer__link--next" aria-label="Successivo: Entità">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Successivo
+              </span>
+              <div class="md-ellipsis">
+                Entità
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/matteoraf/ha-inim_smartliving_alarm_panel" target="_blank" rel="noopener" title="L&#39;integrazione su GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.highlight", "search.suggest", "content.code.copy"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiato", "clipboard.copy": "Copia", "search.result.more.one": "1 altro in questa pagina", "search.result.more.other": "# altri in questa pagina", "search.result.none": "Nessun documento trovato", "search.result.one": "1 documento trovato", "search.result.other": "# documenti trovati", "search.result.placeholder": "Scrivi per iniziare a cercare", "search.result.term.missing": "Non presente", "select.version": "Seleziona la versione"}, "version": {"default": "^dev$", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1380 @@
+
+<!doctype html>
+<html lang="it" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/actions-events/">
+      
+      
+        <link rel="prev" href="../entities/">
+      
+      
+        <link rel="next" href="../troubleshooting/">
+      
+      
+        
+          <link rel="alternate" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/" hreflang="en">
+        
+          <link rel="alternate" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/" hreflang="it">
+        
+      
+      
+      <link rel="icon" href="../assets/icon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
+    
+    
+      
+        <title>Azioni ed eventi - Inim SmartLiving Alarm per Home Assistant</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#actions-and-events" class="md-skip">
+          Vai al contenuto
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            Questa è la documentazione della versione in sviluppo: descrive modifiche non ancora rilasciate. Scegli la tua versione dal menu in alto.
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  Questa è la documentazione di un'altra versione.
+  <a href="../.."><strong>Vai alla versione attuale.</strong></a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Intestazione">
+    <a href=".." title="Inim SmartLiving Alarm per Home Assistant" class="md-header__button md-logo" aria-label="Inim SmartLiving Alarm per Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Inim SmartLiving Alarm per Home Assistant
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Azioni ed eventi
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal"  aria-label="Passa al tema scuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Passa al tema scuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="teal"  aria-label="Passa al tema chiaro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Passa al tema chiaro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Seleziona la lingua">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/" hreflang="it" class="md-select__link">
+              Italiano
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Cerca" placeholder="Cerca" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Cerca">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Cancella" aria-label="Cancella" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inizializza la ricerca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigazione" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Inim SmartLiving Alarm per Home Assistant" class="md-nav__button md-logo" aria-label="Inim SmartLiving Alarm per Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    Inim SmartLiving Alarm per Home Assistant
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installazione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurazione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../options/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Opzioni
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entità
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Azioni ed eventi
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Azioni ed eventi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Indice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Indice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#from-a-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Da una plancia
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#arming-areas-from-automations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inserire aree dalle automazioni
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resetting-the-alarm-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reset delle memorie allarmi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zones-not-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zone non pronte
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-event-log-on-a-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Il registro eventi in una plancia
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Azioni
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Azioni">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#action-arm-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inserisci area
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-activate-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attiva scenario
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-alarm-reset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reset allarme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-reread-panel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rileggi la configurazione della centrale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eventi
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Eventi">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#event-zones-not-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zone non pronte
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-scenario-activation-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attivazione dello scenario non riuscita
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#switching-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comandare le uscite
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risoluzione dei problemi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Report di sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Aggiornare la versione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitazioni note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Indice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Indice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#from-a-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Da una plancia
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#arming-areas-from-automations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inserire aree dalle automazioni
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resetting-the-alarm-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reset delle memorie allarmi
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zones-not-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zone non pronte
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-event-log-on-a-dashboard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Il registro eventi in una plancia
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Azioni
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Azioni">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#action-arm-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inserisci area
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-activate-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attiva scenario
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-alarm-reset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reset allarme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-reread-panel-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rileggi la configurazione della centrale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#events" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eventi
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Eventi">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#event-zones-not-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zone non pronte
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-scenario-activation-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Attivazione dello scenario non riuscita
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#switching-outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comandare le uscite
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="actions-and-events">Azioni ed eventi<a class="headerlink" href="#actions-and-events" title="Permanent link">&para;</a></h1>
+<p>Questa pagina spiega come inserire, disinserire e attivare scenari da plance e automazioni, e come le automazioni possono reagire agli eventi dell'integrazione. Il <a href="#actions">riferimento</a> alla fine elenca ogni campo.</p>
+<h2 id="from-a-dashboard">Da una plancia<a class="headerlink" href="#from-a-dashboard" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>L'intera centrale</strong>: aggiungi l'entità del pannello di allarme alla scheda <em>Pannello degli Allarmi</em> di Home Assistant. I suoi pulsanti attivano gli scenari che hai associato nelle <a href="../options/#initial-options">opzioni</a>.</li>
+<li>
+<p><strong>Un'area</strong>: aggiungi l'interruttore dell'area (acceso inserisce, spento disinserisce) o il suo selettore della modalità di inserimento (scegli la modalità). Una scheda riquadro con la funzione delle opzioni del selettore mostra le modalità come elenco:</p>
+<p><img alt="Schede riquadro di un'area" src="../images/area-card-light.webp#only-light" width="400" />
+<img alt="Schede riquadro di un'area" src="../images/area-card-dark.webp#only-dark" width="400" /></p>
+</li>
+<li>
+<p><strong>Uno scenario</strong>: aggiungi il suo pulsante.</p>
+</li>
+<li><strong>Un'uscita</strong>: aggiungi il suo interruttore o la sua luce (vedi <a href="../entities/#outputs">Uscite</a>).</li>
+</ul>
+<h2 id="arming-areas-from-automations">Inserire aree dalle automazioni<a class="headerlink" href="#arming-areas-from-automations" title="Permanent link">&para;</a></h2>
+<p>Usa l'azione <strong>Inserisci area</strong> per inserire o disinserire una o più aree di una centrale con un solo comando, così cambiano insieme. Nell'editor delle automazioni, aggiungi l'azione <strong>Inserisci area</strong>, scegli la centrale, seleziona le aree e scegli la modalità:</p>
+<p><img alt="L'azione Inserisci area" src="../images/action-arm-area.webp" width="600" /></p>
+<p>In YAML, <code>areas</code> sono i numeri delle aree come sulla centrale:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inim_smartliving_alarm.arm_area</span>
+<span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">config_entry_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your_config_entry_id</span>
+<span class="w">  </span><span class="nt">areas</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">partial</span>
+</code></pre></div>
+<p>Per attivare uno scenario da un'automazione, usa <strong>Attiva scenario</strong> (vedi <a href="#action-activate-scenario">più avanti</a>). Puoi provare qualsiasi azione da <strong>Impostazioni</strong> → <strong>Strumenti</strong> → <strong>Azioni</strong> (nelle versioni precedenti alla 2026.11, <strong>Strumenti per sviluppatori</strong> → <strong>Azioni</strong>).</p>
+<h2 id="resetting-the-alarm-memory">Reset delle memorie allarmi<a class="headerlink" href="#resetting-the-alarm-memory" title="Permanent link">&para;</a></h2>
+<p>Dopo un allarme, la centrale conserva la memoria allarmi delle aree coinvolte finché non se ne fa il reset; i sensori <em>Area N memoria allarmi</em> la mostrano. L'azione <strong>Reset allarme</strong> fa il reset di ogni area della centrale che ha memorie allarmi o manomissioni:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inim_smartliving_alarm.alarm_reset</span>
+<span class="nt">target</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">entity_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alarm_control_panel.your_panel_name</span>
+</code></pre></div>
+<p>Puoi avviarla da uno script, da un'automazione o da un pulsante in una plancia.</p>
+<h2 id="zones-not-ready">Zone non pronte<a class="headerlink" href="#zones-not-ready" title="Permanent link">&para;</a></h2>
+<p>Prima di inserire un'area o attivare uno scenario, l'integrazione chiede alla centrale quali zone non sono pronte per l'inserimento. Tramite l'opzione <strong>Quando le zone non sono pronte</strong> (in <strong>Impostazioni generali</strong>) puoi decidere come si deve comportare l'integrazione:</p>
+<ul>
+<li><strong>Rifiuta</strong> (l'impostazione predefinita): non viene inviato nulla. Ricevi un errore che elenca le zone, per esempio <em>"Area 3 non è stato inserito perché queste zone non sono pronte: Finestra cucina (12)"</em>.</li>
+<li>
+<p><strong>Inserisci comunque e avvisa</strong>: il comando viene inviato e una notifica elenca le zone. Possono far scattare un allarme se non vengono chiuse o escluse in tempo.</p>
+<p><img alt="La notifica dopo un inserimento con una zona non pronta" src="../images/zones-not-ready-notification.webp" width="480" /></p>
+</li>
+</ul>
+<p><code>force: true</code> nelle azioni <strong>Inserisci area</strong> e <strong>Attiva scenario</strong> inserisce comunque per quella chiamata, ignorando l'opzione precedente. Il disinserimento non viene mai controllato. In ogni caso, viene generato l'evento <a href="#event-zones-not-ready"><code>inim_smartliving_alarm_zones_not_ready</code></a>, per esempio per annunciare le zone aperte.</p>
+<details class="note">
+<summary>Quali comandi vengono controllati, e la regola della centrale</summary>
+<ul>
+<li><strong>Controllati</strong>: l'interruttore dell'area, il selettore della modalità di inserimento e <strong>Inserisci area</strong> (inserimento di un'area), e il pulsante dello scenario, il pannello di allarme e <strong>Attiva scenario</strong> (attivazione di uno scenario).</li>
+<li>Le zone che la centrale esclude da sola all'inserimento (zone ad autoesclusione) non vengono elencate.</li>
+<li>L'installatore può anche impostare la centrale stessa per non consentire l'inserimento con zone non pronte. L'integrazione legge questa impostazione con la configurazione della centrale e la mostra nel sensore <em>Rifiuta l'inserimento con zone non pronte</em> (e come <code>panel_refuses_not_ready</code> nell'evento). Quando è attiva, la centrale rifiuta un comando del genere anche quando inserisci comunque o usi <code>force</code>: l'integrazione lo invia lo stesso, il messaggio dice che la centrale l'ha rifiutato, e l'<code>action</code> dell'evento è <code>refused_by_panel</code>. Questa impostazione sulla centrale non può essere bypassata dall'integrazione.</li>
+<li>La regola della centrale dipende dalla programmazione di ogni zona (per esempio, le zone ritardate non bloccano l'inserimento totale, e le zone con <code>no_arming_if_not_ready</code> bloccano ogni modalità), quindi può lasciar passare zone che l'integrazione elenca. Quando l'impostazione è disattivata, la centrale inserisce qualunque cosa dica la programmazione delle zone.</li>
+</ul>
+</details>
+<h2 id="the-event-log-on-a-dashboard">Il registro eventi in una plancia<a class="headerlink" href="#the-event-log-on-a-dashboard" title="Permanent link">&para;</a></h2>
+<p>Una scheda Markdown mostra gli ultimi eventi del <a href="../entities/#sensors">sensore del registro eventi</a>. Sostituisci <code>sensor.home_event_log</code> con l'ID del tuo sensore del registro eventi:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">markdown</span>
+<span class="nt">title</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Eventi allarme</span>
+<span class="nt">content</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+<span class="w">  </span><span class="no">{% for e in (state_attr('sensor.home_event_log', 'event_log') or [])[:10] %}</span>
+<span class="w">  </span><span class="no">- {{ as_timestamp(e.timestamp) | timestamp_custom('%d/%m %H:%M') }}</span>
+<span class="w">  </span><span class="no">· {{ e.description_local }}{% if e.authorized_by %} · {{ e.authorized_by }}{% endif %}{% if e.affected_areas and e.affected_areas != 'None' %} · {{ e.affected_areas }}{% endif %}</span>
+<span class="w">  </span><span class="no">{% endfor %}</span>
+</code></pre></div>
+<p>La cartella <a href="https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/tree/main/Examples">Examples</a> del repository contiene una plancia più grande, fatta per la versione 0.3: i suoi ID delle entità e alcune schede possono richiedere modifiche.</p>
+<h2 id="actions">Azioni<a class="headerlink" href="#actions" title="Permanent link">&para;</a></h2>
+<p>Nessuna delle azioni restituisce una risposta. Se un comando non viene eseguito, l'azione non riesce, con un messaggio che dice perché (vedi <a href="../troubleshooting/#when-the-panel-refuses-a-command">Quando la centrale rifiuta un comando</a>).</p>
+<h3 id="action-arm-area">Inserisci area<a class="headerlink" href="#action-arm-area" title="Permanent link">&para;</a></h3>
+<p><code>inim_smartliving_alarm.arm_area</code>: inserisce o disinserisce una o più aree di una centrale con un solo comando. Prima dell'inserimento, controlla le zone (vedi <a href="#zones-not-ready">Zone non pronte</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Obbligatorio</th>
+<th>Tipo e valori</th>
+<th>Predefinito</th>
+<th>Esempio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config_entry_id</code></td>
+<td>sì</td>
+<td>la centrale (un elenco delle tue centrali nell'editor)</td>
+<td>–</td>
+<td><code>01J…</code></td>
+</tr>
+<tr>
+<td><code>areas</code></td>
+<td>sì</td>
+<td>un elenco di numeri di area, come sulla centrale; l'editor elenca le aree importate per nome</td>
+<td>–</td>
+<td><code>[1, 3]</code></td>
+</tr>
+<tr>
+<td><code>mode</code></td>
+<td>sì</td>
+<td><code>total</code>, <code>partial</code>, <code>instant</code>, <code>disarm</code></td>
+<td>–</td>
+<td><code>partial</code></td>
+</tr>
+<tr>
+<td><code>force</code></td>
+<td>no</td>
+<td><code>true</code> inserisce anche se ci sono zone non pronte</td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Quando non riesce</summary>
+<ul>
+<li>Con più centrali, l'editor mostra ogni numero di area con il nome che ha su ogni centrale che la importa; la centrale che scegli decide quale viene inserita.</li>
+<li>Un'area che non è importata da quella centrale (per esempio, una che hai deselezionato dopo aver scritto l'automazione) viene rifiutata con un messaggio, e non viene inviato nulla.</li>
+<li>Non riesce anche quando la centrale non viene trovata o non è caricata, quando ci sono zone non pronte e l'opzione dice <em>Rifiuta</em>, e quando la centrale rifiuta il comando.</li>
+</ul>
+</details>
+<h3 id="action-activate-scenario">Attiva scenario<a class="headerlink" href="#action-activate-scenario" title="Permanent link">&para;</a></h3>
+<p><code>inim_smartliving_alarm.activate_scenario</code>: attiva uno scenario della centrale. Prima di attivarlo, controlla le zone (vedi <a href="#zones-not-ready">Zone non pronte</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Obbligatorio</th>
+<th>Tipo e valori</th>
+<th>Predefinito</th>
+<th>Esempio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config_entry_id</code></td>
+<td>sì</td>
+<td>la centrale</td>
+<td>–</td>
+<td><code>01J…</code></td>
+</tr>
+<tr>
+<td><code>scenario</code></td>
+<td>sì</td>
+<td>il numero dello scenario, come sulla centrale (da 1); l'editor elenca gli scenari importati per nome</td>
+<td>–</td>
+<td><code>2</code></td>
+</tr>
+<tr>
+<td><code>force</code></td>
+<td>no</td>
+<td><code>true</code> lo attiva anche se ci sono zone non pronte</td>
+<td><code>false</code></td>
+<td><code>true</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inim_smartliving_alarm.activate_scenario</span>
+<span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">config_entry_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your_config_entry_id</span>
+<span class="w">  </span><span class="nt">scenario</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</code></pre></div>
+<p>Uno scenario che non è importato da quella centrale viene rifiutato con un messaggio. Un'attivazione non riuscita mostra anche una notifica e genera l'evento <a href="#event-scenario-activation-failed"><code>inim_smartliving_alarm_scenario_activation_failed</code></a>.</p>
+<h3 id="action-alarm-reset">Reset allarme<a class="headerlink" href="#action-alarm-reset" title="Permanent link">&para;</a></h3>
+<p><code>inim_smartliving_alarm.alarm_reset</code>: fa il reset delle memorie allarmi e manomissioni di ogni area della centrale che ne ha.</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Obbligatorio</th>
+<th>Tipo e valori</th>
+<th>Predefinito</th>
+<th>Esempio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>target <code>entity_id</code></td>
+<td>sì</td>
+<td>l'entità del pannello di allarme della centrale</td>
+<td>–</td>
+<td><code>alarm_control_panel.home</code></td>
+</tr>
+</tbody>
+</table>
+<p>Le entità di altre integrazioni nel target vengono ignorate. Se l'integrazione della centrale non è caricata, l'azione non riesce, con un messaggio.</p>
+<h3 id="action-reread-panel-configuration">Rileggi la configurazione della centrale<a class="headerlink" href="#action-reread-panel-configuration" title="Permanent link">&para;</a></h3>
+<p><code>inim_smartliving_alarm.reread_panel_configuration</code>: rilegge la configurazione della centrale e ricarica l'integrazione, come il pulsante con lo stesso nome (vedi <a href="../setup/#re-reading-the-panel-configuration">Configurazione</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Obbligatorio</th>
+<th>Tipo e valori</th>
+<th>Predefinito</th>
+<th>Esempio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config_entry_id</code></td>
+<td>sì</td>
+<td>la centrale</td>
+<td>–</td>
+<td><code>01J…</code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inim_smartliving_alarm.reread_panel_configuration</span>
+<span class="nt">data</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">config_entry_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your_config_entry_id</span>
+</code></pre></div>
+<p>Non riesce, e mantiene la configurazione salvata, quando la centrale non è raggiungibile, è in programmazione o restituisce una configurazione incompleta.</p>
+<h2 id="events">Eventi<a class="headerlink" href="#events" title="Permanent link">&para;</a></h2>
+<p>Le automazioni possono reagire a questi eventi con un attivatore di tipo evento.</p>
+<h3 id="event-zones-not-ready">Zone non pronte<a class="headerlink" href="#event-zones-not-ready" title="Permanent link">&para;</a></h3>
+<p><code>inim_smartliving_alarm_zones_not_ready</code> viene generato ogni volta che un'area viene inserita o uno scenario viene attivato con zone non pronte, sia che il comando sia stato rifiutato, sia che sia stato inviato comunque.</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config_entry_id</code></td>
+<td>la voce di configurazione della centrale</td>
+</tr>
+<tr>
+<td><code>target</code></td>
+<td>il nome dell'area, più nomi di aree separati da virgole (da <strong>Inserisci area</strong>), o il nome dello scenario</td>
+</tr>
+<tr>
+<td><code>action</code></td>
+<td><code>refused</code> (non inviato), <code>armed_anyway</code> (inviato con un avviso), <code>refused_by_panel</code> (inviato, e la centrale l'ha rifiutato)</td>
+</tr>
+<tr>
+<td><code>zones</code></td>
+<td>le zone non pronte, ognuna con <code>zone_id</code> (il numero) e <code>zone_name</code> (il nome della zona sulla centrale, per esempio <code>Finestra cucina</code>, oppure <code>Zone 12</code> quando non ne ha uno)</td>
+</tr>
+<tr>
+<td><code>panel_refuses_not_ready</code></td>
+<td><code>true</code> o <code>false</code>: se la centrale stessa rifiuta l'inserimento con zone non pronte; <code>null</code> prima che la configurazione sia stata riletta da questa versione</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="nt">triggers</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">trigger</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">event</span>
+<span class="w">    </span><span class="nt">event_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inim_smartliving_alarm_zones_not_ready</span>
+</code></pre></div>
+<h3 id="event-scenario-activation-failed">Attivazione dello scenario non riuscita<a class="headerlink" href="#event-scenario-activation-failed" title="Permanent link">&para;</a></h3>
+<p><code>inim_smartliving_alarm_scenario_activation_failed</code> viene generato ogni volta che uno scenario non si può attivare: dal pannello di allarme, da un pulsante di scenario o da <strong>Attiva scenario</strong>. Uno scenario rifiutato perché ci sono zone non pronte genera entrambi gli eventi.</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>entity_unique_id</code></td>
+<td>l'ID univoco dell'entità che l'ha attivato, oppure <code>&lt;entry id&gt;_activate_scenario_action</code> per l'azione <strong>Attiva scenario</strong></td>
+</tr>
+<tr>
+<td><code>entity_name</code></td>
+<td>il nome di quell'entità, oppure il titolo della voce della centrale per l'azione</td>
+</tr>
+<tr>
+<td><code>action</code></td>
+<td>cosa è stato chiesto, in inglese, per esempio <code>arm away</code>, <code>activate scenario 'Night'</code> (l'azione) o <code>activate scenario 'Night' (index 1)</code> (un pulsante di scenario)</td>
+</tr>
+<tr>
+<td><code>scenario_index</code></td>
+<td>il numero dello scenario meno 1</td>
+</tr>
+<tr>
+<td><code>scenario_name</code></td>
+<td>il nome dello scenario</td>
+</tr>
+<tr>
+<td><code>reason</code></td>
+<td><code>zones_blocked</code>, <code>no_areas_identified</code>, <code>unknown_zones_error</code>, <code>no_data_available</code>, <code>disarm_failed</code>, <code>panel_programming</code>, <code>command_failed</code>, <code>unknown</code>, oppure il motivo dato dalla centrale (vedi sotto), tranne <code>open_zones</code> e <code>refused</code>, che danno <code>zones_blocked</code> o <code>unknown_zones_error</code></td>
+</tr>
+<tr>
+<td><code>panel_result</code></td>
+<td>il motivo della centrale quando ha rifiutato il comando (compresi <code>open_zones</code> e <code>refused</code>), <code>unknown</code> per un motivo che l'integrazione non conosce, oppure <code>null</code> quando la centrale non l'ha rifiutato</td>
+</tr>
+<tr>
+<td><code>blocking_zones</code></td>
+<td>le zone che l'hanno bloccato, ognuna con <code>zone_id</code>, <code>zone_name</code>, <code>status</code> (<code>not_ready</code>, <code>alarmed</code>, <code>short</code> o <code>tamper</code>) e <code>areas</code> (per nome)</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>una descrizione, sempre in inglese, qualunque sia la lingua di Home Assistant</td>
+</tr>
+</tbody>
+</table>
+<p>I motivi della centrale sono <code>invalid_code</code>, <code>open_zones</code>, <code>code_not_enabled</code>, <code>already_in_state</code>, <code>slot_out_of_range</code>, <code>slot_not_connected</code>, <code>null_terminal</code>, <code>cannot_be_bypassed</code>, <code>no_areas</code>, <code>double_zone_error</code>, <code>output_not_enabled</code>, <code>areas_armed</code> e <code>refused</code>; cosa significa ognuno è in <a href="../troubleshooting/#when-the-panel-refuses-a-command">Risoluzione dei problemi</a>.</p>
+<h2 id="switching-outputs">Comandare le uscite<a class="headerlink" href="#switching-outputs" title="Permanent link">&para;</a></h2>
+<p>Vedi <a href="../entities/#outputs">Uscite</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Torna su
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Piede" >
+        
+          
+          <a href="../entities/" class="md-footer__link md-footer__link--prev" aria-label="Precedente: Entità">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Precedente
+              </span>
+              <div class="md-ellipsis">
+                Entità
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../troubleshooting/" class="md-footer__link md-footer__link--next" aria-label="Successivo: Risoluzione dei problemi">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Successivo
+              </span>
+              <div class="md-ellipsis">
+                Risoluzione dei problemi
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/matteoraf/ha-inim_smartliving_alarm_panel" target="_blank" rel="noopener" title="L&#39;integrazione su GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.highlight", "search.suggest", "content.code.copy"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiato", "clipboard.copy": "Copia", "search.result.more.one": "1 altro in questa pagina", "search.result.more.other": "# altri in questa pagina", "search.result.none": "Nessun documento trovato", "search.result.one": "1 documento trovato", "search.result.other": "# documenti trovati", "search.result.placeholder": "Scrivi per iniziare a cercare", "search.result.term.missing": "Non presente", "select.version": "Seleziona la versione"}, "version": {"default": "^dev$", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

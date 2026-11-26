@@ -1,0 +1,1553 @@
+
+<!doctype html>
+<html lang="it" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/upgrading/">
+      
+      
+        <link rel="prev" href="../system-report/">
+      
+      
+        <link rel="next" href="../limitations/">
+      
+      
+        
+          <link rel="alternate" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/" hreflang="en">
+        
+          <link rel="alternate" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/" hreflang="it">
+        
+      
+      
+      <link rel="icon" href="../assets/icon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
+    
+    
+      
+        <title>Aggiornare la versione - Inim SmartLiving Alarm per Home Assistant</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#upgrading" class="md-skip">
+          Vai al contenuto
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            Questa è la documentazione della versione in sviluppo: descrive modifiche non ancora rilasciate. Scegli la tua versione dal menu in alto.
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  Questa è la documentazione di un'altra versione.
+  <a href="../.."><strong>Vai alla versione attuale.</strong></a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Intestazione">
+    <a href=".." title="Inim SmartLiving Alarm per Home Assistant" class="md-header__button md-logo" aria-label="Inim SmartLiving Alarm per Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Inim SmartLiving Alarm per Home Assistant
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Aggiornare la versione
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal"  aria-label="Passa al tema scuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Passa al tema scuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="teal"  aria-label="Passa al tema chiaro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Passa al tema chiaro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Seleziona la lingua">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/" hreflang="it" class="md-select__link">
+              Italiano
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Cerca" placeholder="Cerca" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Cerca">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Cancella" aria-label="Cancella" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inizializza la ricerca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigazione" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Inim SmartLiving Alarm per Home Assistant" class="md-nav__button md-logo" aria-label="Inim SmartLiving Alarm per Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    Inim SmartLiving Alarm per Home Assistant
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installazione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurazione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../options/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Opzioni
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../entities/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entità
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Azioni ed eventi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risoluzione dei problemi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Report di sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Aggiornare la versione
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Aggiornare la versione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Indice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Indice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#from-04" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dalla 0.4
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dalla 0.4">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-you-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prima di aggiornare
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-you-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dopo l'aggiornamento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cosa è cambiato
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-040b1-or-040b2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dalla 0.4.0b1 o dalla 0.4.0b2
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-03x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dalla 0.3.x
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dalla 0.3.x">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-you-update_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prima di aggiornare
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-you-update_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dopo l'aggiornamento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cosa è cambiato
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cosa è cambiato">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#areas-and-the-alarm-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aree e pannello di allarme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zone
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenari
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands-and-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comandi ed errori
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-log-and-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registro eventi e nomi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setup-options-and-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configurazione, opzioni e connessione
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#panels-and-firmware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centrali e firmware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Novità
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitazioni note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Indice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Indice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#from-04" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dalla 0.4
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dalla 0.4">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-you-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prima di aggiornare
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-you-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dopo l'aggiornamento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cosa è cambiato
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-040b1-or-040b2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dalla 0.4.0b1 o dalla 0.4.0b2
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#from-03x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dalla 0.3.x
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dalla 0.3.x">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-you-update_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Prima di aggiornare
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-you-update_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dopo l'aggiornamento
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cosa è cambiato
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cosa è cambiato">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#areas-and-the-alarm-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aree e pannello di allarme
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zone
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenari
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#commands-and-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comandi ed errori
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#event-log-and-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registro eventi e nomi
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setup-options-and-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configurazione, opzioni e connessione
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#panels-and-firmware" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Centrali e firmware
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Novità
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="upgrading">Aggiornare la versione<a class="headerlink" href="#upgrading" title="Permanent link">&para;</a></h1>
+<h2 id="from-04">Dalla 0.4<a class="headerlink" href="#from-04" title="Permanent link">&para;</a></h2>
+<p>Questa versione conserva la configurazione della centrale in un nuovo formato. I tuoi ID delle entità e le opzioni restano come sono, e la voce di configurazione viene aggiornata automaticamente. Se arrivi dalla 0.4.0b1 o dalla 0.4.0b2, leggi anche <a href="#from-040b1-or-040b2">la sezione qui sotto</a>.</p>
+<h3 id="before-you-update">Prima di aggiornare<a class="headerlink" href="#before-you-update" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Fai un backup di Home Assistant</strong> (<strong>Impostazioni</strong> → <strong>Sistema</strong> → <strong>Backup</strong>). <strong>Per tornare alla 0.4, ripristina quel backup</strong>: la 0.4 non carica una voce di configurazione nel nuovo formato.</li>
+</ol>
+<h3 id="after-you-update">Dopo l'aggiornamento<a class="headerlink" href="#after-you-update" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Guarda il log</strong> dopo il primo avvio. L'integrazione rilegge da sola la configurazione della centrale una volta, e lo segnala. Se non ci riesce, riprova a ogni avvio (vedi sotto).</li>
+</ol>
+<h3 id="what-changed">Cosa è cambiato<a class="headerlink" href="#what-changed" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Modifica</th>
+<th>Cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nuovo formato della voce di configurazione; la configurazione della centrale viene riletta una volta</td>
+<td>Nulla; per tornare alla 0.4, ripristina il backup</td>
+</tr>
+<tr>
+<td>Gli interruttori, i sensori delle aree e i selettori della modalità di inserimento non dipendono più dai nomi delle aree salvati</td>
+<td>Nulla</td>
+</tr>
+<tr>
+<td>Gli interruttori di esclusione delle zone trovano il terminale della zona nello stesso modo delle uscite</td>
+<td>Nulla</td>
+</tr>
+<tr>
+<td>Il sensore dello scenario attivo dice <em>No scenario matches</em> quando nessuno scenario corrisponde alle aree</td>
+<td><em>Controlla le tue automazioni</em> se verificano <em>Unknown Scenario (Index 255)</em> o l'indice 255</td>
+</tr>
+<tr>
+<td>Il registro eventi non mostra più due volte gli eventi dopo una lettura non riuscita</td>
+<td>Nulla</td>
+</tr>
+<tr>
+<td>I nomi delle entità sono tradotti e non ripetono più il nome della centrale; <em>Versione firmware</em> e <em>Tipo di centrale</em> sono di diagnostica</td>
+<td>Nulla: gli ID delle entità non cambiano; un nome che hai impostato tu viene mantenuto</td>
+</tr>
+<tr>
+<td>L'unico intervallo di aggiornamento è sostituito da un intervallo per ogni parte dello stato della centrale; la centrale viene letta molto più spesso</td>
+<td>Nulla; per leggere meno spesso, vedi le opzioni di <em>Aggiornamento</em>; per usare l'app Inim o il software dell'installatore con una scheda SmartLAN/SI, attiva <em>Modalità aggiornamento lento</em></td>
+</tr>
+<tr>
+<td>I report di sistema leggono i dati di una scheda SmartLAN/SI dalla scheda stessa, anche tra sottoreti diverse; un report <em>Completo riservato</em> mostra il codice installatore</td>
+<td>Nulla</td>
+</tr>
+<tr>
+<td>Il registro eventi dà un nome a ogni evento, con nuove chiavi (<code>event</code>, <code>code</code>, <code>ended</code>, <code>via</code>, <code>description_local</code>, …); <code>description</code> usa i nomi degli eventi della centrale, per esempio <code>Area armed in away mode</code> invece di <code>Area(s) Armed</code>, e <code>(ended)</code> invece di <code>End of …</code>; i segnaposto <code>-</code> e <code>ff</code> di <code>authorized_by</code>, <code>device</code>, <code>authorized_id</code> e <code>device_id</code> non ci sono più: una chiave assente vuol dire nessuno</td>
+<td><em>Controlla le tue automazioni</em> se confrontano una <code>description</code> o verificano <code>-</code>: confronta invece la nuova chiave <code>event</code>, che resta la stessa</td>
+</tr>
+<tr>
+<td>I nomi dei numeri di telefono della centrale vengono letti con la configurazione della centrale, per il registro eventi; la configurazione viene riletta una volta al primo avvio</td>
+<td>Nulla</td>
+</tr>
+<tr>
+<td>L'elenco <code>event_log</code> non viene più conservato nello storico di Home Assistant (la centrale conserva il suo registro, e l'elenco viene riletto dopo un riavvio); gli altri attributi del sensore del registro eventi sì</td>
+<td>Nulla</td>
+</tr>
+<tr>
+<td>Termostati delle tastiere: un'entità clima e un sensore di temperatura per ogni tastiera che riporta una temperatura ambiente; le tastiere vengono controllate una volta, in background dopo il primo avvio, e i loro termostati aggiunti</td>
+<td><em>Deseleziona</em> i termostati che non usi, in <strong>Aree, zone, scenari, uscite e termostati</strong> nelle opzioni</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli</summary>
+<ul>
+<li><strong>La voce di configurazione viene aggiornata a un nuovo formato (versione 2.2).</strong> Ora conserva solo i dati della centrale come letti, e nomi, zone e scenari vengono ricavati da questi. Al primo avvio l'integrazione rilegge da sola la configurazione della centrale una volta (il log lo segnala). Se non ci riesce, riprova a ogni avvio; fino ad allora i nomi di codici utente, chiavi, lettori, espansioni, timer, sirene e numeri di telefono mostrano i loro valori predefiniti (come <em>Code 1</em>, <em>Reader 1</em> o <em>Key 5</em>), e su una voce configurata per la prima volta prima della 0.4.0b1 gli interruttori di esclusione delle zone compaiono solo quando quella lettura è riuscita. <strong>Rileggi la configurazione della centrale</strong> la legge subito. Gli ID delle entità e le opzioni non cambiano. <strong>Per tornare alla 0.4, ripristina il backup fatto prima dell'aggiornamento</strong>: la 0.4 non carica una voce nel nuovo formato.</li>
+<li><strong>Gli interruttori, i sensori delle aree e i selettori della modalità di inserimento non dipendono più dai nomi delle aree salvati.</strong> Prima, una configurazione della centrale salvata senza di essi (per esempio dopo una lettura incompleta) lasciava la centrale senza nessun interruttore, compresi quelli di esclusione delle zone e delle uscite, e senza i sensori di allarme, manomissione e memoria allarmi delle aree e i selettori della modalità di inserimento. Ora ognuno viene creato per conto suo, un'area senza nome si chiama <em>Area N</em>, e i pulsanti degli scenari mostrano cosa fanno a ogni area.</li>
+<li><strong>Gli interruttori di esclusione delle zone trovano il terminale della zona nell'elenco dei terminali della centrale nello stesso modo delle uscite.</strong> Una zona nell'ultima posizione dell'elenco (un terminale di tastiera su una centrale usata del tutto) ora ha un interruttore di esclusione; prima non ne aveva. Se un terminale compare due volte nell'elenco, l'interruttore usa la sua prima posizione, e l'attributo <code>internal_index</code> della zona la mostra.</li>
+<li><strong>Quando nessuno scenario corrisponde allo stato delle aree</strong> (nessuno scenario corrisponde, o la centrale non ne riporta), il sensore <em>Scenario attivo</em> ora dice <em>No scenario matches</em> e il suo attributo <code>active_scenario_index</code> è vuoto; prima diceva <em>Unknown Scenario (Index 255)</em> e 255. <code>raw_active_scenario_hex</code> dà ancora il valore riportato dalla centrale. Il pannello di allarme mostra ancora <em>Attivo con esclusione personalizzata</em> in quel caso, come prima.</li>
+<li><strong>Il registro eventi non mostra più due volte gli eventi.</strong> Quando una lettura non riusciva dopo una riuscita, gli eventi della lettura riuscita venivano aggiunti al registro una seconda volta.</li>
+<li><strong>I nomi delle entità sono tradotti e si leggono allo stesso modo ovunque</strong>: <em>Zona 12 (Finestra)</em>, <em>Zona 12 manomissione (Finestra)</em>, <em>Area 3 allarme (Cucina)</em>, <em>Attiva scenario 2 (Notte)</em>, <em>Registro eventi</em>, mostrati dopo il nome della centrale e nella lingua di Home Assistant. L'interruttore della zona ora è <em>Zona N inclusa</em>. Una voce senza nome sulla centrale mostra solo il suo numero (<em>Zona 5</em>, non <em>Zona 5 (Zona 5)</em>). Gli ID delle entità non cambiano, quindi automazioni e plance continuano a funzionare; le schede che mostrano il nome di un'entità mostrano quello nuovo, e un nome che hai impostato tu viene mantenuto.</li>
+<li><strong><em>Versione firmware</em> e <em>Tipo di centrale</em></strong> passano nella sezione <em>Diagnostica</em> della pagina del dispositivo.</li>
+<li><strong>Le nuove installazioni non hanno più il nome della centrale due volte negli ID delle entità</strong> (per esempio <code>switch.home_area_3</code> invece di <code>switch.home_home_area_3</code>). Gli ID delle entità di un'installazione esistente restano come sono; per togliere un nome doppio, rinomina l'ID entità nelle impostazioni dell'entità (<strong>Impostazioni</strong> → <strong>Dispositivi e servizi</strong> → <strong>Entità</strong>, l'entità, poi l'icona dell'ingranaggio), e aggiorna le automazioni e le plance che la usano.</li>
+<li><strong>La centrale viene letta a parti, ciascuna con il proprio intervallo</strong> (<a href="../options/#polling">Aggiornamento</a>): zone e uscite ogni secondo, aree e scenario attivo ogni 2 secondi, il registro eventi ogni 10 secondi, l'esclusione delle zone e i livelli dei dimmer ogni 30 secondi, lo stato della centrale ogni 60 secondi, e ogni parte subito dopo un comando inviato da Home Assistant. La vecchia opzione <strong>Intervallo di aggiornamento (secondi)</strong> viene eliminata e valgono i nuovi valori predefiniti, qualunque fosse la sua impostazione; imposta gli intervalli in <strong>Impostazioni</strong> → <strong>Dispositivi e servizi</strong> → <strong>Inim SmartLiving Alarm</strong>, l'icona dell'ingranaggio nella riga della tua centrale, <strong>Aggiornamento</strong>. Mentre legge la centrale a questi intervalli, Home Assistant tiene aperta la connessione alla scheda; la scheda SmartLAN/SI accetta un client locale alla volta, quindi nel frattempo le altre app sulla tua rete non riescono a collegarsi. Per lasciar collegare l'app Inim o il software dell'installatore, attiva il nuovo interruttore <strong>Modalità aggiornamento lento</strong> nella pagina del dispositivo: Home Assistant legge allora tutta la centrale ogni 30 secondi per impostazione predefinita (<strong>Intervallo di lettura in modalità aggiornamento lento</strong>, in <strong>Aggiornamento</strong>) e chiude la connessione dopo ogni lettura, come facevano le versioni precedenti, e l'interruttore si spegne da solo dopo 60 minuti (vedi <a href="../options/#slow-polling-mode">Modalità aggiornamento lento</a>).</li>
+<li><strong>I report di sistema leggono i dati della scheda SmartLAN/SI dalla scheda stessa</strong> (le sue impostazioni di rete e il firmware), quindi sono inclusi anche quando Home Assistant è in un'altra sottorete. Un report <strong>Completo riservato</strong> mostra anche il codice installatore della centrale (vedi <a href="../system-report/#finding-the-installer-code">Trovare il codice installatore</a>), e il nome utente del DNS dinamico della scheda ora compare solo con <em>Completo riservato</em>, come le sue password.</li>
+<li><strong>I termostati delle tastiere sono nuovi</strong> (<a href="../entities/#thermostats">Termostati</a>): ogni tastiera che riporta una temperatura ambiente riceve un'entità clima (spento, riscaldamento o freddo; le modalità manuale, programma giornaliero, programma settimanale e antigelo della centrale come preimpostazioni) e un sensore di temperatura. Al primo avvio, quando l'integrazione è in funzione, controlla quali tastiere riportano una temperatura, ne seleziona i termostati nelle opzioni e ne aggiunge le entità. Anche una tastiera di cui non usi il termostato ne riceve uno: deselezionalo nelle opzioni per rimuoverne le entità. Le modifiche da Home Assistant impostano solo la modalità, la stagione e il valore manuale; i programmi non vengono cambiati.</li>
+<li><strong>Il registro eventi dà un nome a ogni evento</strong> (<a href="../entities/#sensors">Sensori</a>). Prima, solo i più comuni avevano una descrizione e gli altri comparivano come <em>Unknown Action</em>. <code>description</code> ora usa i nomi che la centrale dà ai suoi eventi, in inglese: per esempio <em>Area armed in away mode</em> (era <em>Area(s) Armed</em>), <em>Area disarmed</em> (<em>Area(s) Disarmed</em>), <em>Zone bypassed (ended)</em> (<em>End of Zone Excluded</em>), <em>Scenario activated</em> (<em>Scenario Activated</em>). Nuove chiavi indicano la chiave dell'evento (<code>event</code>, uguale in ogni lingua), il suo codice, se è terminato, come è avvenuto (<code>via</code>), e di cosa si tratta (una tastiera, un timer, un'espansione…); <code>description_local</code> dà la descrizione nella lingua di Home Assistant. Un'area inserita da una zona di comando o da un timer ora lo dice, dove prima il numero della zona compariva come codice utente o il timer come lettore. Quando un evento non ha codice utente, chiave, tastiera o lettore, <code>authorized_by</code>, <code>device</code>, <code>authorized_id</code> e <code>device_id</code> non sono presenti: prima valevano <code>-</code> o <code>ff</code>. L'elenco <code>event_log</code> non viene più conservato nello storico di Home Assistant.</li>
+</ul>
+</details>
+<h2 id="from-040b1-or-040b2">Dalla 0.4.0b1 o dalla 0.4.0b2<a class="headerlink" href="#from-040b1-or-040b2" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Controlla le tue automazioni:</strong> nell'evento <code>inim_smartliving_alarm_zones_not_ready</code>, <code>zone_name</code> ora è il nome semplice della zona (per esempio <code>Finestra cucina</code>), come nelle entità delle zone e nell'evento di scenario non riuscito. Le automazioni che confrontano un nome con il numero tra parentesi, come <code>Finestra cucina (12)</code>, vanno aggiornate; <code>zone_id</code> dà ancora il numero.</li>
+</ul>
+<h2 id="from-03x">Dalla 0.3.x<a class="headerlink" href="#from-03x" title="Permanent link">&para;</a></h2>
+<p>La versione 0.4 rinnova il modo in cui l'integrazione parla con la centrale. I tuoi ID delle entità e le opzioni restano come sono, e la voce di configurazione viene aggiornata automaticamente.</p>
+<h3 id="before-you-update_1">Prima di aggiornare<a class="headerlink" href="#before-you-update_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Fai un backup di Home Assistant</strong> (<strong>Impostazioni</strong> → <strong>Sistema</strong> → <strong>Backup</strong>), soprattutto per un'anteprima o una beta (vedi <a href="../installation/#preview-versions">Versioni di anteprima</a>).</li>
+<li><strong>Leggi le modifiche qui sotto</strong>, soprattutto quelle segnate <em>controlla le tue automazioni</em>.</li>
+</ol>
+<h3 id="after-you-update_1">Dopo l'aggiornamento<a class="headerlink" href="#after-you-update_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Guarda il log</strong> dopo il primo avvio. L'integrazione può rileggere da sola la configurazione della centrale, una volta, e lo segnala.</li>
+<li><strong>Elimina le entità rimaste</strong>: le entità di terminali che non sono zone, o di zone e aree che la tua centrale non ha, restano come entità non disponibili e sono elencate nel log a ogni avvio. Eliminale in <strong>Impostazioni</strong> → <strong>Dispositivi e servizi</strong> → <strong>Entità</strong>.</li>
+<li><strong>Seleziona le novità</strong> nelle opzioni, in <strong>Aree, zone, scenari, uscite e termostati</strong>: le seconde zone dei terminali doppi, le aree da 11 a 15 e le zone oltre la 50 su una 10100, e le uscite.</li>
+<li><strong>Scegli cosa succede con le zone non pronte</strong>: ora l'inserimento controlla le zone, e per impostazione predefinita rifiuta (vedi <a href="../actions-events/#zones-not-ready">Zone non pronte</a>).</li>
+<li><strong>Controlla le tue automazioni e i tuoi modelli</strong> rispetto alle modifiche segnate <em>controlla le tue automazioni</em>.</li>
+</ol>
+<h3 id="what-changed_1">Cosa è cambiato<a class="headerlink" href="#what-changed_1" title="Permanent link">&para;</a></h3>
+<h4 id="areas-and-the-alarm-panel">Aree e pannello di allarme<a class="headerlink" href="#areas-and-the-alarm-panel" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Modifica</th>
+<th>Cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gli interruttori delle aree sono accesi anche con l'inserimento parziale e immediato</td>
+<td><em>Controlla le tue automazioni</em> se contavano sull'interruttore spento in quei casi</td>
+</tr>
+<tr>
+<td><em>Area X Triggered</em> ora è <em>Area X memoria allarmi</em>; nuovi sensori <em>Area X allarme</em> e <em>Area X manomissione</em></td>
+<td>Nulla: stesso ID entità</td>
+</tr>
+<tr>
+<td>Il pannello di allarme mostra <em>Innescato</em> solo mentre un'area è in allarme</td>
+<td><em>Controlla le tue automazioni</em>: usa i sensori <em>memoria allarmi</em> per la memoria</td>
+</tr>
+<tr>
+<td>Nuovo selettore della modalità di inserimento per ogni area, e l'azione <code>arm_area</code></td>
+<td>Aggiungili a plance e automazioni se vuoi</td>
+</tr>
+<tr>
+<td>L'interruttore di ogni area può inserire nella sua modalità</td>
+<td>Facoltativo: <strong>Modalità di inserimento per area</strong></td>
+</tr>
+<tr>
+<td>I tempi di ogni area sono mostrati come attributi</td>
+<td>Nulla</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli</summary>
+<ul>
+<li><strong>Gli interruttori delle aree</strong> ora sono accesi anche per un'area inserita in modalità parziale o immediata (prima, un'area così compariva come sconosciuta e il suo interruttore era spento). Accendere un interruttore inserisce ancora in modalità totale, a meno che tu non scelga un'altra modalità con la nuova opzione <strong>Modalità di inserimento predefinita delle aree</strong>. Il nuovo attributo <code>arming_mode</code> indica la modalità (<code>total</code>, <code>partial</code>, <code>instant</code> o <code>disarmed</code>); <code>status_text</code> resta <code>armed</code> o <code>disarmed</code>.</li>
+<li><strong>"Area X Triggered" ora si chiama "Area X memoria allarmi"</strong>: stesso ID entità, stesso significato (acceso dopo un allarme finché non si fa il reset della memoria), ora anche per le aree 9 e 10, con un attributo <code>tamper_memory</code>. Due nuovi sensori binari per area mostrano lo stato <strong>attuale</strong>: <em>Area X allarme</em> e <em>Area X manomissione</em>.</li>
+<li><strong>Il pannello di allarme mostra Innescato solo mentre un'area è in allarme.</strong> Prima restava Innescato finché non si faceva il reset della memoria allarmi; ora torna al suo stato inserito o disinserito quando l'allarme finisce, e i sensori <em>memoria allarmi</em> conservano la memoria. Le automazioni che contavano su Innescato fino al reset devono usare invece i sensori <em>memoria allarmi</em>.</li>
+<li><strong>Novità: un selettore della modalità di inserimento per ogni area</strong> (<em>Area X modalità di inserimento</em>: disinserita, totale, parziale o immediata) e l'<strong>azione <code>arm_area</code></strong>, che inserisce o disinserisce più aree con un solo comando (vedi <a href="../actions-events/#arming-areas-from-automations">Inserire aree dalle automazioni</a>).</li>
+<li><strong>L'interruttore di ogni area può inserire nella sua modalità</strong>: il nuovo passaggio delle opzioni <strong>Modalità di inserimento per area</strong> ha una scelta per ogni area importata (usa la predefinita, totale, parziale o immediata). Le aree lasciate su <em>Usa la predefinita</em> seguono <strong>Modalità di inserimento predefinita delle aree</strong>, come prima. L'opzione generale, chiamata <strong>Area switches arm in</strong> nell'anteprima 0.4.0a3, ora è <strong>Modalità di inserimento predefinita delle aree</strong>: se l'avevi cambiata in quell'anteprima, impostala di nuovo (è tornata a totale).</li>
+<li><strong>I tempi di ogni area sono mostrati</strong>: gli attributi del selettore <em>Area X modalità di inserimento</em> ora comprendono i tempi di uscita e di ingresso dell'area, il secondo tempo di ingresso, i tempi di preavviso di inserimento e di ronda, il programma orario e tre opzioni, letti dalla centrale. Al primo avvio l'integrazione rilegge da sola la configurazione della centrale una volta per ottenerli (il log lo segnala); se non ci riesce, compaiono dopo l'avvio successivo o dopo <strong>Rileggi la configurazione della centrale</strong>.</li>
+</ul>
+</details>
+<h4 id="zones">Zone<a class="headerlink" href="#zones" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Modifica</th>
+<th>Cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Le zone seguono i tipi di terminale della centrale; si possono aggiungere le seconde zone dei terminali doppi</td>
+<td>Elimina le entità rimaste; seleziona le seconde zone se le vuoi</td>
+</tr>
+<tr>
+<td><em>Zone X Triggered</em> ora è <em>Zona X memoria allarmi</em>; nuovo sensore <em>Zona X manomissione</em></td>
+<td>Nulla: stesso ID entità</td>
+</tr>
+<tr>
+<td>Le zone vengono controllate anche prima di inserire le aree, e per impostazione predefinita l'inserimento viene rifiutato</td>
+<td>Scegli <strong>Quando le zone non sono pronte</strong></td>
+</tr>
+<tr>
+<td>Gli attributi delle zone mostrano la programmazione reale; alcuni sono rinominati</td>
+<td><em>Controlla le tue automazioni</em> e i tuoi modelli</td>
+</tr>
+<tr>
+<td>Le classi del dispositivo delle zone seguono la programmazione della zona</td>
+<td>Imposta <strong>Mostra come</strong> su una zona per mantenerne la vecchia classe</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli</summary>
+<ul>
+<li><strong>Le zone seguono i tipi di terminale della centrale.</strong> I terminali di uscita (per esempio una sirena) e i terminali inutilizzati non ricevono più entità di zona, e si possono aggiungere le seconde zone dei terminali doppi (da 11 a 20 sulla 505, da 21 a 40 sulla 515, da 51 a 100 sulla 1050, da 101 a 200 sulla 10100): selezionale nelle opzioni in <strong>Aree, zone, scenari, uscite e termostati</strong> (le installazioni esistenti mantengono le zone che avevano). Le entità che le versioni precedenti avevano creato per terminali che non sono zone <strong>non vengono eliminate automaticamente</strong>: restano come entità non disponibili, e il log le elenca a ogni avvio (<em>"these entities belong to terminals that are not zones on the panel"</em>). Eliminale in <strong>Impostazioni</strong> → <strong>Dispositivi e servizi</strong> → <strong>Entità</strong>.</li>
+<li><strong>"Zone X Triggered" ora si chiama "Zona X memoria allarmi"</strong> (stesso ID entità). Le zone in cortocircuito o in manomissione non compaiono più come sconosciute: si accende un nuovo sensore <em>Zona X manomissione</em>, e lo <code>status_text</code> della zona dice <code>short</code> o <code>tamper</code>. Queste zone vengono elencate anche quando impediscono l'attivazione di uno scenario.</li>
+<li><strong>Le zone vengono controllate anche prima di inserire le aree.</strong> Gli interruttori delle aree, i selettori della modalità di inserimento e l'azione <code>arm_area</code> ora chiedono alla centrale quali zone non sono pronte, come già facevano gli scenari, e per impostazione predefinita <strong>rifiutano l'inserimento</strong> quando ce ne sono (prima inserivano con le zone aperte). La nuova opzione <strong>Quando le zone non sono pronte</strong> (Impostazioni generali) può invece inserire comunque con un avviso; <code>force: true</code> lo fa per una singola chiamata dell'azione. Una nuova azione, <code>activate_scenario</code>, attiva uno scenario dalle automazioni, e un nuovo evento, <code>inim_smartliving_alarm_zones_not_ready</code>, elenca ogni volta le zone. L'integrazione legge anche se la centrale stessa rifiuta l'inserimento con zone non pronte (nuovo sensore di diagnostica <em>Rifiuta l'inserimento con zone non pronte</em>): al primo avvio rilegge da sola la configurazione della centrale una volta (il log lo segnala). I sensori delle zone mostrano come attributi le opzioni di programmazione di ogni zona (<code>autobypass</code>, <code>no_arming_if_not_ready</code>, <code>interior</code> e altre).</li>
+<li><strong>Gli attributi delle zone ora mostrano la programmazione reale della zona</strong>, letta dalla configurazione della centrale già salvata (non viene riletto nulla). Prima, la maggior parte dei tipi di zona e dei bilanciamenti compariva come <em>Unknown</em>, e due tempi venivano letti in modo errato. Alcuni attributi sono rinominati, quindi controlla i modelli e le automazioni che li usano: <code>activation_type</code> ora è <code>zone_type</code>, <code>balancing_type</code> è <code>balancing</code>, <code>sensor_type</code> è <code>sensor_kind</code>, <code>duration_ms</code> ora è <code>alarm_pulse_duration</code> (o <code>shock_sensitivity</code> per i sensori inerziali), <code>time</code> è <code>pulse_window_time</code> e <code>pulses</code> è <code>pulse_count</code>. Nuovo: <code>alarm_cycles</code>. I valori ora sono chiavi inglesi in minuscolo (per esempio <code>delayed</code>, <code>double_eol</code>, <code>input</code> invece di <em>Delayed</em>, <em>Double Balancing</em>, <em>Input</em>).</li>
+<li><strong>Le classi del dispositivo delle zone seguono la programmazione della zona.</strong> Le zone a bilanciamento singolo ora sono <em>apertura</em> (prima, nessuna classe), i sensori inerziali sono <em>vibrazione</em> (prima, <em>apertura</em> o nessuna), e i sensori tapparella sono <em>apertura</em> (prima, <em>movimento</em>). Le zone normalmente aperte, normalmente chiuse e a doppio bilanciamento mantengono la loro classe. Per mantenere la vecchia classe su una zona, impostala con <strong>Mostra come</strong> nelle impostazioni dell'entità.</li>
+</ul>
+</details>
+<h4 id="scenarios">Scenari<a class="headerlink" href="#scenarios" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Modifica</th>
+<th>Cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Le nuove configurazioni propongono gli scenari di inserimento totale (fuori) e di disinserimento</td>
+<td>Nulla: le installazioni esistenti mantengono le loro associazioni</td>
+</tr>
+<tr>
+<td>Gli scenari che inseriscono in modalità parziale o immediata vengono letti correttamente</td>
+<td><em>Controlla le tue automazioni</em> che usano <code>area_actions_details</code></td>
+</tr>
+<tr>
+<td>Uno scenario bloccato da zone non pronte elenca le zone riportate dalla centrale</td>
+<td>Nulla</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli</summary>
+<ul>
+<li><strong>Le nuove configurazioni propongono gli scenari di inserimento totale (fuori) e di disinserimento</strong> in base a cosa fanno i tuoi scenari alle aree che importi. Le installazioni esistenti mantengono le loro associazioni.</li>
+<li><strong>Gli scenari che inseriscono in modalità parziale o immediata vengono letti correttamente.</strong> L'attributo <code>area_actions_details</code> dei pulsanti degli scenari ora dice <code>total</code>, <code>partial</code> o <code>instant</code> per le aree che uno scenario inserisce (prima, <code>arm</code> per totale e <code>unknown</code> per le altre due). Uno scenario che disinserisce alcune aree e ne inserisce altre in modalità parziale o immediata veniva trattato come scenario di disinserimento, quindi se la centrale lo rifiutava, il messaggio non elencava le zone che l'avevano bloccato; ora lo fa.</li>
+<li><strong>Uno scenario bloccato da zone non pronte elenca le zone riportate dalla centrale.</strong> La notifica persistente e i <code>blocking_zones</code> dell'evento <code>inim_smartliving_alarm_scenario_activation_failed</code> ora elencano le stesse zone del messaggio di errore, comprese le zone a riposo che la centrale considera non pronte (per esempio le zone ritardate), ognuna con <code>status</code> <code>not_ready</code>. Prima elencavano solo le zone in allarme o in manomissione, e potevano dire che non era stata trovata nessuna zona.</li>
+</ul>
+</details>
+<h4 id="commands-and-errors">Comandi ed errori<a class="headerlink" href="#commands-and-errors" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Modifica</th>
+<th>Cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I comandi che non vengono eseguiti ora mostrano un errore</td>
+<td><em>Controlla le tue automazioni</em>: un passaggio non riuscito le ferma, a meno che non abbia <code>continue_on_error: true</code></td>
+</tr>
+<tr>
+<td>La modalità programmazione viene rilevata; in quel momento non viene inviato nessun comando</td>
+<td>Nulla</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli</summary>
+<ul>
+<li><strong>I comandi che non vengono eseguiti ora mostrano un errore.</strong> Prima, un inserimento, un disinserimento, un'esclusione o un reset rifiutati venivano solo scritti nel log, e le notifiche di errore del pannello di allarme non comparivano affatto. Ora l'azione non riesce, con un messaggio che dice perché (per esempio un PIN che la centrale non accetta più, o un PIN non abilitato per quell'area), nella plancia e nelle tracce delle automazioni; vedi <a href="../troubleshooting/#when-the-panel-refuses-a-command">Quando la centrale rifiuta un comando</a>. Un passaggio di un'automazione che non riesce ferma quell'automazione, a meno che il passaggio non abbia <code>continue_on_error: true</code>. L'evento <code>inim_smartliving_alarm_scenario_activation_failed</code> ha un nuovo campo <code>panel_result</code> (la risposta della centrale, oppure <code>null</code> quando la centrale non ha rifiutato il comando), e il suo <code>reason</code> ora può essere anche <code>command_failed</code> o <code>invalid_code</code>.</li>
+<li><strong>La modalità programmazione ora viene rilevata.</strong> Mentre la centrale viene programmata da una tastiera, ignora i comandi, e le versioni precedenti riportavano un comando del genere come eseguito. Ora non viene inviato nessun comando mentre la centrale è in programmazione: l'azione invece non riesce, con un messaggio, e la configurazione, <strong>Riconfigura</strong> e <strong>Rileggi la configurazione della centrale</strong> vengono rifiutati con un messaggio: riprova al termine della programmazione. Un nuovo sensore di diagnostica, <em>Modalità programmazione</em>, lo mostra. Il <code>reason</code> dell'evento <code>inim_smartliving_alarm_scenario_activation_failed</code> ora può essere anche <code>panel_programming</code>.</li>
+</ul>
+</details>
+<h4 id="event-log-and-names">Registro eventi e nomi<a class="headerlink" href="#event-log-and-names" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Modifica</th>
+<th>Cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gli orari degli eventi sono nel fuso orario di Home Assistant; lo stato è la posizione dell'evento nel registro</td>
+<td><em>Controlla le tue automazioni</em> che usano il valore dello stato</td>
+</tr>
+<tr>
+<td>Il registro eventi mostra i nomi programmati sulla centrale; l'opzione <strong>Nomi dei Lettori</strong> viene eliminata</td>
+<td>Nulla: i nomi arrivano dalla centrale</td>
+</tr>
+<tr>
+<td>I nomi con lettere accentate le mostrano per intero</td>
+<td>Nulla</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli</summary>
+<ul>
+<li><strong>Registro eventi:</strong> gli orari degli eventi ora sono mostrati nel fuso orario di Home Assistant, con l'ora legale (prima, sempre UTC+1), e i nuovi eventi continuano a comparire dopo che il registro eventi della centrale si è riempito ed è ripartito dall'inizio. Lo stato del sensore del registro eventi ora è la posizione dell'evento più recente nel registro della centrale (da 0 a 999, oppure da 0 a 499 sulle centrali che conservano 500 eventi: le SmartLiving 505 e 515, e la 1050 con firmware 5.1) invece di un indirizzo di memoria: le automazioni che si attivano solo a un cambiamento continuano a funzionare, ma confronta i nuovi numeri se usavi il valore stesso.</li>
+<li><strong>Il registro eventi mostra i nomi programmati sulla centrale</strong>: chi ha causato un evento (il nome del codice utente o della chiave, invece di <em>User 3</em> o <em>Key 5</em>) e dove (il nome della tastiera o del lettore). I comandi inviati a distanza, dall'app, dal cloud, da Home Assistant o dal software dell'installatore, mostrano <em>Remote</em> (prima, <em>Mobile App</em>). L'opzione <strong>Nomi dei Lettori</strong> viene eliminata: i nomi dei lettori ora arrivano dalla centrale, e i nomi scritti in quell'opzione non vengono più usati. La voce di configurazione viene aggiornata ancora una volta (versione 1.5), e al primo avvio l'integrazione rilegge da sola la configurazione della centrale per ottenere i nomi (il log lo segnala). Un nuovo sensore di diagnostica, <em>Periferiche</em>, elenca le tastiere, i lettori, le espansioni e le sirene abilitati sulla centrale, e lo fa anche il passaggio <strong>Aree, zone, scenari, uscite e termostati</strong>.</li>
+<li><strong>I nomi con lettere accentate ora le mostrano per intero.</strong> I nomi di aree, zone, scenari e tastiere programmati con lettere come à, è, é o ù prima le perdevano; ora vengono letti con il set di caratteri della centrale, come i nomi dei codici utente, delle chiavi e degli altri dispositivi. I nomi arrivano dai dati della centrale già salvati, quindi non viene riletto nulla. Gli ID delle entità non cambiano, e i nomi che hai cambiato in Home Assistant restano come li hai impostati.</li>
+</ul>
+</details>
+<h4 id="setup-options-and-connection">Configurazione, opzioni e connessione<a class="headerlink" href="#setup-options-and-connection" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Modifica</th>
+<th>Cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Una sola connessione alla centrale, riutilizzata</td>
+<td>Nulla; vedi <a href="../troubleshooting/#the-inim-app-cannot-connect-locally">l'app Inim</a></td>
+</tr>
+<tr>
+<td>Novità: schede SmartLAN/G, una ricerca nella rete, tutte le aree del tuo codice utente nello scenario attivo</td>
+<td>Nulla</td>
+</tr>
+<tr>
+<td>Il PIN viene verificato quando usi <strong>Riconfigura</strong>; cambiarlo nelle opzioni funziona di nuovo</td>
+<td>Nulla</td>
+</tr>
+<tr>
+<td>Scegli aree, zone e scenari da elenchi; deselezionare rimuove le entità</td>
+<td>Nulla: i tuoi conteggi sono diventati le stesse voci</td>
+</tr>
+<tr>
+<td>Le risposte delle schede SmartLAN/G vengono lette correttamente</td>
+<td>Nulla</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli</summary>
+<ul>
+<li>La voce di configurazione viene aggiornata automaticamente (viene contrassegnata come connessione SmartLAN/SI). Gli ID delle entità e le opzioni non cambiano.</li>
+<li>Home Assistant ora tiene una sola connessione alla centrale e la riutilizza, quindi gli aggiornamenti sono più rapidi. La scheda SmartLAN/SI accetta una sola connessione locale: vedi <a href="../troubleshooting/#the-inim-app-cannot-connect-locally">l'app Inim</a> in Risoluzione dei problemi.</li>
+<li>D'ora in poi il PIN viene verificato quando usi <strong>Riconfigura</strong>: un PIN che non corrisponde a nessun codice utente della centrale viene rifiutato. Se il tuo PIN attuale non corrisponde a nessuno, il log mostra un avviso a ogni connessione.</li>
+<li>Novità: le schede SmartLAN/G, una ricerca nella rete quando aggiungi una centrale, e lo scenario attivo ora tiene conto di tutte le aree del tuo codice utente (prima le aree da 8 a 10 venivano ignorate).</li>
+<li>La voce di configurazione viene aggiornata ancora una volta (versione 1.3): l'elenco delle zone viene completato dai dati della centrale già salvati, senza contattare la centrale. Se quei dati sono incompleti, un avviso ti chiede di usare <strong>Rileggi la configurazione della centrale</strong>.</li>
+<li><strong>SmartLAN/G:</strong> le risposte della scheda ora vengono lette come la scheda le invia (solo i dati, senza il checksum della centrale). Prima, ogni lettura non riusciva e la configurazione segnalava un nome utente o una password errati anche con le credenziali giuste. Un nome utente o una password errati ora vengono segnalati solo quando la risposta della scheda non si può decifrare; ogni altra risposta inattesa ha il suo messaggio (vedi <a href="../troubleshooting/#smartlang-the-reply-was-not-in-the-expected-format">Risoluzione dei problemi</a>).</li>
+<li><strong>Ora scegli le aree, le zone e gli scenari da importare da elenchi</strong>, per nome, invece di indicare quanti ne vuoi di ciascuno. La voce di configurazione viene aggiornata ancora una volta (versione 1.4): i conteggi che avevi diventano le stesse voci (per esempio, 7 aree diventano le aree da 1 a 7), quindi le tue entità non cambiano. Uno scenario usato da una modalità del pannello di allarme oltre il tuo numero di scenari viene aggiunto, così la modalità continua a funzionare. Ora le opzioni aprono un menu: <strong>Aree, zone, scenari, uscite e termostati</strong> o <strong>Impostazioni generali</strong>. Deselezionare lì una voce <strong>rimuove le sue entità</strong>; selezionandola di nuovo, tornano con gli stessi ID delle entità. Le entità rimaste di aree, zone o scenari oltre i tuoi vecchi conteggi vengono rimosse al primo avvio.</li>
+<li><strong>L'azione <code>arm_area</code> elenca solo le aree importate, per nome</strong>, e rifiuta le aree che non sono importate. Le modalità del pannello di allarme si possono associare solo a scenari importati.</li>
+<li><strong>Cambiare il PIN nelle opzioni funziona di nuovo</strong>, e il PIN non viene più mostrato. Il campo <strong>Nuovo codice PIN</strong> in <strong>Impostazioni generali</strong> ora è vuoto: lascialo vuoto per mantenere il PIN attuale, oppure inseriscine uno nuovo, che viene verificato con la centrale come durante la configurazione. Prima il campo mostrava il PIN attuale in chiaro e ogni nuovo PIN veniva rifiutato. Il PIN (e, per SmartLAN/G, la password della scheda) ora è un campo password durante la configurazione e in <strong>Riconfigura</strong>, dove non viene più precompilato: lascialo vuoto per mantenere quello attuale. Un nuovo sensore di diagnostica, <em>Codice utente</em>, indica il codice utente a cui appartiene il PIN, e lo dice anche <strong>Impostazioni generali</strong>.</li>
+<li><strong>Una parte maggiore dell'integrazione è tradotta.</strong> Le notifiche (uno scenario bloccato o non riuscito, un'area inserita con zone non pronte), le scelte degli scenari per le modalità del pannello di allarme nelle opzioni, e i nomi e i campi delle azioni ora seguono la lingua di Home Assistant (inglese o italiano). Il <code>message</code> dell'evento <code>inim_smartliving_alarm_scenario_activation_failed</code> resta in inglese. L'azione <code>alarm_reset</code> su una centrale la cui integrazione non è caricata ora non riesce, con un messaggio, invece di non fare nulla.</li>
+</ul>
+</details>
+<h4 id="panels-and-firmware">Centrali e firmware<a class="headerlink" href="#panels-and-firmware" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Modifica</th>
+<th>Cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Le SmartLiving 10100, 505 e 515 usano la propria mappa di memoria</td>
+<td>Guarda il log; elimina le entità rimaste; seleziona le nuove aree e zone</td>
+</tr>
+<tr>
+<td>Le centrali con firmware 5.1 usano la propria mappa (sperimentale)</td>
+<td>Guarda il log</td>
+</tr>
+<tr>
+<td>Il firmware 5.0x e gli altri modelli non si possono più configurare</td>
+<td>Le configurazioni esistenti continuano a funzionare, con un avviso di riparazione</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli</summary>
+<ul>
+<li><strong>SmartLiving 10100 (sperimentale con firmware 5.1):</strong> una 10100 ora usa la propria mappa di memoria. Le versioni precedenti la leggevano come se fosse una 1050, quindi i suoi nomi e le sue zone erano errati: al primo avvio dopo l'aggiornamento l'integrazione rilegge da sola la configurazione della centrale (il log lo segnala). Gli ID delle entità delle aree e delle zone restano gli stessi; le aree da 11 a 15 e le zone oltre la 50 si possono selezionare nelle opzioni in <strong>Aree, zone, scenari, uscite e termostati</strong>.</li>
+<li><strong>SmartLiving 505 e 515 (sperimentali):</strong> ora usano la propria mappa di memoria. Le versioni precedenti le leggevano come se fossero una 1050, quindi i loro nomi, zone, scenari e registro eventi erano errati. Al primo avvio dopo l'aggiornamento l'integrazione rilegge da sola la configurazione della centrale (il log lo segnala). Gli ID delle entità restano gli stessi; le zone e le aree che la centrale non ha restano come entità non disponibili e sono elencate nel log, come per la 10100: eliminale in <strong>Impostazioni</strong> → <strong>Dispositivi e servizi</strong> → <strong>Entità</strong>. Segnala come funziona.</li>
+<li><strong>Firmware 5.1 (sperimentale):</strong> le centrali con firmware 5.1 ora usano la propria mappa di memoria. Le versioni precedenti le leggevano come se fossero una 1050 con firmware 6, quindi i loro nomi, zone, scenari e registro eventi erano errati. Al primo avvio dopo l'aggiornamento l'integrazione rilegge da sola la configurazione della centrale (il log lo segnala), e l'avviso di riparazione "centrale non supportata" scompare. Le descrizioni del registro eventi ora sono corrette su queste centrali. Vedi i <a href="../limitations/">limiti del supporto del firmware 5.1</a>. Segnala come funziona.</li>
+<li><strong>Il firmware 5.0x e gli altri modelli non si possono più configurare</strong>: una nuova configurazione di una centrale con firmware precedente al 5.1, o di un modello SmartLiving senza la propria mappa, viene rifiutata con un messaggio. Una centrale di un modello del genere, o con firmware 5.0x, già configurata continua a funzionare come prima e mostra un avviso di riparazione, perché i suoi dati possono essere errati.</li>
+</ul>
+</details>
+<h4 id="new-features">Novità<a class="headerlink" href="#new-features" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Modifica</th>
+<th>Cosa fare</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Le uscite si possono comandare e regolare</td>
+<td>Selezionale nelle opzioni</td>
+</tr>
+<tr>
+<td>Report di sistema</td>
+<td>Vedi <a href="../system-report/">Report di sistema</a></td>
+</tr>
+<tr>
+<td>L'integrazione ha la sua icona</td>
+<td>Mostrata con Home Assistant 2026.3 o successivo</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli</summary>
+<ul>
+<li><strong>Le uscite sono nuove</strong>: le uscite su terminale e le uscite fisse da O1 a O3 si possono comandare, e i dimmer regolare, da Home Assistant. Al primo avvio l'integrazione rilegge da sola la configurazione della centrale una volta per ottenere la programmazione e i nomi delle uscite (il log lo segnala). Nessuna uscita viene importata finché non salvi le opzioni in <strong>Aree, zone, scenari, uscite e termostati</strong>, dove le uscite che l'installatore ha contrassegnato come domotiche sono già selezionate per te.</li>
+<li><strong>I report di sistema sono nuovi</strong>: scaricare la diagnostica dell'integrazione ora dà un report di sistema per le segnalazioni di problemi, al livello scelto con il nuovo selettore <em>Livello diagnostica</em> (disattivato per impostazione predefinita). Vedi <a href="../system-report/">Condividere un report di sistema</a>.</li>
+<li><strong>L'integrazione ha la sua icona</strong>, mostrata con Home Assistant 2026.3 o successivo; le versioni precedenti non ne mostrano nessuna, come prima.</li>
+</ul>
+</details>
+<p>Limiti di questa versione: vedi <a href="../limitations/">Limitazioni note</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Torna su
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Piede" >
+        
+          
+          <a href="../system-report/" class="md-footer__link md-footer__link--prev" aria-label="Precedente: Report di sistema">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Precedente
+              </span>
+              <div class="md-ellipsis">
+                Report di sistema
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../limitations/" class="md-footer__link md-footer__link--next" aria-label="Successivo: Limitazioni note">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Successivo
+              </span>
+              <div class="md-ellipsis">
+                Limitazioni note
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/matteoraf/ha-inim_smartliving_alarm_panel" target="_blank" rel="noopener" title="L&#39;integrazione su GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.highlight", "search.suggest", "content.code.copy"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiato", "clipboard.copy": "Copia", "search.result.more.one": "1 altro in questa pagina", "search.result.more.other": "# altri in questa pagina", "search.result.none": "Nessun documento trovato", "search.result.one": "1 documento trovato", "search.result.other": "# documenti trovati", "search.result.placeholder": "Scrivi per iniziare a cercare", "search.result.term.missing": "Non presente", "select.version": "Seleziona la versione"}, "version": {"default": "^dev$", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>

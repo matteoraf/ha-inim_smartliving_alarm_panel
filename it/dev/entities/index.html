@@ -1,0 +1,1937 @@
+
+<!doctype html>
+<html lang="it" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/entities/">
+      
+      
+        <link rel="prev" href="../options/">
+      
+      
+        <link rel="next" href="../actions-events/">
+      
+      
+        
+          <link rel="alternate" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/" hreflang="en">
+        
+          <link rel="alternate" href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/" hreflang="it">
+        
+      
+      
+      <link rel="icon" href="../assets/icon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.2">
+    
+    
+      
+        <title>Entità - Inim SmartLiving Alarm per Home Assistant</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#entities" class="md-skip">
+          Vai al contenuto
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+            Questa è la documentazione della versione in sviluppo: descrive modifiche non ancora rilasciate. Scegli la tua versione dal menu in alto.
+          </div>
+          
+        </aside>
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  Questa è la documentazione di un'altra versione.
+  <a href="../.."><strong>Vai alla versione attuale.</strong></a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL(".."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Intestazione">
+    <a href=".." title="Inim SmartLiving Alarm per Home Assistant" class="md-header__button md-logo" aria-label="Inim SmartLiving Alarm per Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Inim SmartLiving Alarm per Home Assistant
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Entità
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="teal"  aria-label="Passa al tema scuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Passa al tema scuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="teal"  aria-label="Passa al tema chiaro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Passa al tema chiaro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Seleziona la lingua">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/dev/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/it/dev/" hreflang="it" class="md-select__link">
+              Italiano
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Cerca" placeholder="Cerca" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Cerca">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Cancella" aria-label="Cancella" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inizializza la ricerca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigazione" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Inim SmartLiving Alarm per Home Assistant" class="md-nav__button md-logo" aria-label="Inim SmartLiving Alarm per Home Assistant" data-md-component="logo">
+      
+  <img src="../assets/icon.png" alt="logo">
+
+    </a>
+    Inim SmartLiving Alarm per Home Assistant
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installazione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configurazione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../options/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Opzioni
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entità
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Entità
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Indice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Indice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cosa ottieni
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-alarm-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Il pannello di allarme
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aree
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zone
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenari
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sensori
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnostic-and-configuration-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entità di diagnostica e di configurazione
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Uscite
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thermostats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Termostati
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../actions-events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Azioni ed eventi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Risoluzione dei problemi
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../system-report/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Report di sistema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrading/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Aggiornare la versione
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Limitazioni note
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Indice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Indice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-you-get" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cosa ottieni
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-alarm-panel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Il pannello di allarme
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aree
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#zones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zone
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scenarios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scenari
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sensors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sensori
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnostic-and-configuration-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entità di diagnostica e di configurazione
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#outputs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Uscite
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thermostats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Termostati
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="entities">Entità<a class="headerlink" href="#entities" title="Permanent link">&para;</a></h1>
+<p>La tua centrale compare in Home Assistant come un dispositivo, con il nome che hai scelto durante la configurazione. Le sue entità sono le aree, le zone, gli scenari e le uscite che importi, più alcuni sensori sulla centrale stessa. Apri la pagina del dispositivo da <strong>Impostazioni</strong> → <strong>Dispositivi e servizi</strong> → <strong>Inim SmartLiving Alarm</strong>.</p>
+<h2 id="what-you-get">Cosa ottieni<a class="headerlink" href="#what-you-get" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parte</th>
+<th>Entità</th>
+<th>Cosa ci fai</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#the-alarm-panel">La centrale</a></td>
+<td>un pannello di allarme</td>
+<td>Inserire e disinserire con la scheda <em>Pannello degli Allarmi</em>, usando i tuoi scenari</td>
+</tr>
+<tr>
+<td><a href="#areas">Ogni area</a></td>
+<td>un interruttore, un selettore della modalità di inserimento, tre sensori binari</td>
+<td>Inserire o disinserire l'area; vedere allarme, manomissione e memoria allarmi</td>
+</tr>
+<tr>
+<td><a href="#zones">Ogni zona</a></td>
+<td>un sensore binario, un interruttore, altri due sensori binari</td>
+<td>Vedere se la zona è aperta; escluderla; vedere manomissione e memoria allarmi</td>
+</tr>
+<tr>
+<td><a href="#scenarios">Ogni scenario</a></td>
+<td>un pulsante, un sensore binario</td>
+<td>Attivare lo scenario; vedere se è attivo</td>
+</tr>
+<tr>
+<td><a href="#outputs">Ogni uscita</a></td>
+<td>un interruttore, o una luce per i dimmer</td>
+<td>Accendere e spegnere l'uscita, o regolarla</td>
+</tr>
+<tr>
+<td><a href="#thermostats">Il termostato di ogni tastiera</a></td>
+<td>un'entità clima, un sensore di temperatura</td>
+<td>Impostare la temperatura, il riscaldamento o il raffrescamento, il programma; vedere la temperatura ambiente</td>
+</tr>
+<tr>
+<td><a href="#sensors">Lo stato della centrale</a></td>
+<td>sensori</td>
+<td>Il registro eventi, lo scenario attivo, firmware e modello</td>
+</tr>
+<tr>
+<td><a href="#diagnostic-and-configuration-entities">Diagnostica</a></td>
+<td>sensori, sensori binari, un selettore, un pulsante, un interruttore</td>
+<td>Il codice utente, i dispositivi trovati, la modalità programmazione, i report di sistema, la rilettura della configurazione, la modalità aggiornamento lento</td>
+</tr>
+</tbody>
+</table>
+<p>Per esempio, le schede riquadro di un'area: la sua modalità di inserimento, il suo interruttore e la sua memoria allarmi.</p>
+<p><img alt="Schede riquadro di un'area" src="../images/area-card-light.webp#only-light" width="400" />
+<img alt="Schede riquadro di un'area" src="../images/area-card-dark.webp#only-dark" width="400" /></p>
+<div class="admonition note">
+<p class="admonition-title">ID delle entità</p>
+<p>Gli ID delle entità iniziano con il nome della tua centrale: con il nome <em>Home</em>, l'interruttore dell'area 1 è <code>switch.home_area_1</code>. Le tabelle qui sotto danno la parte finale di ogni ID; <em>N</em> è il numero dell'area, della zona o dello scenario (gli ID degli scenari contano da 0). I nomi sono mostrati dopo il nome della centrale, nella lingua di Home Assistant; <em>(nome)</em> è il nome della voce sulla centrale, mostrato quando ne ha uno. Tutte le entità sono attive per impostazione predefinita, tranne <strong>Livello diagnostica</strong>.</p>
+</div>
+<h2 id="the-alarm-panel">Il pannello di allarme<a class="headerlink" href="#the-alarm-panel" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>L'ID finisce con</th>
+<th>Nome</th>
+<th>Stati</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>alarm_control_panel.…</code></td>
+<td>il nome della centrale</td>
+<td>attivo in casa, attivo fuori casa, attivo notte, attivo in vacanza, attivo con esclusione personalizzata, disattivo, innescato</td>
+</tr>
+</tbody>
+</table>
+<p>Il pannello di allarme inserisce e disinserisce con gli scenari che hai associato nelle <a href="../options/#initial-options">opzioni</a>. Usalo con la scheda <em>Pannello degli Allarmi</em> di Home Assistant. Non viene chiesto nessun codice.</p>
+<details class="note">
+<summary>Come viene ricavato lo stato</summary>
+<ul>
+<li><em>Innescato</em> mentre una qualsiasi area è in allarme.</li>
+<li>Altrimenti la modalità il cui scenario è attivo sulla centrale, per esempio <em>Attivo notte</em>.</li>
+<li>Uno scenario attivo sulla centrale che non è associato a una modalità compare come <em>Attivo con esclusione personalizzata</em>. <em>Attivo con esclusione personalizzata</em> compare anche quando lo stato delle aree non corrisponde a nessuno scenario.</li>
+<li>Senza uno scenario di disinserimento associato, lo stato è sconosciuto quando nessuna associazione corrisponde.</li>
+<li>Lo stato segue l'associazione degli scenari: associa al disinserimento lo scenario che disinserisce tutte le tue aree, altrimenti una centrale disinserita non compare come <em>Disattivo</em>.</li>
+<li>Vengono proposte solo le modalità di inserimento con uno scenario associato. Disinserire o inserire senza uno scenario associato non riesce, con un messaggio (<em>"Nessuno scenario è associato a … sceglilo nelle opzioni dell'integrazione"</em>).</li>
+</ul>
+</details>
+<h2 id="areas">Aree<a class="headerlink" href="#areas" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>L'ID finisce con</th>
+<th>Nome</th>
+<th>Stati</th>
+<th>Classe del dispositivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>switch.…_area_N</code></td>
+<td>Area N (<em>nome</em>)</td>
+<td>acceso quando l'area è inserita in una qualsiasi modalità</td>
+<td>–</td>
+</tr>
+<tr>
+<td><code>select.…_area_N_arming_mode</code></td>
+<td>Area N modalità di inserimento (<em>nome</em>)</td>
+<td>Disinserita, Inserita totale, Inserita parziale, Inserita immediata</td>
+<td>–</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_area_N_alarm</code></td>
+<td>Area N allarme (<em>nome</em>)</td>
+<td>acceso mentre l'area è in allarme</td>
+<td>sicurezza</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_area_N_tamper</code></td>
+<td>Area N manomissione (<em>nome</em>)</td>
+<td>acceso mentre l'area è in manomissione</td>
+<td>manomissione</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_area_N_triggered</code></td>
+<td>Area N memoria allarmi (<em>nome</em>)</td>
+<td>acceso dopo un allarme, finché non si fa il reset della memoria</td>
+<td>sicurezza</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>L'interruttore</strong> inserisce l'area quando lo accendi e la disinserisce quando lo spegni. Inserisce nella modalità dell'area impostata in <strong>Modalità di inserimento per area</strong>, altrimenti in <strong>Modalità di inserimento predefinita delle aree</strong> (totale per impostazione predefinita).</li>
+<li><strong>Il selettore della modalità di inserimento</strong> inserisce l'area nella modalità che scegli, oppure la disinserisce. Se la centrale rifiuta, un errore dice perché. È sconosciuto mentre la centrale non riporta nessuna delle quattro modalità.</li>
+<li><strong>La memoria allarmi</strong> resta accesa dopo un allarme finché non si fa il reset (vedi <a href="../actions-events/#resetting-the-alarm-memory">Reset delle memorie allarmi</a>). Mentre è accesa, Home Assistant mostra la classe sicurezza come <em>Non Sicuro</em>.</li>
+</ul>
+<p>L'inserimento dall'interruttore o dal selettore controlla prima le zone: vedi <a href="../actions-events/#zones-not-ready">Zone non pronte</a>.</p>
+<details class="note">
+<summary>Attributi delle entità delle aree</summary>
+<table>
+<thead>
+<tr>
+<th>Attributo</th>
+<th>Su</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>area_id</code></td>
+<td>tutte le entità dell'area</td>
+<td>il numero dell'area</td>
+</tr>
+<tr>
+<td><code>area_name</code></td>
+<td>tutte le entità dell'area</td>
+<td>il nome dell'area sulla centrale</td>
+</tr>
+<tr>
+<td><code>status_text</code></td>
+<td>interruttore</td>
+<td><code>armed</code>, <code>disarmed</code>, <code>unknown</code>; <code>Unknown</code> quando la centrale non riporta nessuno stato per l'area</td>
+</tr>
+<tr>
+<td><code>arming_mode</code></td>
+<td>interruttore</td>
+<td><code>total</code>, <code>partial</code>, <code>instant</code>, <code>disarmed</code>, <code>unknown</code></td>
+</tr>
+<tr>
+<td><code>tamper_memory</code></td>
+<td>memoria allarmi</td>
+<td><code>true</code> quando l'area ha anche una memoria manomissioni</td>
+</tr>
+<tr>
+<td><code>exit_time</code></td>
+<td>selettore della modalità di inserimento</td>
+<td>il tempo per uscire dopo l'inserimento, per esempio <code>120 s</code> o <code>2 min</code></td>
+</tr>
+<tr>
+<td><code>entry_time</code></td>
+<td>selettore della modalità di inserimento</td>
+<td>il tempo per disinserire dopo l'apertura di una zona ritardata</td>
+</tr>
+<tr>
+<td><code>entry_time_2</code></td>
+<td>selettore della modalità di inserimento</td>
+<td>il secondo tempo di ingresso, usato dalle zone con l'opzione <code>entry_time_2</code>, oppure <code>not used</code></td>
+</tr>
+<tr>
+<td><code>pre_arm_warning_time</code></td>
+<td>selettore della modalità di inserimento</td>
+<td>in minuti, per esempio <code>3 min</code></td>
+</tr>
+<tr>
+<td><code>patrol_time</code></td>
+<td>selettore della modalità di inserimento</td>
+<td>in minuti</td>
+</tr>
+<tr>
+<td><code>timer_program</code></td>
+<td>selettore della modalità di inserimento</td>
+<td>il programma orario di inserimento e disinserimento, oppure <code>none</code></td>
+</tr>
+<tr>
+<td><code>reset_alarm_memory_on_arming</code></td>
+<td>selettore della modalità di inserimento</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>auto_arm_partial</code></td>
+<td>selettore della modalità di inserimento</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>clear_call_queue_on_disarm</code></td>
+<td>selettore della modalità di inserimento</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>L'interruttore mostra <code>status_text</code> e <code>arming_mode</code> dopo che lo stato della centrale è stato letto. I tempi e le opzioni del selettore sono quelli programmati sulla centrale; non sono mostrati per le centrali gestite con la mappa di un altro modello (vedi <a href="../limitations/">Limitazioni note</a>).</p>
+</details>
+<h2 id="zones">Zone<a class="headerlink" href="#zones" title="Permanent link">&para;</a></h2>
+<p>Ricevono entità solo le zone che esistono sulla centrale: le zone dei terminali di ingresso, di ingresso/uscita e doppi. I terminali di uscita (per esempio una sirena) e i terminali inutilizzati non ne hanno. Le zone da 1 a N sono le zone degli N terminali della centrale (50 sulla SmartLiving 1050, 100 sulla 10100); un terminale doppio <em>n</em> ha anche una seconda zona, con il numero N + <em>n</em> (da 51 a 100 sulla 1050, da 101 a 200 sulla 10100).</p>
+<table>
+<thead>
+<tr>
+<th>L'ID finisce con</th>
+<th>Nome</th>
+<th>Stati</th>
+<th>Classe del dispositivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>binary_sensor.…_zone_N</code></td>
+<td>Zona N (<em>nome</em>)</td>
+<td>acceso mentre la zona è in allarme (aperta)</td>
+<td>ricavata, vedi sotto</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_zone_N_triggered</code></td>
+<td>Zona N memoria allarmi (<em>nome</em>)</td>
+<td>acceso dopo che la zona ha generato un allarme, finché non si fa il reset della memoria</td>
+<td>problema</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_zone_N_tamper</code></td>
+<td>Zona N manomissione (<em>nome</em>)</td>
+<td>acceso mentre la zona è in manomissione o in cortocircuito</td>
+<td>manomissione</td>
+</tr>
+<tr>
+<td><code>switch.…_zone_N</code></td>
+<td>Zona N inclusa (<em>nome</em>)</td>
+<td>acceso: inclusa; spento: esclusa</td>
+<td>–</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Il sensore della zona</strong> è acceso mentre la zona è aperta o in allarme. Un cortocircuito o una manomissione compaiono nel suo <code>status_text</code> e nel sensore di manomissione della zona.</li>
+<li><strong>L'interruttore della zona</strong> esclude la zona quando lo spegni, e la include di nuovo quando lo accendi.</li>
+</ul>
+<details class="note">
+<summary>Classe del dispositivo del sensore della zona</summary>
+<p>Una zona cablata non dice alla centrale che rilevatore ha, quindi la classe del dispositivo è ricavata dalla programmazione della zona:</p>
+<table>
+<thead>
+<tr>
+<th>Programmazione della zona</th>
+<th>Classe del dispositivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sensore inerziale</td>
+<td>vibrazione</td>
+</tr>
+<tr>
+<td>sensore tapparella, contatto normalmente aperto o normalmente chiuso, bilanciamento singolo</td>
+<td>apertura</td>
+</tr>
+<tr>
+<td>bilanciamento doppio</td>
+<td>movimento</td>
+</tr>
+<tr>
+<td>tutto il resto</td>
+<td>nessuna</td>
+</tr>
+</tbody>
+</table>
+<p>Se la classe è sbagliata, cambiala in Home Assistant: apri le impostazioni dell'entità e scegli <strong>Mostra come</strong>.</p>
+</details>
+<p>Gli attributi del sensore della zona sono la programmazione della zona, come letta dalla centrale. Apri il sensore, poi il menu (⋮) → <strong>Dettagli</strong>:</p>
+<p><img alt="Gli attributi di una zona" src="../images/zone-attributes.webp" width="480" /></p>
+<details class="note">
+<summary>Attributi delle entità delle zone</summary>
+<table>
+<thead>
+<tr>
+<th>Attributo</th>
+<th>Su</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>zone_id</code></td>
+<td>tutte le entità della zona</td>
+<td>il numero della zona</td>
+</tr>
+<tr>
+<td><code>zone_name</code></td>
+<td>tutte le entità della zona</td>
+<td>il nome della zona sulla centrale</td>
+</tr>
+<tr>
+<td><code>status_text</code></td>
+<td>sensore, manomissione</td>
+<td><code>clear</code>, <code>alarmed</code>, <code>short</code>, <code>tamper</code>; <code>Unknown</code> quando la centrale non riporta nessuno stato</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>sensore</td>
+<td><code>true</code> mentre la zona è in test</td>
+</tr>
+<tr>
+<td><code>internal_index</code></td>
+<td>sensore, interruttore</td>
+<td>la posizione del terminale della zona nell'elenco dei terminali della centrale (da 0), usata dall'interruttore di esclusione; non mostrato quando il terminale non è nell'elenco</td>
+</tr>
+<tr>
+<td><code>tamper_memory</code></td>
+<td>memoria allarmi</td>
+<td><code>true</code> quando il terminale della zona ha una memoria manomissioni (le due zone di un terminale doppio la condividono)</td>
+</tr>
+<tr>
+<td><code>zone_type</code></td>
+<td>sensore</td>
+<td><code>instant</code>, <code>delayed</code>, <code>viewable_delayed</code>, <code>route</code>, <code>24_hour</code>, <code>automation</code>, <code>arm</code>, <code>disarm</code>, <code>switch</code>, <code>arm_disarm</code>, <code>patrol</code>, <code>emergency_exit_without_call</code>, <code>emergency_exit</code>; un numero per un valore non elencato qui</td>
+</tr>
+<tr>
+<td><code>assigned_areas</code></td>
+<td>sensore</td>
+<td>i numeri delle aree della zona</td>
+</tr>
+<tr>
+<td><code>alarm_cycles</code></td>
+<td>sensore</td>
+<td>quante volte la zona può generare un allarme, oppure <code>unlimited</code></td>
+</tr>
+<tr>
+<td><code>sensor_kind</code></td>
+<td>sensore</td>
+<td><code>generic</code>, <code>roller_blind</code>, <code>shock</code></td>
+</tr>
+<tr>
+<td><code>alarm_pulse_duration</code></td>
+<td>sensore</td>
+<td>solo sensori generici: per esempio <code>300 ms</code> o <code>20 s</code> (la centrale conta a passi di 15 ms o di 10 s)</td>
+</tr>
+<tr>
+<td><code>shock_sensitivity</code></td>
+<td>sensore</td>
+<td>solo sensori inerziali: da 0 a 40</td>
+</tr>
+<tr>
+<td><code>pulse_window_time</code></td>
+<td>sensore</td>
+<td>il tempo in cui vengono contati gli impulsi, per esempio <code>30 s</code> o <code>1 min</code></td>
+</tr>
+<tr>
+<td><code>pulse_count</code></td>
+<td>sensore</td>
+<td>quanti impulsi in quel tempo generano l'allarme</td>
+</tr>
+<tr>
+<td><code>balancing</code></td>
+<td>sensore</td>
+<td><code>normally_open</code>, <code>normally_closed</code>, <code>single_eol</code>, <code>double_eol</code>, <code>double_zone</code>, <code>double_zone_eol</code>, <code>personalized</code></td>
+</tr>
+<tr>
+<td><code>terminal_index</code></td>
+<td>sensore</td>
+<td>il terminale della zona (da 0)</td>
+</tr>
+<tr>
+<td><code>terminal_type</code></td>
+<td>sensore</td>
+<td><code>input</code>, <code>output</code>, <code>in_out</code>, <code>double</code>, <code>null</code>, <code>out_dimming</code>, <code>out_dac</code>, <code>out_analog</code>, <code>out_not_enabled</code></td>
+</tr>
+<tr>
+<td><code>second_zone</code></td>
+<td>sensore</td>
+<td><code>true</code> per la seconda zona di un terminale doppio</td>
+</tr>
+<tr>
+<td><code>interior</code></td>
+<td>sensore</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>autobypass</code></td>
+<td>sensore</td>
+<td>esclusa dalla centrale quando le sue aree si inseriscono mentre è aperta</td>
+</tr>
+<tr>
+<td><code>unbypassable</code></td>
+<td>sensore</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>chime</code></td>
+<td>sensore</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>test_programmed</code></td>
+<td>sensore</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>autobypass_no_reinclude</code></td>
+<td>sensore</td>
+<td>esclusa automaticamente e non inclusa di nuovo quando torna a riposo</td>
+</tr>
+<tr>
+<td><code>no_arming_if_not_ready</code></td>
+<td>sensore</td>
+<td>blocca l'inserimento in ogni modalità, quando la centrale rifiuta l'inserimento con zone non pronte</td>
+</tr>
+<tr>
+<td><code>entry_time_2</code></td>
+<td>sensore</td>
+<td>usa il secondo tempo di ingresso dell'area</td>
+</tr>
+<tr>
+<td><code>last_exit_zone</code></td>
+<td>sensore</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>reinclude_on_disarm</code></td>
+<td>sensore</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>hold_up</code></td>
+<td>sensore</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>fault_zone</code></td>
+<td>sensore</td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>Gli attributi di programmazione (da <code>zone_type</code> in poi) non sono mostrati quando i dati della centrale salvati per la zona non si possono leggere; in quel caso usa <strong>Rileggi la configurazione della centrale</strong>. Le opzioni che valgono solo per le zone radio non sono mostrate.</p>
+</details>
+<h2 id="scenarios">Scenari<a class="headerlink" href="#scenarios" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>L'ID finisce con</th>
+<th>Nome</th>
+<th>Stati</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>button.…_scenario_N</code></td>
+<td>Attiva scenario N (<em>nome</em>)</td>
+<td>–</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_scenario_N_active</code></td>
+<td>Scenario N attivo (<em>nome</em>)</td>
+<td>acceso mentre lo scenario è quello attivo sulla centrale</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Il pulsante</strong> attiva lo scenario. Se non riesce (una zona non pronta, o la centrale rifiuta), un errore e una notifica persistente danno il motivo.</li>
+<li>Per gli scenari, <em>N</em> è il numero dello scenario meno 1: lo scenario 1 è <code>scenario_0</code>. I numeri delle aree e delle zone, e il campo <code>scenario</code> dell'azione <code>activate_scenario</code>, partono da 1.</li>
+</ul>
+<details class="note">
+<summary>Attributi delle entità degli scenari</summary>
+<table>
+<thead>
+<tr>
+<th>Attributo</th>
+<th>Su</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scenario_index</code></td>
+<td>pulsante, sensore binario</td>
+<td>il numero dello scenario meno 1</td>
+</tr>
+<tr>
+<td><code>scenario_name</code></td>
+<td>pulsante, sensore binario</td>
+<td>il nome dello scenario sulla centrale</td>
+</tr>
+<tr>
+<td><code>area_actions_details</code></td>
+<td>pulsante</td>
+<td>cosa fa lo scenario a ogni area, per numero di area: <code>keep</code>, <code>total</code>, <code>partial</code>, <code>instant</code>, <code>disarm</code>, <code>unknown</code></td>
+</tr>
+</tbody>
+</table>
+</details>
+<h2 id="sensors">Sensori<a class="headerlink" href="#sensors" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>L'ID finisce con</th>
+<th>Nome</th>
+<th>Stato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sensor.…_event_log</code></td>
+<td>Registro eventi</td>
+<td>la posizione dell'evento più recente nel registro della centrale</td>
+</tr>
+<tr>
+<td><code>sensor.…_active_scenario</code></td>
+<td>Scenario attivo</td>
+<td>il nome e l'indice dello scenario attivo, per esempio <code>Night (Index 1)</code>, oppure <code>No scenario matches</code></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Il registro eventi</strong> conserva gli eventi recenti, con i nomi programmati sulla centrale: chi è stato e dove. Conserva i suoi ultimi eventi mentre la centrale non è raggiungibile. Per mostrarlo in una plancia, vedi <a href="../actions-events/#the-event-log-on-a-dashboard">Il registro eventi in una plancia</a>.</li>
+</ul>
+<p>Gli eventi e le loro chiavi sono negli attributi del sensore: apri il sensore, poi il menu (⋮) → <strong>Dettagli</strong>:</p>
+<p><img alt="Gli attributi del registro eventi: ogni evento con la sua descrizione, la chiave, il codice, come è avvenuto, chi è stato e le aree" src="../images/event-log-attributes.webp" width="480" /></p>
+<details class="note">
+<summary>Il registro eventi nel dettaglio</summary>
+<p>Lo stato è la posizione dell'evento più recente nel registro eventi della centrale: da 0 a 999, oppure da 0 a 499 sulle centrali che conservano 500 eventi (le SmartLiving 505 e 515, e la 1050 con firmware 5.1). Ricomincia da 0 quando il registro si riempie e riparte dall'inizio, quindi cambia a ogni nuovo evento. Prima della prima lettura è <code>Unknown Index</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Attributo</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event_log</code></td>
+<td>gli eventi recenti, dal più recente (vedi sotto)</td>
+</tr>
+<tr>
+<td><code>event_log_count_current</code></td>
+<td>quanti eventi ci sono ora in <code>event_log</code></td>
+</tr>
+<tr>
+<td><code>event_log_size_configured</code></td>
+<td>l'opzione <strong>Numero di eventi da conservare nel registro</strong></td>
+</tr>
+<tr>
+<td><code>latest_event_description</code></td>
+<td>la descrizione dell'evento più recente, in inglese</td>
+</tr>
+<tr>
+<td><code>latest_event_timestamp</code></td>
+<td>l'ora dell'evento più recente</td>
+</tr>
+</tbody>
+</table>
+<p>L'elenco <code>event_log</code> non viene conservato nello storico di Home Assistant (il recorder): può essere più grande di quanto il recorder conserva, e dopo un riavvio l'elenco viene riletto dalla centrale, che ha il proprio registro. Plance, modelli e automazioni lo leggono come al solito; gli altri attributi vengono conservati nello storico.</p>
+<p>Ogni evento in <code>event_log</code> ha:</p>
+<table>
+<thead>
+<tr>
+<th>Chiave</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>timestamp</code></td>
+<td>l'ora dell'evento: l'orologio della centrale letto nel fuso orario di Home Assistant, con l'ora legale</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>cosa è successo, in inglese, il nome che la centrale dà all'evento, per esempio <code>Area armed in away mode</code>; quando la centrale registra la fine di qualcosa viene aggiunto <code>(ended)</code>, per esempio <code>Zone alarm (ended)</code></td>
+</tr>
+<tr>
+<td><code>description_local</code></td>
+<td>lo stesso nella lingua di Home Assistant (inglese o italiano), per esempio <code>Inserimento effettivo di area</code> o <code>Allarme zona (ripristino)</code></td>
+</tr>
+<tr>
+<td><code>event</code></td>
+<td>la chiave dell'evento, uguale in ogni lingua: usala nelle automazioni, per esempio <code>area_armed_in_away_mode</code>, <code>zone_alarm</code>; <code>detector_dusty</code> per un guasto di un'uscita che l'installatore ha impostato per segnalare un rilevatore di fumo sporco; <code>free_event</code> e <code>unknown</code> per gli eventi senza nome</td>
+</tr>
+<tr>
+<td><code>code</code></td>
+<td>il codice dell'evento nella numerazione del firmware 6 (da 0 a 113), anche sulle centrali con firmware 5.1; un codice a cui il firmware 6 non dà un nome può essere da 114 a 127; vuoto (<code>null</code>) per gli eventi liberi che ha solo il firmware 5.1</td>
+</tr>
+<tr>
+<td><code>ended</code></td>
+<td><code>true</code> quando la centrale registra la fine di qualcosa (un allarme, un'esclusione, un guasto); <code>false</code> quando inizia o avviene</td>
+</tr>
+<tr>
+<td><code>via</code></td>
+<td>come è avvenuto, per gli eventi che lo indicano: <code>keypad_code</code>, <code>reader_key</code>, <code>remote</code> (l'app, il cloud, Home Assistant o il software dell'installatore), <code>command_zone</code>, <code>patrol_time</code>, <code>timer</code>, <code>keypad_shortcut</code>, <code>telephone</code>, <code>user_code</code> (una zona esclusa da un utente), <code>automatic</code> (una zona esclusa dalla centrale)</td>
+</tr>
+<tr>
+<td><code>authorized_by</code></td>
+<td>il codice utente o la chiave che l'ha fatto, per nome</td>
+</tr>
+<tr>
+<td><code>device</code></td>
+<td>la tastiera o il lettore, per nome; <code>Remote</code> per i comandi dall'app, dal cloud, da Home Assistant o dal software dell'installatore; <code>From telephone</code>; <code>Location N</code> quando la centrale registra un luogo che questo evento non usa</td>
+</tr>
+<tr>
+<td><code>affected_areas</code></td>
+<td>le aree, per nome; <code>None</code> quando non riguarda nessuna area</td>
+</tr>
+<tr>
+<td><code>zone</code></td>
+<td>la zona, per gli eventi di zona</td>
+</tr>
+<tr>
+<td><code>scenario</code></td>
+<td>lo scenario, per gli eventi di scenario</td>
+</tr>
+<tr>
+<td><code>keypad</code>, <code>reader</code>, <code>expander</code>, <code>siren</code>, <code>timer</code></td>
+<td>il dispositivo di cui parla l'evento (una manomissione, una scomparsa, un timer), per nome</td>
+</tr>
+<tr>
+<td><code>phone_number</code></td>
+<td>il numero di telefono chiamato, con il nome che ha sulla centrale (solo il nome, mai il numero), per esempio <code>Cloud</code>; <code>Number 12</code> quando non ne ha uno</td>
+</tr>
+<tr>
+<td><code>emergency_key</code>, <code>programmable_event</code></td>
+<td>l'oggetto di cui parla l'evento, per numero (<em>Emergency key 1</em>, <em>Programmable event 2</em>): i loro nomi non vengono letti dalla centrale</td>
+</tr>
+<tr>
+<td><code>number</code></td>
+<td>il numero di un evento di panico o periodico, come lo mostra la centrale, per esempio <code>001</code></td>
+</tr>
+<tr>
+<td><code>authorized_id</code>, <code>device_id</code></td>
+<td>i numeri del codice utente o della chiave, e della tastiera o del lettore (esadecimali)</td>
+</tr>
+<tr>
+<td><code>raw_hex_data</code></td>
+<td>l'evento come salvato dalla centrale</td>
+</tr>
+</tbody>
+</table>
+<p>Le chiavi che non valgono per un evento non sono presenti. <em>Remote</em>, <em>From telephone</em> e i valori di <code>via</code> sono parole dell'integrazione: la centrale lascia vuoti quei campi.</p>
+<p>La centrale registra un inserimento come la fine dell'ultimo disinserimento e un disinserimento come la fine dell'ultimo inserimento: ogni disinserimento aggiunge <em>Area armed in away mode (ended)</em> (o <em>in stay mode</em>) accanto ad <em>Area disarmed</em>, e ogni inserimento aggiunge <em>Area disarmed (ended)</em>.</p>
+</details>
+<details class="note">
+<summary>Lo scenario attivo nel dettaglio</summary>
+<p>Lo stato è il nome dello scenario attivo seguito dal suo indice (da 0). È <code>No scenario matches</code> quando lo stato delle aree non corrisponde a nessuno scenario, <code>Scenario N (Index n)</code> per uno scenario senza nome, <code>Unknown Scenario (Index n)</code> per un indice che la centrale non ha, e <code>Unknown (No data)</code> prima che la centrale sia stata letta.</p>
+<table>
+<thead>
+<tr>
+<th>Attributo</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>active_scenario_index</code></td>
+<td>solo l'indice; vuoto quando nessuno scenario corrisponde</td>
+</tr>
+<tr>
+<td><code>raw_active_scenario_hex</code></td>
+<td>il valore grezzo della centrale</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h2 id="diagnostic-and-configuration-entities">Entità di diagnostica e di configurazione<a class="headerlink" href="#diagnostic-and-configuration-entities" title="Permanent link">&para;</a></h2>
+<p>Compaiono nelle sezioni <em>Diagnostica</em> e <em>Configurazione</em> della pagina del dispositivo.</p>
+<table>
+<thead>
+<tr>
+<th>L'ID finisce con</th>
+<th>Nome</th>
+<th>Stato</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>button.…_reread_panel_configuration</code></td>
+<td>Rileggi la configurazione della centrale</td>
+<td>rilegge la configurazione della centrale e ricarica l'integrazione (vedi <a href="../setup/#re-reading-the-panel-configuration">Configurazione</a>)</td>
+</tr>
+<tr>
+<td><code>sensor.…_firmware_version</code></td>
+<td>Versione firmware</td>
+<td>il firmware della centrale, per esempio <code>6.07</code>; creato quando la centrale lo riporta</td>
+</tr>
+<tr>
+<td><code>sensor.…_system_type</code></td>
+<td>Tipo di centrale</td>
+<td>il modello della centrale, per esempio <code>01050</code>; creato quando la centrale lo riporta</td>
+</tr>
+<tr>
+<td><code>sensor.…_user_code</code></td>
+<td>Codice utente</td>
+<td>il nome del codice utente a cui appartiene il PIN (mai il PIN)</td>
+</tr>
+<tr>
+<td><code>sensor.…_peripherals</code></td>
+<td>Periferiche</td>
+<td>quante tastiere, lettori, espansioni e sirene sono abilitati</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_programming_mode</code></td>
+<td>Modalità programmazione</td>
+<td>acceso mentre la centrale è in programmazione</td>
+</tr>
+<tr>
+<td><code>binary_sensor.…_refuses_arming_with_zones_not_ready</code></td>
+<td>Rifiuta l'inserimento con zone non pronte</td>
+<td>acceso quando l'installatore ha impostato la centrale per rifiutare l'inserimento con zone non pronte</td>
+</tr>
+<tr>
+<td><code>select.…_diagnostics_level</code></td>
+<td>Livello diagnostica</td>
+<td>Oscurato, Completo, Completo riservato; disattivata per impostazione predefinita</td>
+</tr>
+<tr>
+<td><code>switch.…_slow_polling_mode</code></td>
+<td>Modalità aggiornamento lento</td>
+<td>acceso mentre la centrale viene letta ogni 30 secondi per impostazione predefinita (<strong>Intervallo di lettura in modalità aggiornamento lento</strong>), così che le altre app possano collegarsi alla scheda; solo SmartLAN/SI (vedi <a href="../options/#slow-polling-mode">Modalità aggiornamento lento</a>)</td>
+</tr>
+</tbody>
+</table>
+<details class="note">
+<summary>Dettagli e attributi</summary>
+<ul>
+<li><strong>Codice utente</strong>: i comandi funzionano solo sulle aree di questo codice utente. Sconosciuto se il PIN non corrisponde a nessun codice utente: in quel caso i comandi vengono rifiutati. Viene verificato di nuovo ogni volta che viene ricaricata l'integrazione.</li>
+<li><strong>Periferiche</strong>: non dice se un dispositivo risponde.</li>
+<li><strong>Modalità programmazione</strong>: acceso mentre la centrale viene programmata da una tastiera, o mentre ricarica la sua configurazione. In quel momento i comandi non vengono inviati. Disponibile solo per le centrali con firmware uguale o superiore al 5.1.</li>
+<li><strong>Rifiuta l'inserimento con zone non pronte</strong>: letto con la configurazione della centrale; sconosciuto finché la configurazione non viene riletta da questa versione. Vedi <a href="../actions-events/#zones-not-ready">Zone non pronte</a>.</li>
+<li><strong>Modalità aggiornamento lento</strong>: resta disponibile mentre la centrale non è raggiungibile, così puoi spegnerla. Si spegne da sola all'ora indicata in <code>until</code>.</li>
+<li><strong>Livello diagnostica</strong>: quanto mostra il prossimo download della diagnostica (vedi <a href="../system-report/">Report di sistema</a>). Torna a <em>Oscurato</em> quando l'integrazione si riavvia o si ricarica, dopo che è stata scaricata la copia leggibile di un report Completo, e 10 minuti dopo il primo download di un report Completo.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Attributo</th>
+<th>Su</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>number</code></td>
+<td>Codice utente</td>
+<td>il numero del codice utente</td>
+</tr>
+<tr>
+<td><code>areas</code></td>
+<td>Codice utente</td>
+<td>le aree che comanda, per nome</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>Codice utente</td>
+<td><code>standard</code>, <code>manager</code>, <code>master</code></td>
+</tr>
+<tr>
+<td><code>keypads</code>, <code>readers</code>, <code>expanders</code>, <code>sirens</code></td>
+<td>Periferiche</td>
+<td>i nomi dei dispositivi abilitati</td>
+</tr>
+<tr>
+<td><code>until</code></td>
+<td>Modalità aggiornamento lento</td>
+<td>quando la modalità si spegne da sola; vuoto mentre è spenta o tenuta accesa finché non la spegni</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h2 id="outputs">Uscite<a class="headerlink" href="#outputs" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Un'uscita comanda qualunque cosa vi sia collegata: una sirena, una serratura, un cancello, il riscaldamento. Comandarla da Home Assistant, o da un'automazione, agisce sul dispositivo reale. Prima di selezionare un'uscita, controlla cosa comanda.</p>
+</div>
+<table>
+<thead>
+<tr>
+<th>L'ID finisce con</th>
+<th>Nome</th>
+<th>Stati</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>switch.…_</code><em>nome dell'uscita</em></td>
+<td>il nome dell'uscita sulla centrale</td>
+<td>acceso mentre la centrale mostra l'uscita attiva</td>
+</tr>
+<tr>
+<td><code>light.…_</code><em>nome dell'uscita</em></td>
+<td>il nome dell'uscita sulla centrale</td>
+<td>acceso o spento, con la luminosità (dimmer)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Le uscite on/off e monostabili</strong> sono interruttori. Un'uscita monostabile si spegne da sola dopo il suo tempo; l'interruttore la mostra spenta alla lettura successiva.</li>
+<li><strong>I dimmer</strong> sono luci con luminosità. Con il firmware 6 il livello viene letto dalla centrale insieme all'esclusione delle zone (ogni 30 secondi per impostazione predefinita, vedi <a href="../options/#polling">Aggiornamento</a>) e dopo ogni modifica; con il firmware 5.1 la centrale non lo riporta, quindi la luminosità è l'ultima impostata da Home Assistant.</li>
+<li>Le uscite senza nome sulla centrale si chiamano <em>Uscita n</em>, oppure da <em>O1</em> a <em>O3</em> per le uscite fisse.</li>
+</ul>
+<details class="note">
+<summary>Quali uscite vengono proposte e selezionate</summary>
+<ul>
+<li><strong>Cosa viene proposto</strong>: le uscite programmate sulla centrale come uscite on/off, monostabili o dimmer (uscite su terminale e da O1 a O3) che il tuo codice utente può comandare. Le uscite analogiche non vengono proposte. Un'uscita su terminale in una delle prime tre posizioni di terminale della centrale non si può comandare a distanza (la centrale riserva quei numeri a O1-O3), quindi non viene elencata.</li>
+<li><strong>Cosa viene selezionato per te</strong>: solo le uscite che l'installatore ha contrassegnato come <em>domotiche</em> nella programmazione della centrale (firmware 6; con il firmware 5.1 l'integrazione non può leggere questo contrassegno, quindi non viene selezionato nulla). La centrale non può sapere cosa comanda un'uscita, quindi controllale, e scegli tu le altre uscite, durante la configurazione o in seguito nelle opzioni in <strong>Aree, zone, scenari, uscite e termostati</strong>. La prima volta che un'installazione esistente mostra le uscite nelle opzioni, vi sono selezionate anche le uscite domotiche; dopo che hai salvato, la tua scelta viene mantenuta.</li>
+<li><strong>Nulla viene comandato da solo</strong>: nessuna uscita viene comandata durante la configurazione, all'avvio, a una ricarica o quando Home Assistant ripristina il suo stato.</li>
+<li><strong>Quando la centrale rifiuta</strong>: un'uscita che il tuo codice utente non può comandare, o una bloccata mentre le sue aree sono inserite, dà un errore con il motivo (vedi <a href="../troubleshooting/#when-the-panel-refuses-a-command">Quando la centrale rifiuta un comando</a>). Mentre la centrale è in programmazione, non viene inviato nessun comando.</li>
+</ul>
+</details>
+<details class="note">
+<summary>Attributi delle uscite</summary>
+<table>
+<thead>
+<tr>
+<th>Attributo</th>
+<th>Valori</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>output_number</code></td>
+<td>il numero dell'uscita</td>
+</tr>
+<tr>
+<td><code>kind</code></td>
+<td><code>on_off</code>, <code>monostable</code>, <code>dimmer</code></td>
+</tr>
+<tr>
+<td><code>terminal_index</code></td>
+<td>uscite su terminale: il terminale (da 0)</td>
+</tr>
+<tr>
+<td><code>fixed_output</code></td>
+<td>uscite fisse: da 1 a 3</td>
+</tr>
+<tr>
+<td><code>monostable_time</code></td>
+<td>uscite monostabili: per esempio <code>30 s</code></td>
+</tr>
+<tr>
+<td><code>home_automation</code></td>
+<td><code>true</code> se l'installatore l'ha contrassegnata come uscita domotica; non mostrato con il firmware 5.1</td>
+</tr>
+<tr>
+<td><code>normally_closed</code></td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>flashing</code></td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>buzzer</code></td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>keep_on_restoral</code></td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>toggle</code></td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+<tr>
+<td><code>relay_use</code></td>
+<td><code>true</code> o <code>false</code></td>
+</tr>
+</tbody>
+</table>
+</details>
+<h2 id="thermostats">Termostati<a class="headerlink" href="#thermostats" title="Permanent link">&para;</a></h2>
+<p>Una tastiera con sensore di temperatura misura la temperatura ambiente, e la centrale può usarla come termostato: accende il riscaldamento o il raffrescamento tramite le uscite e le notifiche programmate sul suo evento <em>Termostato su tastiera</em>. Ogni tastiera di cui importi il termostato riceve:</p>
+<table>
+<thead>
+<tr>
+<th>L'ID finisce con</th>
+<th>Nome</th>
+<th>Stati</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>climate.…_thermostat_N</code></td>
+<td>Termostato N (<em>nome della tastiera</em>)</td>
+<td>spento, riscaldamento, freddo</td>
+</tr>
+<tr>
+<td><code>sensor.…_keypad_N_temperature</code></td>
+<td>Temperatura tastiera N (<em>nome della tastiera</em>)</td>
+<td>la temperatura ambiente, in °C</td>
+</tr>
+</tbody>
+</table>
+<p>La temperatura ambiente della tastiera è anche la temperatura attuale del termostato; il sensore ne conserva lo storico come statistica.</p>
+<table>
+<thead>
+<tr>
+<th>Sulla centrale</th>
+<th>Modalità</th>
+<th>Preimpostazione</th>
+<th>Temperatura obiettivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spento</td>
+<td>spento</td>
+<td>–</td>
+<td>il valore manuale, conservato per quando viene acceso</td>
+</tr>
+<tr>
+<td>Manuale</td>
+<td>riscaldamento (inverno) o freddo (estate)</td>
+<td><em>Manuale</em></td>
+<td>il valore manuale</td>
+</tr>
+<tr>
+<td>Programma giornaliero</td>
+<td>riscaldamento o freddo</td>
+<td><em>Programma giornaliero</em></td>
+<td>il valore di quest'ora del programma giornaliero</td>
+</tr>
+<tr>
+<td>Programma settimanale</td>
+<td>riscaldamento o freddo</td>
+<td><em>Programma settimanale</em></td>
+<td>il valore di quest'ora del programma settimanale</td>
+</tr>
+<tr>
+<td>Antigelo</td>
+<td>riscaldamento</td>
+<td><em>Antigelo</em></td>
+<td>5,0 °C</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Riscaldamento o freddo</strong> è la stagione della centrale: in inverno riscalda sotto l'obiettivo, in estate raffresca sopra. L'antigelo riscalda sempre. Con il firmware 6 la scheda mostra se il termostato sta riscaldando o raffrescando in quel momento; il firmware 5.1 non lo riporta.</li>
+<li>
+<p><strong>Cosa fa una modifica sulla centrale</strong>:</p>
+<ul>
+<li><strong>Riscaldamento</strong> o <strong>freddo</strong> imposta la stagione. Da spento, riporta anche il termostato alla modalità in cui era l'ultima volta (manuale, programma giornaliero o settimanale; manuale la prima volta). In antigelo, <strong>riscaldamento</strong> non cambia nulla (riscalda già), e <strong>freddo</strong> esce dall'antigelo verso la modalità in cui era l'ultima volta, in estate.</li>
+<li><strong>Spento</strong> imposta la modalità spento. Una <strong>preimpostazione</strong> imposta quella modalità.</li>
+<li><strong>Una temperatura obiettivo</strong> imposta il valore manuale, da 10,0 a 35,5 °C. In un programma o in antigelo il termostato passa anche a manuale. Mentre è spento, resta spento con il nuovo valore conservato per dopo.</li>
+<li><strong>La centrale agisce al suo controllo successivo di quella tastiera</strong>, che può richiedere qualche minuto: il riscaldamento o il raffrescamento si avvia o si ferma allora, non subito.</li>
+<li><strong>I programmi non vengono cambiati</strong>: impostali dalla tastiera. L'obiettivo mostrato per un programma segue l'orologio di Home Assistant; la centrale segue il suo, quindi i due possono differire per qualche minuto se gli orologi non coincidono.</li>
+<li><strong>Ogni modifica viene scritta nella memoria della centrale.</strong> Evita automazioni che cambiano la temperatura obiettivo ogni pochi minuti.</li>
+</ul>
+</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Accendere un termostato genera l'evento <em>Termostato su tastiera</em> della centrale quando richiede riscaldamento o raffrescamento. Le uscite, le chiamate o i messaggi programmati su quell'evento (dal tuo installatore, per esempio il relè di una caldaia) lo seguono. Prima di usare un termostato per la prima volta, controlla cosa fa la centrale con il suo evento.</p>
+</div>
+<details class="note">
+<summary>Quali tastiere ricevono un termostato</summary>
+<ul>
+<li><strong>Cosa viene proposto</strong>: le tastiere abilitate.</li>
+<li><strong>Cosa viene selezionato per te</strong>: le tastiere che riportano una temperatura ambiente quando la centrale viene aggiunta. Un'installazione di una versione precedente controlla le sue tastiere una volta, in background dopo il primo avvio, e aggiunge allora i loro termostati.</li>
+<li><strong>Ogni tastiera con sensore</strong> riceve così un termostato, anche quella di cui non usi il termostato. Deselezionala nelle opzioni in <strong>Aree, zone, scenari, uscite e termostati</strong> per rimuoverne le entità.</li>
+<li>Una tastiera che smette di rispondere mantiene il suo termostato; la sua temperatura è sconosciuta finché non risponde di nuovo, e nel frattempo viene interrogata meno spesso.</li>
+<li>Provato su una SmartLiving 1050 con firmware 6.07 tramite SmartLAN/SI, dove queste modifiche non riavviano la centrale. Non provato su una scheda SmartLAN/G, né con il firmware 5.1.</li>
+</ul>
+</details>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Torna su
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Piede" >
+        
+          
+          <a href="../options/" class="md-footer__link md-footer__link--prev" aria-label="Precedente: Opzioni">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Precedente
+              </span>
+              <div class="md-ellipsis">
+                Opzioni
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../actions-events/" class="md-footer__link md-footer__link--next" aria-label="Successivo: Azioni ed eventi">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Successivo
+              </span>
+              <div class="md-ellipsis">
+                Azioni ed eventi
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/matteoraf/ha-inim_smartliving_alarm_panel" target="_blank" rel="noopener" title="L&#39;integrazione su GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.footer", "toc.follow", "search.highlight", "search.suggest", "content.code.copy"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copiato", "clipboard.copy": "Copia", "search.result.more.one": "1 altro in questa pagina", "search.result.more.other": "# altri in questa pagina", "search.result.none": "Nessun documento trovato", "search.result.one": "1 documento trovato", "search.result.other": "# documenti trovati", "search.result.placeholder": "Scrivi per iniziare a cercare", "search.result.term.missing": "Non presente", "select.version": "Seleziona la versione"}, "version": {"default": "^dev$", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
+      
+    
+  </body>
+</html>
