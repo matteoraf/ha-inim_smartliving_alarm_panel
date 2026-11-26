@@ -33,7 +33,7 @@
             "host": "Host",
             "port": "Porta",
             "pin": "Codice PIN",
-            "panel_name": "Nome Centrale"
+            "panel_name": "Nome centrale"
           },
           "data_description": {
             "port": "5004, se non è stata cambiata nelle impostazioni della scheda.",
@@ -49,7 +49,7 @@
             "username": "Nome utente della scheda",
             "password": "Password della scheda",
             "pin": "Codice PIN",
-            "panel_name": "Nome Centrale"
+            "panel_name": "Nome centrale"
           },
           "data_description": {
             "port": "La porta impostata nella scheda (il software dell'installatore propone 5004).",
@@ -100,15 +100,15 @@
           }
         },
         "initial_options": {
-          "title": "Opzioni Iniziali",
+          "title": "Opzioni iniziali",
           "description": "Imposta le opzioni iniziali. Potranno essere modificate in seguito dalla pagina di configurazione dell'integrazione.",
           "data": {
-            "event_log_size": "Numero di eventi da memorizzare",
-            "scenario_arm_home": "Scenario Inserimento Parziale (Casa)",
-            "scenario_arm_away": "Scenario Inserimento Totale (Fuori)",
-            "scenario_arm_night": "Scenario Inserimento Notte",
-            "scenario_arm_vacation": "Scenario Inserimento Vacanza",
-            "scenario_disarm": "Scenario Disinserimento"
+            "event_log_size": "Numero di eventi da conservare nel registro",
+            "scenario_arm_home": "Scenario inserimento parziale (casa)",
+            "scenario_arm_away": "Scenario inserimento totale (fuori)",
+            "scenario_arm_night": "Scenario inserimento notte",
+            "scenario_arm_vacation": "Scenario inserimento vacanza",
+            "scenario_disarm": "Scenario disinserimento"
           }
         },
         "reconfigure": {
@@ -208,12 +208,12 @@
           "description": "Modifica le impostazioni per la tua integrazione Inim.\n\nI comandi vengono inviati con il codice utente **{user_code}**, che controlla queste aree: {user_areas}.",
           "data": {
             "pin": "Nuovo codice PIN",
-            "event_log_size": "Numero di eventi da memorizzare nel log",
-            "scenario_arm_home": "Scenario Inserimento Parziale (Casa)",
-            "scenario_arm_away": "Scenario Inserimento Totale (Fuori)",
-            "scenario_arm_night": "Scenario Inserimento Notte",
-            "scenario_arm_vacation": "Scenario Inserimento Vacanza",
-            "scenario_disarm": "Scenario Disinserimento",
+            "event_log_size": "Numero di eventi da conservare nel registro",
+            "scenario_arm_home": "Scenario inserimento parziale (casa)",
+            "scenario_arm_away": "Scenario inserimento totale (fuori)",
+            "scenario_arm_night": "Scenario inserimento notte",
+            "scenario_arm_vacation": "Scenario inserimento vacanza",
+            "scenario_disarm": "Scenario disinserimento",
             "area_switches_default_arm_mode": "Modalità di inserimento predefinita delle aree",
             "zones_not_ready": "Quando le zone non sono pronte"
           },
@@ -237,12 +237,12 @@
             "slow_polling_duration": "Disattiva la modalità aggiornamento lento dopo"
           },
           "data_description": {
-            "poll_interval_zones": "Sensori delle zone, memorie di allarme e manomissione, interruttori delle uscite e luci.",
+            "poll_interval_zones": "Sensori delle zone, memorie allarmi e manomissioni, interruttori delle uscite e luci.",
             "poll_interval_areas": "Pannello di allarme, interruttori e sensori delle aree, selettori della modalità di inserimento, sensori dello scenario attivo.",
             "poll_interval_inclusion": "Interruttori di inclusione delle zone, attributo test delle zone e luminosità dei dimmer.",
             "poll_interval_events": "Sensore del registro eventi.",
             "poll_interval_faults": "Sensore della modalità programmazione.",
-            "poll_interval_thermostats": "Termostati e sensori di temperatura delle tastiere. In modalità polling lento vengono letti insieme al resto della centrale, al primo multiplo dell'intervallo di polling lento che sia almeno così lungo.",
+            "poll_interval_thermostats": "Termostati e sensori di temperatura delle tastiere. In modalità aggiornamento lento vengono letti insieme al resto della centrale, al primo multiplo dell'intervallo di aggiornamento lento che sia almeno così lungo.",
             "slow_polling_interval": "Mentre la modalità aggiornamento lento è attiva, Home Assistant legge tutta la centrale a questo intervallo e chiude la connessione dopo ogni lettura, così le altre app possono collegarsi alla scheda nel frattempo.",
             "slow_polling_duration": "La modalità aggiornamento lento si disattiva da sola dopo questi minuti. Con 0 resta attiva finché non la disattivi."
           }
@@ -713,7 +713,7 @@
         "message": "Report di sistema Inim pronto"
       },
       "notification_system_report_message": {
-        "message": "Il file appena scaricato è cifrato: allegalo alla tua issue su GitHub. Scarica di nuovo la diagnostica entro 10 minuti per avere una copia leggibile dello stesso report, per controllare cosa condividi. Tieni privata questa copia: contiene nomi, numero di serie e indirizzi (Completo), oppure anche PIN, numeri di telefono e password (Completo riservato). Eliminala quando non ti serve più. Il livello torna poi a Ridotto."
+        "message": "Il file appena scaricato è cifrato: allegalo alla tua issue su GitHub. Scarica di nuovo la diagnostica entro 10 minuti per avere una copia leggibile dello stesso report, per controllare cosa condividi. Tieni privata questa copia: contiene nomi, numero di serie e indirizzi (Completo), oppure anche PIN, numeri di telefono e password (Completo riservato). Eliminala quando non ti serve più. Il livello torna poi a Oscurato."
       },
       "notification_armed_not_ready_title": {
         "message": "Inim Alarm - {target} inserito con zone non pronte"
@@ -790,7 +790,7 @@
         "options": {
           "total": "Totale",
           "partial": "Parziale",
-          "instant": "Immediato"
+          "instant": "Immediata"
         }
       },
       "area_switch_arm_mode_by_area": {
@@ -798,7 +798,7 @@
           "default": "Usa la predefinita",
           "total": "Totale",
           "partial": "Parziale",
-          "instant": "Immediato"
+          "instant": "Immediata"
         }
       },
       "zones_not_ready": {
@@ -825,10 +825,10 @@
           "name": "Zona {number}"
         },
         "zone_alarm_memory": {
-          "name": "Zona {number} memoria allarme ({label})"
+          "name": "Zona {number} memoria allarmi ({label})"
         },
         "zone_alarm_memory_unnamed": {
-          "name": "Zona {number} memoria allarme"
+          "name": "Zona {number} memoria allarmi"
         },
         "zone_tamper": {
           "name": "Zona {number} manomissione ({label})"
@@ -849,10 +849,10 @@
           "name": "Area {number} manomissione"
         },
         "area_alarm_memory": {
-          "name": "Area {number} memoria allarme ({label})"
+          "name": "Area {number} memoria allarmi ({label})"
         },
         "area_alarm_memory_unnamed": {
-          "name": "Area {number} memoria allarme"
+          "name": "Area {number} memoria allarmi"
         },
         "scenario_active": {
           "name": "Scenario {number} attivo ({label})"
@@ -900,7 +900,7 @@
         "diagnostics_level": {
           "name": "Livello diagnostica",
           "state": {
-            "redacted": "Ridotto",
+            "redacted": "Oscurato",
             "full": "Completo",
             "confidential": "Completo riservato"
           }
@@ -1000,10 +1000,10 @@
     "services": {
       "alarm_reset": {
         "name": "Reset allarme",
-        "description": "Azzera ogni area della centrale Inim che ha una memoria di allarme o di manomissione."
+        "description": "Azzera ogni area della centrale Inim che ha memorie allarmi o manomissioni."
       },
       "reread_panel_configuration": {
-        "name": "Rileggi configurazione della centrale",
+        "name": "Rileggi la configurazione della centrale",
         "description": "Rilegge la configurazione della centrale Inim (nomi, impostazioni delle zone, scenari) e ricarica l'integrazione. Le opzioni vengono mantenute.",
         "fields": {
           "config_entry_id": {

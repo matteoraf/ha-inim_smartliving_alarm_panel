@@ -1,4 +1,4 @@
-# Known limitations
+# Known limitations { #known-limitations }
 
 Known limitations of this version, and what you can do about them:
 

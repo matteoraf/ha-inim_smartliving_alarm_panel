@@ -1,8 +1,8 @@
-# Actions and events
+# Actions and events { #actions-and-events }
 
 This page shows how to arm, disarm and run scenarios from dashboards and automations, and how automations can react to the integration's events. The [reference](#actions) at the end lists every field.
 
-## From a dashboard
+## From a dashboard { #from-a-dashboard }
 
 *   **The whole panel**: add the alarm panel entity to Home Assistant's alarm panel card. Its buttons run the scenarios you mapped in the [options](options.md#initial-options).
 *   **One area**: add the area's switch (on arms, off disarms) or its arming mode select (choose the mode). A tile card with the select's options feature shows the modes as a list:
@@ -13,7 +13,7 @@ This page shows how to arm, disarm and run scenarios from dashboards and automat
 *   **A scenario**: add its button.
 *   **An output**: add its switch or light (see [Outputs](entities.md#outputs)).
 
-## Arming areas from automations
+## Arming areas from automations { #arming-areas-from-automations }
 
 Use the **Arm area** action to arm or disarm one or more areas of a panel in a single command, so they change together. In the automation editor, add the action **Arm area**, pick the panel, tick the areas and choose the mode:
 
@@ -31,7 +31,7 @@ data:
 
 To run a scenario from an automation, use **Activate scenario** (see [below](#action-activate-scenario)). You can try any action from **Settings** → **Tools** → **Actions** (on versions before 2026.11, **Developer tools** → **Actions**).
 
-## Resetting the alarm memory
+## Resetting the alarm memory { #resetting-the-alarm-memory }
 
 After an alarm, the panel keeps the alarm memory of the areas involved until it is reset; the *Area N alarm memory* sensors show it. The **Alarm Reset** action resets every area of the panel that has an alarm or tamper memory:
 
@@ -43,7 +43,7 @@ target:
 
 You can call it from a script, an automation or a dashboard button.
 
-## Zones not ready
+## Zones not ready { #zones-not-ready }
 
 Before it arms an area or runs a scenario, the integration asks the panel which zones are not ready: zones that are not at rest and would be armed. Then the option **When zones are not ready** (in **General settings**) decides:
 
@@ -61,7 +61,7 @@ Before it arms an area or runs a scenario, the integration asks the panel which 
     *   The installer can also set the panel itself not to allow arming with zones not ready. The integration reads that setting with the panel configuration and shows it in the *Refuses arming with zones not ready* sensor (and as `panel_refuses_not_ready` in the event). When it is on, the panel refuses such a command even when you arm anyway or use `force`: the integration still sends it, the message says the panel refused it, and the event's `action` is `refused_by_panel`.
     *   The panel's own rule depends on each zone's programming (for example, delayed zones do not stop total arming, and zones with `no_arming_if_not_ready` stop every mode), so it may let through zones the integration lists. When the setting is off, the panel arms whatever the zones' programming says.
 
-## The event log on a dashboard
+## The event log on a dashboard { #the-event-log-on-a-dashboard }
 
 A Markdown card shows the last events of the [event log sensor](entities.md#sensors). Replace `sensor.home_event_log` with your event log sensor's ID:
 
@@ -77,7 +77,7 @@ content: >-
 
 The repository's [Examples](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel/tree/main/Examples) folder has a larger dashboard, made for version 0.3: its entity IDs and some cards may need changes.
 
-## Actions
+## Actions { #actions }
 
 None of the actions returns a response. If a command is not carried out, the action fails with a message that says why (see [When the panel refuses a command](troubleshooting.md#when-the-panel-refuses-a-command)).
 
@@ -143,7 +143,7 @@ data:
 
 It fails, and keeps the stored configuration, when the panel cannot be reached, is in programming mode, or returns an incomplete configuration.
 
-## Events
+## Events { #events }
 
 Automations can react to these events with an event trigger.
 
@@ -183,6 +183,6 @@ triggers:
 
 The panel's reasons are `invalid_code`, `open_zones`, `code_not_enabled`, `already_in_state`, `slot_out_of_range`, `slot_not_connected`, `null_terminal`, `cannot_be_bypassed`, `no_areas`, `double_zone_error`, `output_not_enabled`, `areas_armed` and `refused`; what each means is on [Troubleshooting](troubleshooting.md#when-the-panel-refuses-a-command).
 
-## Switching outputs
+## Switching outputs { #switching-outputs }
 
 See [Outputs](entities.md#outputs).

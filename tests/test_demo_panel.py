@@ -2,23 +2,26 @@
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
+import pytest
 
 from custom_components.inim_smartliving_alarm.const import DOMAIN
 
 from .conftest import add_entry, offered, proposed
 from .fake_panel import FakePanel, captures, const as c, panel_1050, panel_demo
+from .fake_panel.state import DEMO_NAMES_IT
 from .test_config_flow import si_input
 
-PLACEHOLDER = ("Area ", "Zone ", "User ", "Scenario ", "Key ")
+PLACEHOLDER = ("Area ", "Zone ", "User ", "Scenario ", "Key ", "Utente ", "Chiave ")
 
 
 def names(labels: dict[int, list[str]]) -> set[str]:
     return {name for values in labels.values() for name in values if name}
 
 
-def test_no_names_from_captures() -> None:
+@pytest.mark.parametrize("language", ["en", "it"])
+def test_no_names_from_captures(language: str) -> None:
     """The demo shares no name or record with the panel the captures come from."""
-    demo = panel_demo()
+    demo = panel_demo(language)
     shared = names(demo.labels) & names(panel_1050().labels)
     assert {name for name in shared if not name.startswith(PLACEHOLDER)} == {"Master"}
     assert demo.serial_number == "0000000000000001"
@@ -28,9 +31,26 @@ def test_no_names_from_captures() -> None:
     assert all(event is None or not event.agent_text for event in demo.events)
 
 
-def test_names_fit_the_panel() -> None:
+@pytest.mark.parametrize("language", ["en", "it"])
+def test_names_fit_the_panel(language: str) -> None:
     """Every name fits the panel's 16 characters, so none is cut on screen."""
-    assert all(len(name) <= c.LABEL_LENGTH for name in names(panel_demo().labels))
+    labels = panel_demo(language).labels
+    assert all(len(name) <= c.LABEL_LENGTH for name in names(labels))
+
+
+def test_the_italian_demo_is_the_same_panel() -> None:
+    """The Italian screenshots show the same panel: only the names differ,
+    and every name is translated."""
+    english, italian = panel_demo(), panel_demo("it")
+    assert italian.labels.keys() == english.labels.keys()
+    for block, values in english.labels.items():
+        assert [bool(name) for name in italian.labels[block]] == [
+            bool(name) for name in values
+        ]
+    english.labels = italian.labels
+    assert italian == english
+    translated = {name for name in names(panel_demo("it").labels)}
+    assert not translated & (set(DEMO_NAMES_IT) - set(DEMO_NAMES_IT.values()))
 
 
 async def test_what_the_setup_offers(hass: HomeAssistant, socket_enabled) -> None:

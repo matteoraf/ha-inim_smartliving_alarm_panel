@@ -1,8 +1,8 @@
-# Options
+# Options { #options }
 
 Options set how the integration reads your panel and what it does when you arm. You choose some of them when you add the panel, and can change all of them later.
 
-## Initial options
+## Initial options { #initial-options }
 
 When you add a panel, the last step asks for:
 
@@ -18,7 +18,7 @@ The setup proposes **Arm Away** and **Disarm** from what your scenarios do to th
 
     What a scenario does to areas you do not import does not matter. If no scenario fits, the mode stays without a scenario. Only the scenarios you import are offered, and the mapping fields are shown only when at least one scenario is imported.
 
-## Changing the options later
+## Changing the options later { #changing-the-options-later }
 
 1.  Go to **Settings** → **Devices & services** and open **Inim SmartLiving Alarm**.
 2.  Click the gear icon (⚙) on your panel's row (on Home Assistant versions before 2026.11, **Configure**).
@@ -33,7 +33,7 @@ The setup proposes **Arm Away** and **Disarm** from what your scenarios do to th
 
 4.  Click **Submit**. The integration reloads with the new options.
 
-### Areas, zones, scenarios, outputs and thermostats
+### Areas, zones, scenarios, outputs and thermostats { #areas-zones-scenarios-outputs-and-thermostats }
 
 Tick what you want in Home Assistant. Unticking an area, zone, scenario, output or thermostat **removes its entities**, together with any name or entity ID you gave them; ticking it again brings them back with their original entity IDs.
 
@@ -41,19 +41,19 @@ The keypads that report a room temperature have their thermostat ticked at setup
 
 A scenario that an alarm panel mode uses cannot be unticked: choose another scenario for that mode in **General settings** first.
 
-### Area switches arm mode per area
+### Area switches arm mode per area { #area-switches-arm-mode-per-area }
 
 Each area's switch arms in the mode chosen here when you turn it on. *Use the default* follows **Area switches default arm mode** in **General settings**. For example, set the bedrooms to *Partial* and leave the others at the default.
 
 ![Choosing an arm mode for each area switch](images/options-area-switches.webp){ width="480" }
 
-### General settings
+### General settings { #general-settings }
 
 ![The general settings](images/options-general.webp){ width="480" }
 
 The step names the user code the current PIN belongs to and the areas it controls. Leave **New PIN Code** empty to keep the current PIN; a new PIN is checked with the panel as at setup.
 
-### Polling
+### Polling { #polling }
 
 ![The polling options](images/options-polling.webp){ width="480" }
 
@@ -71,13 +71,13 @@ The integration reads the panel's state in parts, each at its own interval, in s
 *   After a command sent from Home Assistant (arming, a scenario, a bypass, an output), every part is read at once, whatever its interval.
 *   Shorter intervals show changes sooner and keep the board busier. At the defaults the integration sends about three requests a second, well within what the board answers.
 *   If the panel cannot answer as fast as an interval asks, the reads simply come later, and the log says so once.
-*   Home Assistant's **Enable polling for updates** setting (the panel's entry, ⋮ menu, **System options**) turns all scheduled reads off; commands and the `homeassistant.update_entity` action still read the panel.
+*   Home Assistant's **Enable polling for changes** setting (the panel's entry, ⋮ menu, **System options**) turns all scheduled reads off; commands and the `homeassistant.update_entity` action still read the panel.
 
 !!! note "One local connection at a time"
 
     While Home Assistant reads the panel at these intervals, it keeps its connection to the board open. The SmartLAN/SI board accepts one local client at a time, so other apps on your network (such as the Inim app or the installer software) cannot connect to it meanwhile. To let them connect, turn on [slow polling mode](#slow-polling-mode). Remote access through Inim Cloud is not affected.
 
-### Slow polling mode
+### Slow polling mode { #slow-polling-mode }
 
 ![The Slow polling mode switch on the device page](images/device-page-slow-polling.webp){ width="400" }
 
@@ -112,7 +112,7 @@ With a SmartLAN/SI board, the panel's device page has a **Slow polling mode** sw
 
     Set **Turn off slow polling mode after** to 0, or to at least 240 minutes, so that it does not end before 23:00. Replace `switch.home_slow_polling_mode` with your switch's entity ID.
 
-## All options
+## All options { #all-options }
 
 | Option | Where | Values | Default | What it does |
 |---|---|---|---|---|

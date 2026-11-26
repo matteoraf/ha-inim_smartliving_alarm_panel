@@ -1,8 +1,8 @@
-# Installation
+# Installation { #installation }
 
 This page says what you need, and how to install the integration in Home Assistant.
 
-## Requirements
+## Requirements { #requirements }
 
 You need:
 
@@ -12,12 +12,12 @@ You need:
 *   **The board's address and port** (usually 5004). For a SmartLAN/G board, also the user name and password of the board's web page.
 *   **A user code (PIN) of the panel.** Commands are sent with it, so it must control the areas you want to arm and disarm.
 
-### Supported panels
+### Supported panels { #supported-panels }
 
 | Model | Areas | Zone numbers | Status |
 |---|---|---|---|
-| SmartLiving 1050 | 10 | 1-100 | developed and tested on it |
-| SmartLiving 10100 | 15 | 1-200 | confirmed working (SmartLAN/G) |
+| SmartLiving 1050 | 10 | 1-100 | developed on it; tested and reported working (SmartLAN/SI and SmartLAN/G) |
+| SmartLiving 10100 | 15 | 1-200 | tested and reported working (SmartLAN/SI and SmartLAN/G) |
 | SmartLiving 515 | 5 | 1-40 | **experimental** |
 | SmartLiving 505 | 5 | 1-20 | **experimental** |
 
@@ -31,7 +31,7 @@ Zone numbers above the number of terminals are the second zones of double termin
 
         *   it has not been tested on a real panel on firmware 5.1;
         *   the panel's state flags (such as programming mode) and the results of commands are assumed to work as on firmware 6;
-        *   the event log shows the free events that only firmware 5.1 has (free events 1 to 11) as unknown events;
+        *   the event log shows the free events that only firmware 5.1 has as *Free event 1* to *Free event 14*;
         *   video sensors are not supported (firmware 5.1 has none).
 
         A warning in the log says the panel's support is experimental. Please report how it works for you.
@@ -40,9 +40,9 @@ Zone numbers above the number of terminals are the second zones of double termin
 
 ??? note "SmartLAN/SI and SmartLAN/G"
 
-    Both boards are supported. The SmartLAN/G board is confirmed working on a SmartLiving 10100.
+    Both boards are supported, and both are reported working on the SmartLiving 1050 and 10100.
 
-## Installing
+## Installing { #installing }
 
 The integration is installed as a custom repository. Use the button to open it in your Home Assistant, or follow the steps for your version below.
 
@@ -72,7 +72,7 @@ The button opens the repository in the Marketplace on Home Assistant 2026.11 or 
 
 Then [add your panel](setup.md#adding-a-panel).
 
-## Preview versions
+## Preview versions { #preview-versions }
 
 Versions such as `0.4.0a1` (preview) or `0.4.0b1` (beta) are published as GitHub *pre-releases*. They are offered only to users who ask for them.
 

@@ -1,4 +1,4 @@
-# Inim SmartLiving Alarm for Home Assistant
+# Inim SmartLiving Alarm for Home Assistant { #inim-smartliving-alarm-for-home-assistant }
 
 This integration connects Home Assistant to an Inim SmartLiving alarm panel on your local network. You can see the state of every area and zone, arm and disarm, run the panel's scenarios and switch its outputs, from dashboards and automations.
 
@@ -9,9 +9,9 @@ This integration connects Home Assistant to an Inim SmartLiving alarm panel on y
 
     This integration is not made or supported by Inim Electronics. Use it at your own risk.
 
-    The SmartLiving 1050 on firmware 6 is tested and confirmed by several users. The SmartLiving 10100 with a SmartLAN/G board is confirmed by one user. The SmartLiving 505 and 515, and all four models on firmware 5.1, are supported experimentally. Reports from users of these panels help.
+    The SmartLiving 1050 and 10100 on firmware 6 are tested and reported working by several users, with both SmartLAN/SI and SmartLAN/G boards. The SmartLiving 505 and 515, and all four models on firmware 5.1, are supported experimentally. Reports from users of these panels help.
 
-## Getting started
+## Getting started { #getting-started }
 
 1.  **Check the [requirements](installation.md#requirements)**: a supported panel, a SmartLAN/SI or SmartLAN/G board on your network, and a user code (PIN) of the panel.
 2.  **[Install the integration](installation.md#installing)** and restart Home Assistant.
@@ -20,7 +20,7 @@ This integration connects Home Assistant to an Inim SmartLiving alarm panel on y
 
 Coming from an earlier version? Read [Upgrading](upgrading.md) first, and take a backup before you update. Something not working? See [Troubleshooting](troubleshooting.md).
 
-## What you get
+## What you get { #what-you-get }
 
 | Part of the panel | What you can do | Page |
 |---|---|---|
@@ -53,6 +53,6 @@ Before arming an area or running a scenario, the integration asks the panel whic
 | **User code and PIN** | A user code is a user programmed on the panel (for example *Master*). Its PIN is the number typed to use it. Home Assistant sends commands with one PIN, so it can control only the areas of that user code. |
 | **Programming mode** | While someone programs the panel from a keypad, it ignores commands. No command is sent then. |
 
-## Contributing
+## Contributing { #contributing }
 
 Contributions are welcome: open an issue or a pull request on [GitHub](https://github.com/matteoraf/ha-inim_smartliving_alarm_panel).

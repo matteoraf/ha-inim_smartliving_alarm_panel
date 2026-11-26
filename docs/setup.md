@@ -1,8 +1,8 @@
-# Setup
+# Setup { #setup }
 
 This page shows how to add your panel to Home Assistant, how to change its connection details later, and how to read its configuration again after a change on the panel.
 
-## Adding a panel
+## Adding a panel { #adding-a-panel }
 
 After [installing](installation.md#installing) the integration and restarting Home Assistant:
 
@@ -30,7 +30,7 @@ After [installing](installation.md#installing) the integration and restarting Ho
 
 8.  Click **Submit**. The panel appears as a device with its entities: see [Entities](entities.md).
 
-### Connection fields
+### Connection fields { #connection-fields }
 
 | Field | Needed for | What to enter |
 |---|---|---|
@@ -40,7 +40,7 @@ After [installing](installation.md#installing) the integration and restarting Ho
 | **PIN Code** | both boards | A user PIN of the panel, 1 to 6 digits. Commands are sent with it, so it needs the areas you want to control. |
 | **Panel Name** | optional | The name of the panel in Home Assistant, for example `Home`. Entity IDs start with it. |
 
-### What the items step lists
+### What the items step lists { #what-the-items-step-lists }
 
 ??? note "Areas, zones, scenarios, outputs and devices"
 
@@ -52,7 +52,7 @@ After [installing](installation.md#installing) the integration and restarting Ho
 
     The setup ticks what the panel shows in use: the zones that belong to an area, the areas of those zones, the scenarios that change at least one area, and the outputs the installer marked as home automation outputs. Each section can be folded.
 
-### Why the setup can be refused
+### Why the setup can be refused { #why-the-setup-can-be-refused }
 
 | Message | What to do |
 |---|---|
@@ -66,7 +66,7 @@ After [installing](installation.md#installing) the integration and restarting Ho
 | This SmartLiving model is not supported yet. | Please report the model and firmware on GitHub. |
 | This Inim Alarm panel is already configured. | The panel is already set up in Home Assistant. |
 
-## Changing the connection details (Reconfigure)
+## Changing the connection details (Reconfigure) { #changing-the-connection-details-reconfigure }
 
 If the address, port or PIN of your panel change (or, for SmartLAN/G, the board's user name or password), you do not need to remove and add the integration again:
 
@@ -82,7 +82,7 @@ The integration contacts the panel with the new details, reads its configuration
     *   An address already used by another configured panel is refused, and so is a PIN that does not match any user code of the panel.
     *   The board type (SmartLAN/SI or SmartLAN/G) cannot be changed here: remove the integration and add it again for that.
 
-## Re-reading the panel configuration
+## Re-reading the panel configuration { #re-reading-the-panel-configuration }
 
 The integration reads the panel's names and programming when you add it: the names of areas, zones, scenarios, user codes, keys, keypads, readers, expanders, timers, sirens and phone numbers (only their names); which keypads, readers, expanders and sirens are enabled; the zone setup and the scenario definitions. If you change them on the panel later (from a keypad or the installer software), read them again with either:
 

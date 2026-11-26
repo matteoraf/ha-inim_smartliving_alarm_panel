@@ -7,10 +7,15 @@
 #   | a | b |                   tables
 #   ![Text](images/x.png){ width="600" }          image size; { align=right } to float
 #   ![Text](images/x-light.png#only-light)        light and dark versions of an image
-#   ## Heading { #stable-id }   a heading id that stays when the text changes
+#   ## Heading { #stable-id }   a heading id: every heading has one, the same
+#                               in both languages, and it stays when the text changes
 # Screenshots go in docs/images/: PNG or WebP, at most 200 kB and 1600 px wide.
 # Only the extensions and theme features below are used: Zensical reads them
 # too. New pages need a line in nav (the build fails without it).
+#
+# The site is in English and Italian. The Italian pages are in docs/it/, with
+# the same file names, heading ids, images and links, and are built by
+# mkdocs.it.yml: a change to an English page changes the Italian page too.
 
 site_name: Inim SmartLiving Alarm for Home Assistant
 site_url: https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/
@@ -18,6 +23,9 @@ site_url: https://matteoraf.github.io/ha-inim_smartliving_alarm_panel/
 # fork counts. The repository is linked in the footer instead (extra.social).
 edit_uri: ""
 docs_dir: docs
+# The Italian pages: built by mkdocs.it.yml.
+exclude_docs: |
+  it/
 
 theme:
   name: material
@@ -75,6 +83,15 @@ extra:
   # The banner on every page: set by the Documentation workflow for the
   # version under development and for betas, empty otherwise.
   notice: !ENV [DOCS_NOTICE, ""]
+  # The language selector. Set by the Documentation workflow to this version
+  # in each language; the theme opens the same page in the other language.
+  alternate:
+    - name: English
+      link: !ENV [DOCS_LINK_EN, "/"]
+      lang: en
+    - name: Italiano
+      link: !ENV [DOCS_LINK_IT, "/it/"]
+      lang: it
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/matteoraf/ha-inim_smartliving_alarm_panel

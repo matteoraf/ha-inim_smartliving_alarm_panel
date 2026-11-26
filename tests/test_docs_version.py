@@ -13,7 +13,9 @@ sys.path.insert(0, str(SCRIPTS))
 
 from docs_version import (  # noqa: E402
     BETA_NOTICE,
+    BETA_NOTICE_IT,
     DEV_NOTICE,
+    DEV_NOTICE_IT,
     SITE_URL,
     default_pattern,
     main,
@@ -94,7 +96,52 @@ def test_shell_output(capsys: pytest.CaptureFixture[str]) -> None:
         "STABLE": "false",
         "BETA": "true",
         "NOTICE": BETA_NOTICE.format(name="0.4"),
+        "LINK_EN": f"{SITE_URL}0.4/",
+        "LINK_IT": f"{SITE_URL}it/0.4/",
     }
+
+
+def test_shell_output_in_italian(capsys: pytest.CaptureFixture[str]) -> None:
+    """The Italian pages get the Italian title and banner, the same links."""
+    assert main(["--shell", "--version", "0.5.0.dev0", "--language", "it"]) == 0
+    values = {}
+    for line in capsys.readouterr().out.splitlines():
+        key, _, value = line.partition("=")
+        values[key] = " ".join(shlex.split(value))
+    assert values == {
+        "NAME": "dev",
+        "TITLE": "dev (non rilasciata)",
+        "STABLE": "false",
+        "BETA": "false",
+        "NOTICE": DEV_NOTICE_IT,
+        "LINK_EN": f"{SITE_URL}dev/",
+        "LINK_IT": f"{SITE_URL}it/dev/",
+    }
+
+
+@pytest.mark.parametrize(
+    ("version", "name", "title", "notice"),
+    [
+        ("0.5.0.dev0", "dev", "dev (non rilasciata)", DEV_NOTICE_IT),
+        ("0.5.0a1", "dev", "dev (non rilasciata)", DEV_NOTICE_IT),
+        ("0.5.0b1", "0.5", "0.5 (beta)", BETA_NOTICE_IT.format(name="0.5")),
+        ("0.5.0", "0.5", "0.5", ""),
+    ],
+)
+def test_italian_versions(version: str, name: str, title: str, notice: str) -> None:
+    """The same versions in Italian, under it/, with Italian titles and banners."""
+    found = site_version(version, "it")
+    english = site_version(version)
+    assert (found.name, found.title, found.notice) == (name, title, notice)
+    assert (found.stable, found.beta) == (english.stable, english.beta)
+    assert found.url == f"{SITE_URL}it/{name}/"
+    assert found.link("en") == english.url == f"{SITE_URL}{name}/"
+    assert found.link("it") == english.link("it") == found.url
+
+
+def test_unknown_languages_are_refused() -> None:
+    with pytest.raises(ValueError, match="not a language"):
+        site_version("0.5.0.dev0", "de")
 
 
 def test_plain_output(capsys: pytest.CaptureFixture[str]) -> None:
@@ -124,12 +171,30 @@ def test_default_version(version: str, latest_published: bool, default: str) -> 
     assert site_version(version).default(latest_published) == default
 
 
+@pytest.mark.parametrize(
+    ("version", "default"),
+    [
+        # A language with only the version under development: dev is its default.
+        ("0.5.0.dev0", "dev"),
+        ("0.5.0a1", "dev"),
+        # Its first beta or stable version follows the usual rules.
+        ("0.5.0b1", "0.5"),
+        ("0.5.0", "latest"),
+    ],
+)
+def test_default_version_with_dev_only(version: str, default: str) -> None:
+    """A new language's versions start with dev, which is then its default."""
+    for language in ("en", "it"):
+        assert site_version(version, language).default(False, True) == default
+
+
 def test_default_output(capsys: pytest.CaptureFixture[str]) -> None:
     """The workflow reads the default, and its pattern, from the command line."""
     assert main(["--version", "0.4.0b1", "--default", "no-latest"]) == 0
     assert main(["--version", "0.4.0b1", "--default", "latest-published"]) == 0
     assert main(["--version", "0.4.0b1", "--default", "no-latest", "--pattern"]) == 0
-    assert capsys.readouterr().out == "0.4\nlatest\n^0\\.4$\n"
+    assert main(["--version", "0.5.0.dev0", "--default", "dev-only", "--pattern"]) == 0
+    assert capsys.readouterr().out == "0.4\nlatest\n^0\\.4$\n^dev$\n"
 
 
 @pytest.mark.parametrize(
